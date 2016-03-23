@@ -1,0 +1,50 @@
+{
+    "name" : "Operator policy set",
+    "policies" : [
+        {
+            "name" : "PolicyMatcher MUST NOT match this policy during this test.",
+            "target" : {
+                "name" : "When an operator reads an asset",
+                "resource" : {
+                    "name" : "Asset",
+                    "uriTemplate" : "/assets/{asset_id}",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "group" }
+                    ]
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "group" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "is member of group",
+                  "condition" : "match.any(subject.attributes('https://acs.attributes.int', 'group'), resource.attributes('https://acs.attributes.int', 'group'))" }
+            ],
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "PolicyMatcher MUST match this policy during this test.",
+            "target" : {
+                "name" : "When an administrator reads something",
+                "action" : "GET",
+                "subject" : {
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "role" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "is an administrator",
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'role'),'admin')" }
+            ],
+            "effect" : "PERMIT"
+        }
+    ]
+}

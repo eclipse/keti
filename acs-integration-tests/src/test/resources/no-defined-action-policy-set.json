@@ -1,0 +1,16 @@
+{
+    "name" : "no-defined-action-policy-set",
+    "policies" : [
+        {
+            "name" : "PolicyMatcher_MUST_match_this_policy_during_this_test",
+            "target" : {
+                "name" : "When an operator reads an asset",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "any"
+                }
+            },
+            "effect" : "PERMIT"
+        }
+    ]
+}

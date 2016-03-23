@@ -1,0 +1,18 @@
+/build
+/bin
+/target
+.classpath
+.project
+.settings
+target
+/test-output/
+<<<<<<< Updated upstream
+data
+=======
+.DS_Store
+.springBeans
+.idea
+*.ipr
+*.iml
+>>>>>>> Stashed changes
+.checkstyle

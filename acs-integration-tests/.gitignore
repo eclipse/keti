@@ -1,0 +1,16 @@
+/build
+/bin
+/target
+.classpath
+.project
+.settings
+target
+/test-output/
+.DS_Store
+.springBeans
+.idea
+*.ipr
+*.iml
+/target/
+/target/
+/target/

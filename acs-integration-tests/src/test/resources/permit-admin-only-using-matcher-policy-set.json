@@ -1,0 +1,28 @@
+{
+    "name" : "permit-admin-only-using-matcher-policy-set",
+    "policies" : [
+        {
+            "name" : "Subject with role Administrator has access to everything",
+             "target" : {
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "any"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "subject1",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "role",
+                          "value" : "administrator" }
+                    ]
+                }
+            },
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "DENY to everyone else",
+            "effect" : "DENY"
+        }
+    ]
+}

@@ -1,0 +1,14 @@
+---
+# Manifest for ACS. Properties can be overridden from the command line. This file can be used for manual cf push. 
+applications:
+- name: acs-test-app
+  path: service/target/acs-service-*.jar
+  memory: 2048M
+  instances: 1
+  timeout: 180
+  services:
+  - acs-db
+  env:
+    SPRING_PROFILES_ACTIVE: public
+    ACS_BASE_DOMAIN: 
+    ACS_DB: acs-db

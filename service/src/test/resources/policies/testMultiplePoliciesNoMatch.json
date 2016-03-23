@@ -1,0 +1,153 @@
+{
+    "name" : "Operator policy set",
+    "policies" : [
+        {
+            "name" : "PolicyMatcher MUST NOT match this policy during this test.",
+            "target" : {
+                "name" : "When an operator reads a site",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/sites/{site_id}"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "site" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "is assigned to site",
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'site'), resource.uri.placeHolder('site_id'))" }
+            ],
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "PolicyMatcher MUST NOT match this policy during this test.",
+            "target" : {
+                "name" : "When an operator reads an asset",
+                "resource" : {
+                    "name" : "Asset",
+                    "uriTemplate" : "/assets/{asset_id}",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "group" }
+                    ]
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "group" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "is member of group",
+                  "condition" : "match.any(subject.attributes('https://acs.attributes.int', 'group'), resource.attributes('https://acs.attributes.int', 'group'))" }
+            ],
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "PolicyMatcher MUST NOT match this policy during this test.",
+            "target" : {
+                "name" : "When an operator modifies a site",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/sites/{site_id}"
+                },
+                "action" : "PUT",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "site" },
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "role" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "is assigned to site",
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'site'), resource.uri.placeHolder('site_id'))" },
+                { "name" : "is a manager",
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'role'), 'manager')" }
+            ],
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "PolicyMatcher MUST NOT match this policy during this test.",
+            "target" : {
+                "name" : "When an operator creates an case for an asset alarm",
+                "resource" : {
+                    "name" : "Asset alarm cases",
+                    "uriTemplate" : "/assets/{asset_id}/alarms/{alarm_id}/cases",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "group" },
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "owner" }
+                    ]
+                },
+                "action" : "POST",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "name_id" },
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "group" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "is member of group",
+                  "condition" : "match.any(subject.attributes('https://acs.attributes.int', 'group'), resource.attributes('https://acs.attributes.int', 'group'))" },
+                { "name" : "is owner of",
+                  "condition" : "match.any(subject.attributes('https://acs.attributes.int', 'name_id'), resource.attributes('https://acs.attributes.int', 'owner'))" }
+            ],
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "PolicyMatcher MUST NOT match this policy during this test.",
+            "target" : {
+                "name" : "When an operator reads all sites",
+                "resource" : {
+                    "name" : "Sites",
+                    "uriTemplate" : "/sites"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "group" }
+                    ]
+                }
+            },
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "PolicyMatcher MUST NOT match this policy during this test.",
+            "target" : {
+                "name" : "When an operator reads all assets",
+                "resource" : {
+                    "name" : "Assets",
+                    "uriTemplate" : "/assets"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "group" }
+                    ]
+                }
+            },
+            "effect" : "PERMIT"
+        }
+    ]
+}

@@ -1,0 +1,55 @@
+{
+    "name" : "multiple-site-test-policy-set",
+    "policies" : [
+        {
+            "name" : "Operators can read a site if they are assigned to the site.",
+            "target" : {
+                "name" : "When a operator reads a site",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/secured-by-value/sites/{site_id}"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "site" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { 
+                  "name":"",
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'site'), resource.uriVariable('site_id'))" 
+                }
+            ],
+            "effect" : "DENY"
+        },
+        {
+            "name" : "Operators can read a site if they are assigned to the site.",
+            "target" : {
+                "name" : "When a operator reads a site",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/secured-by-value/sites/{site_id}"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "site" }
+                    ]
+                }               
+            },
+            "conditions" : [
+                { 
+                  "name":"",
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'site'), resource.uriVariable('site_id'))" 
+                }
+            ],
+            "effect" : "PERMIT"
+        }
+    ]
+}

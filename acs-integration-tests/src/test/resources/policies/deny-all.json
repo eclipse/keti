@@ -1,0 +1,9 @@
+{
+    "name" : "default",
+    "policies" : [
+        {
+            "name" : "Access to everyone to everything",
+            "effect" : "DENY"
+        }
+    ]
+}

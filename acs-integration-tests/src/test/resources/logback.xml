@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright 2016 General Electric Company. 
+   
+    Licensed under the Apache License, Version 2.0 (the "License"); 
+    you may not use this file except in compliance with the License. 
+    You may obtain a copy of the License at
+   
+    http://www.apache.org/licenses/LICENSE-2.0
+   
+    Unless required by applicable law or agreed to in writing, software 
+    distributed under the License is distributed on an "AS IS" BASIS, 
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+    See the License for the specific language governing permissions and 
+    limitations under the License.
+ -->
+
+<!DOCTYPE xml>
+<!-- Introducing logback.xml for acs-int-tests package. Adding log level 
+    control for class ResourceOwnerPasswordAccessTokenProvider to avoid printing 
+    password details in log file -->
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{YYYY-MM-dd HH:mm:ss} %level [%thread]
+                %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="java" level="WARN" />
+
+    <!-- To avoid printing UAA password credentials info in log file, changing 
+        the log level for the following class to INFO. -->
+    <!--     <logger
+        name="org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider"
+        level="INFO" /> -->
+
+    <logger name="org.springframework.security" level="DEBUG" />
+    <logger name="com.ge.predix" level="DEBUG" />
+
+    <!-- This category will log all httpclient requests/responses. Only enable to troubleshoot. -->
+    <logger name="org.apache.http.wire" level="DEBUG" />
+    <logger name="http.wire" level="DEBUG" />
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>

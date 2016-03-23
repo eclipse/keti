@@ -1,0 +1,31 @@
+{
+    "name" : "policy-set-with-uri-attribute-template",
+    "policies" : [
+        {
+            "name" : "match-site-attribute-policy",
+            "target" : {
+                "resource" : {
+                    "uriTemplate" : "/v1/region/report/asset/{asset_id}",
+                    "attributeUriTemplate": "/v1/region/report{attribute_uri}",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "site" }
+                    ]
+                },
+                "action" : "GET"
+            },
+           "conditions" : [
+                { 
+                  "condition" : "match.single(resource.attributes('https://acs.attributes.int', 'site'), 'sanramon')" 
+                }
+            ],
+            "effect" : "PERMIT"
+        }
+        ,
+        
+        {
+            "name" : "deny-all-policy",
+            "effect" : "DENY"
+        }
+    ]
+}

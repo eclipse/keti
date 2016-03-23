@@ -1,0 +1,29 @@
+{
+    "name" : "URI Canonicalization Test",
+    "policies" : [
+        {
+            "name" : "Policy for allowed actions.",
+            "target" : {
+                "name" : "When an operator attempts an allowed action",
+                "resource" : {
+                    "name" : "Asset",
+                    "uriTemplate" : "/allowed/{.*}"
+                },
+                "action" : "GET"
+            },
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "Policy for not allowed actions.",
+            "target" : {
+                "name" : "When an operator attempts a not allowed action",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/not_allowed/{.*}"
+                },
+                "action" : "GET"
+            },
+            "effect" : "DENY"
+        }
+    ]
+}

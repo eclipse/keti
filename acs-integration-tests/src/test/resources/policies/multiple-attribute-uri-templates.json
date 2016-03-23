@@ -1,0 +1,57 @@
+{
+    "name" : "default",
+    "policies" : [
+        {
+            "name" : "Operators can read a site if they are in the site organization.",
+            "target" : {
+                "name" : "When a operator reads a site",
+                "resource" : {
+                    "name" : "Site and asset",
+                    "uriTemplate" : "/v1/site/{site_id}/plant/asset/{asset_id}",
+                    "attributeUriTemplate": "/v1{attribute_uri}/plant/asset/{asset_id}",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "org" }
+                    ]
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name":""
+                }
+            },
+            "conditions" : [
+                { 
+                  "name":"",
+                  "condition" : "match.any(subject.attributes('https://acs.attributes.int', 'org'), resource.attributes('https://acs.attributes.int', 'org'))"
+                }
+            ],
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "Operators can read an asset if they are in the asset organization.",
+            "target" : {
+                "name" : "When a operator reads a site",
+                "resource" : {
+                    "name" : "Site and asset",
+                    "uriTemplate" : "/v1/site/{site_id}/plant/asset/{asset_id}",
+                    "attributeUriTemplate": "/v1/site/{site_id}/plant{attribute_uri}",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "org" }
+                    ]
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name":""
+                }
+            },
+            "conditions" : [
+                { 
+                  "name":"",
+                  "condition" : "match.any(subject.attributes('https://acs.attributes.int', 'org'), resource.attributes('https://acs.attributes.int', 'org'))"
+                }
+            ],
+            "effect" : "PERMIT"
+        }
+    ]
+}

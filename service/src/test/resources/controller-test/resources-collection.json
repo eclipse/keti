@@ -1,0 +1,33 @@
+[
+	{
+		"resourceIdentifier" : "/services/secured-api",
+		"resourceId" : "0192837410239874",
+		"attributes" : [
+		    { "issuer" : "https://acs.attributes.int",
+		      "name" : "group",
+		      "value": "admin" 
+		    }
+		    ,
+		    { "issuer" : "https://acs.attributes.int",
+		      "name" : "department",
+		       "value": "sales" 
+		    }
+		]
+	}
+	,
+	{
+		"resourceIdentifier" : "/services/reports/01928374102398741235123",
+		"resourceId" : "01928374102398741235123",
+		"attributes" : [
+		    { "issuer" : "https://acs.attributes.int",
+		      "name" : "group",
+		      "value": "admin" 
+		    }
+		    ,
+		    { "issuer" : "https://acs.attributes.int",
+		      "name" : "department",
+		       "value": "sales" 
+		    }
+		]
+	}
+]

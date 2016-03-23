@@ -1,0 +1,25 @@
+{
+    "name" : "policy-set-with-uri-attribute-template",
+    "policies" : [
+        {
+            "target" : {
+                "resource" : {
+                    "uriTemplate" : "/v1/site/{site_id}/asset/{asset-id}",
+                    "attributeUriTemplate": "/v1{attribute_uri}/asset/{asset-id}",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "role" }
+                    ]
+                },
+                "action" : "GET"
+            },
+            "effect" : "PERMIT"
+        }
+        
+        ,
+        
+        {
+            "effect" : "DENY"
+        }
+    ]
+}

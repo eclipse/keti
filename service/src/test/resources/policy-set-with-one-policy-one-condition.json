@@ -1,0 +1,28 @@
+{
+    "name" : "test-policy-set",
+    "policies" : [
+        {
+            "name" : "Operators can read a site if they are assigned to the site.",
+            "target" : {
+                "name" : "When an operator reads a site",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/sites/{site_id}"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "site" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "is assigned to site",
+                  "condition" : "'sanramon'.equals('sanramon')" }
+            ],
+            "effect" : "PERMIT"
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="testAll">
+    <test name="public">
+        <classes>
+          <class name="com.ge.predix.test.TestConfig"/>
+          <class name="com.ge.predix.acceptance.test.ACSAcceptanceIT"/>
+          <class name="com.ge.predix.integration.test.AccessControlServiceIT"/>
+          <class name="com.ge.predix.integration.test.PrivilegeManagementAccessControlServiceIT"/>
+        </classes>
+    </test>
+</suite>

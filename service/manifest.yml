@@ -1,0 +1,17 @@
+---
+# Manifest for ACS. Properties can be overridden from the command line. This file can be used for manual cf push. 
+applications:
+- name: acs_default
+  path: ./target/acs-service-*.jar
+  memory: 1024M
+  instances: 1
+  timeout: 180
+  services:
+  - acs_db
+  env:
+    SPRING_PROFILES_ACTIVE: public
+    ACS_BASE_DOMAIN: 
+    ACS_DB: acs_db
+# The following property must be configured for the service to be functional 
+#    uaaCheckHealthUrl=http://<UAA_URL>/healthz
+

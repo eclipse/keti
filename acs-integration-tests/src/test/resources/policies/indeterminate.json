@@ -1,0 +1,15 @@
+{
+    "name" : "default",
+    "policies" : [
+        {
+            "name" : "never",
+            "target" : {
+                "resource" : {
+                    "uriTemplate" : "/never"
+                },
+                "action" : "POST"
+            },
+            "effect" : "PERMIT"
+        }
+    ]
+}
