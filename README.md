@@ -1,5 +1,8 @@
 ## Access Control Service.
 
+### LICENSE
+This project is licensed under Apache v2.
+
 For more information about Access Control Services, please read the following documentation:
 https://www.predix.io/docs#IGyNp2eM
 
