@@ -68,27 +68,27 @@ public final class AcsRequestContextHolder implements ApplicationContextAware {
         private static ZoneRepository zoneRepository;
         private static final Logger LOGGER = LoggerFactory.getLogger(AcsRequestContextBuilder.class);
 
-        private static void initAcsRequestContextBuilderRepos(final ApplicationContext applicationContext) {
+        static void initAcsRequestContextBuilderRepos(final ApplicationContext applicationContext) {
             zoneRepository = applicationContext.getBean(ZoneRepository.class);
             LOGGER.info("AcsRequestContextBuilder JPA Repositories Initialized");
         }
 
         private Map<ACSRequestContextAttribute, Object> requestContextMap;
 
-        private AcsRequestContextBuilder() {
-            requestContextMap = new HashMap<ACSRequestContextAttribute, Object>();
+        AcsRequestContextBuilder() {
+            this.requestContextMap = new HashMap<ACSRequestContextAttribute, Object>();
         }
 
-        private AcsRequestContextBuilder zoneEntityOrFail() {
+        AcsRequestContextBuilder zoneEntityOrFail() {
             ZoneOAuth2Authentication zoneAuth = (ZoneOAuth2Authentication) SecurityContextHolder.getContext()
                     .getAuthentication();
-            requestContextMap.put(ACSRequestContextAttribute.ZONE_ENTITY,
+            this.requestContextMap.put(ACSRequestContextAttribute.ZONE_ENTITY,
                     zoneRepository.getBySubdomain(zoneAuth.getZoneId()));
             return this;
         }
 
-        private AcsRequestContext build() {
-            return new AcsRequestContext(Collections.unmodifiableMap(requestContextMap));
+        AcsRequestContext build() {
+            return new AcsRequestContext(Collections.unmodifiableMap(this.requestContextMap));
         }
     }
 }

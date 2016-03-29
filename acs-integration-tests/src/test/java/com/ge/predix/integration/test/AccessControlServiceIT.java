@@ -42,7 +42,6 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ge.predix.acs.AccessControlService;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
 import com.ge.predix.acs.rest.BaseResource;
@@ -124,7 +123,7 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         this.acsZone1Url = this.zoneHelper.getZone1Url();
         UaaTestUtil uaaTestUtil = new UaaTestUtil(this.acsRestTemplateFactory.getOAuth2RestTemplateForUaaAdmin(),
                 this.uaaUrl);
-        uaaTestUtil.setup(Arrays.asList(new String[] {acsZone1Name, acsZone2Name, acsZone3Name}));
+        uaaTestUtil.setup(Arrays.asList(new String[] {this.acsZone1Name, this.acsZone2Name, this.acsZone3Name}));
 
         this.acsAdminRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForAcsAdmin();
         this.acsReadOnlyRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForReadOnlyClient();

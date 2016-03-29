@@ -1,10 +1,10 @@
-## Access Control Service.
-
-### LICENSE
-This project is licensed under Apache v2.
+## Access Control Service
 
 For more information about Access Control Services, please read the following documentation:
 https://www.predix.io/docs#IGyNp2eM
+
+### LICENSE
+This project is licensed under Apache v2.
 
 ### How to run ACS locally
 To run the service locally, go to service/ directory

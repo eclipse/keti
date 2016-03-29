@@ -70,7 +70,7 @@ public class ResourceType {
             + "defining attributeUriTemplate as /region/us/report{attribute_uri}. ACS extracts the value of URI "
             + "Template variable 'attribute_uri' as the resourceURI. ")
     public String getAttributeUriTemplate() {
-        return attributeUriTemplate;
+        return this.attributeUriTemplate;
     }
 
     public void setAttributeUriTemplate(final String attributeUriTemplate) {

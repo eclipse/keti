@@ -16,7 +16,7 @@ public class AcsRequestContext {
     }
 
     public Object get(final ACSRequestContextAttribute acsRequestContextEnum) {
-        return unModifiableRequestContextMap.get(acsRequestContextEnum);
+        return this.unModifiableRequestContextMap.get(acsRequestContextEnum);
     }
 
 }

@@ -82,6 +82,7 @@ public class AccessControlService {
                 .paths(attributeManagementPaths()).build();
     }
 
+    @SuppressWarnings("unchecked")
     private Predicate<String> attributeManagementPaths() {
         return or(regex("/v1/subject.*"), regex("/v1/resource.*"), regex("/v1/policy-set.*"),
                 regex("/v1/policy-evaluation.*"), regex("/monitoring/heartbeat.*"));
