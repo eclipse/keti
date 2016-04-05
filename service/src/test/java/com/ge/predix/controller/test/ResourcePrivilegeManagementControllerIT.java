@@ -150,9 +150,9 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         getContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(),
                 aResourceURI);
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isOk())
-                .andExpect(jsonPath("$resourceIdentifier", is("/services/secured-api")))
-                .andExpect(jsonPath("$attributes[0].value", isIn(new String[] { "supervisor", "it" })))
-                .andExpect(jsonPath("$attributes[0].issuer", is("https://acs.attributes.int")));
+                .andExpect(jsonPath("resourceIdentifier", is("/services/secured-api")))
+                .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "supervisor", "it" })))
+                .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         MockMvcContext deleteContext = this.testUtils.createWACWithCustomDELETERequestBuilder(this.wac,
                 this.testZone.getSubdomain(), aResourceURI);
@@ -260,15 +260,15 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         MockMvcContext putContext = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
                 this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(resource))).andExpect(status().isCreated());
+                .content(OBJECT_MAPPER.writeValueAsString(resource))).andExpect(status().is2xxSuccessful());
 
         // Get a given resource
         MockMvcContext getContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
                 this.testZone.getSubdomain(), thisUri);
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isOk())
-                .andExpect(jsonPath("$resourceIdentifier", is("/services/secured-api/subresource")))
-                .andExpect(jsonPath("$attributes[0].value", isIn(new String[] { "supervisor", "it" })))
-                .andExpect(jsonPath("$attributes[0].issuer", is("https://acs.attributes.int")));
+                .andExpect(jsonPath("resourceIdentifier", is("/services/secured-api/subresource")))
+                .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "supervisor", "it" })))
+                .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         // Delete a given resource
         MockMvcContext deleteContext = this.testUtils.createWACWithCustomDELETERequestBuilder(this.wac,
@@ -294,9 +294,9 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         MockMvcContext getContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
                 this.testZone.getSubdomain(), thisUri);
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isOk())
-                .andExpect(jsonPath("$resourceIdentifier", is(resource.getResourceIdentifier())))
-                .andExpect(jsonPath("$attributes[0].value", isIn(new String[] { "supervisor", "it" })))
-                .andExpect(jsonPath("$attributes[0].issuer", is("https://acs.attributes.int")));
+                .andExpect(jsonPath("resourceIdentifier", is(resource.getResourceIdentifier())))
+                .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "supervisor", "it" })))
+                .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         // Ensure we can update resource without a resource identifier in json
         // payload
@@ -317,9 +317,9 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         getContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(),
                 thisUri);
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isOk())
-                .andExpect(jsonPath("$resourceIdentifier", is(resource.getResourceIdentifier())))
-                .andExpect(jsonPath("$attributes[0].value", isIn(new String[] { "supervisor", "it" })))
-                .andExpect(jsonPath("$attributes[0].issuer", is("https://acs.attributes.int")));
+                .andExpect(jsonPath("resourceIdentifier", is(resource.getResourceIdentifier())))
+                .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "supervisor", "it" })))
+                .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         // Delete a given resource
         MockMvcContext deleteContext = this.testUtils.createWACWithCustomDELETERequestBuilder(this.wac,
@@ -350,7 +350,7 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         MockMvcContext getContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
                 this.testZone.getSubdomain(), thisUri);
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isOk())
-                .andExpect(jsonPath("$resourceIdentifier", is(decoded)));
+                .andExpect(jsonPath("resourceIdentifier", is(decoded)));
     }
 
 }

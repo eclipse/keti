@@ -147,9 +147,9 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         getContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(),
                 thisUri);
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isOk())
-                .andExpect(jsonPath("$subjectIdentifier", is("dave")))
-                .andExpect(jsonPath("$attributes[0].value", isIn(new String[] { "supervisor", "it" })))
-                .andExpect(jsonPath("$attributes[0].issuer", is("https://acs.attributes.int")));
+                .andExpect(jsonPath("subjectIdentifier", is("dave")))
+                .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "supervisor", "it" })))
+                .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         // Delete resources from created collection
         thisUri = SUBJECT_BASE_URL + "/vineet";
@@ -242,16 +242,16 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         MockMvcContext putContext = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
                 this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(subject))).andExpect(status().isCreated());
+                .content(OBJECT_MAPPER.writeValueAsString(subject))).andExpect(status().is2xxSuccessful());
 
         // Get a given resource
         MockMvcContext getContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
                 this.testZone.getSubdomain(), thisUri);
         ResultActions resultActions = getContext.getMockMvc().perform(getContext.getBuilder());
 
-        resultActions.andExpect(status().isOk()).andExpect(jsonPath("$subjectIdentifier", is("fermin")))
-                .andExpect(jsonPath("$attributes[0].value", isIn(new String[] { "sales", "admin" })))
-                .andExpect(jsonPath("$attributes[0].issuer", is("https://acs.attributes.int")));
+        resultActions.andExpect(status().isOk()).andExpect(jsonPath("subjectIdentifier", is("fermin")))
+                .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "sales", "admin" })))
+                .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         // Delete a given resource
         MockMvcContext deleteContext = this.testUtils.createWACWithCustomDELETERequestBuilder(this.wac,
@@ -281,9 +281,9 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
                 this.testZone.getSubdomain(), thisUri);
         ResultActions resultActions = getContext.getMockMvc().perform(getContext.getBuilder());
 
-        resultActions.andExpect(status().isOk()).andExpect(jsonPath("$subjectIdentifier", is(subjectIdentifier)))
-                .andExpect(jsonPath("$attributes[0].value", isIn(new String[] { "admin", "sales" })))
-                .andExpect(jsonPath("$attributes[0].issuer", is("https://acs.attributes.int")));
+        resultActions.andExpect(status().isOk()).andExpect(jsonPath("subjectIdentifier", is(subjectIdentifier)))
+                .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "admin", "sales" })))
+                .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         BaseSubject subjectNoSubjectIdentifier = this.jsonUtil
                 .deserializeFromFile("controller-test/no-subjectidentifier-subject.json", BaseSubject.class);
@@ -300,9 +300,9 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
                 thisUri);
         resultActions = getContext.getMockMvc().perform(getContext.getBuilder());
 
-        resultActions.andExpect(status().isOk()).andExpect(jsonPath("$subjectIdentifier", is(subjectIdentifier)))
-                .andExpect(jsonPath("$attributes[0].value", isIn(new String[] { "admin", "sales" })))
-                .andExpect(jsonPath("$attributes[0].issuer", is("https://acs.attributes.int")));
+        resultActions.andExpect(status().isOk()).andExpect(jsonPath("subjectIdentifier", is(subjectIdentifier)))
+                .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "admin", "sales" })))
+                .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         // Delete a given resource
         MockMvcContext deleteContext = this.testUtils.createWACWithCustomDELETERequestBuilder(this.wac,
