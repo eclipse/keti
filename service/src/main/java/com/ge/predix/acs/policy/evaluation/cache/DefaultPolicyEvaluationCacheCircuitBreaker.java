@@ -3,6 +3,8 @@ package com.ge.predix.acs.policy.evaluation.cache;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 @Component
 public class DefaultPolicyEvaluationCacheCircuitBreaker implements PolicyEvaluationCacheCircuitBreaker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPolicyEvaluationCacheCircuitBreaker.class);
 
     @Autowired
     private PolicyEvaluationCache cacheImpl;
@@ -30,6 +33,7 @@ public class DefaultPolicyEvaluationCacheCircuitBreaker implements PolicyEvaluat
     }
 
     public PolicyEvaluationResult nopGet(final PolicyEvaluationRequestCacheKey key) {
+        LOGGER.warn("Executing circuit breaker fallback method for cache 'get' method.");
         return null;
     }
 
@@ -43,6 +47,7 @@ public class DefaultPolicyEvaluationCacheCircuitBreaker implements PolicyEvaluat
 
     public void nopSet(final PolicyEvaluationRequestCacheKey key, final PolicyEvaluationResult value) {
         // Do nothing.
+        LOGGER.warn("Executing circuit breaker fallback method for cache 'set' method.");
     }
 
     @HystrixCommand(fallbackMethod = "nopSetResourceTranslation")
@@ -55,6 +60,7 @@ public class DefaultPolicyEvaluationCacheCircuitBreaker implements PolicyEvaluat
 
     public void nopSetResourceTranslation(final String zoneId, final String fromResourceId, final String toResourceId) {
         // Do nothing.
+        LOGGER.warn("Executing circuit breaker fallback method for cache 'setResourceTranslation' method.");
     }
 
     @HystrixCommand(fallbackMethod = "nopSetResourceTranslations")
@@ -69,6 +75,7 @@ public class DefaultPolicyEvaluationCacheCircuitBreaker implements PolicyEvaluat
     public void nopSetResourceTranslations(final String zoneId, final Set<String> fromResourceIds,
             final String toResourceId) {
         // Do nothing.
+        LOGGER.warn("Executing circuit breaker fallback method for cache 'setResourceTranslations' method.");
     }
 
     @Override
