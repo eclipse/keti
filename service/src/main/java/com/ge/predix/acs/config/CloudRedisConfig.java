@@ -44,11 +44,11 @@ public class CloudRedisConfig extends AbstractCloudConfig {
     @Value("${ACS_REDIS:acs-redis}")
     private String acsRedis;
 
-    @Value("${MIN_ACTIVE:0}")
+    @Value("${REDIS_MIN_ACTIVE:0}")
     private int minActive;
-    @Value("${MAX_ACTIVE:100}")
+    @Value("${REDIS_MAX_ACTIVE:100}")
     private int maxActive;
-    @Value("${MAX_WAIT_TIME:30000}")
+    @Value("${REDIS_MAX_WAIT_TIME:30000}")
     private int maxWaitTime;
 
     @Bean
