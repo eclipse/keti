@@ -16,6 +16,7 @@
 package com.ge.predix.integration.test;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -23,6 +24,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -40,15 +42,20 @@ public class ACSCorsFilterIT extends AbstractTestNGSpringContextTests {
 
     private static final String SWAGGER_API = "/v2/api-docs?group=acs";
 
-    @Value("${acsUrl}")
+    @Value("${acsUrl:http://localhost:8181}")
     private String acsBaseUrl;
 
     @Autowired
     private ZacTestUtil zacTestUtil;
 
+    @Autowired
+    Environment env;
+
     @BeforeClass
     public void setup() throws JsonParseException, JsonMappingException, IOException {
-        this.zacTestUtil.assumeZacServerAvailable();
+        if (!Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
+            this.zacTestUtil.assumeZacServerAvailable();
+        }
     }
 
     @Test

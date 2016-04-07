@@ -33,12 +33,13 @@ public class ACSRestTemplateFactory {
 
     private OAuth2RestTemplate authorizedACSTemplate;
     private OAuth2RestTemplate readOnlyPolicyACSTemplate;
-    private OAuth2RestTemplate clientOnlyPolicyACSTemplate;
     private OAuth2RestTemplate rocketACSTemplate;
+    private OAuth2RestTemplate apmACSTemplate;
     private OAuth2RestTemplate acsZone2RogueTemplate;
-    private OAuth2RestTemplate acsZone2Template;
     private OAuth2RestTemplate zacTemplate;
     private OAuth2RestTemplate uaaAdminTemplate;
+    private OAuth2RestTemplate zone1AdminACSTemplate;
+    private OAuth2RestTemplate zone2AdminACSTemplate;
 
     @Value("${zone1UaaUrl}/oauth/token")
     private String accessTokenEndpointUrl;
@@ -96,6 +97,16 @@ public class ACSRestTemplateFactory {
     @Value("${ACS_NO_POLICY_SCOPE_CLIENT_SECRET:acs_no_policy_secret}")
     private String acsNoPolicyScopeClientSecret;
 
+    @Value("${zone1AdminClientId:zone1AdminClient}")
+    private String zone1AdminClientId;
+    @Value("${zone1AdminClientSecret:zone1AdminClientSecret}")
+    private String zone1AdminClientSecret;
+
+    @Value("${zone2AdminClientId:zone2AdminClient}")
+    private String zone2AdminClientId;
+    @Value("${zone2AdminClientSecret:zone2AdminClientSecret}")
+    private String zone2AdminClientSecret;
+
     @Value("${UAA_URL:http://localhost:8080/uaa}/oauth/token")
     private String uaaTokenUrl;
 
@@ -107,18 +118,29 @@ public class ACSRestTemplateFactory {
         return this.authorizedACSTemplate;
     }
 
-    public OAuth2RestTemplate getOAuth2ResttemplateForRocketClient() {
-        if (this.rocketACSTemplate == null) {
+    public OAuth2RestTemplate getOAuth2RestTemplateForZone1AdminClient() {
+        if (this.zone1AdminACSTemplate == null) {
             ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
             resource.setAccessTokenUri(this.accessTokenEndpointUrl);
-            resource.setClientId(this.rocketClientId);
-            resource.setClientSecret(this.rocketClientSecret);
-            this.rocketACSTemplate = new OAuth2RestTemplate(resource);
+            resource.setClientId(this.zone1AdminClientId);
+            resource.setClientSecret(this.zone1AdminClientSecret);
+            this.zone1AdminACSTemplate = new OAuth2RestTemplate(resource);
         }
 
-        return this.rocketACSTemplate;
+        return this.zone1AdminACSTemplate;
     }
 
+    public OAuth2RestTemplate getOAuth2RestTemplateForZone2AdminClient() {
+        if (this.zone2AdminACSTemplate == null) {
+            ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
+            resource.setAccessTokenUri(this.zone2TokenUrl);
+            resource.setClientId(this.zone2AdminClientId);
+            resource.setClientSecret(this.zone2AdminClientSecret);
+            this.zone2AdminACSTemplate = new OAuth2RestTemplate(resource);
+        }
+
+        return this.zone2AdminACSTemplate;
+    }
     public OAuth2RestTemplate getOAuth2ResttemplateForZAC() {
         if (this.zacTemplate == null) {
             ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
@@ -169,11 +191,11 @@ public class ACSRestTemplateFactory {
     }
 
     public OAuth2RestTemplate getACSZone2Template() {
-        if (this.acsZone2Template == null) {
-            this.acsZone2Template = new OAuth2RestTemplate(getZone2RocketClient());
+        if (this.rocketACSTemplate == null) {
+            this.rocketACSTemplate = new OAuth2RestTemplate(getZone2RocketClient());
 
         }
-        return this.acsZone2Template;
+        return this.rocketACSTemplate;
     }
 
     /**
@@ -189,12 +211,12 @@ public class ACSRestTemplateFactory {
         return this.acsZone2RogueTemplate;
     }
 
-    public OAuth2RestTemplate getACSCllientTemplate() {
-        if (this.clientOnlyPolicyACSTemplate == null) {
-            this.clientOnlyPolicyACSTemplate = new OAuth2RestTemplate(getZone1Client());
+    public OAuth2RestTemplate getACSZone1Template() {
+        if (this.apmACSTemplate == null) {
+            this.apmACSTemplate = new OAuth2RestTemplate(getZone1ApmClient());
         }
 
-        return this.clientOnlyPolicyACSTemplate;
+        return this.apmACSTemplate;
     }
 
     public OAuth2RestTemplate getACSTemplateWithReadOnlyPolicyAccess() {
@@ -262,11 +284,11 @@ public class ACSRestTemplateFactory {
         return resource;
     }
 
-    private OAuth2ProtectedResourceDetails getZone1Client() {
+    private OAuth2ProtectedResourceDetails getZone1ApmClient() {
         ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
         resource.setAccessTokenUri(this.accessTokenEndpointUrl);
-        resource.setClientId(this.rocketClientId);
-        resource.setClientSecret(this.rocketClientSecret);
+        resource.setClientId(this.apmClientId);
+        resource.setClientSecret(this.apmClientSecret);
         return resource;
     }
 }

@@ -59,12 +59,33 @@ public class UaaTestUtil {
     public void setup(List<String> acsZones) {
         if (acsZones == null || acsZones.size() == 0)
             throw new RuntimeException("At least one ACS zone is expected to setup UAA");
-        createAcsAdminClient(acsZones);
+        createAcsAdminClient(acsZones, "acs_admin", "acs_admin_secret");
         createNoPolicyScopeClient(acsZones);
         createReadOnlyPolicyScopeClient(acsZones);
     }
 
-    private void createAcsAdminClient(List<String> acsZones) {
+    public void setupAcsZoneClient(String acsZone, String clientId, String clientSecret) {
+        createAcsZoneClient(acsZone, clientId, clientSecret);
+    }
+
+    private void createAcsZoneClient(String acsZone, String clientId, String clientSecret) {
+        BaseClientDetails acsZoneAdminClient = new BaseClientDetails();
+        ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("acs.attributes.read"));
+        authorities.add(new SimpleGrantedAuthority("acs.attributes.write"));
+        authorities.add(new SimpleGrantedAuthority("acs.policies.read"));
+        authorities.add(new SimpleGrantedAuthority("acs.policies.write"));
+        authorities.add(new SimpleGrantedAuthority("predix-acs.zones." + acsZone + ".admin"));
+        authorities.add(new SimpleGrantedAuthority("predix-acs.zones." + acsZone + ".user"));
+        acsZoneAdminClient.setAuthorities(authorities);
+        acsZoneAdminClient.setAuthorizedGrantTypes(Arrays.asList(new String[] { "client_credentials" }));
+        acsZoneAdminClient.setClientId(clientId);
+        acsZoneAdminClient.setClientSecret(clientSecret);
+        acsZoneAdminClient.setResourceIds(Arrays.asList(new String[] { "uaa.none" }));
+        createOrUpdateClient(acsZoneAdminClient);
+    }
+
+    private void createAcsAdminClient(List<String> acsZones, String clientId, String clientSecret) {
         BaseClientDetails acsAdminClient = new BaseClientDetails();
         ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority("acs.zones.admin"));
@@ -79,8 +100,8 @@ public class UaaTestUtil {
 
         acsAdminClient.setAuthorities(authorities);
         acsAdminClient.setAuthorizedGrantTypes(Arrays.asList(new String[] { "client_credentials" }));
-        acsAdminClient.setClientId("acs_admin");
-        acsAdminClient.setClientSecret("acs_admin_secret");
+        acsAdminClient.setClientId(clientId);
+        acsAdminClient.setClientSecret(clientSecret);
         acsAdminClient.setResourceIds(Arrays.asList(new String[] { "uaa.none" }));
         createOrUpdateClient(acsAdminClient);
     }

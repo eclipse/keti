@@ -75,14 +75,12 @@ public class PrivilegeHelper {
         return subject;
     }
 
-    public void putSubjectWithDefaultTemplate(final String subjectIdentifier, final Attribute... attributes)
+    public void putSubject(final OAuth2RestTemplate restTemplate, final String subjectIdentifier, final Attribute... attributes)
             throws UnsupportedEncodingException {
 
         BaseSubject subject = new BaseSubject(subjectIdentifier);
-        OAuth2RestTemplate acsRestTemplate = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
-
         // no header needed, because it uses zone specific url
-        putSubject(acsRestTemplate, subject, this.zoneHelper.getZone1Url(), null, attributes);
+        putSubject(restTemplate, subject, this.zoneHelper.getZone1Url(), null, attributes);
     }
 
     public ResponseEntity<Object> postMultipleSubjects(final OAuth2RestTemplate acsTemplate, final String endpoint,

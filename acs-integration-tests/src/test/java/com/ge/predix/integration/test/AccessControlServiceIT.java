@@ -82,13 +82,13 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     @Autowired
     Environment env;
 
-    @Value("${ZONE1_NAME}")
+    @Value("${ZONE1_NAME:testzone1}")
     private String acsZone1Name;
 
-    @Value("${ZONE2_NAME}")
+    @Value("${ZONE2_NAME:testzone2}")
     private String acsZone2Name;
 
-    @Value("${ZONE3_NAME}")
+    @Value("${ZONE3_NAME:testzone3}")
     private String acsZone3Name;
 
     @Value("${UAA_URL:http://localhost:8080/uaa}")
