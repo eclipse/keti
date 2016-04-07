@@ -61,9 +61,8 @@ import com.ge.predix.test.utils.ZoneHelper;
 @SuppressWarnings({ "nls" })
 @ContextConfiguration("classpath:acceptance-test-spring-context.xml")
 public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
-    // private static final String POLICY_SET_URI = "/policy-set/";
 
-    @Value("${acsUrl}")
+    @Value("${acsUrl:http://localhost:8181}")
     private String acsBaseUrl;
 
     private String testZoneSubdomain;
@@ -88,13 +87,13 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
     @Autowired
     private ACSRestTemplateFactory acsRestTemplateFactory;
 
-    @Value("${ZONE1_NAME}")
+    @Value("${ZONE1_NAME:testzone1}")
     private String acsZone1Name;
 
-    @Value("${ZONE2_NAME}")
+    @Value("${ZONE2_NAME:testzone2}")
     private String acsZone2Name;
 
-    @Value("${ZONE3_NAME}")
+    @Value("${ZONE3_NAME:testzone3}")
     private String acsZone3Name;
 
     @Value("${UAA_URL:http://localhost:8080/uaa}")

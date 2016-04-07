@@ -59,12 +59,6 @@ public class PolicyHelper {
     @Autowired
     private ZoneHelper zoneHelper;
 
-    public String setTestPolicyWithDefaultTemplate(final String policyFile)
-            throws JsonParseException, JsonMappingException, IOException {
-        return setTestPolicy(this.acsRestTemplateFactory.getACSTemplateWithPolicyScope(), null,
-                this.zoneHelper.getZone1Url(), policyFile);
-    }
-
     public String setTestPolicy(final RestTemplate acs, final HttpHeaders headers, final String endpoint,
             final String policyFile) throws JsonParseException, JsonMappingException, IOException {
 
@@ -134,12 +128,11 @@ public class PolicyHelper {
      * @param createRandomEvalRequest
      * @return
      */
-    public ResponseEntity<PolicyEvaluationResult> sendEvaluationRequest(
+    public ResponseEntity<PolicyEvaluationResult> sendEvaluationRequest(final RestTemplate restTemplate,
             final PolicyEvaluationRequestV1 randomEvalRequest) {
-        ResponseEntity<PolicyEvaluationResult> evaluationResponse = this.acsRestTemplateFactory
-                .getACSTemplateWithPolicyScope()
-                .postForEntity(this.zoneHelper.getZone1Url() + ACS_POLICY_EVAL_API_PATH, randomEvalRequest,
-                        PolicyEvaluationResult.class);
+        ResponseEntity<PolicyEvaluationResult> evaluationResponse = restTemplate.postForEntity(
+                this.zoneHelper.getZone1Url() + ACS_POLICY_EVAL_API_PATH, randomEvalRequest,
+                PolicyEvaluationResult.class);
         return evaluationResponse;
     }
 

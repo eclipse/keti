@@ -22,7 +22,6 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.ge.predix.test.utils.ZacTestUtil;
 
 import cucumber.api.CucumberOptions;
 import cucumber.api.testng.AbstractTestNGCucumberTests;
@@ -32,11 +31,8 @@ import cucumber.api.testng.AbstractTestNGCucumberTests;
 public class ZoneEnforcementCucumberTest extends AbstractTestNGCucumberTests {
     // Used as the entry point for ZoneCreation StepsDefinitions
 
-    private ZacTestUtil zacTestUtil = new ZacTestUtil();
-
     @Override
     public void run_cukes() throws JsonParseException, JsonMappingException, IOException {
-        this.zacTestUtil.assumeZacServerAvailable();
         super.run_cukes();
     }
 }

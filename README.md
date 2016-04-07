@@ -31,7 +31,13 @@ git checkout releases/3.2.1
 
 ###Run ACS integration tests
 
+Add the following entries to the /etc/hosts file
+  * 127.0.0.1   testzone1.localhost
+  * 127.0.0.1   testzone2.localhost
+  * 127.0.0.1   testzone3.localhost
+
 The public profile starts UAA and ACS, runs the tests, then stops the ACS and UAA services.
+
 ```
 cd acs-integration-tests
 mvn clean verify -Ppublic
