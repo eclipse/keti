@@ -23,12 +23,16 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.config.java.AbstractCloudConfig;
 import org.springframework.cloud.service.PooledServiceConnectorConfig;
 import org.springframework.cloud.service.PooledServiceConnectorConfig.PoolConfig;
+import org.springframework.cloud.service.common.RedisServiceInfo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * DataSourceConfig used for all cloud profiles.
@@ -51,12 +55,46 @@ public class CloudRedisConfig extends AbstractCloudConfig {
     @Value("${REDIS_MAX_WAIT_TIME:30000}")
     private int maxWaitTime;
 
+    @Value("${REDIS_SOCKET_TIMEOUT:3000}")
+    private int soTimeout;
+
+    @Value("${REDIS_USE_JEDIS_FACTORY:false}")
+    private boolean useJedisFactory;
+
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
+        RedisConnectionFactory connFactory;
+        if (this.useJedisFactory) {
+            connFactory = createJedisConnectionFactory();
+        } else {
+            connFactory = createSpringCloudConnectionFactory();
+        }
+        LOGGER.info("Successfully created Redis connection factory.");
+        return connFactory;
+    }
+
+    private RedisConnectionFactory createSpringCloudConnectionFactory() {
         PoolConfig poolConfig = new PoolConfig(this.minActive, this.maxActive, this.maxWaitTime);
         RedisConnectionFactory connFactory = connectionFactory().redisConnectionFactory(this.acsRedis,
                 new PooledServiceConnectorConfig(poolConfig));
-        LOGGER.info("Successfully created Redis connection factory.");
+        return connFactory;
+    }
+
+    public RedisConnectionFactory createJedisConnectionFactory() {
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxTotal(this.maxActive);
+        poolConfig.setMinIdle(this.minActive);
+        poolConfig.setMaxWaitMillis(this.maxWaitTime);
+        poolConfig.setTestOnBorrow(false);
+
+        RedisServiceInfo redisServiceInfo = (RedisServiceInfo) cloud().getServiceInfo(this.acsRedis);
+
+        JedisConnectionFactory connFactory = new JedisConnectionFactory(poolConfig);
+        connFactory.setUsePool(true);
+        connFactory.setTimeout(this.soTimeout);
+        connFactory.setHostName(redisServiceInfo.getHost());
+        connFactory.setPort(redisServiceInfo.getPort());
+        connFactory.setPassword(redisServiceInfo.getPassword());
         return connFactory;
     }
 
