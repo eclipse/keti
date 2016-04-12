@@ -71,6 +71,7 @@
         xmlns="http://www.springframework.org/schema/security"
         disable-url-rewriting="true" use-expressions="true"
         entry-point-ref="preAuthenticationEntryPoint">
+        <csrf disabled="true"/>
 
         <intercept-url pattern="/v1/policy-set/**" method="GET"
             access="hasAnyAuthority('acs.policies.read') " />
@@ -100,7 +101,8 @@
         xmlns="http://www.springframework.org/schema/security"
         disable-url-rewriting="true" use-expressions="true"
         entry-point-ref="preAuthenticationEntryPoint">
-        
+        <csrf disabled="true"/>
+
         <intercept-url pattern="/v1/policy-evaluation"
             access="isFullyAuthenticated() " />
 
@@ -116,7 +118,8 @@
         xmlns="http://www.springframework.org/schema/security"
         disable-url-rewriting="true" use-expressions="true"
         entry-point-ref="preAuthenticationEntryPoint">
-        
+        <csrf disabled="true"/>
+
         <intercept-url pattern="/v1/resource/**" method="GET"
             access="hasAnyAuthority('acs.attributes.read') " />
         <intercept-url pattern="/v1/resource/**" method="HEAD"
@@ -144,8 +147,9 @@
         xmlns="http://www.springframework.org/schema/security"
         disable-url-rewriting="true" use-expressions="true"
         entry-point-ref="preAuthenticationEntryPoint">
-        
-               <intercept-url pattern="/v1/subject/**" method="GET"
+        <csrf disabled="true"/>
+
+        <intercept-url pattern="/v1/subject/**" method="GET"
             access="hasAnyAuthority('acs.attributes.read') " />
         <intercept-url pattern="/v1/subject/**" method="HEAD"
             access="hasAnyAuthority('acs.attributes.read') " />
@@ -172,6 +176,8 @@
         xmlns="http://www.springframework.org/schema/security"
         disable-url-rewriting="true" use-expressions="true"
         entry-point-ref="preAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
         <!-- ZacTokenService will only verify the token against defaultTrustedIssuerId 
             for requests with no zone. Additional scope acs.zones.admin needs to be asserted 
             here. -->
