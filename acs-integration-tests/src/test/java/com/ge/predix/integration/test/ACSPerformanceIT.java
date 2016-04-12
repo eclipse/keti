@@ -90,7 +90,7 @@ public class ACSPerformanceIT extends AbstractTestNGSpringContextTests {
     }
 
     @AfterClass
-    public void tearDown() throws JsonParseException, JsonMappingException, IOException {
+    public void tearDown() throws Exception {
         this.policyHelper.deletePolicySet(this.testPolicyName);
         this.privilegeHelper.deleteSubject(this.defaultSubject.getSubjectIdentifier());
     }

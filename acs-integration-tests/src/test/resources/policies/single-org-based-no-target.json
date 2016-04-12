@@ -3,17 +3,6 @@
     "policies" : [
         {
             "name" : "Operators can read a site if they belong to the site organization.",
-            "target" : {
-                "name" : "When a operator reads a site",
-                "resource" : {
-                    "name" : "Site",
-                    "uriTemplate" : "/secured-by-value/sites/{site_id}"
-                },
-                "action" : "GET",
-                "subject" : {
-                    "name":""
-                }
-            },
             "conditions" : [
                 { 
                   "name":"",

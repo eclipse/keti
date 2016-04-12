@@ -75,8 +75,8 @@ public class PrivilegeHelper {
         return subject;
     }
 
-    public void putSubject(final OAuth2RestTemplate restTemplate, final String subjectIdentifier, final Attribute... attributes)
-            throws UnsupportedEncodingException {
+    public void putSubject(final OAuth2RestTemplate restTemplate, final String subjectIdentifier,
+            final Attribute... attributes) throws UnsupportedEncodingException {
 
         BaseSubject subject = new BaseSubject(subjectIdentifier);
         // no header needed, because it uses zone specific url
@@ -98,6 +98,30 @@ public class PrivilegeHelper {
 
         ResponseEntity<Object> responseEntity = acsTemplate.postForEntity(subjectUri, subjectsArray, Object.class);
 
+        return responseEntity;
+    }
+
+    public ResponseEntity<Object> postSubjectsWithDefaultAttributes(final OAuth2RestTemplate acsTemplate,
+            final String endpoint, final HttpHeaders headers, final BaseSubject... subjects) {
+        Attribute site = getDefaultAttribute();
+        Set<Attribute> attributes = new HashSet<>();
+        attributes.add(site);
+
+        for (BaseSubject s : subjects) {
+            s.setAttributes(attributes);
+        }
+        return postSubjects(acsTemplate, endpoint, headers, subjects);
+    }
+
+    public ResponseEntity<Object> postSubjects(final OAuth2RestTemplate acsTemplate, final String endpoint,
+            final HttpHeaders headers, final BaseSubject... subjects) {
+        List<BaseSubject> subjectsArray = new ArrayList<>();
+        for (BaseSubject s : subjects) {
+            subjectsArray.add(s);
+        }
+        URI subjectUri = URI.create(endpoint + ACS_SUBJECT_API_PATH);
+        ResponseEntity<Object> responseEntity = acsTemplate.postForEntity(subjectUri,
+                new HttpEntity<>(subjectsArray, headers), Object.class);
         return responseEntity;
     }
 
@@ -160,38 +184,34 @@ public class PrivilegeHelper {
         return responseEntity;
     }
 
-    public void deleteSubject(final String subjectId) {
-        if (subjectId != null) {
-            this.acsRestTemplateFactory.getACSTemplateWithPolicyScope()
-                    .delete(this.zoneHelper.getZone1Url() + ACS_SUBJECT_API_PATH + subjectId);
-        }
+    public void deleteSubject(final String subjectId) throws Exception {
+        deleteSubject(this.acsRestTemplateFactory.getACSTemplateWithPolicyScope(), this.zoneHelper.getZone1Url(),
+                subjectId, null);
     }
 
-    public void deleteSubject(final RestTemplate restTemplate, final String acsUrl, final String subjectId) {
-        if (subjectId != null) {
-            restTemplate.delete(acsUrl + ACS_SUBJECT_API_PATH + subjectId);
-        }
+    public void deleteSubject(final RestTemplate restTemplate, final String acsUrl, final String subjectId)
+            throws Exception {
+        deleteSubject(restTemplate, acsUrl, subjectId, null);
     }
 
     public void deleteSubject(final RestTemplate restTemplate, final String acsUrl, final String subjectId,
-            final HttpHeaders headers) {
+            final HttpHeaders headers) throws Exception {
         if (subjectId != null) {
-            restTemplate.exchange(acsUrl + ACS_SUBJECT_API_PATH + subjectId, HttpMethod.DELETE,
-                    new HttpEntity<>(headers), String.class);
+            URI subjectUri = URI.create(acsUrl + ACS_SUBJECT_API_PATH + URLEncoder.encode(subjectId, "UTF-8"));
+            restTemplate.exchange(subjectUri, HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
         }
     }
 
-    public void deleteResource(final RestTemplate restTemplate, final String acsUrl, final String resourceId) {
-        if (resourceId != null) {
-            restTemplate.delete(acsUrl + ACS_RESOURCE_API_PATH + resourceId);
-        }
+    public void deleteResource(final RestTemplate restTemplate, final String acsUrl, final String resourceId)
+            throws Exception {
+        deleteResource(restTemplate, acsUrl, resourceId, null);
     }
 
     public void deleteResource(final RestTemplate restTemplate, final String acsUrl, final String resourceId,
-            final HttpHeaders headers) {
+            final HttpHeaders headers) throws Exception {
         if (resourceId != null) {
-            restTemplate.exchange(acsUrl + ACS_RESOURCE_API_PATH + resourceId, HttpMethod.DELETE,
-                    new HttpEntity<>(headers), String.class);
+            URI resourceUri = URI.create(acsUrl + ACS_RESOURCE_API_PATH + URLEncoder.encode(resourceId, "UTF-8"));
+            restTemplate.exchange(resourceUri, HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
         }
     }
 

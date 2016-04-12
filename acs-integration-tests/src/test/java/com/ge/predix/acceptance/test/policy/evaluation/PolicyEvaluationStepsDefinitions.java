@@ -168,7 +168,7 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
     }
 
     @After
-    public void cleanAfterScenario() {
+    public void cleanAfterScenario() throws Exception {
         this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zone1Url, this.testPolicyName);
         this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zone1Url, DEFAULT_SUBJECT_ID);
     }
