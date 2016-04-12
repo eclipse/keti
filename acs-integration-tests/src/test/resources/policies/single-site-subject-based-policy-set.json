@@ -1,8 +1,8 @@
 {
-    "name" : "default",
+    "name" : "single-site-subject-based-policy-set",
     "policies" : [
         {
-            "name" : "Operators can read a site if they belong to the site organization.",
+            "name" : "Operators can read a site if they are assigned to the site.",
             "target" : {
                 "name" : "When a operator reads a site",
                 "resource" : {
@@ -17,7 +17,7 @@
             "conditions" : [
                 { 
                   "name":"",
-                  "condition" : "match.single(resource.attributes('https://acs.attributes.int', 'org'), 'alliance')"
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'site'), resource.uriVariable('site_id'))" 
                 }
             ],
             "effect" : "PERMIT"

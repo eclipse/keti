@@ -7,6 +7,7 @@
           <class name="com.ge.predix.acceptance.test.ACSAcceptanceIT"/>
           <class name="com.ge.predix.integration.test.AccessControlServiceIT"/>
           <class name="com.ge.predix.integration.test.PrivilegeManagementAccessControlServiceIT"/>
+          <class name="com.ge.predix.integration.test.PolicyEvaluationCachingIT"/>
           <class name="com.ge.predix.integration.test.ACSCorsFilterIT" />
           <class name="com.ge.predix.acceptance.test.policy.admin.PolicyCreationCucumberTest" />
           <class name="com.ge.predix.acceptance.test.policy.evaluation.PolicyEvaluationCucumberTest" />

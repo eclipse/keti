@@ -210,6 +210,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
         ResourceEntity resourceEntity = this.resourceRepository.getByZoneAndResourceIdentifier(zone,
                 resourceIdentifier);
         if (resourceEntity != null) {
+            this.cache.resetForResource(zone.getName(), resourceIdentifier);
             this.resourceRepository.delete(resourceEntity.getId());
             deleted = true;
             if (LOGGER.isDebugEnabled()) {
