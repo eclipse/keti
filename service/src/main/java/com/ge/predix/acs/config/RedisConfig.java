@@ -24,9 +24,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * DataSourceConfig used for all cloud profiles.
@@ -43,11 +45,33 @@ public class RedisConfig {
     private String redisHost;
     @Value("${REDIS_PORT:6379}")
     private int redisPort;
+    @Value("${REDIS_MIN_ACTIVE:0}")
+    private int minActive;
+    @Value("${REDIS_MAX_ACTIVE:100}")
+    private int maxActive;
+    @Value("${REDIS_MAX_WAIT_TIME:2000}")
+    private int maxWaitTime;
+    @Value("${REDIS_SOCKET_TIMEOUT:3000}")
+    private int soTimeout;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        LettuceConnectionFactory connFactory = new LettuceConnectionFactory(this.redisHost, this.redisPort);
         LOGGER.info("Successfully created Redis connection factory.");
+        return createJedisConnectionFactory();
+    }
+
+    public RedisConnectionFactory createJedisConnectionFactory() {
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxTotal(this.maxActive);
+        poolConfig.setMinIdle(this.minActive);
+        poolConfig.setMaxWaitMillis(this.maxWaitTime);
+        poolConfig.setTestOnBorrow(false);
+
+        JedisConnectionFactory connFactory = new JedisConnectionFactory(poolConfig);
+        connFactory.setUsePool(false);
+        connFactory.setTimeout(this.soTimeout);
+        connFactory.setHostName(this.redisHost);
+        connFactory.setPort(this.redisPort);
         return connFactory;
     }
 

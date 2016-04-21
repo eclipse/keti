@@ -39,7 +39,7 @@ import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
-import com.ge.predix.acs.policy.evaluation.cache.DefaultPolicyEvaluationCacheCircuitBreaker;
+import com.ge.predix.acs.policy.evaluation.cache.HystrixPolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.policy.evaluation.cache.InMemoryPolicyEvaluationCache;
 import com.ge.predix.acs.service.InvalidACSRequestException;
 import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
@@ -52,7 +52,7 @@ import com.ge.predix.acs.zone.resolver.ZoneResolver;
 @Test
 @ActiveProfiles(profiles = { "h2", "public", "simple-cache" })
 @ContextConfiguration(
-        classes = { DefaultPolicyEvaluationCacheCircuitBreaker.class, InMemoryPolicyEvaluationCache.class,
+        classes = { HystrixPolicyEvaluationCacheCircuitBreaker.class, InMemoryPolicyEvaluationCache.class,
                 InMemoryDataSourceConfig.class, PolicyManagementServiceImpl.class,
                 SpringSecurityPolicyContextResolver.class, PolicySetValidatorImpl.class, GroovyConditionShell.class,
                 SpringSecurityZoneResolver.class, GroovyConditionCache.class })

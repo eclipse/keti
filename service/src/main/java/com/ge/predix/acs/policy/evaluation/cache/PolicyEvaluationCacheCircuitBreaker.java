@@ -48,4 +48,6 @@ public interface PolicyEvaluationCacheCircuitBreaker {
     void resetForSubjects(String zoneId, List<SubjectEntity> subjectEntities);
 
     void setCacheImpl(final PolicyEvaluationCache cacheImpl);
+
+    void setCachingEnabled(final boolean cachingEnabled);
 }

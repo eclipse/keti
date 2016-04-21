@@ -52,7 +52,7 @@ public class CloudRedisConfig extends AbstractCloudConfig {
     private int minActive;
     @Value("${REDIS_MAX_ACTIVE:100}")
     private int maxActive;
-    @Value("${REDIS_MAX_WAIT_TIME:30000}")
+    @Value("${REDIS_MAX_WAIT_TIME:2000}")
     private int maxWaitTime;
 
     @Value("${REDIS_SOCKET_TIMEOUT:3000}")
@@ -69,7 +69,7 @@ public class CloudRedisConfig extends AbstractCloudConfig {
         } else {
             connFactory = createSpringCloudConnectionFactory();
         }
-        LOGGER.info("Successfully created Redis connection factory.");
+        LOGGER.info("Successfully created cloud Redis connection factory.");
         return connFactory;
     }
 

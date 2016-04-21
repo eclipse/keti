@@ -20,6 +20,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,13 +32,18 @@ import com.ge.predix.acs.rest.PolicyEvaluationResult;
 @ActiveProfiles(profiles = { "simple-cache" })
 @ContextConfiguration(
         classes = { DefaultPolicyEvaluationCacheCircuitBreakerTest.Config.class,
-                DefaultPolicyEvaluationCacheCircuitBreaker.class })
+                HystrixPolicyEvaluationCacheCircuitBreaker.class })
 public class DefaultPolicyEvaluationCacheCircuitBreakerTest extends AbstractTestNGSpringContextTests {
     @Autowired
     private PolicyEvaluationCacheCircuitBreaker policyEvaluationCacheCircuitBreaker;
     @Autowired
     private InMemoryPolicyEvaluationCache cache;
     private final MockBrokenPolicyEvaluationCache brokenCache = new MockBrokenPolicyEvaluationCache();
+
+    @BeforeClass
+    public void setup() {
+        this.policyEvaluationCacheCircuitBreaker.setCachingEnabled(true);
+    }
 
     @BeforeMethod
     public void setupMethod() {
