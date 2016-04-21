@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
 import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.policy.evaluation.cache.DefaultPolicyEvaluationCacheCircuitBreaker;
+import com.ge.predix.acs.policy.evaluation.cache.HystrixPolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.policy.evaluation.cache.InMemoryPolicyEvaluationCache;
 import com.ge.predix.acs.request.context.AcsRequestContextHolder;
 import com.ge.predix.acs.rest.BaseResource;
@@ -48,7 +48,7 @@ import com.ge.predix.acs.zone.management.ZoneServiceImpl;
 import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
 
 @ContextConfiguration(
-        classes = { AcsRequestContextHolder.class, DefaultPolicyEvaluationCacheCircuitBreaker.class,
+        classes = { AcsRequestContextHolder.class, HystrixPolicyEvaluationCacheCircuitBreaker.class,
                 InMemoryDataSourceConfig.class, InMemoryPolicyEvaluationCache.class,
                 PrivilegeManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
                 SpringSecurityZoneResolver.class, ZoneServiceImpl.class })
