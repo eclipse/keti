@@ -45,7 +45,7 @@
         level="ERROR" />
     <logger name="springfox.documentation" level="ERROR" />
 
-    <logger name="com.ge.predix.acs" level="DEBUG" additivity="false">
+    <logger name="com.ge.predix.acs" level="INFO" additivity="false">
         <appender-ref ref="acsAppender" />
     </logger>
 
