@@ -45,7 +45,9 @@
         level="ERROR" />
     <logger name="springfox.documentation" level="ERROR" />
 
-    <logger name="com.ge.predix.acs" level="DEBUG" additivity="false">
+    <!-- Note: There is severe performance penalty for turning on DEBUG messages during policy evaluation. Limit
+         use for development. -->
+    <logger name="com.ge.predix.acs" level="INFO" additivity="false">
         <appender-ref ref="acsAppender" />
     </logger>
 

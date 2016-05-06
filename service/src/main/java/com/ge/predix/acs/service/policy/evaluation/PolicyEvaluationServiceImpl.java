@@ -106,13 +106,6 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
         List<PolicySet> allPolicySets = this.policyService.getAllPolicySets();
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format(
-                    "Policy Evaluation in the context of: " + "resourceUri=[%s], subjectIdentifier=[%s], action=[%s],"
-                            + " number of policy sets found=[%s]",
-                    resourceURI, subjectIdentifier, action, allPolicySets.size()));
-        }
-
         if (allPolicySets.isEmpty()) {
             return new PolicyEvaluationResult(Effect.NOT_APPLICABLE);
         } else if (allPolicySets.size() > 1) {
@@ -121,12 +114,18 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
             throw new IllegalArgumentException(
                     "Request to create policy set rejected. Only one policy set is supported.");
         } else {
-
             Set<Attribute> subjectAttributes = resolveSubjectAttributes(subjectIdentifier, attributes);
-
+            
             // NOTE: When multiple policy sets are supported, this code needs to
             // delegate to a "InterPolicySetDecisionAggregator"
-            return this.evalPolicySet(allPolicySets.get(0), subjectIdentifier, resourceURI, action, subjectAttributes);
+            PolicyEvaluationResult result = 
+                    evalPolicySet(allPolicySets.get(0), subjectIdentifier, resourceURI, action, subjectAttributes);
+
+            LOGGER.info(String.format(
+                    "Processed Policy Evaluation for: " + "resourceUri=[%s], subjectIdentifier=[%s], action=[%s],"
+                            + " result=[%s]", resourceURI, subjectIdentifier, action, result.getEffect()));
+            
+            return result;
         }
     }
 
@@ -200,7 +199,7 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
                 if (conditionEvaluationResult) {
                     effect = policy.getEffect();
                     LOGGER.info(String.format(
-                            "Policy Evaluation decision : " + "policy set name=[%s], policy name=[%s], effect=[%s]",
+                            "Condition Evaluation success: policy set name=[%s], policy name=[%s], effect=[%s]",
                             policySet.getName(), policy.getName(), policy.getEffect()));
                     break;
                 }
