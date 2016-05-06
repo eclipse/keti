@@ -123,7 +123,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("No policy set found for policySetName = %s,  zone = %s, inserting now .",
+            LOGGER.debug(String.format("No policy set found for policySetName = %s,  zone = %s.",
                     policySetName, zone.toString()));
         }
 
@@ -146,10 +146,8 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
         PolicySetEntity policySetEntity = this.policySetRepository.getByZoneAndPolicySetId(zone, policySetID);
         if (policySetEntity != null) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(String.format("Found an existing policy set policySetName=%s, zone=%s, deleting now.",
+            LOGGER.info(String.format("Found an existing policy set policySetName=%s, zone=%s, deleting now.",
                         policySetID, zone.getName()));
-            }
             // Since we only support one policy set and we don't want to load that policy set when checking for a
             // cached invalidation, we use a hard-coded value for the policy set key.
             this.cache.resetForPolicySet(zone.getName(), "default");
@@ -189,7 +187,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         try {
             this.policySetValidator.validatePolicySet(policySet);
         } catch (PolicySetValidationException e) {
-            LOGGER.debug(String.format("Policy Evaluation Failed policySetName = %s,  " + "zone = %s .",
+            LOGGER.debug(String.format("Policy Validation Failed policySetName = %s,  " + "zone = %s .",
                     policySet.getName(), zone.toString()));
             throw new PolicyManagementException(e.getMessage(), e);
         }

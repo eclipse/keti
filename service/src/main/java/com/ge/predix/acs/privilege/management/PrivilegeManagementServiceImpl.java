@@ -213,10 +213,8 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
             this.cache.resetForResource(zone.getName(), resourceIdentifier);
             this.resourceRepository.delete(resourceEntity.getId());
             deleted = true;
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(String.format("Deleted resource with resourceId = %s, zone = %s.", resourceIdentifier,
+            LOGGER.info(String.format("Deleted resource with resourceId = %s, zone = %s.", resourceIdentifier,
                         zone.toString()));
-            }
         }
         return deleted;
     }
@@ -344,10 +342,8 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
             this.cache.resetForSubject(zone.getName(), subjectIdentifier);
             this.subjectRepository.delete(subjectEntity.getId());
             deleted = true;
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(String.format("Deleted subject with subjectIdentifier=%s, zone = %s.", subjectIdentifier,
+            LOGGER.info(String.format("Deleted subject with subjectIdentifier=%s, zone = %s.", subjectIdentifier,
                         zone.toString()));
-            }
         }
         return deleted;
     }
