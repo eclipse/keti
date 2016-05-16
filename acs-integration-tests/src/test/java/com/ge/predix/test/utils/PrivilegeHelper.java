@@ -66,7 +66,7 @@ public class PrivilegeHelper {
 
     public BaseSubject putSubject(final OAuth2RestTemplate acsTemplate, final BaseSubject subject,
             final String endpoint, final HttpHeaders headers, final Attribute... attributes)
-                    throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
 
         subject.setAttributes(new HashSet<>(Arrays.asList(attributes)));
         URI subjectUri = URI
@@ -263,5 +263,36 @@ public class PrivilegeHelper {
         site.setName(DEFAULT_ORG_ATTRIBUTE_NAME);
         site.setValue(ALTERNATE_ORG_ATTRIBUTE_VALUE);
         return site;
+    }
+
+    public void deleteSubjects(final RestTemplate restTemplate, final String acsUrl, final HttpHeaders headers)
+            throws Exception {
+        BaseSubject[] subjects = listSubjects(restTemplate, acsUrl, headers);
+        for (BaseSubject subject : subjects) {
+            deleteSubject(restTemplate, acsUrl, subject.getSubjectIdentifier(), headers);
+        }
+    }
+
+    public BaseSubject[] listSubjects(final RestTemplate restTemplate, final String acsUrl, final HttpHeaders headers) {
+        URI uri = URI.create(acsUrl + ACS_SUBJECT_API_PATH);
+        ResponseEntity<BaseSubject[]> response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(headers),
+                BaseSubject[].class);
+        return response.getBody();
+    }
+
+    public void deleteResources(final RestTemplate restTemplate, final String acsUrl, final HttpHeaders headers)
+            throws Exception {
+        BaseResource[] resources = listResources(restTemplate, acsUrl, headers);
+        for (BaseResource resource : resources) {
+            deleteResource(restTemplate, acsUrl, resource.getResourceIdentifier(), headers);
+        }
+    }
+
+    public BaseResource[] listResources(final RestTemplate restTemplate, final String acsUrl,
+            final HttpHeaders headers) {
+        URI uri = URI.create(acsUrl + ACS_RESOURCE_API_PATH);
+        ResponseEntity<BaseResource[]> response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(headers),
+                BaseResource[].class);
+        return response.getBody();
     }
 }

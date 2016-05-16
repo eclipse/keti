@@ -18,10 +18,12 @@ package com.ge.predix.acceptance.test.zone.admin;
 
 import java.io.IOException;
 
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.ge.predix.test.TestConfig;
 
 import cucumber.api.CucumberOptions;
 import cucumber.api.testng.AbstractTestNGCucumberTests;
@@ -30,6 +32,11 @@ import cucumber.api.testng.AbstractTestNGCucumberTests;
 @CucumberOptions(tags = "~@ignore")
 public class ZoneEnforcementCucumberTest extends AbstractTestNGCucumberTests {
     // Used as the entry point for ZoneCreation StepsDefinitions
+
+    @BeforeClass
+    public void setup() {
+        TestConfig.setupForEclipse(); // Starts ACS when running the test in eclipse.
+    }
 
     @Override
     public void run_cukes() throws JsonParseException, JsonMappingException, IOException {

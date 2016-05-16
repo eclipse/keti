@@ -35,6 +35,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -47,6 +48,7 @@ import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.acs.utils.JsonUtils;
+import com.ge.predix.test.TestConfig;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
@@ -93,6 +95,8 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
 
     @BeforeClass
     public void setup() throws JsonParseException, JsonMappingException, IOException {
+        TestConfig.setupForEclipse(); // Starts ACS when running the test in eclipse.
+
         this.acsZone1Name = this.zoneHelper.getZone1Name();
         this.acsZone1Headers.add("Predix-Zone-Id", this.acsZone1Name);
         if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
@@ -638,5 +642,12 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
                         testPolicyName, this.acsZone1Headers);
             }
         }
+    }
+
+    @AfterClass
+    public void cleanup() throws Exception {
+        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers);
+        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers);
+        this.policyHelper.deletePolicySets(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers);
     }
 }

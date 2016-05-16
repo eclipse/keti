@@ -31,8 +31,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <subject.version>${project.version}</subject.version>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
         <nurego-java.version>1.0.10</nurego-java.version>
         <maven.acs.artifact>com.ge.predix:acs-service:${subject.version}:jar</maven.acs.artifact>
         <cf.org>predix-acs</cf.org>
@@ -115,7 +113,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.1.1</version>
+            <version>6.9.10</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -126,7 +124,7 @@
         <dependency>
             <groupId>org.springframework.security.oauth</groupId>
             <artifactId>spring-security-oauth2</artifactId>
-            <version>2.0.3.RELEASE</version>
+            <version>2.0.3.RELEASE</version><!--$NO-MVN-MAN-VER$-->
             <!-- These transitive dependencies are incompatible with spring 
                 core dependencies pulled in by spring boot -->
             <exclusions>
@@ -345,6 +343,164 @@
         </profile>
 
         <profile>
+            <id>cloud-titan</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.18.1</version>
+                        <configuration>
+                            <forkCount>0</forkCount>
+                            <parallel>false</parallel>
+                            <systemPropertyVariables>
+                                <ACS_CF_DOMAIN>${acs.cf.domain}</ACS_CF_DOMAIN>
+                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
+                                <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
+                                <ACS_URL>https://${acs.appname}.${cf.base.domain}</ACS_URL>
+                                <CF_BASE_DOMAIN>${cf.base.domain}</CF_BASE_DOMAIN>
+                                <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
+                                <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
+                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
+                                <!-- ACS zones (a.k.a tenancies) used for the tests -->
+                                <ZONE1_NAME>${acs.zone.subdomain}</ZONE1_NAME>
+                                <ZONE1_UAA_URL>${ZONE1_UAA_URL}</ZONE1_UAA_URL>
+                                <ZONE2_NAME>${acs.zone.subdomain}2</ZONE2_NAME>
+                                <ZONE2_UAA_URL>${ZONE2_UAA_URL}</ZONE2_UAA_URL>
+                                <ZONE3_NAME>${acs.zone.subdomain}3</ZONE3_NAME>
+                                <!-- OAuth clients and users used for the tests -->
+                                <ACS_CLIENT_SECRET>${ACS_CLIENT_SECRET}</ACS_CLIENT_SECRET>
+                                <ACS_TEST_USER_PWD>${ACS_TEST_USER_PWD}</ACS_TEST_USER_PWD>
+                                <APM_CLIENT_SECRET>${APM_CLIENT_SECRET}</APM_CLIENT_SECRET>
+                                <ROCKET_CLIENT_SECRET>${ROCKET_CLIENT_SECRET}</ROCKET_CLIENT_SECRET>
+                                <READ_ONLY_USER_PASSWORD>${READ_ONLY_USER_PASSWORD}</READ_ONLY_USER_PASSWORD>
+                                <NO_READ_ONLY_USER_PASSWORD>${NO_READ_ONLY_USER_PASSWORD}</NO_READ_ONLY_USER_PASSWORD>
+                                <ZAC_CLIENT_SECRET>${ZAC_CLIENT_SECRET}</ZAC_CLIENT_SECRET>
+                                <!-- proxy settings -->
+                                <https.proxyHost>${HTTPS_PROXY_HOST}</https.proxyHost>
+                                <https.proxyPort>${HTTPS_PROXY_PORT}</https.proxyPort>
+                            </systemPropertyVariables>
+                            <excludes>
+                                <exclude>**/ACSPerformanceIT.java</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*IT.java</include>
+                                <include>**/*Cucumber*.java</include>
+                            </includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>integ-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.cloudfoundry</groupId>
+                        <artifactId>cf-maven-plugin</artifactId>
+                        <version>1.1.2</version>
+                        <configuration>
+                            <server>ice</server>
+                            <target>${CF_LOGIN_URL}</target>
+                            <healthCheckTimeout>120</healthCheckTimeout>
+                            <appStartupTimeout>120</appStartupTimeout>
+                            <org>${cf.org}</org>
+                            <space>${cf.space}</space>
+                            <appname>${acs.appname}</appname>
+                            <memory>1024</memory>
+                            <env>
+                                <ACS_BASE_DOMAIN>${acs.cf.domain}.${cf.base.domain}</ACS_BASE_DOMAIN>
+                                <ACS_DB>${acs.db}</ACS_DB>
+                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
+                                <ACS_REDIS>${acs.redis}</ACS_REDIS>
+                                <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
+                                <NUREGO_API_KEY>${NUREGO_API_KEY}</NUREGO_API_KEY>
+                                <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
+                                <NUREGO_BATCH_MAX_MAP_SIZE>1</NUREGO_BATCH_MAX_MAP_SIZE>
+                                <SPRING_PROFILES_ACTIVE>integration,predix,cloud-redis,titan</SPRING_PROFILES_ACTIVE>
+                                <TITAN_ENABLE_CASSANDRA>${TITAN_ENABLE_CASSANDRA}</TITAN_ENABLE_CASSANDRA>
+                                <TITAN_STORAGE_CASSANDRA_KEYSPACE>${TITAN_STORAGE_CASSANDRA_KEYSPACE}</TITAN_STORAGE_CASSANDRA_KEYSPACE>
+                                <TITAN_STORAGE_HOSTNAME>${TITAN_STORAGE_HOSTNAME}</TITAN_STORAGE_HOSTNAME>
+                                <TITAN_STORAGE_PORT>${TITAN_STORAGE_PORT}</TITAN_STORAGE_PORT>
+                                <TITAN_STORAGE_USERNAME>${TITAN_STORAGE_USERNAME}</TITAN_STORAGE_USERNAME>
+                                <TITAN_STORAGE_PASSWORD>${TITAN_STORAGE_PASSWORD}</TITAN_STORAGE_PASSWORD>
+                                <UAA_CHECK_HEALTH_URL>${UAA_CHECK_HEALTH_URL}</UAA_CHECK_HEALTH_URL>
+                                <ZAC_CLIENT_ID>${ZAC_CLIENT_ID}</ZAC_CLIENT_ID>
+                                <ZAC_CLIENT_SECRET>${ZAC_CLIENT_SECRET}</ZAC_CLIENT_SECRET>
+                                <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
+                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
+                                <ENABLED_REDIS_HEALTH_CHECK>true</ENABLED_REDIS_HEALTH_CHECK>
+                            </env>
+                            <services>
+                                <service>
+                                    <name>${acs.db}</name>
+                                    <label>stc-postgresql-1</label>
+                                    <plan>free</plan>
+                                </service>
+                                <service>
+                                    <name>${acs.redis}</name>
+                                    <label>p-redis</label>
+                                    <plan>shared-vm</plan>
+                                </service>
+                            </services>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>push</id>
+                                <configuration>
+                                    <path>${local.acs.artifact}</path>
+                                    <artifact>${maven.acs.artifact}</artifact>
+                                    <urls>
+                                        <url>${acs.zone.subdomain}3.${acs.cf.domain}.${cf.base.domain}</url>
+                                        <url>${acs.zone.subdomain}2.${acs.cf.domain}.${cf.base.domain}</url>
+                                        <url>${acs.zone.subdomain}.${acs.cf.domain}.${cf.base.domain}</url>
+                                        <url>${acs.appname}.${cf.base.domain}</url>
+                                    </urls>
+                                </configuration>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>push</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>delete-services</id>
+                                <configuration>
+                                    <services>
+                                        <service>
+                                            <name>${acs.db}</name>
+                                        </service>
+                                        <service>
+                                            <name>${acs.redis}</name>
+                                        </service>
+                                    </services>
+                                </configuration>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>delete-services</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>delete</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>delete</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
             <id>local</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -463,6 +619,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <environmentVariables>
+                                <ENABLE_TITAN>true</ENABLE_TITAN>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
                                 <management.health.redis.enabled>false</management.health.redis.enabled>
                                 <uaaCheckHealthUrl>http://localhost:8080/uaa/healthz</uaaCheckHealthUrl>

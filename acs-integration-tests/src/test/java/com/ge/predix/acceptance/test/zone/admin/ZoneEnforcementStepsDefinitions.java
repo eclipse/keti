@@ -343,5 +343,4 @@ public class ZoneEnforcementStepsDefinitions {
         this.zoneHelper.deleteZone(this.acsAdminRestTemplate, this.zone1Name, this.registerWithZac);
         this.zoneHelper.deleteZone(this.acsAdminRestTemplate, this.zone2Name, this.registerWithZac);
     }
-
 }

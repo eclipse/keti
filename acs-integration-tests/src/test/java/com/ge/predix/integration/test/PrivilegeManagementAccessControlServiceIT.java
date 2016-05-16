@@ -47,6 +47,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -56,6 +57,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
+import com.ge.predix.test.TestConfig;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
 import com.ge.predix.test.utils.PrivilegeHelper;
 import com.ge.predix.test.utils.UaaTestUtil;
@@ -103,6 +105,8 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
 
     @BeforeClass
     public void setup() throws JsonParseException, JsonMappingException, IOException {
+        TestConfig.setupForEclipse(); // Starts ACS when running the test in eclipse.
+
         this.zone1Url = this.zoneHelper.getZone1Url();
         if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
             setupPublicACS();
@@ -141,6 +145,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
         Assert.fail("Expected unprocessable entity http client error.");
     }
 
+    @Test
     public void testBatchSubjectsDataConstraintViolationSubjectIdentifier() {
         List<BaseSubject> subjects = new ArrayList<BaseSubject>();
         subjects.add(this.privilegeHelper.createSubject("marissa"));
@@ -256,6 +261,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
         this.acsAdminRestTemplate.delete(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa");
     }
 
+    @Test
     public void testBatchResourcesDataConstraintViolationResourceIdentifier() {
         List<BaseResource> resources = new ArrayList<BaseResource>();
         resources.add(this.privilegeHelper.createResource("dupResourceIdentifier"));
@@ -493,5 +499,11 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public Object[][] getAcsEndpoint() {
         Object[][] data = new Object[][] { { this.zone1Url } };
         return data;
+    }
+
+    @AfterClass
+    public void cleanup() throws Exception {
+        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate, this.zone1Url, null);
+        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.zone1Url, null);
     }
 }
