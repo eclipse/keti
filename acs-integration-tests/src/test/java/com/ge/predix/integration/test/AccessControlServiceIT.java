@@ -26,7 +26,7 @@ import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -35,6 +35,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -48,6 +49,7 @@ import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
+import com.ge.predix.test.TestConfig;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
 import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;
@@ -80,7 +82,7 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     private ZacTestUtil zacTestUtil;
 
     @Autowired
-    Environment env;
+    ConfigurableEnvironment env;
 
     @Value("${ZONE1_NAME:testzone1}")
     private String acsZone1Name;
@@ -101,6 +103,8 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
 
     @BeforeClass
     public void setup() throws JsonParseException, JsonMappingException, IOException {
+        TestConfig.setupForEclipse(); // Starts ACS when running the test in eclipse.
+
         if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
             setupPublicACS();
         } else {
@@ -123,7 +127,7 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         this.acsZone1Url = this.zoneHelper.getZone1Url();
         UaaTestUtil uaaTestUtil = new UaaTestUtil(this.acsRestTemplateFactory.getOAuth2RestTemplateForUaaAdmin(),
                 this.uaaUrl);
-        uaaTestUtil.setup(Arrays.asList(new String[] {this.acsZone1Name, this.acsZone2Name, this.acsZone3Name}));
+        uaaTestUtil.setup(Arrays.asList(new String[] { this.acsZone1Name, this.acsZone2Name, this.acsZone3Name }));
 
         this.acsAdminRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForAcsAdmin();
         this.acsReadOnlyRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForReadOnlyClient();
@@ -470,4 +474,10 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         return data;
     }
 
+    @AfterClass
+    public void cleanup() throws Exception {
+        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate, this.acsZone1Url, null);
+        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.acsZone1Url, null);
+        this.policyHelper.deletePolicySets(this.acsAdminRestTemplate, this.acsZone1Url, null);
+    }
 }

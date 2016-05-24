@@ -43,8 +43,8 @@
         <!-- Maven JAVA Version -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <maven-bundle-plugin.version>2.3.7</maven-bundle-plugin.version>
         <archaius.version>0.7.1</archaius.version>
         <hystrix.version>1.5.2</hystrix.version>
@@ -66,6 +66,7 @@
         <flyway.version>3.0</flyway.version>
         <spring-security-oauth2.version>2.0.3.RELEASE</spring-security-oauth2.version>
         <spring-security-jwt.version>1.0.2.RELEASE</spring-security-jwt.version>
+        <titandb.version>1.0.0</titandb.version>
         <openjpa.version>2.4.0</openjpa.version>
         <postgres.version>9.3-1103-jdbc4</postgres.version>
         <uaa-token-lib.version>3.1.1</uaa-token-lib.version>

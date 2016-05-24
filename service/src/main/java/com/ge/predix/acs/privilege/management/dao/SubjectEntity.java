@@ -36,7 +36,7 @@ import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 @Table(
         name = "subject",
         uniqueConstraints = { @UniqueConstraint(columnNames = { "authorization_zone_id", "subject_identifier" }) })
-public class SubjectEntity {
+public class SubjectEntity implements ZonableEntity {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,12 +70,20 @@ public class SubjectEntity {
         this.subjectIdentifier = subjectIdentifier;
     }
 
-    public long getId() {
+    public Long getId() {
         return this.id;
     }
 
-    public void setId(final long id) {
+    public void setId(final Long id) {
         this.id = id;
+    }
+
+    public ZoneEntity getZone() {
+        return zone;
+    }
+
+    public void setZone(final ZoneEntity zone) {
+        this.zone = zone;
     }
 
     public String getSubjectIdentifier() {

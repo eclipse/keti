@@ -36,7 +36,7 @@ import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 @Table(
         name = "resource",
         uniqueConstraints = { @UniqueConstraint(columnNames = { "authorization_zone_id", "resource_identifier" }) })
-public class ResourceEntity {
+public class ResourceEntity implements ZonableEntity {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,12 +69,20 @@ public class ResourceEntity {
     public ResourceEntity() {
     }
 
-    public long getId() {
+    public Long getId() {
         return this.id;
     }
 
-    public void setId(final long id) {
+    public void setId(final Long id) {
         this.id = id;
+    }
+
+    public ZoneEntity getZone() {
+        return this.zone;
+    }
+
+    public void setZone(final ZoneEntity zone) {
+        this.zone = zone;
     }
 
     public String getResourceIdentifier() {

@@ -295,5 +295,4 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
                 this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION, DEFAULT_SUBJECT_ID,
                         DEFAULT_RESOURCE_IDENTIFIER, null));
     }
-
 }

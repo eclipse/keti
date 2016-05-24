@@ -22,6 +22,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,9 +52,11 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     private PolicyEvaluationCacheCircuitBreaker cache;
 
     @Autowired
+    @Qualifier("resourceRepository")
     private ResourceRepository resourceRepository;
 
     @Autowired
+    @Qualifier("subjectRepository")
     private SubjectRepository subjectRepository;
 
     @Autowired
