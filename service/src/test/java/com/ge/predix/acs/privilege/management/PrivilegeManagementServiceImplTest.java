@@ -116,6 +116,11 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
     public void testCreateResource() {
         doCreateResourceAndAssert("/asset/sanrafael");
     }
+    
+    @Test(expectedExceptions = PrivilegeManagementException.class)
+    public void testCreateNullResources() {
+        this.service.upsertResource(null);
+    }
 
     // @Test
     // public void testCreateResourceGetWithDifferentIssuer()
@@ -205,6 +210,11 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
 
     }
 
+    @Test(expectedExceptions = PrivilegeManagementException.class)
+    public void testCreateNullSubject() {
+        this.service.upsertSubject(null);
+    }
+    
     // TODO enable it back when the zone resolver is fully implemented
     @Test(expectedExceptions = SecurityException.class, enabled = false)
     public void testCreateSubjectAndGetWithDifferentClientId() {

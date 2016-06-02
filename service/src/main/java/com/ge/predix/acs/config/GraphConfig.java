@@ -1,5 +1,7 @@
 package com.ge.predix.acs.config;
 
+import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.PARENT_EDGE_LABEL;
+import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.SCOPE_PROPERTY_KEY;
 import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.ZONE_ID_KEY;
 import static com.ge.predix.acs.privilege.management.dao.GraphResourceRepository.RESOURCE_ID_KEY;
 import static com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository.SUBJECT_ID_KEY;
@@ -9,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.slf4j.Logger;
@@ -19,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import com.thinkaurelius.titan.core.EdgeLabel;
 import com.thinkaurelius.titan.core.PropertyKey;
 import com.thinkaurelius.titan.core.TitanFactory;
 import com.thinkaurelius.titan.core.TitanFactory.Builder;
@@ -34,6 +38,7 @@ import com.thinkaurelius.titan.graphdb.database.management.ManagementSystem;
 public class GraphConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphConfig.class);
 
+    public static final String BY_SCOPE_INDEX_NAME = "byScopeIndex";
     public static final String BY_SUBJECT_UNIQUE_INDEX_NAME = "bySubjectUnique";
     public static final String BY_RESOURCE_UNIQUE_INDEX_NAME = "byResourceUnique";
     public static final String BY_ZONE_INDEX_NAME = "byZone";
@@ -92,6 +97,7 @@ public class GraphConfig {
         createTwoKeyUniqueCompositeIndex(newGraph, BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME, ZONE_ID_KEY,
                 RESOURCE_ID_KEY);
         createTwoKeyUniqueCompositeIndex(newGraph, BY_ZONE_AND_SUBJECT_UNIQUE_INDEX_NAME, ZONE_ID_KEY, SUBJECT_ID_KEY);
+        createEdgeIndex(newGraph, BY_SCOPE_INDEX_NAME, PARENT_EDGE_LABEL, SCOPE_PROPERTY_KEY);
 
         LOGGER.info("Initialized titan db.");
         return newGraph;
@@ -145,6 +151,24 @@ public class GraphConfig {
         mgmt.commit();
         // Wait for the index to become available
         ManagementSystem.awaitGraphIndexStatus((TitanGraph) newGraph, indexName).status(SchemaStatus.ENABLED).call();
+    }
+
+    public static void createEdgeIndex(final Graph newGraph, final String indexName, final String label,
+            final String indexKey) throws InterruptedException {
+        newGraph.tx().rollback(); // Never create new indexes while a transaction is active
+        TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
+        if (!mgmt.containsGraphIndex(indexName)) {
+            EdgeLabel edgeLabel = mgmt.getOrCreateEdgeLabel(label);
+            PropertyKey indexPropertyKey = mgmt.getPropertyKey(indexKey);
+            if (null == indexPropertyKey) {
+                indexPropertyKey = mgmt.makePropertyKey(indexKey).dataType(String.class).make();
+            }
+            mgmt.buildEdgeIndex(edgeLabel, indexName, Direction.OUT, indexPropertyKey);
+        }
+        mgmt.commit();
+        // Wait for the index to become available
+        ManagementSystem.awaitRelationIndexStatus((TitanGraph) newGraph, indexName, label).status(SchemaStatus.ENABLED)
+                .call();
     }
 
     public static void reIndex(final Graph newGraph, final String indexName)

@@ -16,6 +16,9 @@
 
 package com.ge.predix.acs.privilege.management.dao;
 
+import java.util.Collections;
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,8 +27,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import com.ge.predix.acs.model.Attribute;
+import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
 /**
@@ -55,6 +61,12 @@ public class SubjectEntity implements ZonableEntity {
     @Column(name = "attributes", columnDefinition = "CLOB NOT NULL")
     private String attributesAsJson;
 
+    @Transient
+    private Set<Attribute> attributes = Collections.emptySet();
+
+    @Transient
+    private Set<Parent> parents = Collections.emptySet();
+
     /**
      * Note about all these Id's and identifiers:
      *
@@ -70,18 +82,22 @@ public class SubjectEntity implements ZonableEntity {
         this.subjectIdentifier = subjectIdentifier;
     }
 
+    @Override
     public Long getId() {
         return this.id;
     }
 
+    @Override
     public void setId(final Long id) {
         this.id = id;
     }
 
+    @Override
     public ZoneEntity getZone() {
-        return zone;
+        return this.zone;
     }
 
+    @Override
     public void setZone(final ZoneEntity zone) {
         this.zone = zone;
     }
@@ -94,12 +110,38 @@ public class SubjectEntity implements ZonableEntity {
         this.subjectIdentifier = subjectIdentifier;
     }
 
+    @Override
     public String getAttributesAsJson() {
         return this.attributesAsJson;
     }
 
+    @Override
     public void setAttributesAsJson(final String attributesAsJson) {
         this.attributesAsJson = attributesAsJson;
+    }
+
+    @Override
+    public Set<Attribute> getAttributes() {
+        return this.attributes;
+    }
+
+    @Override
+    public void setAttributes(final Set<Attribute> attributes) {
+        this.attributes = attributes;
+    }
+
+    @Override
+    public Set<Parent> getParents() {
+        return this.parents;
+    }
+
+    @Override
+    public void setParents(final Set<Parent> parents) {
+        this.parents = parents;
+    }
+
+    public void setId(final long id) {
+        this.id = id;
     }
 
     @Override
@@ -107,5 +149,4 @@ public class SubjectEntity implements ZonableEntity {
         return "SubjectEntity [id=" + this.id + ", zone=" + this.zone + ", subjectIdentifier=" + this.subjectIdentifier
                 + ", attributesAsJson=" + this.attributesAsJson + "]";
     }
-
 }

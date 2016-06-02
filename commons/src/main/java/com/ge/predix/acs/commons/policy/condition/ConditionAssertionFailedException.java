@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.ge.predix.acs.commons.policy.condition;
 
-public class ConditionAssertionFailedException extends Exception {
+public class ConditionAssertionFailedException extends RuntimeException {
 
     /**
      * Generated serialization id.

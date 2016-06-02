@@ -16,7 +16,7 @@
 
 package com.ge.predix.acs.service.policy.matcher;
 
-import java.util.List;
+import java.util.Set;
 
 import com.ge.predix.acs.model.Attribute;
 
@@ -28,7 +28,8 @@ public class PolicyMatchCandidate {
     private String action;
     private String resourceURI;
     private String subjectIdentifier;
-    private List<Attribute> subjectAttributes;
+    private Set<Attribute> supplementalResourceAttributes;
+    private Set<Attribute> supplementalSubjectAttributes;
 
     /**
      * Creates a new criteria object.
@@ -41,16 +42,16 @@ public class PolicyMatchCandidate {
      *            attributes for the resource
      * @param subjectIdentifier
      *            identifier for the subject
-     * @param subjectAttributes
+     * @param supplementalSubjectAttributes
      *            attributes for the subject
      */
     public PolicyMatchCandidate(final String action, final String resourceURI, final String subjectIdentifier,
-            final List<Attribute> subjectAttributes) {
-        super();
+            final Set<Attribute> supplementalResourceAttributes, final Set<Attribute> supplementalSubjectAttributes) {
         this.action = action;
         this.resourceURI = resourceURI;
         this.subjectIdentifier = subjectIdentifier;
-        this.subjectAttributes = subjectAttributes;
+        this.supplementalResourceAttributes = supplementalResourceAttributes;
+        this.supplementalSubjectAttributes = supplementalSubjectAttributes;
     }
 
     /**
@@ -58,7 +59,7 @@ public class PolicyMatchCandidate {
      *
      */
     public PolicyMatchCandidate() {
-        super();
+        // Default constructor.
     }
 
     /**
@@ -91,19 +92,20 @@ public class PolicyMatchCandidate {
         this.resourceURI = resourceURI;
     }
 
-    /**
-     * @return the subjectAttributes
-     */
-    public List<Attribute> getSubjectAttributes() {
-        return this.subjectAttributes;
+    public Set<Attribute> getSupplementalResourceAttributes() {
+        return this.supplementalResourceAttributes;
     }
 
-    /**
-     * @param subjectAttributes
-     *            the subjectAttributes to set
-     */
-    public void setSubjectAttributes(final List<Attribute> subjectAttributes) {
-        this.subjectAttributes = subjectAttributes;
+    public void setSupplementalResourceAttributes(final Set<Attribute> supplementalResourceAttributes) {
+        this.supplementalResourceAttributes = supplementalResourceAttributes;
+    }
+
+    public Set<Attribute> getSupplementalSubjectAttributes() {
+        return this.supplementalSubjectAttributes;
+    }
+
+    public void setSupplementalSubjectAttributes(final Set<Attribute> supplementalSubjectAttributes) {
+        this.supplementalSubjectAttributes = supplementalSubjectAttributes;
     }
 
     /**
@@ -122,5 +124,4 @@ public class PolicyMatchCandidate {
     public void setSubjectIdentifier(final String subjectIdentifier) {
         this.subjectIdentifier = subjectIdentifier;
     }
-
 }

@@ -17,6 +17,7 @@ package com.ge.predix.acs.service.policy.evaluation;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,19 +34,25 @@ public class ResourceAttributeResolver {
 
     public static final String ATTRIBUTE_URI_TEMPLATE_VARIABLE = "attribute_uri";
 
-    private final PrivilegeManagementService privilegeService;
-    private final UriTemplateVariableResolver uriTemplateVariableResolver = new UriTemplateVariableResolver();
-    private final String requestResourceUri;
     private final Map<String, Set<Attribute>> resourceAttributeMap = new HashMap<>();
+    private final PrivilegeManagementService privilegeService;
+    private final Set<Attribute> supplementalResourceAttributes;
+    private final String requestResourceUri;
+    private final UriTemplateVariableResolver uriTemplateVariableResolver = new UriTemplateVariableResolver();
 
     /**
      * @param requestResourceUri
      *            URI of the resource from the policy evaluation request
      */
-    public ResourceAttributeResolver(final PrivilegeManagementService privilegeService,
-            final String requestResourceUri) {
+    public ResourceAttributeResolver(final PrivilegeManagementService privilegeService, final String requestResourceUri,
+            final Set<Attribute> supplementalResourceAttributes) {
         this.privilegeService = privilegeService;
         this.requestResourceUri = requestResourceUri;
+        if (null == supplementalResourceAttributes) {
+            this.supplementalResourceAttributes = Collections.emptySet();
+        } else {
+            this.supplementalResourceAttributes = supplementalResourceAttributes;
+        }
     }
 
     public ResourceAttributeResolverResult getResult(final Policy policy) {
@@ -59,6 +66,7 @@ public class ResourceAttributeResolver {
         resourceAttributes = this.resourceAttributeMap.get(resovledResourceUri);
         if (null == resourceAttributes) {
             resourceAttributes = getResourceAttributes(resovledResourceUri);
+            resourceAttributes.addAll(this.supplementalResourceAttributes);
             this.resourceAttributeMap.put(resovledResourceUri, resourceAttributes);
         }
         return new ResourceAttributeResolverResult(resourceAttributes, resovledResourceUri, uriTemplateExists);
@@ -69,13 +77,10 @@ public class ResourceAttributeResolver {
     }
 
     private Set<Attribute> getResourceAttributes(final String resovledResourceUri) {
-        Set<Attribute> resourceAttributes;
+        Set<Attribute> resourceAttributes = new HashSet<>();
         BaseResource resource = this.privilegeService.getByResourceIdentifier(resovledResourceUri);
-
-        if (resource != null) {
-            resourceAttributes = resource.getAttributes();
-        } else {
-            resourceAttributes = Collections.emptySet();
+        if (null != resource) {
+            resourceAttributes.addAll(resource.getAttributes());
         }
         return resourceAttributes;
     }

@@ -15,11 +15,13 @@
  *******************************************************************************/
 package com.ge.predix.acs.service.policy.evaluation;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,6 +41,7 @@ import com.ge.predix.acs.model.PolicySet;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementServiceImpl;
 import com.ge.predix.acs.rest.BaseResource;
+import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.acs.service.policy.admin.PolicyManagementService;
 import com.ge.predix.acs.service.policy.admin.PolicyManagementServiceImpl;
@@ -57,6 +60,7 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
 
     private final PolicyMatcherImpl policyMatcher = new PolicyMatcherImpl();
 
+    @SuppressWarnings("unchecked")
     @Test(enabled = true)
     public void testEvaluateWithURIAttributeTemplate() throws JsonParseException, JsonMappingException, IOException {
         MockitoAnnotations.initMocks(this);
@@ -76,13 +80,18 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
 
         when(this.privilegeManagementService.getByResourceIdentifier("/site/1234")).thenReturn(testResource);
 
+        BaseSubject testSubject = new BaseSubject("test-subject");
+        testSubject.setAttributes(Collections.emptySet());
+        when(this.privilegeManagementService.getBySubjectIdentifierAndScopes(any(String.class), any(Set.class)))
+                .thenReturn(testSubject);
+
         // resourceURI matches attributeURITemplate
         PolicyEvaluationResult evalResult = this.evaluationService.evalPolicy("/v1/site/1234/asset/456", "test-subject",
-                "GET", null);
+                "GET", null, null);
         Assert.assertEquals(evalResult.getEffect(), Effect.PERMIT);
 
         // resourceURI does NOT match attributeURITemplate
-        evalResult = this.evaluationService.evalPolicy("/v1/no-match/asset/123", "test-subject", "GET", null);
+        evalResult = this.evaluationService.evalPolicy("/v1/no-match/asset/123", "test-subject", "GET", null, null);
         // second policy will match.
         Assert.assertEquals(evalResult.getEffect(), Effect.DENY);
 

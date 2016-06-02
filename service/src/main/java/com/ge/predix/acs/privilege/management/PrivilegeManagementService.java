@@ -17,7 +17,9 @@
 package com.ge.predix.acs.privilege.management;
 
 import java.util.List;
+import java.util.Set;
 
+import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 
@@ -43,6 +45,8 @@ public interface PrivilegeManagementService {
     List<BaseSubject> getSubjects();
 
     BaseSubject getBySubjectIdentifier(String subjectIdentifier);
+
+    BaseSubject getBySubjectIdentifierAndScopes(final String subjectIdentifier, final Set<Attribute> scopes);
 
     boolean upsertSubject(BaseSubject subject);
 

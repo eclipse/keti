@@ -1,14 +1,15 @@
 package com.ge.predix.acs.privilege.management.dao;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.springframework.util.Assert;
+import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
-public class GraphSubjectRepository extends GraphGenericRepository<SubjectEntity> implements SubjectRepository {
-    private static final String ATTRIBUTES_PROPERTY_KEY = "attributes";
+public class GraphSubjectRepository extends GraphGenericRepository<SubjectEntity>
+        implements SubjectRepository, SubjectScopedAccessRepository {
     private static final String EMPTY_ATTRIBUTES = "{}";
     private static final String HAS_SUBJECT_RELATIONSHIP_KEY = "hasSubject";
     private static final String SUBJECT_LABEL = "subject";
@@ -17,24 +18,17 @@ public class GraphSubjectRepository extends GraphGenericRepository<SubjectEntity
 
     @Override
     public SubjectEntity getByZoneAndSubjectIdentifier(final ZoneEntity zone, final String subjectIdentifier) {
-        try {
-            GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V().has(ZONE_ID_KEY, zone.getName())
-                    .has(SUBJECT_ID_KEY, subjectIdentifier);
-            if (!traversal.hasNext()) {
-                return null;
-            }
-            SubjectEntity subjectEntity = vertexToEntity(traversal.next());
-
-            // There should be only one subject with a given subject id.
-            Assert.isTrue(!traversal.hasNext(), "There are two subjects with the same subject id.");
-            return subjectEntity;
-        } finally {
-            getGraph().tx().commit();
-        }
+        return getByZoneAndIdentifier(zone, subjectIdentifier);
     }
 
     @Override
-    String computeId(final SubjectEntity entity) {
+    public SubjectEntity getByZoneAndSubjectIdentifierAndScopes(final ZoneEntity zone, final String subjectIdentifier,
+            final Set<Attribute> scopes) {
+        return getByZoneAndIdentifierAndScopes(zone, subjectIdentifier, scopes);
+    }
+
+    @Override
+    String getEntityId(final SubjectEntity entity) {
         return entity.getSubjectIdentifier();
     }
 
@@ -54,7 +48,7 @@ public class GraphSubjectRepository extends GraphGenericRepository<SubjectEntity
     }
 
     @Override
-    void upsertEntityVertex(final SubjectEntity entity, final Vertex vertex) {
+    void updateVertexProperties(final SubjectEntity entity, final Vertex vertex) {
         String subjectAttributesJson = entity.getAttributesAsJson();
         if (StringUtils.isEmpty(subjectAttributesJson)) {
             subjectAttributesJson = EMPTY_ATTRIBUTES;

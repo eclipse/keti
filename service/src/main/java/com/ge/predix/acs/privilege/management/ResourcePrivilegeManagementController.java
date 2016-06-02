@@ -99,8 +99,8 @@ public class ResourcePrivilegeManagementController extends BaseRestApi {
     }
 
     @ApiOperation(
-            value = "Creates/Updates a given subject for a given zone. "
-                    + "The subjectIdentifier must be URL encoded in application/x-www-form-urlencoded format with "
+            value = "Creates/Updates a given resource for a given zone. "
+                    + "The resourceIdentifier must be URL encoded in application/x-www-form-urlencoded format with "
                     + "UTF-8.",
             tags = { "Attribute Management" })
     @RequestMapping(method = PUT, value = { V1 + MANAGED_RESOURCE_URL }, consumes = MediaType.APPLICATION_JSON_VALUE)

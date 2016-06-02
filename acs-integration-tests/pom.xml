@@ -619,7 +619,6 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <environmentVariables>
-                                <ENABLE_TITAN>true</ENABLE_TITAN>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
                                 <management.health.redis.enabled>false</management.health.redis.enabled>
                                 <uaaCheckHealthUrl>http://localhost:8080/uaa/healthz</uaaCheckHealthUrl>
@@ -652,6 +651,109 @@
                                 <exclude>**/DefaultZoneAuthorizationIT.java</exclude>
                             </excludes>
  -->                            <suiteXmlFiles>
+                                <suiteXmlFile>testng-public.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>integ-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>public-titan</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- run UAA -->
+                    <plugin>
+                        <groupId>org.codehaus.cargo</groupId>
+                        <artifactId>cargo-maven2-plugin</artifactId>
+                        <version>1.4.19</version>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat7x/container</home>
+                            </configuration>
+                            <container>
+                                <containerId>tomcat7x</containerId>
+                                <systemProperties>
+                                    <CLOUD_FOUNDRY_CONFIG_PATH>${project.basedir}/uaa/config</CLOUD_FOUNDRY_CONFIG_PATH>
+                                </systemProperties>
+                                <zipUrlInstaller>
+                                    <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.55/bin/apache-tomcat-7.0.55.tar.gz</url>
+                                    <downloadDir>${project.build.directory}/downloads</downloadDir>
+                                    <extractDir>${project.build.directory}/extracts</extractDir>
+                                </zipUrlInstaller>
+                            </container>
+                            <deployables>
+                                <deployable>
+                                    <groupId>org.cloudfoundry.identity</groupId>
+                                    <artifactId>cloudfoundry-identity-uaa</artifactId>
+                                    <type>war</type>
+                                    <properties>
+                                        <context>uaa</context>
+                                    </properties>
+                                </deployable>
+                            </deployables>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-container</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-container</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <environmentVariables>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan</SPRING_PROFILES_ACTIVE>
+                                <management.health.redis.enabled>false</management.health.redis.enabled>
+                                <uaaCheckHealthUrl>http://localhost:8080/uaa/healthz</uaaCheckHealthUrl>
+                                <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method, Access-Control-Request-Headers</cors.xhr.allowed.headers>
+                                <cors.xhr.allowed.origins>^.*\.grc-apps\.svc\.ge\.com$,^.*\.predix\.io$</cors.xhr.allowed.origins>
+                                <cors.xhr.allowed.uris>^/v2/api-docs$</cors.xhr.allowed.uris>
+                                <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
+                                <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
+                            </environmentVariables>
+                            <skipTests>false</skipTests>
+                            <systemPropertyVariables>
+                                <ACS_URL>http://localhost:8181</ACS_URL>
+                                <ACS_DEFAULT_ISSUER_ID>http://localhost:8080/uaa/oauth/token</ACS_DEFAULT_ISSUER_ID>
+                                <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
+                                <ZONE1_NAME>testzone1</ZONE1_NAME>
+                                <ZONE1_UAA_URL>http://localhost:8080/uaa</ZONE1_UAA_URL>
+                                <ZONE2_NAME>testzone2</ZONE2_NAME>
+                                <ZONE2_UAA_URL>http://localhost:8080/uaa</ZONE2_UAA_URL>
+                                <ZONE3_NAME>testzone3</ZONE3_NAME>
+                            </systemPropertyVariables>
+                            <suiteXmlFiles>
                                 <suiteXmlFile>testng-public.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>

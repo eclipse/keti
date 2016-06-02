@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.ge.predix.acs.commons.policy.condition.ConditionAssertionFailedException;
 import com.ge.predix.acs.commons.policy.condition.ConditionScript;
 import com.ge.predix.acs.commons.policy.condition.ConditionShell;
 import com.ge.predix.acs.commons.policy.condition.ResourceHandler;
@@ -81,24 +82,38 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
         PolicyEvaluationRequestCacheKey key = new Builder().zoneId(zone.getName()).policySetId("default")
                 .request(request).build();
         PolicyEvaluationResult result = this.cache.get(key);
+
         if (null == result) {
+            HashSet<Attribute> supplementalResourceAttributes;
+            if (null == request.getResourceAttributes()) {
+                supplementalResourceAttributes = new HashSet<>();
+            } else {
+                supplementalResourceAttributes = new HashSet<>(request.getResourceAttributes());
+            }
+            HashSet<Attribute> supplementalSubjectAttributes;
+            if (null == request.getSubjectAttributes()) {
+                supplementalSubjectAttributes = new HashSet<>();
+            } else {
+                supplementalSubjectAttributes = new HashSet<>(request.getSubjectAttributes());
+            }
             result = evalPolicy(request.getResourceIdentifier(), request.getSubjectIdentifier(), request.getAction(),
-                    request.getSubjectAttributes());
+                    supplementalResourceAttributes, supplementalSubjectAttributes);
             this.cache.set(key, result);
         }
         return result;
     }
 
     @Override
-    public PolicyEvaluationResult evalPolicy(final String resourceURI, final String subjectIdentifier,
-            final String action, final List<Attribute> attributes) {
+    public PolicyEvaluationResult evalPolicy(final String uri, final String subjectIdentifier, final String action,
+            final Set<Attribute> supplementalResourceAttributes, final Set<Attribute> supplementalSubjectAttributes) {
 
-        if (resourceURI == null || subjectIdentifier == null || action == null) {
+        if (uri == null || subjectIdentifier == null || action == null) {
 
-            LOGGER.error(String.format(
-                    "PolicyEvaluationResult input paramters cannot be null, "
-                            + "resourceURI=[%s] subjectIdentifier=[%s] action=[%s]",
-                    resourceURI, subjectIdentifier, action));
+            LOGGER.error(
+                    String.format(
+                            "PolicyEvaluationResult input paramters cannot be null, "
+                                    + "resourceURI=[%s] subjectIdentifier=[%s] action=[%s]",
+                            uri, subjectIdentifier, action));
 
             throw new IllegalArgumentException(
                     "ACS Internal Error: PolicyEvaluationResult input paramters cannot be null.");
@@ -110,54 +125,34 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
             return new PolicyEvaluationResult(Effect.NOT_APPLICABLE);
         } else if (allPolicySets.size() > 1) {
             LOGGER.error("Found more than one policy set during policy evaluation. Subject: " + subjectIdentifier
-                    + ", Resource: " + resourceURI);
+                    + ", Resource: " + uri);
             throw new IllegalArgumentException(
                     "Request to create policy set rejected. Only one policy set is supported.");
         } else {
-            Set<Attribute> subjectAttributes = resolveSubjectAttributes(subjectIdentifier, attributes);
-            
             // NOTE: When multiple policy sets are supported, this code needs to
             // delegate to a "InterPolicySetDecisionAggregator"
-            PolicyEvaluationResult result = 
-                    evalPolicySet(allPolicySets.get(0), subjectIdentifier, resourceURI, action, subjectAttributes);
+            PolicyEvaluationResult result = evalPolicySet(allPolicySets.get(0), subjectIdentifier, uri, action,
+                    supplementalResourceAttributes, supplementalSubjectAttributes);
 
-            LOGGER.info(String.format(
-                    "Processed Policy Evaluation for: " + "resourceUri=[%s], subjectIdentifier=[%s], action=[%s],"
-                            + " result=[%s]", resourceURI, subjectIdentifier, action, result.getEffect()));
-            
+            LOGGER.info(
+                    String.format(
+                            "Processed Policy Evaluation for: "
+                                    + "resourceUri=[%s], subjectIdentifier=[%s], action=[%s]," + " result=[%s]",
+                            uri, subjectIdentifier, action, result.getEffect()));
+
             return result;
         }
     }
 
-    /**
-     * @param subjectID
-     * @param policyEvaluationRequestAttributes
-     * @return
-     */
-    private Set<Attribute> resolveSubjectAttributes(final String subjectIdentifier,
-            final List<Attribute> policyEvaluationRequestAttributes) {
-        Set<Attribute> mergedSubjectAttributes = new HashSet<Attribute>();
-
-        BaseSubject subject = this.privilegeService.getBySubjectIdentifier(subjectIdentifier);
-        if (subject != null) {
-            mergedSubjectAttributes.addAll(subject.getAttributes());
-        }
-
-        if (policyEvaluationRequestAttributes != null) {
-            mergedSubjectAttributes.addAll(policyEvaluationRequestAttributes);
-        }
-
-        return mergedSubjectAttributes;
-    }
-
     private PolicyEvaluationResult evalPolicySet(final PolicySet policySet, final String subjectIdentifier,
-            final String resourceURI, final String action, final Set<Attribute> subjectAttributes) {
+            final String resourceURI, final String action, final Set<Attribute> supplementalResourceAttributes,
+            final Set<Attribute> supplementalSubjectAttributes) {
 
         PolicyEvaluationResult result;
         try {
             // Set<Attribute> resourceAttributes = getResourceAttributes(resourceURI);
-            MatchResult matchResult = matchPolicies(subjectAttributes, subjectIdentifier, resourceURI, action,
-                    policySet.getPolicies());
+            MatchResult matchResult = matchPolicies(subjectIdentifier, resourceURI, action, policySet.getPolicies(),
+                    supplementalResourceAttributes, supplementalSubjectAttributes);
 
             Effect effect = Effect.NOT_APPLICABLE;
             Set<String> resolvedResourceUris = matchResult.getResolvedResourceUris();
@@ -167,11 +162,13 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
             resolvedResourceUris.add(resourceURI);
 
             Set<Attribute> resourceAttributes = Collections.emptySet();
+            Set<Attribute> subjectAttributes = Collections.emptySet();
             ConditionShell groovyShell = null;
             List<MatchedPolicy> matchedPolicies = matchResult.getMatchedPolicies();
             for (MatchedPolicy matchedPolicy : matchedPolicies) {
                 Policy policy = matchedPolicy.getPolicy();
                 resourceAttributes = matchedPolicy.getResourceAttributes();
+                subjectAttributes = matchedPolicy.getSubjectAttributes();
                 Target target = policy.getTarget();
                 String resourceURITemplate = null;
                 if (target != null && target.getResource() != null) {
@@ -204,19 +201,16 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
                     break;
                 }
             }
-
             result = new PolicyEvaluationResult(effect, new ArrayList<Attribute>(subjectAttributes),
                     new ArrayList<Attribute>(resourceAttributes), resolvedResourceUris);
-
         } catch (Throwable e) {
             StringBuilder builder = new StringBuilder();
-            builder.append("Exception occured while evaulating the policy set. Policy Set ID:")
+            builder.append("Exception occured while evaluating the policy set. Policy Set ID:")
                     .append(policySet.getName()).append(" subject:").append(subjectIdentifier)
                     .append(", Resource URI: ").append(resourceURI);
             LOGGER.error(builder.toString(), e);
             result = new PolicyEvaluationResult(Effect.INDETERMINATE);
         }
-
         return result;
     }
 
@@ -246,12 +240,13 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
             ConditionScript conditionScript = validatedConditionScripts.get(i);
             try {
                 result = result && conditionScript.execute(attributeBindingsMap);
+            } catch (ConditionAssertionFailedException e) {
+                result = false;
             } catch (Throwable e) {
                 LOGGER.error("Unable to evualate condition: " + conditions.get(i).toString(), e);
                 throw new PolicyEvaluationException("Condition Evaluation failed", e);
             }
         }
-
         return result;
     }
 
@@ -276,12 +271,11 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
         return attributeHandler;
     }
 
-    private MatchResult matchPolicies(final Set<Attribute> subjectAttributes, final String subjectIdentifier,
-            final String resourceURI, final String action, final List<Policy> allPolicies) {
-
+    private MatchResult matchPolicies(final String subjectIdentifier, final String resourceURI, final String action,
+            final List<Policy> allPolicies, final Set<Attribute> supplementalResourceAttributes,
+            final Set<Attribute> supplementalSubjectAttributes) {
         PolicyMatchCandidate criteria = new PolicyMatchCandidate(action, resourceURI, subjectIdentifier,
-                new ArrayList<Attribute>(subjectAttributes));
-
+                supplementalResourceAttributes, supplementalSubjectAttributes);
         return this.policyMatcher.matchForResult(criteria, allPolicies);
     }
 
@@ -301,5 +295,4 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
             LOGGER.debug(sb.toString());
         }
     }
-
 }

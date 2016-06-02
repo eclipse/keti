@@ -34,15 +34,15 @@ public class PrivilegeConverter {
     private final JsonUtils jsonUtils = new JsonUtils();
 
     public ResourceEntity toResourceEntity(final ZoneEntity zone, final BaseResource resource) {
-
         if (resource == null) {
             return null;
         }
 
         ResourceEntity resourceEntity = new ResourceEntity(zone, resource.getResourceIdentifier());
-
+        resourceEntity.setAttributes(resource.getAttributes());
         String attributesAsJson = this.jsonUtils.serialize(resource.getAttributes());
         resourceEntity.setAttributesAsJson(attributesAsJson);
+        resourceEntity.setParents(resource.getParents());
         return resourceEntity;
     }
 
@@ -57,6 +57,7 @@ public class PrivilegeConverter {
         Set<Attribute> deserialize = this.jsonUtils.deserialize(resourceEntity.getAttributesAsJson(), Set.class,
                 Attribute.class);
         resource.setAttributes(deserialize);
+        resource.setParents(resourceEntity.getParents());
         return resource;
     }
 
@@ -66,8 +67,10 @@ public class PrivilegeConverter {
         }
 
         SubjectEntity subjectEntity = new SubjectEntity(zone, subject.getSubjectIdentifier());
+        subjectEntity.setAttributes(subject.getAttributes());
         String attributesAsJson = this.jsonUtils.serialize(subject.getAttributes());
         subjectEntity.setAttributesAsJson(attributesAsJson);
+        subjectEntity.setParents(subject.getParents());
         return subjectEntity;
     }
 
@@ -82,6 +85,7 @@ public class PrivilegeConverter {
         Set<Attribute> deserialize = this.jsonUtils.deserialize(subjectEntity.getAttributesAsJson(), Set.class,
                 Attribute.class);
         subject.setAttributes(deserialize);
+        subject.setParents(subjectEntity.getParents());
         return subject;
     }
 }

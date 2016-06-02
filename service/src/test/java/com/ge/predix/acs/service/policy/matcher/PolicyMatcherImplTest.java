@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +45,10 @@ import com.ge.predix.acs.model.Policy;
 import com.ge.predix.acs.model.PolicySet;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
 import com.ge.predix.acs.rest.BaseResource;
+import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.service.policy.evaluation.MatchedPolicy;
 import com.ge.predix.acs.service.policy.evaluation.ResourceAttributeResolver;
+import com.ge.predix.acs.service.policy.evaluation.SubjectAttributeResolver;
 
 /**
  * Unit tests for PolicyMatcher class.
@@ -63,15 +66,23 @@ public class PolicyMatcherImplTest {
     @Mock
     private ResourceAttributeResolver resourceAttributeResolver;
 
+    @Mock
+    private SubjectAttributeResolver subjectAttributeResolver;
+
     @InjectMocks
     private PolicyMatcher policyMatcher;
 
+    @SuppressWarnings("unchecked")
     @BeforeClass
     public void setup() {
         this.policyMatcher = new PolicyMatcherImpl();
         MockitoAnnotations.initMocks(this);
         when(this.resourceAttributeResolver.getResourceAttributes(any(Policy.class)))
                 .thenReturn(new HashSet<Attribute>());
+        BaseSubject subject = new BaseSubject("test-subject");
+        subject.setAttributes(new HashSet<>());
+        when(this.privilegeManagementService.getBySubjectIdentifierAndScopes(any(String.class), any(Set.class)))
+                .thenReturn(subject);
     }
 
     @AfterMethod
@@ -95,7 +106,8 @@ public class PolicyMatcherImplTest {
         candidate.setAction("GET");
         candidate.setResourceURI("/this/does/not/exist");
         candidate.setSubjectIdentifier("Edward R. Murrow");
-        candidate.setSubjectAttributes(Arrays.asList(new Attribute[] {}));
+        candidate.setSupplementalResourceAttributes(Collections.emptySet());
+        candidate.setSupplementalSubjectAttributes(Collections.emptySet());
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 1);
         Assert.assertEquals(matchedPolicies.get(0).getPolicy(), policies.get(policies.size() - 1));
@@ -117,7 +129,8 @@ public class PolicyMatcherImplTest {
         candidate.setAction("GET");
         candidate.setResourceURI("/this/does/not/exist");
         candidate.setSubjectIdentifier("Edward R. Murrow");
-        candidate.setSubjectAttributes(Arrays.asList(new Attribute[] {}));
+        candidate.setSupplementalResourceAttributes(Collections.emptySet());
+        candidate.setSupplementalSubjectAttributes(Collections.emptySet());
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 1);
         Assert.assertEquals(matchedPolicies.get(0).getPolicy(), policies.get(policies.size() - 1));
@@ -139,7 +152,8 @@ public class PolicyMatcherImplTest {
         candidate.setAction("GET");
         candidate.setResourceURI("/public");
         candidate.setSubjectIdentifier("Edward R. Murrow");
-        candidate.setSubjectAttributes(Arrays.asList(new Attribute[] {}));
+        candidate.setSupplementalResourceAttributes(Collections.emptySet());
+        candidate.setSupplementalSubjectAttributes(Collections.emptySet());
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 1);
         Assert.assertEquals(matchedPolicies.get(0).getPolicy(), policies.get(policies.size() - 1));
@@ -161,8 +175,8 @@ public class PolicyMatcherImplTest {
         candidate.setAction("GET");
         candidate.setResourceURI("/public");
         candidate.setSubjectIdentifier("Edward R. Murrow");
-        candidate.setSubjectAttributes(
-                Arrays.asList(new Attribute[] { new Attribute("https://acs.attributes.int", "role", "admin") }));
+        candidate.setSupplementalSubjectAttributes(new HashSet<>(
+                Arrays.asList(new Attribute[] { new Attribute("https://acs.attributes.int", "role", "admin") })));
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 1);
         Assert.assertEquals(matchedPolicies.get(0).getPolicy(), policies.get(policies.size() - 1));
@@ -195,7 +209,7 @@ public class PolicyMatcherImplTest {
         candidate.setAction("GET");
         candidate.setResourceURI("/assets/1123");
         candidate.setSubjectIdentifier("Edward R. Murrow");
-        candidate.setSubjectAttributes(Arrays.asList(new Attribute[] { groupAttr }));
+        candidate.setSupplementalSubjectAttributes(new HashSet<>(Arrays.asList(new Attribute[] { groupAttr })));
 
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 1);
@@ -223,8 +237,8 @@ public class PolicyMatcherImplTest {
         candidate.setResourceURI("/assets/1123");
 
         candidate.setSubjectIdentifier("Edward R. Murrow");
-        candidate.setSubjectAttributes(
-                Arrays.asList(new Attribute[] { new Attribute("https://acs.attributes.int", "group", "gog") }));
+        candidate.setSupplementalSubjectAttributes(new HashSet<>(
+                Arrays.asList(new Attribute[] { new Attribute("https://acs.attributes.int", "group", "gog") })));
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 0);
     }
@@ -246,7 +260,7 @@ public class PolicyMatcherImplTest {
 
         candidate.setSubjectIdentifier("Edward R. Murrow");
         Attribute siteAttr = new Attribute("https://acs.attributes.int", "site", "1123");
-        candidate.setSubjectAttributes(Arrays.asList(new Attribute[] { siteAttr }));
+        candidate.setSupplementalSubjectAttributes(new HashSet<>(Arrays.asList(new Attribute[] { siteAttr })));
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 1);
         Assert.assertEquals(matchedPolicies.get(0).getPolicy(), policies.get(policies.size() - 1));
@@ -270,7 +284,7 @@ public class PolicyMatcherImplTest {
         candidate.setAction("GET");
         candidate.setResourceURI("/this/does/not/exist");
         candidate.setSubjectIdentifier("Edward R. Murrow");
-        candidate.setSubjectAttributes(Arrays.asList(new Attribute[] {}));
+        candidate.setSupplementalSubjectAttributes(Collections.emptySet());
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 0);
     }
@@ -400,7 +414,7 @@ public class PolicyMatcherImplTest {
     @Test(dataProvider = "uriTemplateMatchDataProvider")
     public void testURITemplateMatch(final String uriTemplate, final String uri,
 
-    final Boolean uriTemplateExpectedMatch, final String[] varNames, final String[] varValues) {
+            final Boolean uriTemplateExpectedMatch, final String[] varNames, final String[] varValues) {
         doTestForURITemplateMatch(uriTemplate, uri, uriTemplateExpectedMatch, varNames, varValues);
     }
 
@@ -556,7 +570,7 @@ public class PolicyMatcherImplTest {
         candidate.setAction("GET");
         candidate.setResourceURI("/allowed/../not_allowed/gotcha");
         candidate.setSubjectIdentifier("Edward R. Murrow");
-        candidate.setSubjectAttributes(Arrays.asList(new Attribute[] {}));
+        candidate.setSupplementalSubjectAttributes(Collections.emptySet());
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 1);
         Assert.assertEquals(matchedPolicies.get(0).getPolicy().getEffect(), Effect.DENY);
