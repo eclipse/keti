@@ -15,12 +15,12 @@
  *******************************************************************************/
 package com.ge.predix.controller.test;
 
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_EVIDENCE_0_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_EVIDENCE_0_ID;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_SITE_0_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_SITE_0_ID;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_XFILE_0_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_XFILE_0_ID;
+import static com.ge.predix.acs.testutils.XFiles.SCULLYS_TESTIMONY_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_SCULLYS_TESTIMONY_ID;
+import static com.ge.predix.acs.testutils.XFiles.BASEMENT_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.BASEMENT_SITE_ID;
+import static com.ge.predix.acs.testutils.XFiles.ASCENSION_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.ASCENSION_ID;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
@@ -109,16 +109,16 @@ public class ResourcePrivilegeMgmtWithGraphDbControllerIT extends AbstractTestNG
      */
     @Test
     public void testCreateResourceWithCyclicReference() throws Exception {
-        BaseResource resource0 = new BaseResource(RESOURCE_SITE_0_ID);
-        resource0.setAttributes(RESOURCE_SITE_0_ATTRS_0);
+        BaseResource resource0 = new BaseResource(BASEMENT_SITE_ID);
+        resource0.setAttributes(BASEMENT_ATTRIBUTES);
 
-        BaseResource resource1 = new BaseResource(RESOURCE_XFILE_0_ID);
-        resource1.setAttributes(RESOURCE_XFILE_0_ATTRS_0);
+        BaseResource resource1 = new BaseResource(ASCENSION_ID);
+        resource1.setAttributes(ASCENSION_ATTRIBUTES);
         resource1.setParents(
                 new HashSet<>(Arrays.asList(new Parent[] { new Parent(resource0.getResourceIdentifier()) })));
 
-        BaseResource resource2 = new BaseResource(RESOURCE_EVIDENCE_0_ID);
-        resource2.setAttributes(RESOURCE_EVIDENCE_0_ATTRS_0);
+        BaseResource resource2 = new BaseResource(EVIDENCE_SCULLYS_TESTIMONY_ID);
+        resource2.setAttributes(SCULLYS_TESTIMONY_ATTRIBUTES);
         resource2.setParents(
                 new HashSet<>(Arrays.asList(new Parent[] { new Parent(resource1.getResourceIdentifier()) })));
 

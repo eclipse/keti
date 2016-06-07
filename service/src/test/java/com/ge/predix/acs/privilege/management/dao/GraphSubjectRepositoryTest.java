@@ -5,27 +5,23 @@ import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.
 import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.ZONE_ID_KEY;
 import static com.ge.predix.acs.privilege.management.dao.GraphResourceRepository.RESOURCE_ID_KEY;
 import static com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository.SUBJECT_ID_KEY;
-import static com.ge.predix.acs.testutils.Constants.ATTR_CLASSIFICATION_0;
-import static com.ge.predix.acs.testutils.Constants.ATTR_CLASSIFICATION_1;
-import static com.ge.predix.acs.testutils.Constants.ATTR_SITE_0;
-import static com.ge.predix.acs.testutils.Constants.ATTR_SITE_1;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_XFILE_1_ID;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_XFILE_2_ID;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_GROUP_2_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_GROUP_2_ID;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_GROUP_3_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_GROUP_3_ID;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_USER_1_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_USER_1_ID;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_USER_2_ID;
+import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
+import static com.ge.predix.acs.testutils.XFiles.AGENT_SCULLY;
+import static com.ge.predix.acs.testutils.XFiles.MULDERS_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.SECRET_CLASSIFICATION;
+import static com.ge.predix.acs.testutils.XFiles.SECRET_GROUP;
+import static com.ge.predix.acs.testutils.XFiles.SECRET_GROUP_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.SITE_BASEMENT;
+import static com.ge.predix.acs.testutils.XFiles.SITE_PENTAGON;
+import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION;
+import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_GROUP;
+import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_GROUP_ATTRIBUTES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -83,8 +79,8 @@ public class GraphSubjectRepositoryTest {
         persistSubject1toZone2();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
 
-        SubjectEntity subject = this.repository.getByZoneAndSubjectIdentifier(TEST_ZONE_1, SUBJECT_USER_2_ID);
-        assertThat(subject.getSubjectIdentifier(), equalTo(SUBJECT_USER_2_ID));
+        SubjectEntity subject = this.repository.getByZoneAndSubjectIdentifier(TEST_ZONE_1, AGENT_SCULLY);
+        assertThat(subject.getSubjectIdentifier(), equalTo(AGENT_SCULLY));
     }
 
     @Test
@@ -94,16 +90,16 @@ public class GraphSubjectRepositoryTest {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
 
         SubjectEntity subject = this.repository.getByZoneAndIdentifierAndScopes(TEST_ZONE_1, subjectIdentifier,
-                new HashSet<>(Arrays.asList(new Attribute[] { ATTR_SITE_0 })));
+                new HashSet<>(Arrays.asList(new Attribute[] { SITE_BASEMENT })));
         assertThat(subject.getSubjectIdentifier(), equalTo(subjectIdentifier));
-        assertThat(subject.getAttributes().contains(ATTR_CLASSIFICATION_0), equalTo(true));
-        assertThat(subject.getAttributes().contains(ATTR_CLASSIFICATION_1), equalTo(true));
+        assertThat(subject.getAttributes().contains(TOP_SECRET_CLASSIFICATION), equalTo(true));
+        assertThat(subject.getAttributes().contains(SECRET_CLASSIFICATION), equalTo(true));
 
         subject = this.repository.getByZoneAndIdentifierAndScopes(TEST_ZONE_1, subjectIdentifier,
-                new HashSet<>(Arrays.asList(new Attribute[] { ATTR_SITE_1 })));
+                new HashSet<>(Arrays.asList(new Attribute[] { SITE_PENTAGON })));
         assertThat(subject.getSubjectIdentifier(), equalTo(subjectIdentifier));
-        assertThat(subject.getAttributes().contains(ATTR_CLASSIFICATION_0), equalTo(false));
-        assertThat(subject.getAttributes().contains(ATTR_CLASSIFICATION_1), equalTo(true));
+        assertThat(subject.getAttributes().contains(TOP_SECRET_CLASSIFICATION), equalTo(false));
+        assertThat(subject.getAttributes().contains(SECRET_CLASSIFICATION), equalTo(true));
     }
 
     @Test
@@ -122,7 +118,7 @@ public class GraphSubjectRepositoryTest {
     @Test
     public void testSaveWithNoAttributes() {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        this.repository.save(new SubjectEntity(TEST_ZONE_1, SUBJECT_USER_2_ID));
+        this.repository.save(new SubjectEntity(TEST_ZONE_1, AGENT_SCULLY));
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
     }
 
@@ -140,44 +136,44 @@ public class GraphSubjectRepositoryTest {
     }
 
     private SubjectEntity persistSubject1toZone1() {
-        SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, SUBJECT_USER_2_ID);
+        SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, AGENT_SCULLY);
         subject.setAttributes(Collections.emptySet());
         subject.setAttributesAsJson(JSON_UTILS.serialize(subject.getAttributes()));
         return this.repository.save(subject);
     }
 
     private SubjectEntity persistSubject1toZone2() {
-        SubjectEntity subject = new SubjectEntity(TEST_ZONE_2, SUBJECT_USER_2_ID);
+        SubjectEntity subject = new SubjectEntity(TEST_ZONE_2, AGENT_SCULLY);
         subject.setAttributes(Collections.emptySet());
         subject.setAttributesAsJson(JSON_UTILS.serialize(subject.getAttributes()));
         return this.repository.save(subject);
     }
 
-    private SubjectEntity persistSubject3toZone1() {
-        SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, SUBJECT_GROUP_2_ID);
-        subject.setAttributes(SUBJECT_GROUP_2_ATTRS_0);
+    private SubjectEntity persistTopSecretGroup() {
+        SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, TOP_SECRET_GROUP);
+        subject.setAttributes(TOP_SECRET_GROUP_ATTRIBUTES);
         subject.setAttributesAsJson(JSON_UTILS.serialize(subject.getAttributes()));
         return this.repository.save(subject);
     }
 
-    private SubjectEntity persistSubject4toZone1() {
-        SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, SUBJECT_GROUP_3_ID);
-        subject.setAttributes(SUBJECT_GROUP_3_ATTRS_0);
+    private SubjectEntity persistSecretGroup() {
+        SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, SECRET_GROUP);
+        subject.setAttributes(SECRET_GROUP_ATTRIBUTES);
         subject.setAttributesAsJson(JSON_UTILS.serialize(subject.getAttributes()));
         return this.repository.save(subject);
     }
 
     private SubjectEntity persistScopedHierarchy() {
-        SubjectEntity parent = persistSubject4toZone1();
-        SubjectEntity scopedParent = persistSubject3toZone1();
+        SubjectEntity secretGroup = persistSecretGroup();
+        SubjectEntity topSecretGroup = persistTopSecretGroup();
 
-        SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, SUBJECT_USER_1_ID);
-        subject.setAttributes(SUBJECT_USER_1_ATTRS_0);
-        subject.setAttributesAsJson(JSON_UTILS.serialize(subject.getAttributes()));
-        subject.setParents(new HashSet<>(Arrays.asList(new Parent[] {
-                new Parent(scopedParent.getSubjectIdentifier(),
-                        new HashSet<>(Arrays.asList(new Attribute[] { ATTR_SITE_0 }))),
-                new Parent(parent.getSubjectIdentifier()) })));
-        return this.repository.save(subject);
+        SubjectEntity agentMulder = new SubjectEntity(TEST_ZONE_1, AGENT_MULDER);
+        agentMulder.setAttributes(MULDERS_ATTRIBUTES);
+        agentMulder.setAttributesAsJson(JSON_UTILS.serialize(agentMulder.getAttributes()));
+        agentMulder.setParents(new HashSet<>(Arrays.asList(new Parent[] {
+                new Parent(topSecretGroup.getSubjectIdentifier(),
+                        new HashSet<>(Arrays.asList(new Attribute[] { SITE_BASEMENT }))),
+                new Parent(secretGroup.getSubjectIdentifier()) })));
+        return this.repository.save(agentMulder);
     }
 }

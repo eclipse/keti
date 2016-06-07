@@ -1,26 +1,26 @@
 package com.ge.predix.controller.test;
 
-import static com.ge.predix.acs.testutils.Constants.ATTR_CLASSIFICATION_0;
-import static com.ge.predix.acs.testutils.Constants.ATTR_GROUP_0;
-import static com.ge.predix.acs.testutils.Constants.ATTR_SITE_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_EVIDENCE_0_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_EVIDENCE_0_ID;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_EVIDENCE_1_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_EVIDENCE_1_ID;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_SITE_0_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_SITE_0_ID;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_SITE_1_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_SITE_1_ID;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_XFILE_0_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_XFILE_0_ID;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_GROUP_0_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_GROUP_0_ID;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_GROUP_1_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_GROUP_1_ID;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_GROUP_2_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_GROUP_2_ID;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_USER_1_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.SUBJECT_USER_1_ID;
+import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION;
+import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTE;
+import static com.ge.predix.acs.testutils.XFiles.SITE_BASEMENT;
+import static com.ge.predix.acs.testutils.XFiles.SCULLYS_TESTIMONY_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_SCULLYS_TESTIMONY_ID;
+import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_IMPLANT_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_IMPLANT_ID;
+import static com.ge.predix.acs.testutils.XFiles.BASEMENT_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.BASEMENT_SITE_ID;
+import static com.ge.predix.acs.testutils.XFiles.PENTAGON_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.PENTAGON_SITE_ID;
+import static com.ge.predix.acs.testutils.XFiles.ASCENSION_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.ASCENSION_ID;
+import static com.ge.predix.acs.testutils.XFiles.FBI_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.FBI;
+import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP;
+import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_GROUP_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_GROUP;
+import static com.ge.predix.acs.testutils.XFiles.MULDERS_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -160,17 +160,17 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
 
     @DataProvider(name = "policyEvalDataProvider")
     private Object[][] policyEvalDataProvider() {
-        return new Object[][] { verifyAttributeInheritance(), verifyScopedAttributeInheritance(),
-                verifyEvaluationWithNoSubjectAndNoResource(), verifyEvaluationWithSupplementalAttributes() };
+        return new Object[][] { attributeInheritanceData(), scopedAttributeInheritanceData(),
+                evaluationWithNoSubjectAndNoResourceData(), evaluationWithSupplementalAttributesData() };
     }
 
     /**
      * Test that subjects and resources inherit attributes from their parents. The policy set will permit the request
      * if the subject and resource successfully inherit the required attributes from their respective parents.
      */
-    Object[] verifyAttributeInheritance() {
+    Object[] attributeInheritanceData() {
         return new Object[] { this.testZone1, this.policySet, createThreeLevelResourceHierarchy(),
-                createSubjectHierarchy(), createPolicyEvalRequest("GET", RESOURCE_EVIDENCE_0_ID, SUBJECT_USER_1_ID),
+                createSubjectHierarchy(), createPolicyEvalRequest("GET", EVIDENCE_SCULLYS_TESTIMONY_ID, AGENT_MULDER),
                 Effect.PERMIT };
     }
 
@@ -179,102 +179,102 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
      * will deny the request if the subject accesses a resource that does not allow it inherit the required
      * attributes.
      */
-    Object[] verifyScopedAttributeInheritance() {
+    Object[] scopedAttributeInheritanceData() {
         return new Object[] { this.testZone1, this.policySet, createTwoParentResourceHierarchy(),
                 createScopedSubjectHierarchy(),
-                createPolicyEvalRequest("GET", RESOURCE_EVIDENCE_1_ID, SUBJECT_USER_1_ID), Effect.DENY };
+                createPolicyEvalRequest("GET", EVIDENCE_IMPLANT_ID, AGENT_MULDER), Effect.DENY };
     }
 
     /**
      * Test that evaluation is successful even when the resource and subject do not exist. The policy set will deny
      * the request but return a successful result.
      */
-    Object[] verifyEvaluationWithNoSubjectAndNoResource() {
+    Object[] evaluationWithNoSubjectAndNoResourceData() {
         return new Object[] { this.testZone1, this.policySet, null, null,
-                createPolicyEvalRequest("GET", RESOURCE_EVIDENCE_1_ID, SUBJECT_USER_1_ID), Effect.DENY };
+                createPolicyEvalRequest("GET", EVIDENCE_IMPLANT_ID, AGENT_MULDER), Effect.DENY };
     }
 
     /**
      * Test that evaluation is successful even when the request provides the attributes. The policy set will return
      * permit because the condition is satisfied by the user provided supplemental attributes.
      */
-    Object[] verifyEvaluationWithSupplementalAttributes() {
+    Object[] evaluationWithSupplementalAttributesData() {
         return new Object[] { this.testZone1, this.policySet, null, null,
-                createPolicyEvalRequest("GET", RESOURCE_EVIDENCE_1_ID, SUBJECT_USER_1_ID,
-                        Arrays.asList(new Attribute[] { ATTR_GROUP_0, ATTR_CLASSIFICATION_0 }),
-                        Arrays.asList(new Attribute[] { ATTR_GROUP_0, ATTR_CLASSIFICATION_0 })),
+                createPolicyEvalRequest("GET", EVIDENCE_IMPLANT_ID, AGENT_MULDER,
+                        Arrays.asList(new Attribute[] { SPECIAL_AGENTS_GROUP_ATTRIBUTE, TOP_SECRET_CLASSIFICATION }),
+                        Arrays.asList(new Attribute[] { SPECIAL_AGENTS_GROUP_ATTRIBUTE, TOP_SECRET_CLASSIFICATION })),
                 Effect.PERMIT };
     }
 
     List<BaseSubject> createSubjectHierarchy() {
-        BaseSubject subject0 = new BaseSubject(SUBJECT_GROUP_0_ID);
-        subject0.setAttributes(SUBJECT_GROUP_0_ATTRS_0);
+        BaseSubject fbi = new BaseSubject(FBI);
+        fbi.setAttributes(FBI_ATTRIBUTES);
 
-        BaseSubject subject1 = new BaseSubject(SUBJECT_GROUP_1_ID);
-        subject1.setAttributes(SUBJECT_GROUP_1_ATTRS_0);
-        subject1.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(subject0.getSubjectIdentifier()) })));
+        BaseSubject specialAgentsGroup = new BaseSubject(SPECIAL_AGENTS_GROUP);
+        specialAgentsGroup.setAttributes(SPECIAL_AGENTS_GROUP_ATTRIBUTES);
+        specialAgentsGroup.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(fbi.getSubjectIdentifier()) })));
 
-        BaseSubject subject3 = new BaseSubject(SUBJECT_GROUP_2_ID);
-        subject3.setAttributes(SUBJECT_GROUP_2_ATTRS_0);
+        BaseSubject topSecretGroup = new BaseSubject(TOP_SECRET_GROUP);
+        topSecretGroup.setAttributes(TOP_SECRET_GROUP_ATTRIBUTES);
 
-        BaseSubject subject2 = new BaseSubject(SUBJECT_USER_1_ID);
-        subject2.setAttributes(SUBJECT_USER_1_ATTRS_0);
-        subject2.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(subject1.getSubjectIdentifier()),
-                new Parent(subject3.getSubjectIdentifier()) })));
+        BaseSubject agentMulder = new BaseSubject(AGENT_MULDER);
+        agentMulder.setAttributes(MULDERS_ATTRIBUTES);
+        agentMulder.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(specialAgentsGroup.getSubjectIdentifier()),
+                new Parent(topSecretGroup.getSubjectIdentifier()) })));
 
-        return Arrays.asList(new BaseSubject[] { subject0, subject1, subject3, subject2 });
+        return Arrays.asList(new BaseSubject[] { fbi, specialAgentsGroup, topSecretGroup, agentMulder });
     }
 
     List<BaseResource> createThreeLevelResourceHierarchy() {
-        BaseResource resource0 = new BaseResource(RESOURCE_SITE_0_ID);
-        resource0.setAttributes(RESOURCE_SITE_0_ATTRS_0);
+        BaseResource basement = new BaseResource(BASEMENT_SITE_ID);
+        basement.setAttributes(BASEMENT_ATTRIBUTES);
 
-        BaseResource resource1 = new BaseResource(RESOURCE_XFILE_0_ID);
-        resource1.setAttributes(RESOURCE_XFILE_0_ATTRS_0);
-        resource1.setParents(
-                new HashSet<>(Arrays.asList(new Parent[] { new Parent(resource0.getResourceIdentifier()) })));
+        BaseResource ascension = new BaseResource(ASCENSION_ID);
+        ascension.setAttributes(ASCENSION_ATTRIBUTES);
+        ascension.setParents(
+                new HashSet<>(Arrays.asList(new Parent[] { new Parent(basement.getResourceIdentifier()) })));
 
-        BaseResource resource2 = new BaseResource(RESOURCE_EVIDENCE_0_ID);
-        resource2.setAttributes(RESOURCE_EVIDENCE_0_ATTRS_0);
-        resource2.setParents(
-                new HashSet<>(Arrays.asList(new Parent[] { new Parent(resource1.getResourceIdentifier()) })));
+        BaseResource scullysTestimony = new BaseResource(EVIDENCE_SCULLYS_TESTIMONY_ID);
+        scullysTestimony.setAttributes(SCULLYS_TESTIMONY_ATTRIBUTES);
+        scullysTestimony.setParents(
+                new HashSet<>(Arrays.asList(new Parent[] { new Parent(ascension.getResourceIdentifier()) })));
 
-        return Arrays.asList(new BaseResource[] { resource0, resource1, resource2 });
+        return Arrays.asList(new BaseResource[] { basement, ascension, scullysTestimony });
     }
 
     List<BaseResource> createTwoParentResourceHierarchy() {
-        BaseResource resource0 = new BaseResource(RESOURCE_SITE_1_ID);
-        resource0.setAttributes(RESOURCE_SITE_1_ATTRS_0);
+        BaseResource pentagon = new BaseResource(PENTAGON_SITE_ID);
+        pentagon.setAttributes(PENTAGON_ATTRIBUTES);
 
-        BaseResource resource1 = new BaseResource(RESOURCE_XFILE_0_ID);
-        resource1.setAttributes(RESOURCE_XFILE_0_ATTRS_0);
+        BaseResource ascension = new BaseResource(ASCENSION_ID);
+        ascension.setAttributes(ASCENSION_ATTRIBUTES);
 
-        BaseResource resource2 = new BaseResource(RESOURCE_EVIDENCE_1_ID);
-        resource2.setAttributes(RESOURCE_EVIDENCE_1_ATTRS_0);
-        resource2.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(resource0.getResourceIdentifier()),
-                new Parent(resource1.getResourceIdentifier()) })));
+        BaseResource evidenceImplant = new BaseResource(EVIDENCE_IMPLANT_ID);
+        evidenceImplant.setAttributes(EVIDENCE_IMPLANT_ATTRIBUTES);
+        evidenceImplant.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(pentagon.getResourceIdentifier()),
+                new Parent(ascension.getResourceIdentifier()) })));
 
-        return Arrays.asList(new BaseResource[] { resource0, resource1, resource2 });
+        return Arrays.asList(new BaseResource[] { pentagon, ascension, evidenceImplant });
     }
 
     List<BaseSubject> createScopedSubjectHierarchy() {
-        BaseSubject subject0 = new BaseSubject(SUBJECT_GROUP_0_ID);
-        subject0.setAttributes(SUBJECT_GROUP_0_ATTRS_0);
+        BaseSubject fbi = new BaseSubject(FBI);
+        fbi.setAttributes(FBI_ATTRIBUTES);
 
-        BaseSubject subject1 = new BaseSubject(SUBJECT_GROUP_1_ID);
-        subject1.setAttributes(SUBJECT_GROUP_1_ATTRS_0);
-        subject1.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(subject0.getSubjectIdentifier()) })));
+        BaseSubject specialAgentsGroup = new BaseSubject(SPECIAL_AGENTS_GROUP);
+        specialAgentsGroup.setAttributes(SPECIAL_AGENTS_GROUP_ATTRIBUTES);
+        specialAgentsGroup.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(fbi.getSubjectIdentifier()) })));
 
-        BaseSubject subject3 = new BaseSubject(SUBJECT_GROUP_2_ID);
-        subject3.setAttributes(SUBJECT_GROUP_2_ATTRS_0);
+        BaseSubject topSecretGroup = new BaseSubject(TOP_SECRET_GROUP);
+        topSecretGroup.setAttributes(TOP_SECRET_GROUP_ATTRIBUTES);
 
-        BaseSubject subject2 = new BaseSubject(SUBJECT_USER_1_ID);
-        subject2.setAttributes(SUBJECT_USER_1_ATTRS_0);
-        subject2.setParents(new HashSet<>(Arrays.asList(
-                new Parent[] { new Parent(subject1.getSubjectIdentifier()), new Parent(subject3.getSubjectIdentifier(),
-                        new HashSet<>(Arrays.asList(new Attribute[] { ATTR_SITE_0 }))) })));
+        BaseSubject agentMulder = new BaseSubject(AGENT_MULDER);
+        agentMulder.setAttributes(MULDERS_ATTRIBUTES);
+        agentMulder.setParents(new HashSet<>(Arrays.asList(
+                new Parent[] { new Parent(specialAgentsGroup.getSubjectIdentifier()), new Parent(topSecretGroup.getSubjectIdentifier(),
+                        new HashSet<>(Arrays.asList(new Attribute[] { SITE_BASEMENT }))) })));
 
-        return Arrays.asList(new BaseSubject[] { subject0, subject1, subject3, subject2 });
+        return Arrays.asList(new BaseSubject[] { fbi, specialAgentsGroup, topSecretGroup, agentMulder });
     }
 
     PolicyEvaluationRequestV1 createPolicyEvalRequest(final String action, final String resourceIdentifier,

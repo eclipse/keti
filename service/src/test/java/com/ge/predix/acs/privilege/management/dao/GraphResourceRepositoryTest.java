@@ -5,16 +5,16 @@ import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.
 import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.ZONE_ID_KEY;
 import static com.ge.predix.acs.privilege.management.dao.GraphResourceRepository.RESOURCE_ID_KEY;
 import static com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository.SUBJECT_ID_KEY;
-import static com.ge.predix.acs.testutils.Constants.ATTR_CLASSIFICATION_0;
-import static com.ge.predix.acs.testutils.Constants.ATTR_SITE_0;
-import static com.ge.predix.acs.testutils.Constants.ATTR_TYPE_1;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_EVIDENCE_1_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_EVIDENCE_1_ID;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_SITE_0_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_SITE_0_ID;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_XFILE_1_ATTRS_0;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_XFILE_1_ID;
-import static com.ge.predix.acs.testutils.Constants.RESOURCE_XFILE_2_ID;
+import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION;
+import static com.ge.predix.acs.testutils.XFiles.SITE_BASEMENT;
+import static com.ge.predix.acs.testutils.XFiles.TYPE_MONSTER_OF_THE_WEEK;
+import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_IMPLANT_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_IMPLANT_ID;
+import static com.ge.predix.acs.testutils.XFiles.BASEMENT_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.BASEMENT_SITE_ID;
+import static com.ge.predix.acs.testutils.XFiles.DRIVE_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.DRIVE_ID;
+import static com.ge.predix.acs.testutils.XFiles.JOSECHUNG_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -145,7 +145,7 @@ public class GraphResourceRepositoryTest {
         for (ResourceEntity resource : resources) {
             assertThat(resource.getZone().getName(), equalTo(TEST_ZONE_1.getName()));
             assertThat(resource.getResourceIdentifier(), notNullValue());
-            assertThat(resource.getAttributesAsJson(), equalTo(JSON_UTILS.serialize(RESOURCE_XFILE_1_ATTRS_0)));
+            assertThat(resource.getAttributesAsJson(), equalTo(JSON_UTILS.serialize(DRIVE_ATTRIBUTES)));
         }
     }
 
@@ -158,8 +158,8 @@ public class GraphResourceRepositoryTest {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
 
         ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
-                RESOURCE_XFILE_1_ID);
-        assertThat(resource.getResourceIdentifier(), equalTo(RESOURCE_XFILE_1_ID));
+                DRIVE_ID);
+        assertThat(resource.getResourceIdentifier(), equalTo(DRIVE_ID));
     }
 
     @Test
@@ -170,8 +170,8 @@ public class GraphResourceRepositoryTest {
 
         ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
                 resourceIdentifier);
-        assertThat(resource.getAttributes().contains(ATTR_SITE_0), equalTo(true));
-        assertThat(resource.getAttributes().contains(ATTR_TYPE_1), equalTo(true));
+        assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
+        assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
     }
 
     @Test
@@ -182,18 +182,18 @@ public class GraphResourceRepositoryTest {
 
         ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
                 resourceIdentifier);
-        assertThat(resource.getAttributes().contains(ATTR_SITE_0), equalTo(true));
-        assertThat(resource.getAttributes().contains(ATTR_TYPE_1), equalTo(true));
-        assertThat(resource.getAttributes().contains(ATTR_CLASSIFICATION_0), equalTo(true));
+        assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
+        assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
+        assertThat(resource.getAttributes().contains(TOP_SECRET_CLASSIFICATION), equalTo(true));
     }
 
     @Test(expectedExceptions = SchemaViolationException.class)
     public void testPreventEntityParentSelfReference() {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, RESOURCE_SITE_0_ID);
-        resource.setAttributes(RESOURCE_SITE_0_ATTRS_0);
+        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, BASEMENT_SITE_ID);
+        resource.setAttributes(BASEMENT_ATTRIBUTES);
         resource.setAttributesAsJson(JSON_UTILS.serialize(resource.getAttributes()));
-        resource.setParents(new HashSet<>(Arrays.asList(new Parent(RESOURCE_SITE_0_ID))));
+        resource.setParents(new HashSet<>(Arrays.asList(new Parent(BASEMENT_SITE_ID))));
         this.resourceRepository.save(resource);
     }
 
@@ -206,15 +206,15 @@ public class GraphResourceRepositoryTest {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
         ResourceEntity resource1 = persistResource0toZone1();
 
-        ResourceEntity resource2 = new ResourceEntity(TEST_ZONE_1, RESOURCE_XFILE_1_ID);
-        resource2.setAttributes(RESOURCE_XFILE_1_ATTRS_0);
+        ResourceEntity resource2 = new ResourceEntity(TEST_ZONE_1, DRIVE_ID);
+        resource2.setAttributes(DRIVE_ATTRIBUTES);
         resource2.setAttributesAsJson(JSON_UTILS.serialize(resource2.getAttributes()));
         resource2.setParents(
                 new HashSet<Parent>(Arrays.asList(new Parent[] { new Parent(resource1.getResourceIdentifier()) })));
         this.resourceRepository.save(resource2);
 
-        ResourceEntity resource3 = new ResourceEntity(TEST_ZONE_1, RESOURCE_EVIDENCE_1_ID);
-        resource3.setAttributes(RESOURCE_EVIDENCE_1_ATTRS_0);
+        ResourceEntity resource3 = new ResourceEntity(TEST_ZONE_1, EVIDENCE_IMPLANT_ID);
+        resource3.setAttributes(EVIDENCE_IMPLANT_ATTRIBUTES);
         resource3.setAttributesAsJson(JSON_UTILS.serialize(resource3.getAttributes()));
         resource3.setParents(
                 new HashSet<Parent>(Arrays.asList(new Parent[] { new Parent(resource2.getResourceIdentifier()) })));
@@ -261,10 +261,10 @@ public class GraphResourceRepositoryTest {
         assertThat(resourceVertex.property(RESOURCE_ID_KEY).value(), equalTo(resourceId));
 
         traversal = this.graph.traversal().V(resourceVertex.id()).out("parent").has(RESOURCE_ID_KEY,
-                RESOURCE_SITE_0_ID);
+                BASEMENT_SITE_ID);
         assertThat(traversal.hasNext(), equalTo(true));
         resourceVertex = traversal.next();
-        assertThat(resourceVertex.property(RESOURCE_ID_KEY).value(), equalTo(RESOURCE_SITE_0_ID));
+        assertThat(resourceVertex.property(RESOURCE_ID_KEY).value(), equalTo(BASEMENT_SITE_ID));
     }
 
     @Test
@@ -305,8 +305,8 @@ public class GraphResourceRepositoryTest {
     @Test
     public void testSaveMultiple() {
         List<ResourceEntity> resourceEntitiesToSave = new ArrayList<>();
-        resourceEntitiesToSave.add(new ResourceEntity(TEST_ZONE_1, RESOURCE_XFILE_1_ID));
-        resourceEntitiesToSave.add(new ResourceEntity(TEST_ZONE_1, RESOURCE_XFILE_2_ID));
+        resourceEntitiesToSave.add(new ResourceEntity(TEST_ZONE_1, DRIVE_ID));
+        resourceEntitiesToSave.add(new ResourceEntity(TEST_ZONE_1, JOSECHUNG_ID));
         this.resourceRepository.save(resourceEntitiesToSave);
         assertThat(this.resourceRepository.count(), equalTo(2L));
     }
@@ -314,8 +314,8 @@ public class GraphResourceRepositoryTest {
     @Test
     public void testSaveResourceWithNonexistentParent() {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, RESOURCE_XFILE_1_ID);
-        resource.setParents(new HashSet<>(Arrays.asList(new Parent(RESOURCE_SITE_0_ID))));
+        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, DRIVE_ID);
+        resource.setParents(new HashSet<>(Arrays.asList(new Parent(BASEMENT_SITE_ID))));
 
         // Save a resource with nonexistent parent which should throw IllegalStateException exception 
         // while saving parent relationships.
@@ -345,8 +345,8 @@ public class GraphResourceRepositoryTest {
     public ResourceEntity persist2LevelHierarchicalResource1toZone1() {
         ResourceEntity parentResource = persistResource0toZone1();
 
-        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, RESOURCE_XFILE_1_ID);
-        resource.setAttributes(RESOURCE_XFILE_1_ATTRS_0);
+        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, DRIVE_ID);
+        resource.setAttributes(DRIVE_ATTRIBUTES);
         resource.setAttributesAsJson(JSON_UTILS.serialize(resource.getAttributes()));
         resource.setParents(new HashSet<Parent>(
                 Arrays.asList(new Parent[] { new Parent(parentResource.getResourceIdentifier()) })));
@@ -356,8 +356,8 @@ public class GraphResourceRepositoryTest {
     public ResourceEntity persist3LevelHierarchicalResource1toZone1() {
         ResourceEntity parentResource = persist2LevelHierarchicalResource1toZone1();
 
-        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, RESOURCE_EVIDENCE_1_ID);
-        resource.setAttributes(RESOURCE_EVIDENCE_1_ATTRS_0);
+        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, EVIDENCE_IMPLANT_ID);
+        resource.setAttributes(EVIDENCE_IMPLANT_ATTRIBUTES);
         resource.setAttributesAsJson(JSON_UTILS.serialize(resource.getAttributes()));
         resource.setParents(new HashSet<Parent>(
                 Arrays.asList(new Parent[] { new Parent(parentResource.getResourceIdentifier()) })));
@@ -365,29 +365,29 @@ public class GraphResourceRepositoryTest {
     }
 
     private ResourceEntity persistResource0toZone1() {
-        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, RESOURCE_SITE_0_ID);
-        resource.setAttributes(RESOURCE_SITE_0_ATTRS_0);
+        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, BASEMENT_SITE_ID);
+        resource.setAttributes(BASEMENT_ATTRIBUTES);
         resource.setAttributesAsJson(JSON_UTILS.serialize(resource.getAttributes()));
         return this.resourceRepository.save(resource);
     }
 
     private ResourceEntity persistResource1toZone1() {
-        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, RESOURCE_XFILE_1_ID);
-        resource.setAttributes(RESOURCE_XFILE_1_ATTRS_0);
+        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, DRIVE_ID);
+        resource.setAttributes(DRIVE_ATTRIBUTES);
         resource.setAttributesAsJson(JSON_UTILS.serialize(resource.getAttributes()));
         return this.resourceRepository.save(resource);
     }
 
     private ResourceEntity persistResource2toZone1() {
-        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, RESOURCE_XFILE_2_ID);
-        resource.setAttributes(RESOURCE_XFILE_1_ATTRS_0);
+        ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, JOSECHUNG_ID);
+        resource.setAttributes(DRIVE_ATTRIBUTES);
         resource.setAttributesAsJson(JSON_UTILS.serialize(resource.getAttributes()));
         return this.resourceRepository.save(resource);
     }
 
     private ResourceEntity persistResource1toZone2() {
-        ResourceEntity resource = new ResourceEntity(TEST_ZONE_2, RESOURCE_XFILE_1_ID);
-        resource.setAttributes(RESOURCE_XFILE_1_ATTRS_0);
+        ResourceEntity resource = new ResourceEntity(TEST_ZONE_2, DRIVE_ID);
+        resource.setAttributes(DRIVE_ATTRIBUTES);
         resource.setAttributesAsJson(JSON_UTILS.serialize(resource.getAttributes()));
         return this.resourceRepository.save(resource);
     }
