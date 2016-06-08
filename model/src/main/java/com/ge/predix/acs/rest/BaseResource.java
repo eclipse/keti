@@ -38,7 +38,8 @@ public class BaseResource {
     private String resourceIdentifier;
     @ApiModelProperty(value = "The list of attribute values being assigned", required = true)
     private Set<Attribute> attributes = Collections.emptySet();
-    @ApiModelProperty(value = "A set that identifies resources whose attributes also apply to this resource")
+    @ApiModelProperty(value = "A set that identifies resources whose attributes also apply to this resource during "
+            + "policy evaluation.")
     private Set<Parent> parents = Collections.emptySet();
 
     public BaseResource() {

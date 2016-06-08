@@ -37,7 +37,6 @@ import com.ge.predix.acs.service.policy.evaluation.MatchedPolicy;
 import com.ge.predix.acs.service.policy.evaluation.ResourceAttributeResolver;
 import com.ge.predix.acs.service.policy.evaluation.ResourceAttributeResolver.ResourceAttributeResolverResult;
 import com.ge.predix.acs.service.policy.evaluation.SubjectAttributeResolver;
-import com.ge.predix.acs.service.policy.evaluation.SubjectAttributeResolver.SubjectAttributeResolverResult;
 
 /**
  *
@@ -69,9 +68,8 @@ public class PolicyMatcherImpl implements PolicyMatcher {
         for (Policy policy : policies) {
             ResourceAttributeResolverResult resAttrResolverResult = resourceAttributeResolver.getResult(policy);
             Set<Attribute> resourceAttributes = resAttrResolverResult.getResourceAttributes();
-            SubjectAttributeResolverResult subAttrResolverResult = subjectAttributeResolver
-                    .getResult(resAttrResolverResult.getResovledResourceUri(), resourceAttributes);
-            Set<Attribute> subjectAttributes = subAttrResolverResult.getSubjectAttributes();
+            Set<Attribute> subjectAttributes = subjectAttributeResolver
+                    .getResult(resourceAttributes);
             if (resAttrResolverResult.isAttributeUriTemplateFound()) {
                 resolvedResourceUris.add(resAttrResolverResult.getResovledResourceUri());
             }

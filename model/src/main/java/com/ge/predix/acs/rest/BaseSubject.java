@@ -40,7 +40,8 @@ public class BaseSubject {
     @ApiModelProperty(value = "The list of attribute values being assigned", required = true)
     private Set<Attribute> attributes = Collections.emptySet();
 
-    @ApiModelProperty(value = "A set that identifies subjects whose attributes also apply to this resource")
+    @ApiModelProperty(value = "A set that identifies subjects whose attributes also apply to this subject during"
+            + "policy evaluation.")
     private Set<Parent> parents = Collections.emptySet();
 
     public BaseSubject() {

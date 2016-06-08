@@ -28,8 +28,8 @@ public class SubjectAttributeResolver {
         }
     }
 
-    public SubjectAttributeResolverResult getResult(final String resourceIdentifier, final Set<Attribute> scopes) {
-        Set<Attribute> subjectAttributes = this.subjectAttributeMap.get(resourceIdentifier);
+    public Set<Attribute> getResult(final Set<Attribute> scopes) {
+        Set<Attribute> subjectAttributes = this.subjectAttributeMap.get(this.subjectIdentifier);
         if (null == subjectAttributes) {
             subjectAttributes = new HashSet<>();
             BaseSubject subject = this.privilegeService.getBySubjectIdentifierAndScopes(this.subjectIdentifier, scopes);
@@ -37,20 +37,9 @@ public class SubjectAttributeResolver {
                 subjectAttributes.addAll(subject.getAttributes());
             }
             subjectAttributes.addAll(this.supplementalSubjectAttributes);
-            this.subjectAttributeMap.put(resourceIdentifier, subjectAttributes);
+            this.subjectAttributeMap.put(this.subjectIdentifier, subjectAttributes);
         }
-        return new SubjectAttributeResolverResult(subjectAttributes);
+        return subjectAttributes;
     }
 
-    public static class SubjectAttributeResolverResult {
-        private final Set<Attribute> subjectAttributes;
-
-        public SubjectAttributeResolverResult(final Set<Attribute> subjectAttributes) {
-            this.subjectAttributes = subjectAttributes;
-        }
-
-        public Set<Attribute> getSubjectAttributes() {
-            return this.subjectAttributes;
-        }
-    }
 }

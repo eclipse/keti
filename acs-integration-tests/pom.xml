@@ -502,9 +502,6 @@
 
         <profile>
             <id>local</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -675,9 +672,6 @@
 
         <profile>
             <id>public-titan</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <build>
                 <plugins>
                     <!-- run UAA -->

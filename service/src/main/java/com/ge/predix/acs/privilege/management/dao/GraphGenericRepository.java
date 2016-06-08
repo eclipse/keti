@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -269,14 +270,8 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
             throw new IllegalStateException(String.format("No parent exists in zone '%s' with '%s' value of '%s'.",
                     entity.getZone().getName(), getEntityIdKey(), parent.getIdentifier()));
         }
-        if (parent.getScopes().isEmpty()) {
-            vertex.addEdge(PARENT_EDGE_LABEL, traversal.next());
-            return;
-        }
-        for (Attribute scope : parent.getScopes()) {
-            vertex.addEdge(PARENT_EDGE_LABEL, traversal.next()).property(SCOPE_PROPERTY_KEY,
-                    JSON_UTILS.serialize(scope));
-        }
+        Edge parentEdge =  vertex.addEdge(PARENT_EDGE_LABEL, traversal.next());
+        parent.getScopes().forEach(scope -> parentEdge.property(SCOPE_PROPERTY_KEY, JSON_UTILS.serialize(scope)));
     }
 
     Set<ParentEntity> getParentEntities(final E entity) {

@@ -58,7 +58,7 @@ public class SubjectAttributeResolverTest {
         SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
                 testSubject.getSubjectIdentifier(), supplementalSubjectAttributes);
 
-        Set<Attribute> combinedSubjectAttributes = resolver.getResult("/test/resource", null).getSubjectAttributes();
+        Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
         Assert.assertNotNull(combinedSubjectAttributes);
         Assert.assertTrue(combinedSubjectAttributes.containsAll(subjectAttributes));
         Assert.assertTrue(combinedSubjectAttributes.containsAll(supplementalSubjectAttributes));
@@ -75,7 +75,7 @@ public class SubjectAttributeResolverTest {
         SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
                 testSubject.getSubjectIdentifier(), null);
 
-        Set<Attribute> combinedSubjectAttributes = resolver.getResult("/test/resource", null).getSubjectAttributes();
+        Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
         Assert.assertTrue(combinedSubjectAttributes.isEmpty());
     }
 
@@ -90,7 +90,7 @@ public class SubjectAttributeResolverTest {
         SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
                 testSubject.getSubjectIdentifier(), null);
 
-        Set<Attribute> combinedSubjectAttributes = resolver.getResult("/test/resource", null).getSubjectAttributes();
+        Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
         Assert.assertTrue(combinedSubjectAttributes.isEmpty());
     }
 
@@ -108,7 +108,7 @@ public class SubjectAttributeResolverTest {
         SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
                 testSubject.getSubjectIdentifier(), null);
 
-        Set<Attribute> combinedSubjectAttributes = resolver.getResult("/test/resource", null).getSubjectAttributes();
+        Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
         Assert.assertNotNull(combinedSubjectAttributes);
         Assert.assertTrue(combinedSubjectAttributes.containsAll(subjectAttributes));
     }
@@ -127,7 +127,7 @@ public class SubjectAttributeResolverTest {
         SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
                 testSubject.getSubjectIdentifier(), supplementalSubjectAttributes);
 
-        Set<Attribute> combinedSubjectAttributes = resolver.getResult("/test/resource", null).getSubjectAttributes();
+        Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
         Assert.assertNotNull(combinedSubjectAttributes);
         Assert.assertTrue(combinedSubjectAttributes.containsAll(supplementalSubjectAttributes));
     }
@@ -146,7 +146,7 @@ public class SubjectAttributeResolverTest {
         SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
                 testSubject.getSubjectIdentifier(), supplementalSubjectAttributes);
 
-        Set<Attribute> combinedSubjectAttributes = resolver.getResult("/test/resource", null).getSubjectAttributes();
+        Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
         Assert.assertNotNull(combinedSubjectAttributes);
         Assert.assertTrue(combinedSubjectAttributes.containsAll(supplementalSubjectAttributes));
     }

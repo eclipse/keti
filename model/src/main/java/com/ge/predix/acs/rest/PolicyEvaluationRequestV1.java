@@ -57,7 +57,7 @@ public class PolicyEvaluationRequestV1 {
         this.subjectIdentifier = subjectIdentifier;
     }
 
-    @ApiModelProperty(value = "Supplemental resource attributes provided by the requestor", required = true)
+    @ApiModelProperty(value = "Supplemental resource attributes provided by the requestor")
     public List<Attribute> getResourceAttributes() {
         return this.resourceAttributes;
     }
@@ -69,7 +69,7 @@ public class PolicyEvaluationRequestV1 {
     /**
      * @return the subjectAttributes
      */
-    @ApiModelProperty(value = "Supplemental subject attributes provided by the requestor", required = true)
+    @ApiModelProperty(value = "Supplemental subject attributes provided by the requestor")
     public List<Attribute> getSubjectAttributes() {
         return this.subjectAttributes;
     }
