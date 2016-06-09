@@ -16,8 +16,6 @@
 
 package com.ge.predix.acs.model;
 
-import java.util.List;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -38,15 +36,9 @@ public class Attribute {
     private String issuer;
     private String name;
     private String value;
-    private List<Attribute> scopes;
 
     public Attribute() {
 
-    }
-
-    public Attribute(final String issuer, final String name, final String value, final List<Attribute> scopes) {
-        this(issuer, name, value);
-        this.scopes = scopes;
     }
 
     public Attribute(final String issuer, final String name, final String value) {
@@ -100,14 +92,6 @@ public class Attribute {
 
     public void setValue(final String value) {
         this.value = value;
-    }
-
-    public List<Attribute> getScopes() {
-        return this.scopes;
-    }
-
-    public void setScopes(final List<Attribute> scopes) {
-        this.scopes = scopes;
     }
 
     @Override
