@@ -21,8 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.ge.predix.acs.commons.attribute.Attribute;
 import com.ge.predix.acs.commons.attribute.AttributeType;
+import com.ge.predix.acs.model.Attribute;
 
 public class AbstractHandlers {
 
