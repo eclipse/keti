@@ -123,14 +123,15 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
 
             Assert.assertEquals(evalResponse.getStatusCode(), HttpStatus.OK);
 
+            //Nurego server seems to have a lag before the counts are updated
+            Thread.sleep(3000);
+
             Double afterPolicyUpdateMeterCount = getEntitlementUsageByFeatureId(POLICY_UPDATE_FEATURE_ID, this.zoneId);
             Double afterPolicyEvalMeterCount = getEntitlementUsageByFeatureId(POLICY_EVAL_FEATURE_ID, this.zoneId);
 
             System.out.println("POLICY UPDATE USAGE AFTER:" + afterPolicyUpdateMeterCount);
             System.out.println("POLICY EVAL USAGE AFTER:" + afterPolicyEvalMeterCount);
 
-            //Nurego server seems to have a lag before the counts are updated
-            Thread.sleep(2000);
             // Assert metering counts incremented by 1
             Assert.assertEquals(afterPolicyUpdateMeterCount - beforePolicyUpdateMeterCount, 1.0);
             Assert.assertEquals(afterPolicyEvalMeterCount - beforePolicyEvalMeterCount, 1.0);
