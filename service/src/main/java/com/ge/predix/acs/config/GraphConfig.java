@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import com.thinkaurelius.titan.core.EdgeLabel;
 import com.thinkaurelius.titan.core.PropertyKey;
@@ -34,7 +33,6 @@ import com.thinkaurelius.titan.graphdb.database.management.ManagementSystem;
 
 @Configuration
 @EnableAutoConfiguration
-@Profile("titan")
 public class GraphConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphConfig.class);
 

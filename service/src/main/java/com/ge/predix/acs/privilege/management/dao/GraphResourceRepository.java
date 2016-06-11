@@ -1,11 +1,10 @@
 package com.ge.predix.acs.privilege.management.dao;
 
-import java.util.Set;
+import java.util.Collections;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
 public class GraphResourceRepository extends GraphGenericRepository<ResourceEntity> implements ResourceRepository {
@@ -17,12 +16,7 @@ public class GraphResourceRepository extends GraphGenericRepository<ResourceEnti
 
     @Override
     public ResourceEntity getByZoneAndResourceIdentifier(final ZoneEntity zone, final String resourceIdentifier) {
-        return getByZoneAndIdentifier(zone, resourceIdentifier);
-    }
-
-    public ResourceEntity getByZoneAndResourceIdentifierAndScopes(final ZoneEntity zone,
-            final String resourceIdentifier, final Set<Attribute> scopes) {
-        return getByZoneAndIdentifierAndScopes(zone, resourceIdentifier, scopes);
+        return getByZoneAndIdentifierAndScopes(zone, resourceIdentifier, Collections.emptySet());
     }
 
     @Override

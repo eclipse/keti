@@ -328,6 +328,9 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
         return null;
     }
 
+    /**
+     * Returns the entity with attributes only on the requested vertex. No parent attributes are included.
+     */
     public E getByZoneAndIdentifier(final ZoneEntity zone, final String identifier) {
         try {
             GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V().has(ZONE_ID_KEY, zone.getName())
@@ -337,8 +340,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
             }
             Vertex vertex = traversal.next();
             E entity = vertexToEntity(vertex);
-            searchAttributes(entity, vertex);
-
+            
             // There should be only one entity with a given entity id.
             Assert.isTrue(!traversal.hasNext(),
                     String.format("There are two entities with the same %s.", getEntityIdKey()));

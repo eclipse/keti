@@ -17,7 +17,9 @@ package com.ge.predix.acs.privilege.management;
 
 import static java.util.Arrays.asList;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +35,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
+import com.ge.predix.acs.config.GraphBeanDefinitionRegistryPostProcessor;
+import com.ge.predix.acs.config.GraphConfig;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.policy.evaluation.cache.HystrixPolicyEvaluationCacheCircuitBreaker;
@@ -40,6 +44,7 @@ import com.ge.predix.acs.policy.evaluation.cache.InMemoryPolicyEvaluationCache;
 import com.ge.predix.acs.request.context.AcsRequestContextHolder;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
+import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.acs.testutils.MockSecurityContext;
 import com.ge.predix.acs.testutils.TestUtils;
@@ -51,7 +56,7 @@ import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
         classes = { AcsRequestContextHolder.class, HystrixPolicyEvaluationCacheCircuitBreaker.class,
                 InMemoryDataSourceConfig.class, InMemoryPolicyEvaluationCache.class,
                 PrivilegeManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
-                SpringSecurityZoneResolver.class, ZoneServiceImpl.class })
+                SpringSecurityZoneResolver.class, ZoneServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class })
 @ActiveProfiles(profiles = { "h2", "public", "simple-cache" })
 public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTestNGSpringContextTests {
 
@@ -122,19 +127,6 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
         this.service.upsertResource(null);
     }
 
-    // @Test
-    // public void testCreateResourceGetWithDifferentIssuer()
-    // {
-    // String resourceIdentifier = "/asset/sanrafael";
-    // Resource resource = doCreateResourceAndAssert(resourceIdentifier);
-    //
-    // configureSecurityContextFixture("ampid", "ampusername",
-    // "dave@predix.com", ISSUER_2);
-    // Assert.assertNull(this.service.getByResourceId(resource.getResourceId()));
-    // Assert.assertNull(this.service.getByResourceIdentifier(resourceIdentifier));
-    //
-    // }
-
     @Test
     public void testUpdateResource() {
         String resourceIdentifier = "/asset/sananselmo";
@@ -164,28 +156,21 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
         Assert.assertFalse(this.service.deleteResource("invalid_id"));
     }
 
-    // @Test
-    // public void testGetResourcesEmptyResult()
-    // {
-    // doAppendResourcesAndAssert("/asset/macfarland", "/asset/oregon");
-    //
-    // configureSecurityContextFixture("ampid", "ampusername",
-    // "dave@predix.com", ISSUER_2);
-    // List<Resource> resources = this.service.getResources();
-    // Assert.assertEquals(resources.size(), 0);
-    //
-    // }
-
     @Test
     public void testAppendSubjects() {
-        BaseSubject s1 = createSubject("dave");
-        BaseSubject s2 = createSubject("sanjeev");
+        try {
+            BaseSubject s1 = createSubject("dave", this.fixedAttributes);
+            BaseSubject s2 = createSubject("sanjeev", this.fixedAttributes);
 
-        this.service.appendSubjects(asList(s1, s2));
+            this.service.appendSubjects(asList(s1, s2));
 
-        // able to get subject by identifier
-        Assert.assertNotNull(this.service.getBySubjectIdentifier(s1.getSubjectIdentifier()));
-        Assert.assertNotNull(this.service.getBySubjectIdentifier(s2.getSubjectIdentifier()));
+            // able to get subject by identifier
+            Assert.assertNotNull(this.service.getBySubjectIdentifier(s1.getSubjectIdentifier()));
+            Assert.assertNotNull(this.service.getBySubjectIdentifier(s2.getSubjectIdentifier()));
+        } finally {
+            this.service.deleteSubject("dave");
+            this.service.deleteSubject("sanjeev");
+        }
     }
 
     @Test(expectedExceptions = PrivilegeManagementException.class)
@@ -202,12 +187,36 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
     @Test
     public void testCreateSubject() {
         String subjectIdentifier = "marissa";
-        BaseSubject subject = createSubject(subjectIdentifier);
+        try {
+            BaseSubject subject = createSubject(subjectIdentifier, this.fixedAttributes);
 
-        boolean created = this.service.upsertSubject(subject);
-        Assert.assertTrue(created);
-        Assert.assertTrue(this.service.getBySubjectIdentifier(subjectIdentifier).equals(subject));
+            boolean created = this.service.upsertSubject(subject);
+            Assert.assertTrue(created);
+            Assert.assertTrue(this.service.getBySubjectIdentifier(subjectIdentifier).equals(subject));
+        } finally {
+            this.service.deleteSubject("marissa");
+        }
+    }
+    
+    @Test
+    public void testCreateSubjectWithParent() {
+        String testSubjectId = "marissa";
+        final String parentSubjectId = "bob";
+        try {
+            BaseSubject marissa = createSubject(testSubjectId, this.fixedAttributes);
 
+            BaseSubject bob = createSubject(parentSubjectId, 
+                    this.attributesUtilities.getSetOfAttributes(new Attribute("acs", "group", "parent")));
+            this.service.upsertSubject(bob);
+            marissa.setParents(new HashSet<Parent>(Arrays.asList(new Parent(parentSubjectId))));
+            this.service.upsertSubject(marissa);
+
+            Assert.assertEquals(this.service.getBySubjectIdentifier(testSubjectId), marissa);
+            Assert.assertEquals(this.service.getBySubjectIdentifier(testSubjectId).getAttributes(), marissa.getAttributes());
+        } finally {
+            this.service.deleteSubject(testSubjectId);
+            this.service.deleteSubject(parentSubjectId);
+        }
     }
 
     @Test(expectedExceptions = PrivilegeManagementException.class)
@@ -219,7 +228,7 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
     @Test(expectedExceptions = SecurityException.class, enabled = false)
     public void testCreateSubjectAndGetWithDifferentClientId() {
         String subjectIdentifier = "Dave-ID123";
-        BaseSubject subject = createSubject(subjectIdentifier);
+        BaseSubject subject = createSubject(subjectIdentifier, this.fixedAttributes);
 
         boolean created = this.service.upsertSubject(subject);
         Assert.assertTrue(created);
@@ -259,7 +268,7 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
     @Test
     public void testUpdateSubject() {
         String subjectIdentifier = "/asset/sananselmo";
-        BaseSubject subject = createSubject(subjectIdentifier);
+        BaseSubject subject = createSubject(subjectIdentifier, this.fixedAttributes);
 
         boolean created = this.service.upsertSubject(subject);
         Assert.assertTrue(created);
@@ -277,7 +286,7 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
     @Test
     public void testDeleteSubject() {
         String subjectIdentifier = "/asset/santarita";
-        BaseSubject subject = createSubject(subjectIdentifier);
+        BaseSubject subject = createSubject(subjectIdentifier, this.fixedAttributes);
         this.service.upsertSubject(subject);
 
         boolean deleted = this.service.deleteSubject(subjectIdentifier);
@@ -292,8 +301,8 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
 
     @Test
     public void testGetSubjects() {
-        BaseSubject r1 = createSubject("/asset/macfarland");
-        BaseSubject r2 = createSubject("/asset/oregon");
+        BaseSubject r1 = createSubject("/asset/macfarland", this.fixedAttributes);
+        BaseSubject r2 = createSubject("/asset/oregon", this.fixedAttributes);
 
         this.service.appendSubjects(asList(r1, r2));
         List<BaseSubject> subjects = this.service.getSubjects();
@@ -301,10 +310,10 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
 
     }
 
-    private BaseSubject createSubject(final String subjectIdentifier) {
+    private BaseSubject createSubject(final String subjectIdentifier, Set<Attribute> attributes) {
         BaseSubject subject = new BaseSubject();
         subject.setSubjectIdentifier(subjectIdentifier);
-        subject.setAttributes(this.fixedAttributes);
+        subject.setAttributes(attributes);
         return subject;
     }
 
