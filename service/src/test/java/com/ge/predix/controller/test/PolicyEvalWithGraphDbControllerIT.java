@@ -115,15 +115,15 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
     }
 
     @Test(dataProvider = "policyEvalDataProvider")
-    public void testPolicyEvaluation(final Zone zone, final PolicySet policySet,
+    public void testPolicyEvaluation(final Zone zone, final PolicySet testPolicySet,
             final List<BaseResource> resourceHierarchy, final List<BaseSubject> subjectHierarchy,
             final PolicyEvaluationRequestV1 policyEvalRequest, final Effect expectedEffect) throws Exception {
         // Create policy set.
-        String uri = POLICY_SET_URL + "/" + URLEncoder.encode(policySet.getName(), "UTF-8");
+        String uri = POLICY_SET_URL + "/" + URLEncoder.encode(testPolicySet.getName(), "UTF-8");
         MockMvcContext putPolicySetContext = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
                 zone.getSubdomain(), uri);
         putPolicySetContext.getMockMvc().perform(putPolicySetContext.getBuilder()
-                .contentType(MediaType.APPLICATION_JSON).content(OBJECT_WRITER.writeValueAsString(policySet)))
+                .contentType(MediaType.APPLICATION_JSON).content(OBJECT_WRITER.writeValueAsString(testPolicySet)))
                 .andExpect(status().isCreated());
 
         // Create resource hierarchy.
@@ -212,15 +212,17 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
 
         BaseSubject specialAgentsGroup = new BaseSubject(SPECIAL_AGENTS_GROUP);
         specialAgentsGroup.setAttributes(SPECIAL_AGENTS_GROUP_ATTRIBUTES);
-        specialAgentsGroup.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(fbi.getSubjectIdentifier()) })));
+        specialAgentsGroup
+                .setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(fbi.getSubjectIdentifier()) })));
 
         BaseSubject topSecretGroup = new BaseSubject(TOP_SECRET_GROUP);
         topSecretGroup.setAttributes(TOP_SECRET_GROUP_ATTRIBUTES);
 
         BaseSubject agentMulder = new BaseSubject(AGENT_MULDER);
         agentMulder.setAttributes(MULDERS_ATTRIBUTES);
-        agentMulder.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(specialAgentsGroup.getSubjectIdentifier()),
-                new Parent(topSecretGroup.getSubjectIdentifier()) })));
+        agentMulder.setParents(
+                new HashSet<>(Arrays.asList(new Parent[] { new Parent(specialAgentsGroup.getSubjectIdentifier()),
+                        new Parent(topSecretGroup.getSubjectIdentifier()) })));
 
         return Arrays.asList(new BaseSubject[] { fbi, specialAgentsGroup, topSecretGroup, agentMulder });
     }
@@ -251,8 +253,8 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
 
         BaseResource evidenceImplant = new BaseResource(EVIDENCE_IMPLANT_ID);
         evidenceImplant.setAttributes(EVIDENCE_IMPLANT_ATTRIBUTES);
-        evidenceImplant.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(pentagon.getResourceIdentifier()),
-                new Parent(ascension.getResourceIdentifier()) })));
+        evidenceImplant.setParents(new HashSet<>(Arrays.asList(new Parent[] {
+                new Parent(pentagon.getResourceIdentifier()), new Parent(ascension.getResourceIdentifier()) })));
 
         return Arrays.asList(new BaseResource[] { pentagon, ascension, evidenceImplant });
     }
@@ -263,15 +265,16 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
 
         BaseSubject specialAgentsGroup = new BaseSubject(SPECIAL_AGENTS_GROUP);
         specialAgentsGroup.setAttributes(SPECIAL_AGENTS_GROUP_ATTRIBUTES);
-        specialAgentsGroup.setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(fbi.getSubjectIdentifier()) })));
+        specialAgentsGroup
+                .setParents(new HashSet<>(Arrays.asList(new Parent[] { new Parent(fbi.getSubjectIdentifier()) })));
 
         BaseSubject topSecretGroup = new BaseSubject(TOP_SECRET_GROUP);
         topSecretGroup.setAttributes(TOP_SECRET_GROUP_ATTRIBUTES);
 
         BaseSubject agentMulder = new BaseSubject(AGENT_MULDER);
         agentMulder.setAttributes(MULDERS_ATTRIBUTES);
-        agentMulder.setParents(new HashSet<>(Arrays.asList(
-                new Parent[] { new Parent(specialAgentsGroup.getSubjectIdentifier()), new Parent(topSecretGroup.getSubjectIdentifier(),
+        agentMulder.setParents(new HashSet<>(Arrays.asList(new Parent[] {
+                new Parent(specialAgentsGroup.getSubjectIdentifier()), new Parent(topSecretGroup.getSubjectIdentifier(),
                         new HashSet<>(Arrays.asList(new Attribute[] { SITE_BASEMENT }))) })));
 
         return Arrays.asList(new BaseSubject[] { fbi, specialAgentsGroup, topSecretGroup, agentMulder });

@@ -6,7 +6,7 @@ import com.ge.predix.acs.model.Attribute;
 
 public class ParentEntity {
 
-    private ZonableEntity entity;
+    private ZonableEntity childEntity;
     private Set<Attribute> scopes;
 
     ParentEntity() {
@@ -14,20 +14,20 @@ public class ParentEntity {
     }
 
     public ParentEntity(final ZonableEntity entity) {
-        this.entity = entity;
+        this.childEntity = entity;
     }
 
     public ParentEntity(final ZonableEntity entity, final Set<Attribute> scopes) {
-        this.entity = entity;
+        this.childEntity = entity;
         this.scopes = scopes;
     }
 
-    public ZonableEntity getEntity() {
-        return this.entity;
+    public ZonableEntity getChildEntity() {
+        return this.childEntity;
     }
 
-    public void setEntity(final ZonableEntity entity) {
-        this.entity = entity;
+    public void setChildEntity(final ZonableEntity entity) {
+        this.childEntity = entity;
     }
 
     public Set<Attribute> getScopes() {

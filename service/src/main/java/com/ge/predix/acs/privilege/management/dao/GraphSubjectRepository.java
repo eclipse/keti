@@ -6,10 +6,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import com.ge.predix.acs.model.Attribute;
+import com.ge.predix.acs.rest.Parent;
+import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
 public class GraphSubjectRepository extends GraphGenericRepository<SubjectEntity>
         implements SubjectRepository, SubjectScopedAccessRepository {
+    private static final JsonUtils JSON_UTILS = new JsonUtils();
+
     private static final String EMPTY_ATTRIBUTES = "{}";
     private static final String HAS_SUBJECT_RELATIONSHIP_KEY = "hasSubject";
     private static final String SUBJECT_LABEL = "subject";
@@ -56,15 +60,20 @@ public class GraphSubjectRepository extends GraphGenericRepository<SubjectEntity
         vertex.property(ATTRIBUTES_PROPERTY_KEY, subjectAttributesJson);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     SubjectEntity vertexToEntity(final Vertex vertex) {
-        String subjectIdentifier = getVertexStringPropertyOrFail(vertex, SUBJECT_ID_KEY);
-        String zoneName = getVertexStringPropertyOrFail(vertex, ZONE_ID_KEY);
+        String subjectIdentifier = getPropertyOrFail(vertex, SUBJECT_ID_KEY);
+        String zoneName = getPropertyOrFail(vertex, ZONE_ID_KEY);
         ZoneEntity zoneEntity = new ZoneEntity();
         zoneEntity.setName(zoneName);
         SubjectEntity subjectEntity = new SubjectEntity(zoneEntity, subjectIdentifier);
         subjectEntity.setId((long) vertex.id());
-        subjectEntity.setAttributesAsJson(getVertexStringPropertyOrEmpty(vertex, ATTRIBUTES_PROPERTY_KEY));
+        String attributesAsJson = getPropertyOrEmptyString(vertex, ATTRIBUTES_PROPERTY_KEY);
+        subjectEntity.setAttributesAsJson(attributesAsJson);
+        subjectEntity.setAttributes(JSON_UTILS.deserialize(attributesAsJson, Set.class, Attribute.class));
+        Set<Parent> parentSet = getParents(vertex, SUBJECT_ID_KEY);
+        subjectEntity.setParents(parentSet);
         return subjectEntity;
     }
 }

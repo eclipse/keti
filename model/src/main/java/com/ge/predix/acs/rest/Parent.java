@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.springframework.util.Assert;
 
 import com.ge.predix.acs.model.Attribute;
 
@@ -38,8 +39,8 @@ public class Parent {
     }
 
     public Parent(final String identifier, final Set<Attribute> scopes) {
+        setScopes(scopes);
         this.identifier = identifier;
-        this.scopes = scopes;
     }
 
     public String getIdentifier() {
@@ -55,6 +56,7 @@ public class Parent {
     }
 
     public void setScopes(final Set<Attribute> scopes) {
+        Assert.isTrue(scopes.size() < 2, "Multiple scope attributes are not supported, yet.");
         this.scopes = scopes;
     }
 
@@ -70,6 +72,11 @@ public class Parent {
             return new EqualsBuilder().append(this.identifier, other.identifier).isEquals();
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "Parent [identifier=" + identifier + ", scopes=" + scopes + "]";
     }
 
 }

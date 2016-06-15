@@ -30,6 +30,9 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
@@ -59,7 +62,7 @@ public class SubjectEntity implements ZonableEntity {
      * Clob representing set of attributes as a JSON body.
      */
     @Column(name = "attributes", columnDefinition = "CLOB NOT NULL")
-    private String attributesAsJson;
+    private String attributesAsJson = "{}";
 
     @Transient
     private Set<Attribute> attributes = Collections.emptySet();
@@ -146,7 +149,29 @@ public class SubjectEntity implements ZonableEntity {
 
     @Override
     public String toString() {
-        return "SubjectEntity [id=" + this.id + ", zone=" + this.zone + ", subjectIdentifier=" + this.subjectIdentifier
-                + ", attributesAsJson=" + this.attributesAsJson + "]";
+        return "SubjectEntity [id=" + id + ", zone=" + zone + ", subjectIdentifier=" + subjectIdentifier
+                + ", attributesAsJson=" + attributesAsJson + ", parents=" + parents + "]";
     }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(this.subjectIdentifier).append(this.zone).append(this.attributesAsJson)
+                .append(this.parents).toHashCode();
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof SubjectEntity) {
+            SubjectEntity other = (SubjectEntity) obj;
+            return new EqualsBuilder()
+                    .append(this.subjectIdentifier, other.subjectIdentifier)
+                    .append(this.zone, other.zone)
+                    .append(this.attributesAsJson, other.attributesAsJson)
+                    .append(this.parents, other.parents)
+                    .isEquals();
+            
+        } 
+        return false;
+    }
+
 }

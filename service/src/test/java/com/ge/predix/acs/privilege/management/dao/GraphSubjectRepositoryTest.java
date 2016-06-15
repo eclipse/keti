@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.equalTo;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -45,14 +46,14 @@ public class GraphSubjectRepositoryTest {
     private static final ZoneEntity TEST_ZONE_1 = new ZoneEntity(1L, "testzone1");
     private static final ZoneEntity TEST_ZONE_2 = new ZoneEntity(2L, "testzone2");
 
-    GraphSubjectRepository repository;
-    Graph graph;
+    private GraphSubjectRepository subjectRepository;
+    private Graph graph;
 
     @BeforeClass
     public void setup() throws Exception {
-        this.repository = new GraphSubjectRepository();
+        this.subjectRepository = new GraphSubjectRepository();
         setupTitanGraph();
-        this.repository.setGraph(this.graph);
+        this.subjectRepository.setGraph(this.graph);
     }
 
     private void setupTitanGraph() throws InterruptedException, ExecutionException {
@@ -74,38 +75,49 @@ public class GraphSubjectRepositoryTest {
     @Test
     public void testGetByZoneAndSubjectIdentifier() {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        persistSubject1toZone1();
+        SubjectEntity subjectEntityForZone1 = persistSubject1toZone1AndAssert();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
-        persistSubject1toZone2();
+        SubjectEntity subjectEntityForZone2 = persistSubject1toZone2AndAssert();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
 
-        SubjectEntity subject = this.repository.getByZoneAndSubjectIdentifier(TEST_ZONE_1, AGENT_SCULLY);
-        assertThat(subject.getSubjectIdentifier(), equalTo(AGENT_SCULLY));
+        SubjectEntity actualSubjectForZone1 = this.subjectRepository.getByZoneAndSubjectIdentifier(TEST_ZONE_1,
+                AGENT_SCULLY);
+        SubjectEntity actualSubjectForZone2 = this.subjectRepository.getByZoneAndSubjectIdentifier(TEST_ZONE_2,
+                AGENT_SCULLY);
+        assertThat(actualSubjectForZone1, equalTo(subjectEntityForZone1));
+        assertThat(actualSubjectForZone2, equalTo(subjectEntityForZone2));
     }
 
     @Test
     public void testGetByZoneAndSubjectIdentifierAndScopes() {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        String subjectIdentifier = persistScopedHierarchy().getSubjectIdentifier();
+        SubjectEntity expectedSubject = persistScopedHierarchy(AGENT_MULDER, SITE_BASEMENT);
+        String subjectIdentifier = expectedSubject.getSubjectIdentifier();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
+        HashSet<Attribute> expectedAttributes = 
+                new HashSet<>(Arrays.asList(new Attribute[] 
+                        { SECRET_CLASSIFICATION, TOP_SECRET_CLASSIFICATION, SITE_BASEMENT }));
+        expectedSubject.setAttributes(expectedAttributes);
+        expectedSubject.setAttributesAsJson(JSON_UTILS.serialize(expectedAttributes));
+        SubjectEntity actualSubject = this.subjectRepository.getByZoneAndIdentifierAndScopes(TEST_ZONE_1,
+                subjectIdentifier,
+                new HashSet<>(Arrays.asList(new Attribute[] {SITE_BASEMENT })));
+        assertThat(actualSubject, equalTo(expectedSubject));
 
-        SubjectEntity subject = this.repository.getByZoneAndIdentifierAndScopes(TEST_ZONE_1, subjectIdentifier,
-                new HashSet<>(Arrays.asList(new Attribute[] { SITE_BASEMENT })));
-        assertThat(subject.getSubjectIdentifier(), equalTo(subjectIdentifier));
-        assertThat(subject.getAttributes().contains(TOP_SECRET_CLASSIFICATION), equalTo(true));
-        assertThat(subject.getAttributes().contains(SECRET_CLASSIFICATION), equalTo(true));
-
-        subject = this.repository.getByZoneAndIdentifierAndScopes(TEST_ZONE_1, subjectIdentifier,
+        expectedAttributes = 
+                new HashSet<>(Arrays.asList(new Attribute[] 
+                        { SECRET_CLASSIFICATION, SITE_BASEMENT }));
+        expectedSubject.setAttributes(expectedAttributes);
+        expectedSubject.setAttributesAsJson(JSON_UTILS.serialize(expectedAttributes));
+        actualSubject = this.subjectRepository.getByZoneAndIdentifierAndScopes(TEST_ZONE_1, subjectIdentifier,
                 new HashSet<>(Arrays.asList(new Attribute[] { SITE_PENTAGON })));
-        assertThat(subject.getSubjectIdentifier(), equalTo(subjectIdentifier));
-        assertThat(subject.getAttributes().contains(TOP_SECRET_CLASSIFICATION), equalTo(false));
-        assertThat(subject.getAttributes().contains(SECRET_CLASSIFICATION), equalTo(true));
+        assertThat(actualSubject, equalTo(expectedSubject));
     }
 
     @Test
     public void testSave() {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        String subjectIdentifier = persistSubject1toZone1().getSubjectIdentifier();
+        String subjectIdentifier = persistSubject1toZone1AndAssert().getSubjectIdentifier();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
 
         GraphTraversalSource g = this.graph.traversal();
@@ -118,62 +130,64 @@ public class GraphSubjectRepositoryTest {
     @Test
     public void testSaveWithNoAttributes() {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        this.repository.save(new SubjectEntity(TEST_ZONE_1, AGENT_SCULLY));
+        SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, AGENT_SCULLY);
+        this.subjectRepository.save(subject);
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
+        assertThat(this.subjectRepository.getByZoneAndIdentifier(TEST_ZONE_1, AGENT_SCULLY), equalTo(subject));
     }
 
     @Test
     public void testSaveScopes() {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        SubjectEntity subject = persistScopedHierarchy();
+        SubjectEntity subject = persistScopedHierarchy(AGENT_MULDER, SITE_BASEMENT);
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
         assertThat(IteratorUtils.count(this.graph.traversal().V(subject.getId()).outE(PARENT_EDGE_LABEL)), equalTo(2L));
 
         // Persist again (i.e. update) and make sure vertex and edge count are stable.
-        this.repository.save(subject);
+        this.subjectRepository.save(subject);
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
         assertThat(IteratorUtils.count(this.graph.traversal().V(subject.getId()).outE(PARENT_EDGE_LABEL)), equalTo(2L));
+        assertThat("Expected scope not found on subject.", this.subjectRepository.findOne(subject.getId()).getParents()
+                .iterator().next().getScopes().contains(SITE_BASEMENT));
     }
 
-    private SubjectEntity persistSubject1toZone1() {
-        SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, AGENT_SCULLY);
-        subject.setAttributes(Collections.emptySet());
+    private SubjectEntity persistSubject1toZone1AndAssert() {
+        return persistSubjectToZoneAndAssert(TEST_ZONE_1, AGENT_SCULLY, Collections.emptySet());
+    }
+
+    private SubjectEntity persistSubject1toZone2AndAssert() {
+        return persistSubjectToZoneAndAssert(TEST_ZONE_2, AGENT_SCULLY, Collections.emptySet());
+    }
+
+    private SubjectEntity persistTopSecretGroupAndAssert() {
+        return persistSubjectToZoneAndAssert(TEST_ZONE_1, TOP_SECRET_GROUP, TOP_SECRET_GROUP_ATTRIBUTES);
+    }
+
+    private SubjectEntity persistSecretGroupAndAssert() {
+        return persistSubjectToZoneAndAssert(TEST_ZONE_1, SECRET_GROUP, SECRET_GROUP_ATTRIBUTES);
+    }
+
+    private SubjectEntity persistSubjectToZoneAndAssert(final ZoneEntity zone, final String subjectIdentifier,
+            final Set<Attribute> attributes) {
+        SubjectEntity subject = new SubjectEntity(zone, subjectIdentifier);
+        subject.setAttributes(attributes);
         subject.setAttributesAsJson(JSON_UTILS.serialize(subject.getAttributes()));
-        return this.repository.save(subject);
+        SubjectEntity subjectEntity = this.subjectRepository.save(subject);
+        assertThat(this.subjectRepository.findOne(subjectEntity.getId()), equalTo(subject));
+        return subjectEntity;
     }
 
-    private SubjectEntity persistSubject1toZone2() {
-        SubjectEntity subject = new SubjectEntity(TEST_ZONE_2, AGENT_SCULLY);
-        subject.setAttributes(Collections.emptySet());
-        subject.setAttributesAsJson(JSON_UTILS.serialize(subject.getAttributes()));
-        return this.repository.save(subject);
-    }
+    private SubjectEntity persistScopedHierarchy(final String subjectIdentifier, final Attribute scope) {
+        SubjectEntity secretGroup = persistSecretGroupAndAssert();
+        SubjectEntity topSecretGroup = persistTopSecretGroupAndAssert();
 
-    private SubjectEntity persistTopSecretGroup() {
-        SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, TOP_SECRET_GROUP);
-        subject.setAttributes(TOP_SECRET_GROUP_ATTRIBUTES);
-        subject.setAttributesAsJson(JSON_UTILS.serialize(subject.getAttributes()));
-        return this.repository.save(subject);
-    }
-
-    private SubjectEntity persistSecretGroup() {
-        SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, SECRET_GROUP);
-        subject.setAttributes(SECRET_GROUP_ATTRIBUTES);
-        subject.setAttributesAsJson(JSON_UTILS.serialize(subject.getAttributes()));
-        return this.repository.save(subject);
-    }
-
-    private SubjectEntity persistScopedHierarchy() {
-        SubjectEntity secretGroup = persistSecretGroup();
-        SubjectEntity topSecretGroup = persistTopSecretGroup();
-
-        SubjectEntity agentMulder = new SubjectEntity(TEST_ZONE_1, AGENT_MULDER);
+        SubjectEntity agentMulder = new SubjectEntity(TEST_ZONE_1, subjectIdentifier);
         agentMulder.setAttributes(MULDERS_ATTRIBUTES);
         agentMulder.setAttributesAsJson(JSON_UTILS.serialize(agentMulder.getAttributes()));
         agentMulder.setParents(new HashSet<>(Arrays.asList(new Parent[] {
                 new Parent(topSecretGroup.getSubjectIdentifier(),
-                        new HashSet<>(Arrays.asList(new Attribute[] { SITE_BASEMENT }))),
+                        new HashSet<>(Arrays.asList(new Attribute[] { scope }))),
                 new Parent(secretGroup.getSubjectIdentifier()) })));
-        return this.repository.save(agentMulder);
+        return this.subjectRepository.save(agentMulder);
     }
 }

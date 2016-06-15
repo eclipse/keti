@@ -33,6 +33,7 @@ import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
+import com.google.common.collect.Sets;
 import com.thinkaurelius.titan.core.SchemaViolationException;
 
 public abstract class GraphGenericRepository<E extends ZonableEntity> implements JpaRepository<E, Long> {
@@ -303,7 +304,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
         }
     }
 
-    public static String getVertexStringPropertyOrEmpty(final Vertex vertex, final String propertyKey) {
+    public static String getPropertyOrEmptyString(final Vertex vertex, final String propertyKey) {
         VertexProperty<String> property = vertex.property(propertyKey);
         if (property.isPresent()) {
             return property.value();
@@ -311,7 +312,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
         return "";
     }
 
-    public static String getVertexStringPropertyOrFail(final Vertex vertex, final String propertyKey) {
+    public static String getPropertyOrFail(final Vertex vertex, final String propertyKey) {
         VertexProperty<String> property = vertex.property(propertyKey);
         if (property.isPresent()) {
             return property.value();
@@ -320,7 +321,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
                 "The vertex with id '%d' does not conatin the expected property '%s'.", vertex.id(), propertyKey));
     }
 
-    public static String getVertexStringPropertyOrNull(final Vertex vertex, final String propertyKey) {
+    public static String getPropertyOrNull(final Vertex vertex, final String propertyKey) {
         VertexProperty<String> property = vertex.property(propertyKey);
         if (property.isPresent()) {
             return property.value();
@@ -403,6 +404,26 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
 
         entity.setAttributes(attributes);
         entity.setAttributesAsJson(JSON_UTILS.serialize(attributes));
+    }
+    
+    public Set<Parent> getParents(final Vertex vertex, final String identifierKey) {
+        Set<Parent> parentSet = new HashSet<Parent>();
+        vertex.edges(Direction.OUT, PARENT_EDGE_LABEL).forEachRemaining(edge -> {
+            String parentIdentifier = getPropertyOrFail(edge.inVertex(), identifierKey);
+            Attribute scope;
+            try {
+                scope = JSON_UTILS.deserialize((String) edge.property(SCOPE_PROPERTY_KEY).value(), Attribute.class);
+                // use ParentEntity ?
+                Parent parent = new Parent(parentIdentifier, Sets.newHashSet(scope));
+                parentSet.add(parent);
+            } catch (Exception e) {
+                scope = null;
+                Parent parent = new Parent(parentIdentifier);
+                parentSet.add(parent);
+            }
+
+        });
+        return parentSet;
     }
 
     abstract String getEntityId(E entity);

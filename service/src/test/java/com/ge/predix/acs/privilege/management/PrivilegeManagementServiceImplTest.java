@@ -56,7 +56,8 @@ import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
         classes = { AcsRequestContextHolder.class, HystrixPolicyEvaluationCacheCircuitBreaker.class,
                 InMemoryDataSourceConfig.class, InMemoryPolicyEvaluationCache.class,
                 PrivilegeManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
-                SpringSecurityZoneResolver.class, ZoneServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class })
+                SpringSecurityZoneResolver.class, ZoneServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class,
+                GraphConfig.class })
 @ActiveProfiles(profiles = { "h2", "public", "simple-cache" })
 public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTestNGSpringContextTests {
 
@@ -205,14 +206,15 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
         try {
             BaseSubject marissa = createSubject(testSubjectId, this.fixedAttributes);
 
-            BaseSubject bob = createSubject(parentSubjectId, 
+            BaseSubject bob = createSubject(parentSubjectId,
                     this.attributesUtilities.getSetOfAttributes(new Attribute("acs", "group", "parent")));
             this.service.upsertSubject(bob);
             marissa.setParents(new HashSet<Parent>(Arrays.asList(new Parent(parentSubjectId))));
             this.service.upsertSubject(marissa);
 
             Assert.assertEquals(this.service.getBySubjectIdentifier(testSubjectId), marissa);
-            Assert.assertEquals(this.service.getBySubjectIdentifier(testSubjectId).getAttributes(), marissa.getAttributes());
+            Assert.assertEquals(this.service.getBySubjectIdentifier(testSubjectId).getAttributes(),
+                    marissa.getAttributes());
         } finally {
             this.service.deleteSubject(testSubjectId);
             this.service.deleteSubject(parentSubjectId);
@@ -310,7 +312,7 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
 
     }
 
-    private BaseSubject createSubject(final String subjectIdentifier, Set<Attribute> attributes) {
+    private BaseSubject createSubject(final String subjectIdentifier, final Set<Attribute> attributes) {
         BaseSubject subject = new BaseSubject();
         subject.setSubjectIdentifier(subjectIdentifier);
         subject.setAttributes(attributes);

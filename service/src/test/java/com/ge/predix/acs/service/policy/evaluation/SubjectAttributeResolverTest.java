@@ -65,7 +65,7 @@ public class SubjectAttributeResolverTest {
     }
 
     @Test
-    public void testGetSubjectAttributes_NoSubjectFoundAndNoSupplementalAttributes() {
+    public void testGetSubjectAttributesNoSubjectFoundAndNoSupplementalAttributes() {
         BaseSubject testSubject = new BaseSubject();
         testSubject.setSubjectIdentifier("/test/subject");
 
@@ -80,7 +80,7 @@ public class SubjectAttributeResolverTest {
     }
 
     @Test
-    public void testGetSubjectAttributes_SubjectFoundWithNoAttributesAndNoSupplementalAttributes() {
+    public void testGetSubjectAttributesSubjectFoundWithNoAttributesAndNoSupplementalAttributes() {
         BaseSubject testSubject = new BaseSubject();
         testSubject.setSubjectIdentifier("/test/subject");
 
@@ -95,7 +95,7 @@ public class SubjectAttributeResolverTest {
     }
 
     @Test
-    public void testGetSubjectAttributes_SubjectFoundWithAttributesAndNoSupplementalAttributes() {
+    public void testGetSubjectAttributesSubjectFoundWithAttributesAndNoSupplementalAttributes() {
         BaseSubject testSubject = new BaseSubject();
         testSubject.setSubjectIdentifier("/test/subject");
         Set<Attribute> subjectAttributes = new HashSet<>();
@@ -114,7 +114,7 @@ public class SubjectAttributeResolverTest {
     }
 
     @Test
-    public void testGetSubjectAttributes_SupplementalAttributesOnly() {
+    public void testGetSubjectAttributesSupplementalAttributesOnly() {
         BaseSubject testSubject = new BaseSubject();
         testSubject.setSubjectIdentifier("/test/subject");
 
@@ -133,7 +133,7 @@ public class SubjectAttributeResolverTest {
     }
 
     @Test
-    public void testGetSubjectAttributes_SubjectFoundWithNoAttributesButSupplementalAttributesProvided() {
+    public void testGetSubjectAttributesSubjectFoundWithNoAttributesButSupplementalAttributesProvided() {
         BaseSubject testSubject = new BaseSubject();
         testSubject.setSubjectIdentifier("/test/subject");
 

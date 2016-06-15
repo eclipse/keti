@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.ge.predix.acs.model.Attribute;
 
-public class XFiles {
+public final class XFiles {
     private XFiles() {
         // Prevents instantiation.
     }
@@ -19,7 +19,8 @@ public class XFiles {
     public static final Attribute SECRET_CLASSIFICATION = new Attribute(ISSUER_URI, "classification", "secret");
     public static final Attribute SPECIAL_AGENTS_GROUP_ATTRIBUTE = new Attribute(ISSUER_URI, "group", "special-agents");
     public static final Attribute TYPE_MYTHARC = new Attribute(ISSUER_URI, "type", "mytharc");
-    public static final Attribute TYPE_MONSTER_OF_THE_WEEK = new Attribute("acs.predix.ge.com", "type", "monster-of-the-week");
+    public static final Attribute TYPE_MONSTER_OF_THE_WEEK = new Attribute("acs.predix.ge.com", "type",
+            "monster-of-the-week");
 
     public static final String FBI = "fbi";
     public static final Set<Attribute> FBI_ATTRIBUTES = new HashSet<>(

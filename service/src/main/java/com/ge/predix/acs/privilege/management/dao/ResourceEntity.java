@@ -30,6 +30,9 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
@@ -144,4 +147,26 @@ public class ResourceEntity implements ZonableEntity {
         return "ResourceEntity [id=" + this.id + ", zone=" + this.zone + ", resourceIdentifier="
                 + this.resourceIdentifier + ", attributesAsJson=" + this.attributesAsJson + "]";
     }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(this.resourceIdentifier).append(this.zone).append(this.attributesAsJson)
+                .append(this.parents).toHashCode();
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof ResourceEntity) {
+            ResourceEntity other = (ResourceEntity) obj;
+            return new EqualsBuilder()
+                    .append(this.resourceIdentifier, other.resourceIdentifier)
+                    .append(this.zone, other.zone)
+                    .append(this.attributesAsJson, other.attributesAsJson)
+                    .append(this.parents, other.parents)
+                    .isEquals();
+            
+        } 
+        return false;
+    }
+
 }
