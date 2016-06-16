@@ -332,7 +332,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     /**
      * Returns the entity with attributes only on the requested vertex. No parent attributes are included.
      */
-    public E getByZoneAndIdentifier(final ZoneEntity zone, final String identifier) {
+    public E getEntity(final ZoneEntity zone, final String identifier) {
         try {
             GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V().has(ZONE_ID_KEY, zone.getName())
                     .has(getEntityIdKey(), identifier);
@@ -351,7 +351,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
         }
     }
 
-    public E getByZoneAndIdentifierAndScopes(final ZoneEntity zone, final String identifier,
+    public E getEntityWithInheritedAttributes(final ZoneEntity zone, final String identifier,
             final Set<Attribute> scopes) {
         try {
             GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V().has(ZONE_ID_KEY, zone.getName())

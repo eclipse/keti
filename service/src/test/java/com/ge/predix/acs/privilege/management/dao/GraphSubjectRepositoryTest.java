@@ -99,7 +99,7 @@ public class GraphSubjectRepositoryTest {
                         { SECRET_CLASSIFICATION, TOP_SECRET_CLASSIFICATION, SITE_BASEMENT }));
         expectedSubject.setAttributes(expectedAttributes);
         expectedSubject.setAttributesAsJson(JSON_UTILS.serialize(expectedAttributes));
-        SubjectEntity actualSubject = this.subjectRepository.getByZoneAndIdentifierAndScopes(TEST_ZONE_1,
+        SubjectEntity actualSubject = this.subjectRepository.getEntityWithInheritedAttributes(TEST_ZONE_1,
                 subjectIdentifier,
                 new HashSet<>(Arrays.asList(new Attribute[] {SITE_BASEMENT })));
         assertThat(actualSubject, equalTo(expectedSubject));
@@ -109,7 +109,7 @@ public class GraphSubjectRepositoryTest {
                         { SECRET_CLASSIFICATION, SITE_BASEMENT }));
         expectedSubject.setAttributes(expectedAttributes);
         expectedSubject.setAttributesAsJson(JSON_UTILS.serialize(expectedAttributes));
-        actualSubject = this.subjectRepository.getByZoneAndIdentifierAndScopes(TEST_ZONE_1, subjectIdentifier,
+        actualSubject = this.subjectRepository.getEntityWithInheritedAttributes(TEST_ZONE_1, subjectIdentifier,
                 new HashSet<>(Arrays.asList(new Attribute[] { SITE_PENTAGON })));
         assertThat(actualSubject, equalTo(expectedSubject));
     }
@@ -133,7 +133,7 @@ public class GraphSubjectRepositoryTest {
         SubjectEntity subject = new SubjectEntity(TEST_ZONE_1, AGENT_SCULLY);
         this.subjectRepository.save(subject);
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
-        assertThat(this.subjectRepository.getByZoneAndIdentifier(TEST_ZONE_1, AGENT_SCULLY), equalTo(subject));
+        assertThat(this.subjectRepository.getEntity(TEST_ZONE_1, AGENT_SCULLY), equalTo(subject));
     }
 
     @Test
