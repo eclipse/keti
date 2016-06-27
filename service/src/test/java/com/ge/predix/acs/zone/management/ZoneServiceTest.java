@@ -16,6 +16,8 @@
 
 package com.ge.predix.acs.zone.management;
 
+import static org.mockito.Matchers.anyList;
+
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,9 +32,17 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
+import com.ge.predix.acs.config.GraphBeanDefinitionRegistryPostProcessor;
+import com.ge.predix.acs.config.GraphConfig;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
+import com.ge.predix.acs.privilege.management.dao.GraphResourceRepository;
+import com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository;
+import com.ge.predix.acs.privilege.management.dao.ResourceRepository;
+import com.ge.predix.acs.privilege.management.dao.SubjectRepository;
 import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.acs.testutils.TestUtils;
+import com.ge.predix.acs.zone.management.dao.ZoneEntity;
+import com.ge.predix.acs.zone.management.dao.ZoneRepository;
 import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
 import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
 
@@ -42,8 +52,9 @@ import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
  */
 
 @ContextConfiguration(
-        classes = { InMemoryDataSourceConfig.class, ZoneServiceImpl.class, SpringSecurityPolicyContextResolver.class,
-                SpringSecurityZoneResolver.class })
+        classes = { GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class, GraphResourceRepository.class,
+                GraphSubjectRepository.class, InMemoryDataSourceConfig.class, SpringSecurityPolicyContextResolver.class,
+                SpringSecurityZoneResolver.class, ZoneServiceImpl.class })
 @TestPropertySource("/application.properties")
 @ActiveProfiles(profiles = { "h2", "public" })
 @Test
@@ -71,6 +82,21 @@ public class ZoneServiceTest extends AbstractTransactionalTestNGSpringContextTes
         } catch (ZoneManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Invalid Zone Subdomain"));
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Subject Deletion Failed!")
+    public void deleteZoneFailsWhenDeleteSubjectFails() {
+        ZoneRepository zoneRepository = Mockito.mock(ZoneRepository.class);
+        Mockito.when(zoneRepository.getByName("test-zone")).thenReturn(new ZoneEntity(1L, "test-zone"));
+        ResourceRepository resourceRepository = Mockito.mock(ResourceRepository.class);
+        Mockito.doNothing().when(resourceRepository).delete(anyList());
+        SubjectRepository subjectRepository = Mockito.mock(SubjectRepository.class);
+        Mockito.doThrow(new RuntimeException("Subject Deletion Failed!")).when(subjectRepository).delete(anyList());
+        this.testUtils.setField(this.zoneService, "subjectRepository", subjectRepository);
+        this.testUtils.setField(this.zoneService, "resourceRepository", resourceRepository);
+        this.testUtils.setField(this.zoneService, "zoneRepository", zoneRepository);
+        this.zoneService.deleteZone("test-zone");
     }
 
     @DataProvider(name = "badSubDomainDataProvider")

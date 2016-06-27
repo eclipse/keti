@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.ge.predix.acs.policy.evaluation.cache.HystrixPolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.policy.evaluation.cache.BasicPolicyEvaluationCacheCircuitBreaker;
+import com.ge.predix.acs.policy.evaluation.cache.HystrixPolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
 
 @Configuration
@@ -27,13 +27,11 @@ public class PolicyEvaluationCacheConfig {
             return new BasicPolicyEvaluationCacheCircuitBreaker();
         }
         if (this.hystrixCircuitBreakerEnabled) {
-            LOGGER.info(
-                    "Caching is enabled with HystrixPolicyEvaluationCacheCircuitBreaker circuit breaker"
+            LOGGER.info("Caching is enabled with HystrixPolicyEvaluationCacheCircuitBreaker circuit breaker"
                     + " implementation.");
             return new HystrixPolicyEvaluationCacheCircuitBreaker();
         }
-        LOGGER.info(
-                "Caching is enabled with BasicPolicyEvaluationCacheCircuitBreaker circuit breaker"
+        LOGGER.info("Caching is enabled with BasicPolicyEvaluationCacheCircuitBreaker circuit breaker"
                 + " implementation.");
         return new BasicPolicyEvaluationCacheCircuitBreaker();
     }

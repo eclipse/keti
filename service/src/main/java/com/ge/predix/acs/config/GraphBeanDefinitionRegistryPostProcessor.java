@@ -6,11 +6,13 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.ge.predix.acs.privilege.management.dao.GraphResourceRepository;
 import com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository;
 
+@Profile("titan")
 @Component
 public class GraphBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 

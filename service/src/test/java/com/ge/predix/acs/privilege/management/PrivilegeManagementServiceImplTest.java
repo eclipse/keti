@@ -41,6 +41,8 @@ import com.ge.predix.acs.config.InMemoryDataSourceConfig;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.policy.evaluation.cache.HystrixPolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.policy.evaluation.cache.InMemoryPolicyEvaluationCache;
+import com.ge.predix.acs.privilege.management.dao.GraphResourceRepository;
+import com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository;
 import com.ge.predix.acs.request.context.AcsRequestContextHolder;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
@@ -57,8 +59,8 @@ import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
                 InMemoryDataSourceConfig.class, InMemoryPolicyEvaluationCache.class,
                 PrivilegeManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
                 SpringSecurityZoneResolver.class, ZoneServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class,
-                GraphConfig.class })
-@ActiveProfiles(profiles = { "h2", "public", "simple-cache" })
+                GraphConfig.class, GraphResourceRepository.class, GraphSubjectRepository.class })
+@ActiveProfiles(profiles = { "h2", "public", "simple-cache", "titan" })
 public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTestNGSpringContextTests {
 
     @Autowired
@@ -122,7 +124,7 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
     public void testCreateResource() {
         doCreateResourceAndAssert("/asset/sanrafael");
     }
-    
+
     @Test(expectedExceptions = PrivilegeManagementException.class)
     public void testCreateNullResources() {
         this.service.upsertResource(null);
@@ -198,7 +200,7 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
             this.service.deleteSubject("marissa");
         }
     }
-    
+
     @Test
     public void testCreateSubjectWithParent() {
         String testSubjectId = "marissa";
@@ -209,7 +211,7 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
             BaseSubject bob = createSubject(parentSubjectId,
                     this.attributesUtilities.getSetOfAttributes(new Attribute("acs", "group", "parent")));
             this.service.upsertSubject(bob);
-            marissa.setParents(new HashSet<Parent>(Arrays.asList(new Parent(parentSubjectId))));
+            marissa.setParents(new HashSet<>(Arrays.asList(new Parent(parentSubjectId))));
             this.service.upsertSubject(marissa);
 
             Assert.assertEquals(this.service.getBySubjectIdentifier(testSubjectId), marissa);
@@ -225,7 +227,7 @@ public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTes
     public void testCreateNullSubject() {
         this.service.upsertSubject(null);
     }
-    
+
     // TODO enable it back when the zone resolver is fully implemented
     @Test(expectedExceptions = SecurityException.class, enabled = false)
     public void testCreateSubjectAndGetWithDifferentClientId() {

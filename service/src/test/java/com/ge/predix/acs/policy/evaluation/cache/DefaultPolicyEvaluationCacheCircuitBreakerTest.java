@@ -84,11 +84,11 @@ public class DefaultPolicyEvaluationCacheCircuitBreakerTest extends AbstractTest
     public void testResourceTranslationPolicyEvaluationCache() {
         this.policyEvaluationCacheCircuitBreaker.setResourceTranslation(ZONE_NAME, "/x-files", "/v1/x-files");
         this.policyEvaluationCacheCircuitBreaker.setResourceTranslations(ZONE_NAME,
-                new HashSet<String>(Arrays.asList(new String[] { "/x-files" })), "/v1/x-files");
+                new HashSet<>(Arrays.asList(new String[] { "/x-files" })), "/v1/x-files");
         openCircuit();
         this.policyEvaluationCacheCircuitBreaker.setResourceTranslation(ZONE_NAME, "/x-files", "/v1/x-files");
         this.policyEvaluationCacheCircuitBreaker.setResourceTranslations(ZONE_NAME,
-                new HashSet<String>(Arrays.asList(new String[] { "/x-files" })), "/v1/x-files");
+                new HashSet<>(Arrays.asList(new String[] { "/x-files" })), "/v1/x-files");
         // Success happens if the calls above do not throw an exception.
     }
 

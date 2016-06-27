@@ -26,8 +26,7 @@ import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
 
 @Component
-public class SpringSecurityZoneResolver implements ZoneResolver {   
-
+public class SpringSecurityZoneResolver implements ZoneResolver {
 
     @Override
     public ZoneEntity getZoneEntityOrFail() {
@@ -40,7 +39,7 @@ public class SpringSecurityZoneResolver implements ZoneResolver {
                     .getAuthentication();
             throw new InvalidACSRequestException("The zone '" + zoneAuth.getZoneId() + "' does not exist.");
         }
-        
+
         return result;
     }
 }

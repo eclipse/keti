@@ -4,7 +4,6 @@ import static com.ge.predix.acs.privilege.management.dao.AttributePredicate.elem
 import static org.apache.tinkerpop.gremlin.process.traversal.P.eq;
 import static org.apache.tinkerpop.gremlin.process.traversal.P.test;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.in;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
 
 import java.util.ArrayList;
@@ -27,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+//import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.util.Assert;
 
 import com.ge.predix.acs.model.Attribute;
@@ -34,6 +34,7 @@ import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.google.common.collect.Sets;
+import com.thinkaurelius.titan.core.QueryException;
 import com.thinkaurelius.titan.core.SchemaViolationException;
 
 public abstract class GraphGenericRepository<E extends ZonableEntity> implements JpaRepository<E, Long> {
@@ -103,15 +104,16 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <S extends E> List<S> save(final Iterable<S> entities) {
+        List<S> savedEntities = new ArrayList<>();
         try {
-            List<E> savedEntities = new ArrayList<>();
             entities.forEach(item -> savedEntities.add(saveCommon(item)));
-            return (List<S>) savedEntities;
-        } finally {
             this.graph.tx().commit();
+        } catch (Exception e) {
+            this.graph.tx().rollback();
+            throw (e);
         }
+        return savedEntities;
     }
 
     @Override
@@ -137,8 +139,10 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     public void delete(final Long id) {
         try {
             this.graph.traversal().V(id).drop().iterate();
-        } finally {
             this.graph.tx().commit();
+        } catch (Exception e) {
+            this.graph.tx().rollback();
+            throw (e);
         }
     }
 
@@ -146,21 +150,25 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     public void delete(final E entity) {
         try {
             this.graph.traversal().V(entity.getId()).drop().iterate();
-        } finally {
             this.graph.tx().commit();
+        } catch (Exception e) {
+            this.graph.tx().rollback();
+            throw (e);
         }
     }
 
     @Override
     public void delete(final Iterable<? extends E> entities) {
+        // Assemble list of entity ids.
         try {
-            // Assemble list of entity ids.
             List<Long> ids = new ArrayList<>();
             entities.forEach(item -> ids.add(item.getId()));
             // Delete all entities in one fell swoop.
             this.graph.traversal().V(ids.toArray()).drop().iterate();
-        } finally {
             this.graph.tx().commit();
+        } catch (Exception e) {
+            this.graph.tx().rollback();
+            throw (e);
         }
     }
 
@@ -168,8 +176,10 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     public void deleteAll() {
         try {
             this.graph.traversal().V().has(getEntityIdKey()).drop().iterate();
-        } finally {
             this.graph.tx().commit();
+        } catch (Exception e) {
+            this.graph.tx().rollback();
+            throw (e);
         }
     }
 
@@ -203,11 +213,15 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
 
     @Override
     public <S extends E> S save(final S entity) {
+        S saveCommon = null;
         try {
-            return saveCommon(entity);
-        } finally {
+            saveCommon = saveCommon(entity);
             this.graph.tx().commit();
+        } catch (Exception e) {
+            this.graph.tx().rollback();
+            throw (e);
         }
+        return saveCommon;
     }
 
     private <S extends E> S saveCommon(final S entity) {
@@ -271,7 +285,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
             throw new IllegalStateException(String.format("No parent exists in zone '%s' with '%s' value of '%s'.",
                     entity.getZone().getName(), getEntityIdKey(), parent.getIdentifier()));
         }
-        Edge parentEdge =  vertex.addEdge(PARENT_EDGE_LABEL, traversal.next());
+        Edge parentEdge = vertex.addEdge(PARENT_EDGE_LABEL, traversal.next());
         parent.getScopes().forEach(scope -> parentEdge.property(SCOPE_PROPERTY_KEY, JSON_UTILS.serialize(scope)));
     }
 
@@ -341,13 +355,13 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
             }
             Vertex vertex = traversal.next();
             E entity = vertexToEntity(vertex);
-            
+
             // There should be only one entity with a given entity id.
             Assert.isTrue(!traversal.hasNext(),
                     String.format("There are two entities with the same %s.", getEntityIdKey()));
             return entity;
         } finally {
-            getGraph().tx().commit();
+            this.graph.tx().commit();
         }
     }
 
@@ -368,46 +382,53 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
                     String.format("There are two entities with the same %s.", getEntityIdKey()));
             return entity;
         } finally {
-            getGraph().tx().commit();
+            this.graph.tx().commit();
         }
     }
 
     @SuppressWarnings("unchecked")
-    public void searchAttributes(final E entity, final Vertex vertex) {
-        Set<Attribute> attributes = new HashSet<>();
-        getGraph().traversal().V(vertex.id()).has(ATTRIBUTES_PROPERTY_KEY).emit()
-                .repeat(out().simplePath().has(ATTRIBUTES_PROPERTY_KEY)).until(eq(null)).limit(this.traversalLimit)
-                .values(ATTRIBUTES_PROPERTY_KEY).toStream().forEach(it -> {
-                    attributes.addAll(JSON_UTILS.deserialize((String) it, Set.class, Attribute.class));
-                });
-        entity.setAttributes(attributes);
-        entity.setAttributesAsJson(JSON_UTILS.serialize(attributes));
-    }
-
-    @SuppressWarnings("unchecked")
-    public void searchAttributesWithScopes(final E entity, final Vertex vertex, final Set<Attribute> scopes) {
+    private void searchAttributesWithScopes(final E entity, final Vertex vertex, final Set<Attribute> scopes) {
         Set<Attribute> attributes = new HashSet<>();
 
         // First add all attributes inherited from non-scoped relationships.
         getGraph().traversal().V(vertex.id()).has(ATTRIBUTES_PROPERTY_KEY).emit()
                 .repeat(outE().hasNot(SCOPE_PROPERTY_KEY).otherV().simplePath().has(ATTRIBUTES_PROPERTY_KEY))
-                .until(eq(null)).limit(this.traversalLimit).values(ATTRIBUTES_PROPERTY_KEY).toStream().forEach(it -> {
-                    attributes.addAll(JSON_UTILS.deserialize((String) it, Set.class, Attribute.class));
+                .until(eq(null)).limit(this.traversalLimit + 1).values(ATTRIBUTES_PROPERTY_KEY).toStream()
+                .forEach(it -> {
+                    Set<Attribute> deserializedAttributes = JSON_UTILS.deserialize((String) it, Set.class,
+                            Attribute.class);
+                    if (deserializedAttributes != null) {
+                        attributes.addAll(deserializedAttributes);
+                        // This enforces the limit on the count of attributes returned from the traversal, instead of
+                        // number of vertices traversed. To do the latter will require traversing the graph twice.
+                        checkTraversalLimitOrFail(attributes);
+                    }
                 });
 
         getGraph().traversal().V(vertex.id()).has(ATTRIBUTES_PROPERTY_KEY).emit()
                 .repeat(outE().has(SCOPE_PROPERTY_KEY, test(elementOf(), scopes)).otherV().simplePath()
                         .has(ATTRIBUTES_PROPERTY_KEY))
-                .until(eq(null)).limit(this.traversalLimit).values(ATTRIBUTES_PROPERTY_KEY).toStream().forEach(it -> {
-                    attributes.addAll(JSON_UTILS.deserialize((String) it, Set.class, Attribute.class));
+                .until(eq(null)).limit(this.traversalLimit + 1).values(ATTRIBUTES_PROPERTY_KEY).toStream()
+                .forEach(it -> {
+                    Set<Attribute> deserializedAttributes = JSON_UTILS.deserialize((String) it, Set.class,
+                            Attribute.class);
+                    if (deserializedAttributes != null) {
+                        attributes.addAll(deserializedAttributes);
+                        checkTraversalLimitOrFail(attributes);
+                    }
                 });
-
         entity.setAttributes(attributes);
         entity.setAttributesAsJson(JSON_UTILS.serialize(attributes));
     }
-    
+
+    private void checkTraversalLimitOrFail(final Set<Attribute> attributes) {
+        if (attributes.size() > this.traversalLimit) {
+            throw new QueryException("Graph search failed: traversal limit exceeded.");
+        }
+    }
+
     public Set<Parent> getParents(final Vertex vertex, final String identifierKey) {
-        Set<Parent> parentSet = new HashSet<Parent>();
+        Set<Parent> parentSet = new HashSet<>();
         vertex.edges(Direction.OUT, PARENT_EDGE_LABEL).forEachRemaining(edge -> {
             String parentIdentifier = getPropertyOrFail(edge.inVertex(), identifierKey);
             Attribute scope;

@@ -68,8 +68,7 @@ public class PolicyMatcherImpl implements PolicyMatcher {
         for (Policy policy : policies) {
             ResourceAttributeResolverResult resAttrResolverResult = resourceAttributeResolver.getResult(policy);
             Set<Attribute> resourceAttributes = resAttrResolverResult.getResourceAttributes();
-            Set<Attribute> subjectAttributes = subjectAttributeResolver
-                    .getResult(resourceAttributes);
+            Set<Attribute> subjectAttributes = subjectAttributeResolver.getResult(resourceAttributes);
             if (resAttrResolverResult.isAttributeUriTemplateFound()) {
                 resolvedResourceUris.add(resAttrResolverResult.getResovledResourceUri());
             }

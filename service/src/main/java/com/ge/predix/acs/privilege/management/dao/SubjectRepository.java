@@ -22,14 +22,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
-/**
- *
- * @author 212360328
- */
 public interface SubjectRepository extends JpaRepository<SubjectEntity, Long> {
 
     List<SubjectEntity> findByZone(final ZoneEntity zone);
 
     SubjectEntity getByZoneAndSubjectIdentifier(final ZoneEntity zone, final String subjectIdentifier);
-
 }

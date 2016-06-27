@@ -23,8 +23,7 @@ public final class XFiles {
             "monster-of-the-week");
 
     public static final String FBI = "fbi";
-    public static final Set<Attribute> FBI_ATTRIBUTES = new HashSet<>(
-            Arrays.asList(new Attribute[] { SITE_QUANTICO }));
+    public static final Set<Attribute> FBI_ATTRIBUTES = new HashSet<>(Arrays.asList(new Attribute[] { SITE_QUANTICO }));
 
     public static final String SPECIAL_AGENTS_GROUP = "special-agents";
     public static final Set<Attribute> SPECIAL_AGENTS_GROUP_ATTRIBUTES = new HashSet<>(
@@ -36,7 +35,7 @@ public final class XFiles {
 
     public static final String SECRET_GROUP = "secret-clearance";
     public static final Set<Attribute> SECRET_GROUP_ATTRIBUTES = new HashSet<>(
-            Arrays.asList(new Attribute[] { SECRET_CLASSIFICATION}));
+            Arrays.asList(new Attribute[] { SECRET_CLASSIFICATION }));
 
     public static final String AGENT_MULDER = "mulder";
     public static final Set<Attribute> MULDERS_ATTRIBUTES = new HashSet<>(
@@ -67,7 +66,7 @@ public final class XFiles {
             Arrays.asList(new Attribute[] { TYPE_MONSTER_OF_THE_WEEK }));
 
     public static final String EVIDENCE_SCULLYS_TESTIMONY_ID = "/evidence/scullys-testimony";
-    public static final Set<Attribute> SCULLYS_TESTIMONY_ATTRIBUTES = new HashSet<Attribute>(
+    public static final Set<Attribute> SCULLYS_TESTIMONY_ATTRIBUTES = new HashSet<>(
             Arrays.asList(new Attribute[] { TOP_SECRET_CLASSIFICATION }));
 
     public static final String EVIDENCE_IMPLANT_ID = "/evidence/implant";

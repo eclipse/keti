@@ -140,7 +140,7 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
     @Override
     public List<ConditionScript> validatePolicyConditions(final List<Condition> conditions,
             final ConditionShell conditionShell) {
-        List<ConditionScript> conditionScripts = new ArrayList<ConditionScript>();
+        List<ConditionScript> conditionScripts = new ArrayList<>();
         try {
             if ((conditions == null) || conditions.isEmpty()) {
                 return conditionScripts;

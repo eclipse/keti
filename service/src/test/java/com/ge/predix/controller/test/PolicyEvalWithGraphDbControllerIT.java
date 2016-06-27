@@ -1,26 +1,26 @@
 package com.ge.predix.controller.test;
 
-import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION;
-import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTE;
-import static com.ge.predix.acs.testutils.XFiles.SITE_BASEMENT;
-import static com.ge.predix.acs.testutils.XFiles.SCULLYS_TESTIMONY_ATTRIBUTES;
-import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_SCULLYS_TESTIMONY_ID;
-import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_IMPLANT_ATTRIBUTES;
-import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_IMPLANT_ID;
-import static com.ge.predix.acs.testutils.XFiles.BASEMENT_ATTRIBUTES;
-import static com.ge.predix.acs.testutils.XFiles.BASEMENT_SITE_ID;
-import static com.ge.predix.acs.testutils.XFiles.PENTAGON_ATTRIBUTES;
-import static com.ge.predix.acs.testutils.XFiles.PENTAGON_SITE_ID;
+import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
 import static com.ge.predix.acs.testutils.XFiles.ASCENSION_ATTRIBUTES;
 import static com.ge.predix.acs.testutils.XFiles.ASCENSION_ID;
-import static com.ge.predix.acs.testutils.XFiles.FBI_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.BASEMENT_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.BASEMENT_SITE_ID;
+import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_IMPLANT_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_IMPLANT_ID;
+import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_SCULLYS_TESTIMONY_ID;
 import static com.ge.predix.acs.testutils.XFiles.FBI;
-import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTES;
-import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP;
-import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_GROUP_ATTRIBUTES;
-import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_GROUP;
+import static com.ge.predix.acs.testutils.XFiles.FBI_ATTRIBUTES;
 import static com.ge.predix.acs.testutils.XFiles.MULDERS_ATTRIBUTES;
-import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
+import static com.ge.predix.acs.testutils.XFiles.PENTAGON_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.PENTAGON_SITE_ID;
+import static com.ge.predix.acs.testutils.XFiles.SCULLYS_TESTIMONY_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.SITE_BASEMENT;
+import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP;
+import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTE;
+import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION;
+import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_GROUP;
+import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_GROUP_ATTRIBUTES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -181,8 +181,8 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
      */
     Object[] scopedAttributeInheritanceData() {
         return new Object[] { this.testZone1, this.policySet, createTwoParentResourceHierarchy(),
-                createScopedSubjectHierarchy(),
-                createPolicyEvalRequest("GET", EVIDENCE_IMPLANT_ID, AGENT_MULDER), Effect.DENY };
+                createScopedSubjectHierarchy(), createPolicyEvalRequest("GET", EVIDENCE_IMPLANT_ID, AGENT_MULDER),
+                Effect.DENY };
     }
 
     /**

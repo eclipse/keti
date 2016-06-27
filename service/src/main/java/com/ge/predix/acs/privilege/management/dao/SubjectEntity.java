@@ -37,10 +37,6 @@ import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
-/**
- *
- * @author 212360328
- */
 @Entity
 @Table(
         name = "subject",
@@ -130,7 +126,11 @@ public class SubjectEntity implements ZonableEntity {
 
     @Override
     public void setAttributes(final Set<Attribute> attributes) {
-        this.attributes = attributes;
+        if (attributes == null) {
+            this.attributes = Collections.emptySet();
+        } else {
+            this.attributes = attributes;
+        }
     }
 
     @Override
@@ -149,8 +149,8 @@ public class SubjectEntity implements ZonableEntity {
 
     @Override
     public String toString() {
-        return "SubjectEntity [id=" + id + ", zone=" + zone + ", subjectIdentifier=" + subjectIdentifier
-                + ", attributesAsJson=" + attributesAsJson + ", parents=" + parents + "]";
+        return "SubjectEntity [id=" + this.id + ", zone=" + this.zone + ", subjectIdentifier=" + this.subjectIdentifier
+                + ", attributesAsJson=" + this.attributesAsJson + ", parents=" + this.parents + "]";
     }
 
     @Override
@@ -158,20 +158,15 @@ public class SubjectEntity implements ZonableEntity {
         return new HashCodeBuilder().append(this.subjectIdentifier).append(this.zone).append(this.attributesAsJson)
                 .append(this.parents).toHashCode();
     }
-    
+
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof SubjectEntity) {
             SubjectEntity other = (SubjectEntity) obj;
-            return new EqualsBuilder()
-                    .append(this.subjectIdentifier, other.subjectIdentifier)
-                    .append(this.zone, other.zone)
-                    .append(this.attributesAsJson, other.attributesAsJson)
-                    .append(this.parents, other.parents)
-                    .isEquals();
-            
-        } 
+            return new EqualsBuilder().append(this.subjectIdentifier, other.subjectIdentifier)
+                    .append(this.zone, other.zone).append(this.attributesAsJson, other.attributesAsJson)
+                    .append(this.parents, other.parents).isEquals();
+        }
         return false;
     }
-
 }

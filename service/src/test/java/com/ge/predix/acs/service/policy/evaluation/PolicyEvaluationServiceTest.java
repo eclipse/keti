@@ -123,7 +123,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testEvaluateWithTwoPolicySets() {
-        List<PolicySet> policySets = new ArrayList<PolicySet>();
+        List<PolicySet> policySets = new ArrayList<>();
         policySets.add(new PolicySet());
         policySets.add(new PolicySet());
         when(this.policyService.getAllPolicySets()).thenReturn(policySets);
@@ -131,7 +131,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     }
 
     public void testEvaluateWithOnePolicySetNoPolicies() {
-        List<PolicySet> policySets = new ArrayList<PolicySet>();
+        List<PolicySet> policySets = new ArrayList<>();
         policySets.add(new PolicySet());
         when(this.policyService.getAllPolicySets()).thenReturn(policySets);
         List<MatchedPolicy> matchedPolicies = Collections.emptyList();
@@ -156,7 +156,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
             final File inputPolicy, final Effect effect, final Set<Attribute> subjectAttributes)
             throws JsonParseException, JsonMappingException, IOException {
 
-        Set<Attribute> resourceAttributes = new HashSet<Attribute>();
+        Set<Attribute> resourceAttributes = new HashSet<>();
         Attribute roleAttribute = new Attribute(ISSUER, RES_ATTRIB_ROLE_REQUIRED, RES_ATTRIB_ROLE_REQUIRED_VALUE);
         resourceAttributes.add(roleAttribute);
         Attribute locationAttribute = new Attribute(ISSUER, RES_ATTRIB_LOCATION, RES_ATTRIB_LOCATION_VALUE);
@@ -205,7 +205,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
             final Set<Attribute> subjectAttributes) throws IOException, JsonParseException, JsonMappingException {
         PolicySet policySet = new ObjectMapper().readValue(inputPolicy, PolicySet.class);
         when(this.policyService.getAllPolicySets()).thenReturn(Arrays.asList(new PolicySet[] { policySet }));
-        List<MatchedPolicy> matchedPolicies = new ArrayList<MatchedPolicy>();
+        List<MatchedPolicy> matchedPolicies = new ArrayList<>();
         for (Policy policy : policySet.getPolicies()) {
             matchedPolicies.add(new MatchedPolicy(policy, resourceAttributes, subjectAttributes));
         }
@@ -227,7 +227,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
      * @return
      */
     private Set<Attribute> getSubjectAttributes(final String roleValue) {
-        Set<Attribute> attributes = new HashSet<Attribute>();
+        Set<Attribute> attributes = new HashSet<>();
         if (roleValue != null) {
             attributes.add(new Attribute(ISSUER, SUBJECT_ATTRIB_NAME_ROLE, roleValue));
         }
@@ -236,7 +236,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
 
     private BaseResource getResource() {
         BaseResource resource = new BaseResource("name");
-        Set<Attribute> resourceAttributes = new HashSet<Attribute>();
+        Set<Attribute> resourceAttributes = new HashSet<>();
         resourceAttributes.add(new Attribute(ISSUER, RES_ATTRIB_ROLE_REQUIRED, RES_ATTRIB_ROLE_REQUIRED_VALUE));
         resourceAttributes.add(new Attribute(ISSUER, RES_ATTRIB_LOCATION, RES_ATTRIB_LOCATION_VALUE));
         resource.setAttributes(resourceAttributes);

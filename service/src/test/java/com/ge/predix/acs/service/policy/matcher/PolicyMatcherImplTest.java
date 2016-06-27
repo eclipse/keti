@@ -195,7 +195,7 @@ public class PolicyMatcherImplTest {
         PolicySet policySet = PolicySets.loadFromFile(file);
 
         Attribute groupAttr = new Attribute("https://acs.attributes.int", "group", "gog");
-        Set<Attribute> resourceAttributes = new HashSet<Attribute>();
+        Set<Attribute> resourceAttributes = new HashSet<>();
         resourceAttributes.add(groupAttr);
 
         BaseResource testResource = new BaseResource();

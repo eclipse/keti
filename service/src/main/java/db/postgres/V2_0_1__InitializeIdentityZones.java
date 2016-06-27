@@ -74,7 +74,7 @@ public class V2_0_1__InitializeIdentityZones implements SpringJdbcMigration {
     }
 
     private Set<ZoneClientEntity> findExistingOAuthClients(final JdbcTemplate jdbcTemplate) {
-        Set<ZoneClientEntity> oauthClients = new HashSet<ZoneClientEntity>();
+        Set<ZoneClientEntity> oauthClients = new HashSet<>();
         List<ZoneClientEntity> subjectOAuthClients = jdbcTemplate
                 .query("SELECT DISTINCT issuer_id, client_id FROM subject", new ZoneClientRowMapper());
         oauthClients.addAll(subjectOAuthClients);

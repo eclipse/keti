@@ -40,7 +40,6 @@ public class GraphConfig {
     public static final String BY_SUBJECT_UNIQUE_INDEX_NAME = "bySubjectUnique";
     public static final String BY_RESOURCE_UNIQUE_INDEX_NAME = "byResourceUnique";
     public static final String BY_ZONE_INDEX_NAME = "byZone";
-    public static final String BY_ZONE_UNIQUE_INDEX_NAME = "byZoneUnique";
     public static final String BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME = "byZoneAndResourceUnique";
     public static final String BY_ZONE_AND_SUBJECT_UNIQUE_INDEX_NAME = "byZoneAndSubjectUnique";
 

@@ -18,6 +18,7 @@ package com.ge.predix.acs.privilege.management;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,10 +30,14 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
+import com.ge.predix.acs.config.GraphBeanDefinitionRegistryPostProcessor;
+import com.ge.predix.acs.config.GraphConfig;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.policy.evaluation.cache.HystrixPolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.policy.evaluation.cache.InMemoryPolicyEvaluationCache;
+import com.ge.predix.acs.privilege.management.dao.GraphResourceRepository;
+import com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository;
 import com.ge.predix.acs.request.context.AcsRequestContextHolder;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
@@ -45,9 +50,10 @@ import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
 @ContextConfiguration(
         classes = { AcsRequestContextHolder.class, HystrixPolicyEvaluationCacheCircuitBreaker.class,
                 InMemoryDataSourceConfig.class, InMemoryPolicyEvaluationCache.class,
-                PrivilegeManagementServiceImpl.class, ZoneServiceImpl.class, SpringSecurityPolicyContextResolver.class,
-                SpringSecurityZoneResolver.class })
-@ActiveProfiles(profiles = { "h2", "public", "simple-cache" })
+                PrivilegeManagementServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class,
+                GraphResourceRepository.class, GraphSubjectRepository.class, ZoneServiceImpl.class,
+                SpringSecurityPolicyContextResolver.class, SpringSecurityZoneResolver.class })
+@ActiveProfiles(profiles = { "h2", "public", "simple-cache", "titan" })
 @Test
 public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringContextTests {
 
@@ -63,7 +69,7 @@ public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringConte
     private Zone testZone;
 
     @BeforeClass
-    public void setup() {
+    public void setup() throws InterruptedException, ExecutionException {
         this.testZone = this.testUtils.setupTestZone("PrivilegeManagementNoRollbackTest", this.zoneService);
         this.fixedAttributes = this.attributesUtilities.getSetOfAttributes(new Attribute("acs", "group", "admin"));
     }
@@ -76,7 +82,7 @@ public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringConte
     public void testCreateMultipleSubjectWithConstraintViolationSubjectIdentifier() {
         String subjectIdentifier = "Dave-ID123";
 
-        List<BaseSubject> subjects = new ArrayList<BaseSubject>();
+        List<BaseSubject> subjects = new ArrayList<>();
         subjects.add(createSubject(subjectIdentifier));
         subjects.add(createSubject(subjectIdentifier));
         try {
@@ -84,7 +90,7 @@ public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringConte
         } catch (PrivilegeManagementException e) {
             // not checking id in toString(), just validating rest of error
             // message due to id mismatch on CI
-            boolean checkMessage = e.getMessage().contains("Duplicate Subject(s) identified");
+            boolean checkMessage = e.getMessage().contains("Unable to persist Subject(s) for zone");
             Assert.assertTrue(checkMessage, "Invalid Error Message: " + e.getMessage());
             Assert.assertEquals(this.service.getSubjects().size(), 0);
             return;
@@ -95,7 +101,7 @@ public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringConte
 
     public void testCreateMultipleResourceWithConstraintViolationResourceIdentifier() {
 
-        List<BaseResource> resourceList = new ArrayList<BaseResource>();
+        List<BaseResource> resourceList = new ArrayList<>();
 
         String resourceIdentifier = "Brittany123";
 
@@ -106,7 +112,7 @@ public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringConte
             this.service.appendResources(resourceList);
 
         } catch (PrivilegeManagementException e) {
-            boolean checkMessage = e.getMessage().contains("Duplicate Resource(s) identified by");
+            boolean checkMessage = e.getMessage().contains("Unable to persist Resource(s) for zone");
             Assert.assertTrue(checkMessage, "Invalid Error Message: " + e.getMessage());
             Assert.assertEquals(this.service.getResources().size(), 0);
             return;

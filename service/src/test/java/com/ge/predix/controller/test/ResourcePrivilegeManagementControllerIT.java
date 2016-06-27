@@ -47,7 +47,7 @@ import com.ge.predix.acs.zone.management.ZoneService;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
-@ActiveProfiles(profiles = { "h2", "public", "simple-cache" })
+@ActiveProfiles(profiles = { "h2", "public", "simple-cache", "titan" })
 public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSpringContextTests {
 
     public static final ConfigureEnvironment CONFIGURE_ENVIRONMENT = new ConfigureEnvironment();

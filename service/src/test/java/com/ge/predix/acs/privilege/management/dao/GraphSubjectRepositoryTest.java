@@ -8,6 +8,7 @@ import static com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository.
 import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
 import static com.ge.predix.acs.testutils.XFiles.AGENT_SCULLY;
 import static com.ge.predix.acs.testutils.XFiles.MULDERS_ATTRIBUTES;
+import static com.ge.predix.acs.testutils.XFiles.PENTAGON_ATTRIBUTES;
 import static com.ge.predix.acs.testutils.XFiles.SECRET_CLASSIFICATION;
 import static com.ge.predix.acs.testutils.XFiles.SECRET_GROUP;
 import static com.ge.predix.acs.testutils.XFiles.SECRET_GROUP_ATTRIBUTES;
@@ -94,24 +95,62 @@ public class GraphSubjectRepositoryTest {
         SubjectEntity expectedSubject = persistScopedHierarchy(AGENT_MULDER, SITE_BASEMENT);
         String subjectIdentifier = expectedSubject.getSubjectIdentifier();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
-        HashSet<Attribute> expectedAttributes = 
-                new HashSet<>(Arrays.asList(new Attribute[] 
-                        { SECRET_CLASSIFICATION, TOP_SECRET_CLASSIFICATION, SITE_BASEMENT }));
+        HashSet<Attribute> expectedAttributes = new HashSet<>(
+                Arrays.asList(new Attribute[] { SECRET_CLASSIFICATION, TOP_SECRET_CLASSIFICATION, SITE_BASEMENT }));
         expectedSubject.setAttributes(expectedAttributes);
         expectedSubject.setAttributesAsJson(JSON_UTILS.serialize(expectedAttributes));
         SubjectEntity actualSubject = this.subjectRepository.getByZoneAndSubjectIdentifierAndScopes(TEST_ZONE_1,
-                subjectIdentifier,
-                new HashSet<>(Arrays.asList(new Attribute[] {SITE_BASEMENT })));
+                subjectIdentifier, new HashSet<>(Arrays.asList(new Attribute[] { SITE_BASEMENT })));
         assertThat(actualSubject, equalTo(expectedSubject));
 
-        expectedAttributes = 
-                new HashSet<>(Arrays.asList(new Attribute[] 
-                        { SECRET_CLASSIFICATION, SITE_BASEMENT }));
+        expectedAttributes = new HashSet<>(Arrays.asList(new Attribute[] { SECRET_CLASSIFICATION, SITE_BASEMENT }));
         expectedSubject.setAttributes(expectedAttributes);
         expectedSubject.setAttributesAsJson(JSON_UTILS.serialize(expectedAttributes));
         actualSubject = this.subjectRepository.getByZoneAndSubjectIdentifierAndScopes(TEST_ZONE_1, subjectIdentifier,
                 new HashSet<>(Arrays.asList(new Attribute[] { SITE_PENTAGON })));
         assertThat(actualSubject, equalTo(expectedSubject));
+    }
+
+    @Test
+    public void testParentAndChildSameAttribute() {
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
+        SubjectEntity agentScully = new SubjectEntity(TEST_ZONE_1, AGENT_SCULLY);
+        agentScully.setAttributes(MULDERS_ATTRIBUTES);
+        agentScully.setAttributesAsJson(JSON_UTILS.serialize(agentScully.getAttributes()));
+        this.subjectRepository.save(agentScully);
+        SubjectEntity agentMulder = new SubjectEntity(TEST_ZONE_1, AGENT_MULDER);
+        agentMulder.setAttributes(MULDERS_ATTRIBUTES);
+        agentMulder.setAttributesAsJson(JSON_UTILS.serialize(agentMulder.getAttributes()));
+        agentMulder.setParents(
+                new HashSet<>(Arrays.asList(new Parent[] { new Parent(agentScully.getSubjectIdentifier()) })));
+        this.subjectRepository.save(agentMulder);
+        SubjectEntity actualAgentMulder = this.subjectRepository.getByZoneAndSubjectIdentifierAndScopes(TEST_ZONE_1,
+                AGENT_MULDER, null);
+        assertThat(actualAgentMulder.getAttributes().size(), equalTo(1));
+        assertThat(actualAgentMulder.getAttributesAsJson(),
+                equalTo("[{\"issuer\":\"acs.example.org\",\"name\":\"site\",\"value\":\"basement\"}]"));
+    }
+
+    @Test
+    public void testParentAndChildAttributeSameNameDifferentValues() {
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
+        SubjectEntity agentScully = new SubjectEntity(TEST_ZONE_1, AGENT_SCULLY);
+        agentScully.setAttributes(PENTAGON_ATTRIBUTES);
+        agentScully.setAttributesAsJson(JSON_UTILS.serialize(agentScully.getAttributes()));
+        this.subjectRepository.save(agentScully);
+        SubjectEntity agentMulder = new SubjectEntity(TEST_ZONE_1, AGENT_MULDER);
+        agentMulder.setAttributes(MULDERS_ATTRIBUTES);
+        agentMulder.setAttributesAsJson(JSON_UTILS.serialize(agentMulder.getAttributes()));
+        agentMulder.setParents(
+                new HashSet<>(Arrays.asList(new Parent[] { new Parent(agentScully.getSubjectIdentifier()) })));
+        this.subjectRepository.save(agentMulder);
+        SubjectEntity actualAgentMulder = this.subjectRepository.getByZoneAndSubjectIdentifierAndScopes(TEST_ZONE_1,
+                AGENT_MULDER, null);
+        assertThat(actualAgentMulder.getAttributes().size(), equalTo(2));
+        System.out.println(actualAgentMulder.getAttributesAsJson());
+        assertThat(actualAgentMulder.getAttributesAsJson(),
+                equalTo("[{\"issuer\":\"acs.example.org\",\"name\":\"site\",\"value\":\"basement\"},"
+                        + "{\"issuer\":\"acs.example.org\",\"name\":\"site\",\"value\":\"pentagon\"}]"));
     }
 
     @Test

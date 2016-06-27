@@ -17,6 +17,7 @@
 package com.ge.predix.acs.privilege.management;
 
 import java.util.List;
+
 import java.util.Set;
 
 import com.ge.predix.acs.model.Attribute;

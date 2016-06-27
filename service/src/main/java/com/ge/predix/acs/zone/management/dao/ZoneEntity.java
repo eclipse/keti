@@ -117,12 +117,12 @@ public class ZoneEntity {
     public void setSubdomain(final String subdomain) {
         this.subdomain = subdomain;
     }
-    
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder().append(this.name).toHashCode();
     }
-    
+
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof ZoneEntity) {

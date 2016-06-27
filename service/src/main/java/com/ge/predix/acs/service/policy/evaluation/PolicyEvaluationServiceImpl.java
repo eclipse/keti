@@ -201,8 +201,8 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
                     break;
                 }
             }
-            result = new PolicyEvaluationResult(effect, new ArrayList<Attribute>(subjectAttributes),
-                    new ArrayList<Attribute>(resourceAttributes), resolvedResourceUris);
+            result = new PolicyEvaluationResult(effect, new ArrayList<>(subjectAttributes),
+                    new ArrayList<>(resourceAttributes), resolvedResourceUris);
         } catch (Throwable e) {
             StringBuilder builder = new StringBuilder();
             builder.append("Exception occured while evaluating the policy set. Policy Set ID:")

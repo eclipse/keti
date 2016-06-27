@@ -281,7 +281,7 @@
                             <services>
                                 <service>
                                     <name>${acs.db}</name>
-                                    <label>stc-postgresql-1</label>
+                                    <label>postgresql93-1</label>
                                     <plan>free</plan>
                                 </service>
                                 <service>
@@ -442,7 +442,7 @@
                             <services>
                                 <service>
                                     <name>${acs.db}</name>
-                                    <label>stc-postgresql-1</label>
+                                    <label>postgresql93-1</label>
                                     <plan>free</plan>
                                 </service>
                                 <service>
@@ -626,8 +626,8 @@
                                 <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
                             </environmentVariables>
                             <skipTests>false</skipTests>
-                            <!-- <forkCount>0</forkCount>
-                            <parallel>false</parallel>-->
+                            <!-- <forkCount>0</forkCount>-->
+                            <parallel>false</parallel>
                             <!-- <argLine>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</argLine> -->
                             <systemPropertyVariables>
                                 <ACS_URL>http://localhost:8181</ACS_URL>
@@ -736,6 +736,7 @@
                                 <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
                                 <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
                             </environmentVariables>
+                            <parallel>false</parallel>
                             <skipTests>false</skipTests>
                             <systemPropertyVariables>
                                 <ACS_URL>http://localhost:8181</ACS_URL>

@@ -74,7 +74,7 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
 
         // Create 'role' attribute in resource for URI /site/1234. Used in target match for policy 1.
         BaseResource testResource = new BaseResource("/site/1234");
-        Set<Attribute> resourceAttributes = new HashSet<Attribute>();
+        Set<Attribute> resourceAttributes = new HashSet<>();
         resourceAttributes.add(new Attribute("https://acs.attributes.int", "role", "admin"));
         testResource.setAttributes(resourceAttributes);
 

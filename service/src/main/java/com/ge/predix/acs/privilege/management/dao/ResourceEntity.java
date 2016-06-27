@@ -37,10 +37,6 @@ import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
-/**
- *
- * @author 212360328
- */
 @Entity
 @Table(
         name = "resource",
@@ -62,7 +58,7 @@ public class ResourceEntity implements ZonableEntity {
      * Clob representing set of attributes as a JSON body.
      */
     @Column(name = "attributes", columnDefinition = "CLOB NOT NULL")
-    private String attributesAsJson;
+    private String attributesAsJson = "{}";
 
     @Transient
     private Set<Attribute> attributes = Collections.emptySet();
@@ -129,7 +125,11 @@ public class ResourceEntity implements ZonableEntity {
 
     @Override
     public void setAttributes(final Set<Attribute> attributes) {
-        this.attributes = attributes;
+        if (attributes == null) {
+            this.attributes = Collections.emptySet();
+        } else {
+            this.attributes = attributes;
+        }
     }
 
     @Override
@@ -153,20 +153,15 @@ public class ResourceEntity implements ZonableEntity {
         return new HashCodeBuilder().append(this.resourceIdentifier).append(this.zone).append(this.attributesAsJson)
                 .append(this.parents).toHashCode();
     }
-    
+
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof ResourceEntity) {
             ResourceEntity other = (ResourceEntity) obj;
-            return new EqualsBuilder()
-                    .append(this.resourceIdentifier, other.resourceIdentifier)
-                    .append(this.zone, other.zone)
-                    .append(this.attributesAsJson, other.attributesAsJson)
-                    .append(this.parents, other.parents)
-                    .isEquals();
-            
-        } 
+            return new EqualsBuilder().append(this.resourceIdentifier, other.resourceIdentifier)
+                    .append(this.zone, other.zone).append(this.attributesAsJson, other.attributesAsJson)
+                    .append(this.parents, other.parents).isEquals();
+        }
         return false;
     }
-
 }

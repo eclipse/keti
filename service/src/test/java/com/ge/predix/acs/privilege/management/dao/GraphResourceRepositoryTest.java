@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.nullValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,6 +44,7 @@ import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
+import com.thinkaurelius.titan.core.QueryException;
 import com.thinkaurelius.titan.core.SchemaViolationException;
 import com.thinkaurelius.titan.core.TitanFactory;
 
@@ -163,9 +165,29 @@ public class GraphResourceRepositoryTest {
         persistResource1toZone2AndAssert();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
 
-        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
-                DRIVE_ID);
+        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1, DRIVE_ID);
         assertThat(resource, equalTo(resourceEntity1));
+    }
+
+    @Test
+    public void testGetByZoneAndResourceIdentifierWithEmptyAttributes() {
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
+        ResourceEntity persistedResourceEntity = persistResourceToZoneAndAssert(TEST_ZONE_1, DRIVE_ID,
+                Collections.emptySet());
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
+
+        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1, DRIVE_ID);
+        assertThat(resource, equalTo(persistedResourceEntity));
+    }
+
+    @Test
+    public void testGetByZoneAndResourceIdentifierWithNullAttributes() {
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
+        ResourceEntity persistedResourceEntity = persistResourceToZoneAndAssert(TEST_ZONE_1, DRIVE_ID, null);
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
+
+        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1, DRIVE_ID);
+        assertThat(resource, equalTo(persistedResourceEntity));
     }
 
     @Test
@@ -216,14 +238,14 @@ public class GraphResourceRepositoryTest {
         resource2.setAttributes(DRIVE_ATTRIBUTES);
         resource2.setAttributesAsJson(JSON_UTILS.serialize(resource2.getAttributes()));
         resource2.setParents(
-                new HashSet<Parent>(Arrays.asList(new Parent[] { new Parent(resource1.getResourceIdentifier()) })));
+                new HashSet<>(Arrays.asList(new Parent[] { new Parent(resource1.getResourceIdentifier()) })));
         this.resourceRepository.save(resource2);
 
         ResourceEntity resource3 = new ResourceEntity(TEST_ZONE_1, EVIDENCE_IMPLANT_ID);
         resource3.setAttributes(EVIDENCE_IMPLANT_ATTRIBUTES);
         resource3.setAttributesAsJson(JSON_UTILS.serialize(resource3.getAttributes()));
         resource3.setParents(
-                new HashSet<Parent>(Arrays.asList(new Parent[] { new Parent(resource2.getResourceIdentifier()) })));
+                new HashSet<>(Arrays.asList(new Parent[] { new Parent(resource2.getResourceIdentifier()) })));
         this.resourceRepository.save(resource3);
 
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
@@ -266,8 +288,7 @@ public class GraphResourceRepositoryTest {
         Vertex resourceVertex = traversal.next();
         assertThat(resourceVertex.property(RESOURCE_ID_KEY).value(), equalTo(resourceId));
 
-        traversal = this.graph.traversal().V(resourceVertex.id()).out("parent").has(RESOURCE_ID_KEY,
-                BASEMENT_SITE_ID);
+        traversal = this.graph.traversal().V(resourceVertex.id()).out("parent").has(RESOURCE_ID_KEY, BASEMENT_SITE_ID);
         assertThat(traversal.hasNext(), equalTo(true));
         resourceVertex = traversal.next();
         assertThat(resourceVertex.property(RESOURCE_ID_KEY).value(), equalTo(BASEMENT_SITE_ID));
@@ -323,13 +344,13 @@ public class GraphResourceRepositoryTest {
         ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, DRIVE_ID);
         resource.setParents(new HashSet<>(Arrays.asList(new Parent(BASEMENT_SITE_ID))));
 
-        // Save a resource with nonexistent parent which should throw IllegalStateException exception 
+        // Save a resource with nonexistent parent which should throw IllegalStateException exception
         // while saving parent relationships.
         try {
             this.resourceRepository.save(resource);
         } catch (IllegalStateException ex) {
-            assertThat(ex.getMessage(), equalTo(
-                    "No parent exists in zone 'testzone1' with 'resourceId' value of '/site/basement'."));
+            assertThat(ex.getMessage(),
+                    equalTo("No parent exists in zone 'testzone1' with 'resourceId' value of '/site/basement'."));
             return;
         }
         Assert.fail("save() did not throw the expected IllegalStateException exception.");
@@ -348,16 +369,52 @@ public class GraphResourceRepositoryTest {
         }
     }
 
+    @Test(
+            expectedExceptions = QueryException.class,
+            expectedExceptionsMessageRegExp = "Graph search failed: traversal limit exceeded.")
+    public void testSearchAttributesTraversalLimitException() {
+        long traversalLimit = 256L;
+        try {
+            ResourceEntity resource1 = persist3LevelHierarchicalResource1toZone1();
+            traversalLimit = this.resourceRepository.getTraversalLimit();
+            assertThat(traversalLimit, equalTo(256L));
+            this.resourceRepository.setTraversalLimit(2);
+            assertThat(this.resourceRepository.getTraversalLimit(), equalTo(2L));
+            this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1, resource1.getResourceIdentifier());
+        } finally {
+            this.resourceRepository.setTraversalLimit(traversalLimit);
+            assertThat(this.resourceRepository.getTraversalLimit(), equalTo(256L));
+        }
+    }
+
+    @Test
+    public void testSearchAttributesEqualsTraversalLimit() {
+        long traversalLimit = 256L;
+        try {
+            traversalLimit = this.resourceRepository.getTraversalLimit();
+            assertThat(traversalLimit, equalTo(256L));
+            this.resourceRepository.setTraversalLimit(3);
+            assertThat(this.resourceRepository.getTraversalLimit(), equalTo(3L));
+            ResourceEntity resource1 = persist3LevelHierarchicalResource1toZone1();
+            ResourceEntity actualResource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
+                    resource1.getResourceIdentifier());
+            assertThat(actualResource.getAttributes().size(), equalTo(3));
+        } finally {
+            this.resourceRepository.setTraversalLimit(traversalLimit);
+            assertThat(this.resourceRepository.getTraversalLimit(), equalTo(256L));
+        }
+    }
+
     public ResourceEntity persist2LevelHierarchicalResource1toZone1() {
         ResourceEntity parentResource = persistResource0toZone1AndAssert();
-        HashSet<Parent> parents = new HashSet<Parent>(
+        HashSet<Parent> parents = new HashSet<>(
                 Arrays.asList(new Parent[] { new Parent(parentResource.getResourceIdentifier()) }));
         return persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1, DRIVE_ID, DRIVE_ATTRIBUTES, parents);
     }
 
     public ResourceEntity persist3LevelHierarchicalResource1toZone1() {
         ResourceEntity parentResource = persist2LevelHierarchicalResource1toZone1();
-        HashSet<Parent> parents = new HashSet<Parent>(
+        HashSet<Parent> parents = new HashSet<>(
                 Arrays.asList(new Parent[] { new Parent(parentResource.getResourceIdentifier()) }));
         return persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1, EVIDENCE_IMPLANT_ID, EVIDENCE_IMPLANT_ATTRIBUTES,
                 parents);
@@ -396,7 +453,7 @@ public class GraphResourceRepositoryTest {
         resource.setAttributes(attributes);
         resource.setAttributesAsJson(JSON_UTILS.serialize(resource.getAttributes()));
         ResourceEntity resourceEntity = this.resourceRepository.save(resource);
-        assertThat(resourceRepository.findOne(resourceEntity.getId()), equalTo(resource));
+        assertThat(this.resourceRepository.findOne(resourceEntity.getId()), equalTo(resource));
         return resourceEntity;
     }
 }

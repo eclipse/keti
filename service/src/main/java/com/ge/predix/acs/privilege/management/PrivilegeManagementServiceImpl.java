@@ -81,7 +81,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
         // fail fast if identifiers are missing or null
         validResourcesOrFail(resources);
 
-        List<ResourceEntity> entities = new ArrayList<ResourceEntity>();
+        List<ResourceEntity> entities = new ArrayList<>();
         appendResourcesInTransaction(resources, zone, entities);
     }
 
@@ -126,7 +126,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     public List<BaseResource> getResources() {
         ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
 
-        List<BaseResource> resources = new ArrayList<BaseResource>();
+        List<BaseResource> resources = new ArrayList<>();
         List<ResourceEntity> resourceEntities = this.resourceRepository.findByZone(zone);
 
         if (resourceEntities != null && resourceEntities.size() > 0) {
@@ -238,7 +238,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
         // fail fast if identifiers are missing or null
         validSubjectUrisOrFail(subjects);
 
-        List<SubjectEntity> subjectEntities = new ArrayList<SubjectEntity>();
+        List<SubjectEntity> subjectEntities = new ArrayList<>();
 
         appendSubjectsInTransaction(subjects, zone, subjectEntities);
     }
@@ -273,7 +273,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     @Transactional(readOnly = true)
     public List<BaseSubject> getSubjects() {
         ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
-        List<BaseSubject> subjects = new ArrayList<BaseSubject>();
+        List<BaseSubject> subjects = new ArrayList<>();
 
         List<SubjectEntity> subjectEntities = this.subjectRepository.findByZone(zone);
         if (subjectEntities != null && subjectEntities.size() > 0) {
@@ -297,6 +297,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
         return subject;
     }
 
+    @Override
     @Transactional(readOnly = true)
     public BaseSubject getBySubjectIdentifierAndScopes(final String subjectIdentifier, final Set<Attribute> scopes) {
         if (null == this.subjectScopedAccessRepository) {
