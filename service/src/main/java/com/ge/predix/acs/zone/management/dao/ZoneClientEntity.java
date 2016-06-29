@@ -32,9 +32,9 @@ import com.ge.predix.acs.issuer.management.dao.IssuerEntity;
 
 /**
  *
- * 
+ *
  * This class is no longer used except in migration logic.
- * 
+ *
  */
 @Entity
 @Table(

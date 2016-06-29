@@ -92,7 +92,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     @Autowired
     private PolicySetValidator policySetValidator;
 
-    private static final List<Attribute> EMPTY_ATTRS = Collections.emptyList();
+    private static final Set<Attribute> EMPTY_ATTRS = Collections.emptySet();
 
     @BeforeClass
     public void setupClass() {
@@ -110,11 +110,12 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
 
     @Test(dataProvider = "policyRequestParameterProvider", expectedExceptions = IllegalArgumentException.class)
     public void testEvaluateWithNullParameters(final String resource, final String subject, final String action) {
-        this.evaluationService.evalPolicy(resource, subject, action, EMPTY_ATTRS);
+        this.evaluationService.evalPolicy(resource, subject, action, EMPTY_ATTRS, EMPTY_ATTRS);
     }
 
     public void testEvaluateWithNoPolicySet() {
-        PolicyEvaluationResult result = this.evaluationService.evalPolicy("resource1", "subject1", "GET", EMPTY_ATTRS);
+        PolicyEvaluationResult result = this.evaluationService.evalPolicy("resource1", "subject1", "GET", EMPTY_ATTRS,
+                EMPTY_ATTRS);
         Assert.assertEquals(result.getEffect(), Effect.NOT_APPLICABLE);
         Assert.assertEquals(result.getResourceAttributes().size(), 0);
         Assert.assertEquals(result.getSubjectAttributes().size(), 0);
@@ -122,22 +123,22 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testEvaluateWithTwoPolicySets() {
-        List<PolicySet> policySets = new ArrayList<PolicySet>();
+        List<PolicySet> policySets = new ArrayList<>();
         policySets.add(new PolicySet());
         policySets.add(new PolicySet());
         when(this.policyService.getAllPolicySets()).thenReturn(policySets);
-        this.evaluationService.evalPolicy("resource1", "subject1", "GET", EMPTY_ATTRS);
+        this.evaluationService.evalPolicy("resource1", "subject1", "GET", EMPTY_ATTRS, EMPTY_ATTRS);
     }
 
     public void testEvaluateWithOnePolicySetNoPolicies() {
-        List<PolicySet> policySets = new ArrayList<PolicySet>();
+        List<PolicySet> policySets = new ArrayList<>();
         policySets.add(new PolicySet());
         when(this.policyService.getAllPolicySets()).thenReturn(policySets);
         List<MatchedPolicy> matchedPolicies = Collections.emptyList();
         when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
                 .thenReturn(new MatchResult(matchedPolicies, new HashSet<String>()));
         PolicyEvaluationResult evalPolicy = this.evaluationService.evalPolicy("resource1", "subject1", "GET",
-                EMPTY_ATTRS);
+                EMPTY_ATTRS, EMPTY_ATTRS);
         Assert.assertEquals(evalPolicy.getEffect(), Effect.NOT_APPLICABLE);
     }
 
@@ -146,27 +147,29 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
             throws JsonParseException, JsonMappingException, IOException {
         initializePolicyMock(inputPolicy);
         PolicyEvaluationResult evalPolicy = this.evaluationService.evalPolicy("resource1", "subject1", "GET",
-                EMPTY_ATTRS);
+                EMPTY_ATTRS, EMPTY_ATTRS);
         Assert.assertEquals(evalPolicy.getEffect(), effect);
     }
 
     @Test(dataProvider = "policyDataProviderForTestWithAttributes")
     public void testEvaluateWithPolicyAndSubjectResourceAttributes(final String acsSubjectAttributeValue,
-            final File inputPolicy, final Effect effect, final List<Attribute> subjectAttributes)
-                    throws JsonParseException, JsonMappingException, IOException {
+            final File inputPolicy, final Effect effect, final Set<Attribute> subjectAttributes)
+            throws JsonParseException, JsonMappingException, IOException {
 
-        Set<Attribute> resourceAttributes = new HashSet<Attribute>();
+        Set<Attribute> resourceAttributes = new HashSet<>();
         Attribute roleAttribute = new Attribute(ISSUER, RES_ATTRIB_ROLE_REQUIRED, RES_ATTRIB_ROLE_REQUIRED_VALUE);
         resourceAttributes.add(roleAttribute);
         Attribute locationAttribute = new Attribute(ISSUER, RES_ATTRIB_LOCATION, RES_ATTRIB_LOCATION_VALUE);
         resourceAttributes.add(locationAttribute);
 
-        initializePolicyMock(inputPolicy, resourceAttributes);
+        Set<Attribute> mergedSubjectAttributes = new HashSet<>(subjectAttributes);
+        mergedSubjectAttributes.addAll(getSubjectAttributes(acsSubjectAttributeValue));
+        initializePolicyMock(inputPolicy, resourceAttributes, mergedSubjectAttributes);
         when(this.privilegeManagementService.getByResourceIdentifier(anyString())).thenReturn(this.getResource());
         when(this.privilegeManagementService.getBySubjectIdentifier(anyString()))
                 .thenReturn(this.getSubject(acsSubjectAttributeValue));
         PolicyEvaluationResult evalPolicyResponse = this.evaluationService.evalPolicy("resource1", "subject1", "GET",
-                subjectAttributes);
+                EMPTY_ATTRS, EMPTY_ATTRS);
         Assert.assertEquals(evalPolicyResponse.getEffect(), effect);
         Assert.assertTrue(evalPolicyResponse.getResourceAttributes().contains(roleAttribute));
         Assert.assertTrue(evalPolicyResponse.getResourceAttributes().contains(locationAttribute));
@@ -189,7 +192,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
      */
     private void initializePolicyMock(final File inputPolicy)
             throws IOException, JsonParseException, JsonMappingException {
-        initializePolicyMock(inputPolicy, new HashSet<Attribute>());
+        initializePolicyMock(inputPolicy, Collections.emptySet(), Collections.emptySet());
     }
 
     /**
@@ -198,13 +201,13 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
      * @throws JsonParseException
      * @throws JsonMappingException
      */
-    private void initializePolicyMock(final File inputPolicy, final Set<Attribute> attributeSet)
-            throws IOException, JsonParseException, JsonMappingException {
+    private void initializePolicyMock(final File inputPolicy, final Set<Attribute> resourceAttributes,
+            final Set<Attribute> subjectAttributes) throws IOException, JsonParseException, JsonMappingException {
         PolicySet policySet = new ObjectMapper().readValue(inputPolicy, PolicySet.class);
         when(this.policyService.getAllPolicySets()).thenReturn(Arrays.asList(new PolicySet[] { policySet }));
-        List<MatchedPolicy> matchedPolicies = new ArrayList<MatchedPolicy>();
+        List<MatchedPolicy> matchedPolicies = new ArrayList<>();
         for (Policy policy : policySet.getPolicies()) {
-            matchedPolicies.add(new MatchedPolicy(policy, attributeSet));
+            matchedPolicies.add(new MatchedPolicy(policy, resourceAttributes, subjectAttributes));
         }
         when(this.policyMatcher.match(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
                 .thenReturn(matchedPolicies);
@@ -224,7 +227,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
      * @return
      */
     private Set<Attribute> getSubjectAttributes(final String roleValue) {
-        Set<Attribute> attributes = new HashSet<Attribute>();
+        Set<Attribute> attributes = new HashSet<>();
         if (roleValue != null) {
             attributes.add(new Attribute(ISSUER, SUBJECT_ATTRIB_NAME_ROLE, roleValue));
         }
@@ -233,7 +236,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
 
     private BaseResource getResource() {
         BaseResource resource = new BaseResource("name");
-        Set<Attribute> resourceAttributes = new HashSet<Attribute>();
+        Set<Attribute> resourceAttributes = new HashSet<>();
         resourceAttributes.add(new Attribute(ISSUER, RES_ATTRIB_ROLE_REQUIRED, RES_ATTRIB_ROLE_REQUIRED_VALUE));
         resourceAttributes.add(new Attribute(ISSUER, RES_ATTRIB_LOCATION, RES_ATTRIB_LOCATION_VALUE));
         resource.setAttributes(resourceAttributes);
@@ -248,16 +251,12 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
                         Effect.NOT_APPLICABLE, EMPTY_ATTRS },
                 { SUBJECT_ATTRIB_VALUE_ANALYST,
                         new File("src/test/resources/policy-set-with-one-policy-one-condition-using-attributes.json"),
-                        Effect.NOT_APPLICABLE, null },
-                { SUBJECT_ATTRIB_VALUE_ANALYST,
-                        new File("src/test/resources/policy-set-with-one-policy-one-condition-using-attributes.json"),
-                        Effect.PERMIT, new ArrayList<Attribute>(getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN)) },
+                        Effect.PERMIT, getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN) },
                 { null, new File("src/test/resources/policy-set-with-one-policy-one-condition-using-attributes.json"),
-                        Effect.NOT_APPLICABLE,
-                        new ArrayList<Attribute>(getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN)) },
+                        Effect.NOT_APPLICABLE, getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN) },
                 { null, new File(
                         "src/test/resources/" + "policy-set-with-one-policy-one-condition-using-res-attributes.json"),
-                        Effect.PERMIT, new ArrayList<Attribute>(getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN)) } };
+                        Effect.PERMIT, getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN) } };
     }
 
     @DataProvider(name = "policyDataProvider")

@@ -9,7 +9,11 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.ge.predix.acs.config.GraphBeanDefinitionRegistryPostProcessor;
+import com.ge.predix.acs.config.GraphConfig;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
+import com.ge.predix.acs.privilege.management.dao.GraphResourceRepository;
+import com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository;
 import com.ge.predix.acs.request.context.AcsRequestContext.ACSRequestContextAttribute;
 import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.acs.testutils.TestUtils;
@@ -18,7 +22,9 @@ import com.ge.predix.acs.zone.management.ZoneServiceImpl;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
 @ContextConfiguration(
-        classes = { InMemoryDataSourceConfig.class, ZoneServiceImpl.class, AcsRequestContextHolder.class })
+        classes = { InMemoryDataSourceConfig.class, ZoneServiceImpl.class, AcsRequestContextHolder.class,
+                GraphBeanDefinitionRegistryPostProcessor.class, GraphResourceRepository.class,
+                GraphSubjectRepository.class, GraphConfig.class })
 @ActiveProfiles(profiles = { "h2", "public" })
 @Test
 public class AcsRequestContextHolderTest extends AbstractTestNGSpringContextTests {

@@ -36,6 +36,8 @@ public class GroovySecureExtension extends AbstractTypeCheckingExtension {
         // First the white list.
         if ((!target.getDeclaringClass().getName().equals("com.ge.predix.acs.commons.policy.condition.AbstractHandler"))
                 && (!target.getDeclaringClass().getName()
+                        .equals("com.ge.predix.acs.commons.policy.condition.AbstractHandlers"))
+                && (!target.getDeclaringClass().getName()
                         .equals("com.ge.predix.acs.commons.policy.condition.ResourceHandler"))
                 && (!target.getDeclaringClass().getName()
                         .equals("com.ge.predix.acs.commons.policy.condition.SubjectHandler"))

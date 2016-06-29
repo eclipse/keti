@@ -16,23 +16,25 @@
 
 package com.ge.predix.acs.zone.management;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
+import com.ge.predix.acs.privilege.management.dao.ResourceRepository;
+import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
+import com.ge.predix.acs.privilege.management.dao.SubjectRepository;
 import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.acs.zone.management.dao.ZoneConverter;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.acs.zone.management.dao.ZoneRepository;
 
-/**
- *
- * @author 212319607
- */
 @Component
 @SuppressWarnings("nls")
 public class ZoneServiceImpl implements ZoneService {
@@ -41,6 +43,14 @@ public class ZoneServiceImpl implements ZoneService {
 
     @Autowired
     private ZoneRepository zoneRepository;
+
+    @Autowired
+    @Qualifier("resourceRepository")
+    private ResourceRepository resourceRepository;
+
+    @Autowired
+    @Qualifier("subjectRepository")
+    private SubjectRepository subjectRepository;
 
     private final ZoneConverter zoneConverter = new ZoneConverter();
 
@@ -119,7 +129,12 @@ public class ZoneServiceImpl implements ZoneService {
     public Boolean deleteZone(final String zoneName) {
         ZoneEntity currentZone = this.zoneRepository.getByName(zoneName);
         if (currentZone != null) {
-            // Clients are removed via JPA cascade
+            //Delete child entities in Graph repos first. This is not transactional.
+            List<ResourceEntity> resourcesInZone = this.resourceRepository.findByZone(currentZone);
+            this.resourceRepository.delete(resourcesInZone);
+            List<SubjectEntity> subjectsInZone = this.subjectRepository.findByZone(currentZone);
+            this.subjectRepository.delete(subjectsInZone);
+
             this.zoneRepository.delete(currentZone);
         }
         return currentZone != null;

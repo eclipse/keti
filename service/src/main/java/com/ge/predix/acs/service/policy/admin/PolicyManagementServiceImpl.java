@@ -123,8 +123,8 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("No policy set found for policySetName = %s,  zone = %s.",
-                    policySetName, zone.toString()));
+            LOGGER.debug(String.format("No policy set found for policySetName = %s,  zone = %s.", policySetName,
+                    zone.toString()));
         }
 
         return null;
@@ -147,7 +147,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         PolicySetEntity policySetEntity = this.policySetRepository.getByZoneAndPolicySetId(zone, policySetID);
         if (policySetEntity != null) {
             LOGGER.info(String.format("Found an existing policy set policySetName=%s, zone=%s, deleting now.",
-                        policySetID, zone.getName()));
+                    policySetID, zone.getName()));
             // Since we only support one policy set and we don't want to load that policy set when checking for a
             // cached invalidation, we use a hard-coded value for the policy set key.
             this.cache.resetForPolicySet(zone.getName(), "default");

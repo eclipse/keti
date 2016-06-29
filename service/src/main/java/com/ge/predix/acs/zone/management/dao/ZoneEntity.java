@@ -28,6 +28,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
 import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
 import com.ge.predix.acs.service.policy.admin.dao.PolicySetEntity;
@@ -113,6 +116,20 @@ public class ZoneEntity {
 
     public void setSubdomain(final String subdomain) {
         this.subdomain = subdomain;
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(this.name).toHashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof ZoneEntity) {
+            ZoneEntity other = (ZoneEntity) obj;
+            return new EqualsBuilder().append(this.getName(), other.getName()).isEquals();
+        }
+        return false;
     }
 
     @Override

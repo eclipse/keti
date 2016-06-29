@@ -22,14 +22,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
-/**
- *
- * @author 212360328
- */
 public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> {
 
     List<ResourceEntity> findByZone(final ZoneEntity zone);
 
     ResourceEntity getByZoneAndResourceIdentifier(final ZoneEntity zone, final String resourceIdentifier);
-
 }

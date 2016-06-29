@@ -1,0 +1,61 @@
+{
+    "name" : "test-policy-set",
+    "policies" : [
+        {
+            "name" : "Agents can access a site if they are stationed at the site.",
+            "target" : {
+                "name" : "When an agent accesses a site",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/sites/{site_id}"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Agent",
+                    "attributes" : [
+                        { "issuer" : "acs.example.org",
+                          "name" : "site" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "is assigned to site",
+                  "condition" : "match.single(subject.attributes('acs.example.org', 'site'), resource.uriVariable('site_id'))" }
+            ],
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "Agents can access evidence if they are a member of the evidence group and have the right clearance.",
+            "target" : {
+                "name" : "When an agent accesses evidence",
+                "resource" : {
+                    "name" : "Evidence",
+                    "uriTemplate" : "/evidence/{evidence_id}",
+                    "attributes" : [
+                        { "issuer" : "acs.example.org",
+                          "name" : "group" }
+                    ]
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Agent",
+                    "attributes" : [
+                        { "issuer" : "acs.example.org",
+                          "name" : "group" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "is member of group",
+                  "condition" : "resource.and(subject).haveSame('acs.example.org', 'group').result()" },
+                { "name" : "has clearance",
+                  "condition" : "resource.and(subject).haveSame('acs.example.org', 'classification').result()" }
+            ],
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "Deny all other operations by default",
+            "effect" : "DENY"
+        }
+    ]
+}

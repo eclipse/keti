@@ -50,7 +50,7 @@ import com.ge.predix.acs.zone.management.ZoneService;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
-@ActiveProfiles(profiles = { "h2", "public", "simple-cache" })
+@ActiveProfiles(profiles = { "h2", "public", "simple-cache", "titan" })
 @Test
 public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTests {
 

@@ -54,7 +54,7 @@ public class ZoneConverter {
     }
 
     public Set<Zone> toZone(final Set<ZoneEntity> zoneEntities) {
-        Set<Zone> result = new HashSet<Zone>();
+        Set<Zone> result = new HashSet<>();
         for (ZoneEntity ze : zoneEntities) {
             result.add(toZone(ze));
         }

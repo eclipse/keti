@@ -222,7 +222,7 @@ public class AbstractPolicyEvaluationCacheTest {
 
     public static PolicyEvaluationResult mockPermitResult() {
         PolicyEvaluationResult result = new PolicyEvaluationResult(Effect.PERMIT);
-        result.setResolvedResourceUris(new HashSet<String>(Arrays.asList(new String[] { "/x-files" })));
+        result.setResolvedResourceUris(new HashSet<>(Arrays.asList(new String[] { "/x-files" })));
         return result;
     }
 }

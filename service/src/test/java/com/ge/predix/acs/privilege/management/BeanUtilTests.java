@@ -35,7 +35,7 @@ public class BeanUtilTests {
     public void test() {
         JsonUtils ju = new JsonUtils();
         Attribute a1 = new Attribute("acs", "role", "admin");
-        Set<Attribute> s = new HashSet<Attribute>();
+        Set<Attribute> s = new HashSet<>();
         s.add(a1);
         String serialize = ju.serialize(s);
         System.out.println(serialize);

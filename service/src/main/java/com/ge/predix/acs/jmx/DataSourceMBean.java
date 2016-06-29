@@ -1,16 +1,16 @@
 /*******************************************************************************
- * Copyright 2016 General Electric Company. 
+ * Copyright 2016 General Electric Company.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
 package com.ge.predix.acs.jmx;
@@ -53,8 +53,8 @@ public class DataSourceMBean {
         }
         // For TOMCAT_POOL_DATASOURCE
         if (this.entityManagerFactory.getDataSource().getClass().getName().equals(TOMCAT_POOL_DATASOURCE)) {
-            org.apache.tomcat.jdbc.pool.DataSource tomcatDs = (org.apache.tomcat.jdbc.pool.DataSource) 
-                    this.entityManagerFactory.getDataSource();
+            org.apache.tomcat.jdbc.pool.DataSource tomcatDs = 
+                    (org.apache.tomcat.jdbc.pool.DataSource) this.entityManagerFactory.getDataSource();
             connectionPool.put("driverClassName", tomcatDs.getDriverClassName());
             connectionPool.put("numActive", tomcatDs.getNumActive());
             connectionPool.put("maxActive", tomcatDs.getMaxActive());

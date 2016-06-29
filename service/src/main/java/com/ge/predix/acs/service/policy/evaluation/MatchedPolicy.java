@@ -27,10 +27,18 @@ public class MatchedPolicy {
 
     private Policy policy;
     private Set<Attribute> resourceAttributes;
+    private Set<Attribute> subjectAttributes;
 
     public MatchedPolicy(final Policy policy, final Set<Attribute> resourceAttributes) {
         this.policy = policy;
         this.resourceAttributes = resourceAttributes;
+    }
+
+    public MatchedPolicy(final Policy policy, final Set<Attribute> resourceAttributes,
+            final Set<Attribute> subjectAttributes) {
+        this.policy = policy;
+        this.resourceAttributes = resourceAttributes;
+        this.subjectAttributes = subjectAttributes;
     }
 
     public Policy getPolicy() {
@@ -49,8 +57,17 @@ public class MatchedPolicy {
         this.resourceAttributes = resourceAttributes;
     }
 
+    public Set<Attribute> getSubjectAttributes() {
+        return this.subjectAttributes;
+    }
+
+    public void setSubjectAttributes(final Set<Attribute> subjectAttributes) {
+        this.subjectAttributes = subjectAttributes;
+    }
+
     @Override
     public String toString() {
-        return "MatchedPolicy [policy=" + this.policy + ", resourceAttributes=" + this.resourceAttributes + "]";
+        return "MatchedPolicy [policy=" + this.policy + ", resourceAttributes=" + this.resourceAttributes
+                + ", subjectAttributes=" + this.subjectAttributes + "]";
     }
 }

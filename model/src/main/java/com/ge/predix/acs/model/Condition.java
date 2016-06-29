@@ -32,6 +32,7 @@ public class Condition {
     private String condition;
 
     public Condition() {
+        // Default constructor.
     }
 
     public Condition(final String condition) {

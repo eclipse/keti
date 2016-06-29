@@ -24,7 +24,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
+import com.ge.predix.acs.config.GraphBeanDefinitionRegistryPostProcessor;
+import com.ge.predix.acs.config.GraphConfig;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
+import com.ge.predix.acs.privilege.management.dao.GraphResourceRepository;
+import com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository;
 import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
 import com.ge.predix.acs.privilege.management.dao.ResourceRepository;
 import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
@@ -37,8 +41,9 @@ import com.ge.predix.acs.zone.management.dao.ZoneRepository;
 import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
 
 @ContextConfiguration(
-        classes = { InMemoryDataSourceConfig.class, ZoneServiceImpl.class, SpringSecurityPolicyContextResolver.class,
-                SpringSecurityZoneResolver.class })
+        classes = { GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class, GraphResourceRepository.class,
+                GraphSubjectRepository.class, InMemoryDataSourceConfig.class, SpringSecurityPolicyContextResolver.class,
+                SpringSecurityZoneResolver.class, ZoneServiceImpl.class })
 @ActiveProfiles(profiles = { "h2", "public" })
 @Test(singleThreaded = true)
 public class ZoneEntityTest extends AbstractTransactionalTestNGSpringContextTests {
@@ -114,7 +119,7 @@ public class ZoneEntityTest extends AbstractTransactionalTestNGSpringContextTest
         this.subjectRepository.save(subjectEntity);
 
         ResourceEntity resourceEntity = new ResourceEntity(testZoneEntity, "bob");
-        resourceEntity.setAttributesAsJson("{}");
+        resourceEntity.setAttributesAsJson("[]");
         this.resourceRepository.save(resourceEntity);
 
         PolicySetEntity policySetEntity = new PolicySetEntity(testZoneEntity, "policy-set-2", "{}");
@@ -130,11 +135,11 @@ public class ZoneEntityTest extends AbstractTransactionalTestNGSpringContextTest
 
         // delete zone and assert proper cascading
         this.service.deleteZone(testZone.getName());
-        testZoneEntity = this.zoneRepository.getByName(testZone.getName());
-        Assert.assertEquals(testZoneEntity, null);
         Assert.assertEquals(this.subjectRepository.getByZoneAndSubjectIdentifier(testZoneEntity, "bob"), null);
         Assert.assertEquals(this.resourceRepository.getByZoneAndResourceIdentifier(testZoneEntity, "bob"), null);
         Assert.assertEquals(this.policySetRepository.getByZoneAndPolicySetId(testZoneEntity, "policy-set-2"), null);
+        testZoneEntity = this.zoneRepository.getByName(testZone.getName());
+        Assert.assertEquals(testZoneEntity, null);
 
     }
 }

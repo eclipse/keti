@@ -18,6 +18,7 @@ package com.ge.predix.acs.privilege.management;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +28,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
 import com.ge.predix.acs.privilege.management.dao.ResourceRepository;
 import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
 import com.ge.predix.acs.privilege.management.dao.SubjectRepository;
+import com.ge.predix.acs.privilege.management.dao.SubjectScopedAccessRepository;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
@@ -59,6 +62,10 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     @Qualifier("subjectRepository")
     private SubjectRepository subjectRepository;
 
+    @Autowired(required = false)
+    @Qualifier("subjectScopedAccessRepository")
+    private SubjectScopedAccessRepository subjectScopedAccessRepository;
+
     @Autowired
     private ZoneResolver zoneResolver;
 
@@ -74,7 +81,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
         // fail fast if identifiers are missing or null
         validResourcesOrFail(resources);
 
-        List<ResourceEntity> entities = new ArrayList<ResourceEntity>();
+        List<ResourceEntity> entities = new ArrayList<>();
         appendResourcesInTransaction(resources, zone, entities);
     }
 
@@ -119,7 +126,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     public List<BaseResource> getResources() {
         ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
 
-        List<BaseResource> resources = new ArrayList<BaseResource>();
+        List<BaseResource> resources = new ArrayList<>();
         List<ResourceEntity> resourceEntities = this.resourceRepository.findByZone(zone);
 
         if (resourceEntities != null && resourceEntities.size() > 0) {
@@ -217,7 +224,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
             this.resourceRepository.delete(resourceEntity.getId());
             deleted = true;
             LOGGER.info(String.format("Deleted resource with resourceId = %s, zone = %s.", resourceIdentifier,
-                        zone.toString()));
+                    zone.toString()));
         }
         return deleted;
     }
@@ -231,7 +238,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
         // fail fast if identifiers are missing or null
         validSubjectUrisOrFail(subjects);
 
-        List<SubjectEntity> subjectEntities = new ArrayList<SubjectEntity>();
+        List<SubjectEntity> subjectEntities = new ArrayList<>();
 
         appendSubjectsInTransaction(subjects, zone, subjectEntities);
     }
@@ -266,7 +273,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     @Transactional(readOnly = true)
     public List<BaseSubject> getSubjects() {
         ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
-        List<BaseSubject> subjects = new ArrayList<BaseSubject>();
+        List<BaseSubject> subjects = new ArrayList<>();
 
         List<SubjectEntity> subjectEntities = this.subjectRepository.findByZone(zone);
         if (subjectEntities != null && subjectEntities.size() > 0) {
@@ -282,6 +289,24 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     public BaseSubject getBySubjectIdentifier(final String subjectIdentifier) {
         ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
         SubjectEntity subjectEntity = this.subjectRepository.getByZoneAndSubjectIdentifier(zone, subjectIdentifier);
+        BaseSubject subject = this.privilegeConverter.toSubject(subjectEntity);
+        if (LOGGER.isDebugEnabled() && subject == null) {
+            LOGGER.debug(String.format("Unable to find the subject for subjectIdentifier = %s, zone = %s.",
+                    subjectIdentifier, zone));
+        }
+        return subject;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BaseSubject getBySubjectIdentifierAndScopes(final String subjectIdentifier, final Set<Attribute> scopes) {
+        if (null == this.subjectScopedAccessRepository) {
+            return getBySubjectIdentifier(subjectIdentifier);
+        }
+
+        ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
+        SubjectEntity subjectEntity = this.subjectScopedAccessRepository.getByZoneAndSubjectIdentifierAndScopes(zone,
+                subjectIdentifier, scopes);
         BaseSubject subject = this.privilegeConverter.toSubject(subjectEntity);
         if (LOGGER.isDebugEnabled() && subject == null) {
             LOGGER.debug(String.format("Unable to find the subject for subjectIdentifier = %s, zone = %s.",
@@ -346,7 +371,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
             this.subjectRepository.delete(subjectEntity.getId());
             deleted = true;
             LOGGER.info(String.format("Deleted subject with subjectIdentifier=%s, zone = %s.", subjectIdentifier,
-                        zone.toString()));
+                    zone.toString()));
         }
         return deleted;
     }
@@ -361,9 +386,11 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
      * @param s
      */
     private void validateSubjectOrFail(final BaseSubject s) {
-        boolean identifierValid = s.isIdentifierValid();
+        if (s == null) {
+            throw new PrivilegeManagementException("Subject is null.");
+        }
 
-        if (!identifierValid) {
+        if (!s.isIdentifierValid()) {
             throw new PrivilegeManagementException(String.format(
                     "Subject missing subjectIdentifier = %s this is mandatory for POST API", s.getSubjectIdentifier()));
         }
@@ -377,6 +404,9 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     }
 
     private void validateResourceOrFail(final BaseResource r) {
+        if (r == null) {
+            throw new PrivilegeManagementException("Resource is null.");
+        }
         if (!r.isIdentifierValid()) {
             throw new PrivilegeManagementException(
                     String.format("Resource missing resourceIdentifier = %s ,this is mandatory for POST API",

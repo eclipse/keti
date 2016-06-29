@@ -36,6 +36,7 @@ import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
 import com.ge.predix.acs.service.policy.evaluation.MatchedPolicy;
 import com.ge.predix.acs.service.policy.evaluation.ResourceAttributeResolver;
 import com.ge.predix.acs.service.policy.evaluation.ResourceAttributeResolver.ResourceAttributeResolverResult;
+import com.ge.predix.acs.service.policy.evaluation.SubjectAttributeResolver;
 
 /**
  *
@@ -56,18 +57,23 @@ public class PolicyMatcherImpl implements PolicyMatcher {
     @Override
     public MatchResult matchForResult(final PolicyMatchCandidate candidate, final List<Policy> policies) {
         ResourceAttributeResolver resourceAttributeResolver = new ResourceAttributeResolver(
-                this.privilegeManagementService, candidate.getResourceURI());
+                this.privilegeManagementService, candidate.getResourceURI(),
+                candidate.getSupplementalResourceAttributes());
+        SubjectAttributeResolver subjectAttributeResolver = new SubjectAttributeResolver(
+                this.privilegeManagementService, candidate.getSubjectIdentifier(),
+                candidate.getSupplementalSubjectAttributes());
 
         List<MatchedPolicy> matchedPolicies = new ArrayList<>();
         Set<String> resolvedResourceUris = new HashSet<>();
         for (Policy policy : policies) {
-            ResourceAttributeResolverResult result = resourceAttributeResolver.getResult(policy);
-            Set<Attribute> resourceAttributes = result.getResourceAttributes();
-            if (result.isAttributeUriTemplateFound()) {
-                resolvedResourceUris.add(result.getResovledResourceUri());
+            ResourceAttributeResolverResult resAttrResolverResult = resourceAttributeResolver.getResult(policy);
+            Set<Attribute> resourceAttributes = resAttrResolverResult.getResourceAttributes();
+            Set<Attribute> subjectAttributes = subjectAttributeResolver.getResult(resourceAttributes);
+            if (resAttrResolverResult.isAttributeUriTemplateFound()) {
+                resolvedResourceUris.add(resAttrResolverResult.getResovledResourceUri());
             }
-            if (isPolicyMatch(candidate, policy, resourceAttributes)) {
-                matchedPolicies.add(new MatchedPolicy(policy, resourceAttributes));
+            if (isPolicyMatch(candidate, policy, resourceAttributes, subjectAttributes)) {
+                matchedPolicies.add(new MatchedPolicy(policy, resourceAttributes, subjectAttributes));
             }
         }
         return new MatchResult(matchedPolicies, resolvedResourceUris);
@@ -82,14 +88,14 @@ public class PolicyMatcherImpl implements PolicyMatcher {
      */
     @SuppressWarnings("nls")
     private boolean isPolicyMatch(final PolicyMatchCandidate candidate, final Policy policy,
-            final Set<Attribute> resourceAttributes) {
+            final Set<Attribute> resourceAttributes, final Set<Attribute> subjectAttributes) {
         // A policy with no target matches everything.
         if (null == policy.getTarget()) {
             return true;
         }
         boolean actionMatch = isActionMatch(candidate.getAction(), policy);
 
-        boolean subjectMatch = isSubjectMatch(candidate.getSubjectAttributes(), policy);
+        boolean subjectMatch = isSubjectMatch(subjectAttributes, policy);
 
         boolean resourceMatch = isResourceMatch(candidate.getResourceURI(), resourceAttributes, policy);
 
@@ -127,7 +133,7 @@ public class PolicyMatcherImpl implements PolicyMatcher {
         return true;
     }
 
-    private boolean isSubjectMatch(final List<Attribute> subjectAttributes, final Policy policy) {
+    private boolean isSubjectMatch(final Set<Attribute> subjectAttributes, final Policy policy) {
         if ((null == policy.getTarget().getSubject()) || (null == policy.getTarget().getSubject().getAttributes())) {
             return true;
         }

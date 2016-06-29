@@ -54,16 +54,15 @@ public class ResourceAttributeResolverTest {
     @Test(dataProvider = "resourceUriProvider")
     public void testResolveResourceUri(final String resourceURI, final String attributeUriTemplate,
             final String resolvedResourceURI) throws Exception {
-        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService,
-                resourceURI);
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, resourceURI,
+                null);
 
         Assert.assertEquals(resolver.resolveResourceURI(getPolicy(attributeUriTemplate)), resolvedResourceURI);
     }
 
     @DataProvider
     public Object[][] resourceUriProvider() {
-        return new Object[][] {
-                { "/v1/site/123/asset/456", "/v1{attribute_uri}/asset/{asset-id}", "/site/123" },
+        return new Object[][] { { "/v1/site/123/asset/456", "/v1{attribute_uri}/asset/{asset-id}", "/site/123" },
                 { "/v1/site/123/asset/456", "/v2/DoesNotExist/{attribute_uri}", null },
                 // attributeUriTemplate not defined
                 { "/v1/site/123/asset/456", null, null },
@@ -72,12 +71,14 @@ public class ResourceAttributeResolverTest {
     }
 
     public void testResolveResourceUriNoPolicy() {
-        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, "/a/b");
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, "/a/b",
+                null);
         Assert.assertEquals(resolver.resolveResourceURI(null), null);
     }
 
     public void testResolveResourceUriNoTarget() {
-        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, "/a/b");
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, "/a/b",
+                null);
         Assert.assertEquals(resolver.resolveResourceURI(new Policy()), null);
     }
 
@@ -86,7 +87,8 @@ public class ResourceAttributeResolverTest {
         t.setAction("GET");
         Policy p = new Policy();
         p.setTarget(t);
-        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, "/a/b");
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, "/a/b",
+                null);
         Assert.assertEquals(resolver.resolveResourceURI(new Policy()), null);
     }
 
@@ -101,13 +103,13 @@ public class ResourceAttributeResolverTest {
         when(this.privilegeManagementService.getByResourceIdentifier(testResource.getResourceIdentifier()))
                 .thenReturn(testResource);
         ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService,
-                testResource.getResourceIdentifier());
+                testResource.getResourceIdentifier(), null);
         Assert.assertEquals(resolver.getResourceAttributes(getPolicy(null)), testResourceAttributes);
     }
 
     public void testGetResourceAttributesForNonExistingURI() {
         ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService,
-                "NonExistingURI");
+                "NonExistingURI", null);
         Assert.assertEquals(resolver.getResourceAttributes(getPolicy(null)).size(), 0);
     }
 

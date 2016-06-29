@@ -26,8 +26,8 @@ public class AcsRequestEnrichingFilter extends OncePerRequestFilter {
                 this.logger.trace("Initialized the Acs Request Context");
 
             } catch (RuntimeException e) { // Ensure that the filter chain is not aborted.
-                this.logger.error("AcsRequestContext Initialization failed:Let the request go on irrespective."
-                        + e.getMessage());
+                this.logger.error(
+                        "AcsRequestContext Initialization failed:Let the request go on irrespective." + e.getMessage());
             }
             filterChain.doFilter(request, response);
         } finally {

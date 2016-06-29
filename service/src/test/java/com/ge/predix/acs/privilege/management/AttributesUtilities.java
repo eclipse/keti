@@ -34,7 +34,7 @@ public class AttributesUtilities {
      * @return a set of the attributes
      */
     public Set<Attribute> getSetOfAttributes(final Attribute... attrs) {
-        Set<Attribute> attributes = new HashSet<Attribute>();
+        Set<Attribute> attributes = new HashSet<>();
         attributes.addAll(Arrays.asList(attrs));
         return attributes;
     }
