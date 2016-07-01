@@ -45,6 +45,7 @@ import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.acs.testutils.MockAcsRequestContext;
 import com.ge.predix.acs.testutils.MockMvcContext;
 import com.ge.predix.acs.testutils.MockSecurityContext;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.ZoneService;
@@ -55,7 +56,7 @@ import com.ge.predix.acs.zone.management.ZoneService;
  */
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
-@ActiveProfiles(profiles = { "h2", "public", "simple-cache", "titan" })
+@ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpringContextTests {
 
     public static final ConfigureEnvironment CONFIGURE_ENVIRONMENT = new ConfigureEnvironment();

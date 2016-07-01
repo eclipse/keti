@@ -32,13 +32,15 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
+
 /**
  *
  * @author 212360328
  */
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
-@ActiveProfiles(profiles = { "h2", "public", "simple-cache" })
+@ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 @Test
 public class AcsMonitoringControllerIT extends AbstractTestNGSpringContextTests {
     @Autowired

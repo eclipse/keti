@@ -42,6 +42,7 @@ import com.ge.predix.acs.request.context.AcsRequestContextHolder;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.Zone;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.zone.management.ZoneService;
 import com.ge.predix.acs.zone.management.ZoneServiceImpl;
@@ -53,7 +54,7 @@ import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
                 PrivilegeManagementServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class,
                 GraphResourceRepository.class, GraphSubjectRepository.class, ZoneServiceImpl.class,
                 SpringSecurityPolicyContextResolver.class, SpringSecurityZoneResolver.class })
-@ActiveProfiles(profiles = { "h2", "public", "simple-cache", "titan" })
+@ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 @Test
 public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringContextTests {
 
@@ -90,7 +91,8 @@ public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringConte
         } catch (PrivilegeManagementException e) {
             // not checking id in toString(), just validating rest of error
             // message due to id mismatch on CI
-            boolean checkMessage = e.getMessage().contains("Unable to persist Subject(s) for zone");
+            boolean checkMessage = (e.getMessage().contains("Unable to persist Subject(s) for zone")
+                    || (e.getMessage().contains("Duplicate Subject(s)")));
             Assert.assertTrue(checkMessage, "Invalid Error Message: " + e.getMessage());
             Assert.assertEquals(this.service.getSubjects().size(), 0);
             return;
@@ -112,7 +114,8 @@ public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringConte
             this.service.appendResources(resourceList);
 
         } catch (PrivilegeManagementException e) {
-            boolean checkMessage = e.getMessage().contains("Unable to persist Resource(s) for zone");
+            boolean checkMessage = (e.getMessage().contains("Unable to persist Resource(s) for zone")
+                    || (e.getMessage().contains("Duplicate Resource(s)")));
             Assert.assertTrue(checkMessage, "Invalid Error Message: " + e.getMessage());
             Assert.assertEquals(this.service.getResources().size(), 0);
             return;

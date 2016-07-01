@@ -36,6 +36,7 @@ import com.ge.predix.acs.privilege.management.dao.SubjectRepository;
 import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.acs.service.policy.admin.dao.PolicySetEntity;
 import com.ge.predix.acs.service.policy.admin.dao.PolicySetRepository;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.acs.zone.management.dao.ZoneRepository;
 import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
@@ -44,7 +45,7 @@ import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
         classes = { GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class, GraphResourceRepository.class,
                 GraphSubjectRepository.class, InMemoryDataSourceConfig.class, SpringSecurityPolicyContextResolver.class,
                 SpringSecurityZoneResolver.class, ZoneServiceImpl.class })
-@ActiveProfiles(profiles = { "h2", "public" })
+@ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 @Test(singleThreaded = true)
 public class ZoneEntityTest extends AbstractTransactionalTestNGSpringContextTests {
 

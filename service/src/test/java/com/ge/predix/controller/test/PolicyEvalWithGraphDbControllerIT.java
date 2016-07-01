@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,6 +40,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -59,13 +61,14 @@ import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.acs.testutils.MockAcsRequestContext;
 import com.ge.predix.acs.testutils.MockMvcContext;
 import com.ge.predix.acs.testutils.MockSecurityContext;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.ZoneService;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
-@ActiveProfiles(profiles = { "h2", "public", "simple-cache", "titan" })
+@ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringContextTests {
 
     public static final ConfigureEnvironment CONFIGURE_ENVIRONMENT = new ConfigureEnvironment();
@@ -92,8 +95,15 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
     private Zone testZone1;
     private Zone testZone2;
 
+    @Autowired
+    ConfigurableEnvironment env;
+
     @BeforeClass
     public void setup() throws Exception {
+        if (!Arrays.asList(this.env.getActiveProfiles()).contains("titan")) {
+            throw new SkipException("This test only applies when using titan profile.");
+        }
+
         this.testZone1 = new TestUtils().createTestZone("PolicyEvalWithGraphDbControllerIT1");
         this.testZone2 = new TestUtils().createTestZone("PolicyEvalWithGraphDbControllerIT2");
         this.zoneService.upsertZone(this.testZone1);

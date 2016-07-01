@@ -24,12 +24,13 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.acs.zone.management.dao.ZoneRepository;
 
 @ContextConfiguration(classes = InMemoryDataSourceConfig.class)
 @EnableAutoConfiguration
-@ActiveProfiles(profiles = { "h2", "public" })
+@ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 public class PolicySetRepositoryTest extends AbstractTransactionalTestNGSpringContextTests {
     private static final String SUBDOMAIN = "PolicySetRepositoryTest-acs";
 

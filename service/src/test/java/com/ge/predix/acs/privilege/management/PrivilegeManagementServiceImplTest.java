@@ -49,6 +49,7 @@ import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.acs.testutils.MockSecurityContext;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.zone.management.ZoneService;
 import com.ge.predix.acs.zone.management.ZoneServiceImpl;
@@ -60,7 +61,7 @@ import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
                 PrivilegeManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
                 SpringSecurityZoneResolver.class, ZoneServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class,
                 GraphConfig.class, GraphResourceRepository.class, GraphSubjectRepository.class })
-@ActiveProfiles(profiles = { "h2", "public", "simple-cache", "titan" })
+@ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTestNGSpringContextTests {
 
     @Autowired
