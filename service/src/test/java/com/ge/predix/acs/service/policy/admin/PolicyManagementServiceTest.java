@@ -43,6 +43,7 @@ import com.ge.predix.acs.policy.evaluation.cache.HystrixPolicyEvaluationCacheCir
 import com.ge.predix.acs.policy.evaluation.cache.InMemoryPolicyEvaluationCache;
 import com.ge.predix.acs.service.InvalidACSRequestException;
 import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.acs.zone.management.dao.ZoneRepository;
@@ -50,7 +51,7 @@ import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
 import com.ge.predix.acs.zone.resolver.ZoneResolver;
 
 @Test
-@ActiveProfiles(profiles = { "h2", "public", "simple-cache" })
+@ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 @ContextConfiguration(
         classes = { HystrixPolicyEvaluationCacheCircuitBreaker.class, InMemoryPolicyEvaluationCache.class,
                 InMemoryDataSourceConfig.class, PolicyManagementServiceImpl.class,

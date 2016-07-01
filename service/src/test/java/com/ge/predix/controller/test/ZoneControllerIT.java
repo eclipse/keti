@@ -41,11 +41,12 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.ge.predix.acs.rest.Zone;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.utils.JsonUtils;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
-@ActiveProfiles(profiles = { "h2", "public", "simple-cache", "titan" })
+@ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 @Test
 public class ZoneControllerIT extends AbstractTestNGSpringContextTests {
 

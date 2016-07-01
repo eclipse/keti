@@ -40,6 +40,7 @@ import com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository;
 import com.ge.predix.acs.privilege.management.dao.ResourceRepository;
 import com.ge.predix.acs.privilege.management.dao.SubjectRepository;
 import com.ge.predix.acs.rest.Zone;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.acs.zone.management.dao.ZoneRepository;
@@ -56,7 +57,7 @@ import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
                 GraphSubjectRepository.class, InMemoryDataSourceConfig.class, SpringSecurityPolicyContextResolver.class,
                 SpringSecurityZoneResolver.class, ZoneServiceImpl.class })
 @TestPropertySource("/application.properties")
-@ActiveProfiles(profiles = { "h2", "public" })
+@ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 @Test
 @SuppressWarnings("nls")
 public class ZoneServiceTest extends AbstractTransactionalTestNGSpringContextTests {

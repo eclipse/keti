@@ -25,8 +25,10 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
+
 @ContextConfiguration(classes = { InMemoryDataSourceConfig.class, CloudDataSourceConfig.class })
-@ActiveProfiles(profiles = { "h2", "public" })
+@ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 public class AcsConfigLocalProfileTest extends AbstractTestNGSpringContextTests {
     @Autowired
     private DataSource dataSource;
