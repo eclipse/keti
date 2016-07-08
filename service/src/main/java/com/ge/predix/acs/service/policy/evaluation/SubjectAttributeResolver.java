@@ -32,7 +32,8 @@ public class SubjectAttributeResolver {
         Set<Attribute> subjectAttributes = this.subjectAttributeMap.get(this.subjectIdentifier);
         if (null == subjectAttributes) {
             subjectAttributes = new HashSet<>();
-            BaseSubject subject = this.privilegeService.getBySubjectIdentifierAndScopes(this.subjectIdentifier, scopes);
+            BaseSubject subject = this.privilegeService
+                    .getBySubjectIdentifierAndScopes(this.subjectIdentifier, scopes);
             if (null != subject) {
                 subjectAttributes.addAll(subject.getAttributes());
             }

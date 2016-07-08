@@ -6,7 +6,7 @@ import org.springframework.test.context.ActiveProfilesResolver;
 public class TestActiveProfilesResolver implements ActiveProfilesResolver {
 
     @Override
-    public String[] resolve(Class<?> arg0) {
+    public String[] resolve(final Class<?> arg0) {
         String envSpringProfilesActive = System.getenv("SPRING_PROFILES_ACTIVE");
         String[] profiles = new String[] { "h2", "public", "simple-cache", "titan" };
         if (StringUtils.isNotEmpty(envSpringProfilesActive)) {

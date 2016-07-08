@@ -203,6 +203,7 @@ public class PolicyMatcherImplTest {
         testResource.setResourceIdentifier("/assets/1123");
 
         when(this.privilegeManagementService.getByResourceIdentifier("/assets/1123")).thenReturn(testResource);
+        when(this.privilegeManagementService.getByResourceIdentifierWithInheritedAttributes("/assets/1123")).thenReturn(testResource);
 
         List<Policy> policies = policySet.getPolicies();
         PolicyMatchCandidate candidate = new PolicyMatchCandidate();

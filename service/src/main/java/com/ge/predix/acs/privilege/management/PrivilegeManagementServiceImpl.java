@@ -31,10 +31,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
+import com.ge.predix.acs.privilege.management.dao.ResourceHierarchicalRepository;
 import com.ge.predix.acs.privilege.management.dao.ResourceRepository;
 import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
+import com.ge.predix.acs.privilege.management.dao.SubjectHierarchicalRepository;
 import com.ge.predix.acs.privilege.management.dao.SubjectRepository;
-import com.ge.predix.acs.privilege.management.dao.SubjectScopedAccessRepository;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
@@ -63,8 +64,12 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     private SubjectRepository subjectRepository;
 
     @Autowired(required = false)
-    @Qualifier("subjectScopedAccessRepository")
-    private SubjectScopedAccessRepository subjectScopedAccessRepository;
+    @Qualifier("subjectHierarchicalRepository")
+    private SubjectHierarchicalRepository subjectHierarchicalRepository;
+
+    @Autowired(required = false)
+    @Qualifier("resourceHierarchicalRepository")
+    private ResourceHierarchicalRepository resourceHierarchicalRepository;
 
     @Autowired
     private ZoneResolver zoneResolver;
@@ -143,7 +148,23 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
         ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
         ResourceEntity resourceEntity = this.resourceRepository.getByZoneAndResourceIdentifier(zone,
                 resourceIdentifier);
+        return createResource(resourceIdentifier, zone, resourceEntity);
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public BaseResource getByResourceIdentifierWithInheritedAttributes(final String resourceIdentifier) {
+        if (null == this.resourceHierarchicalRepository) {
+            return getByResourceIdentifier(resourceIdentifier);
+        }
+        ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
+        ResourceEntity resourceEntity = this.resourceHierarchicalRepository
+                .getByZoneAndResourceIdentifierWithInheritedAttributes(zone, resourceIdentifier);
+        return createResource(resourceIdentifier, zone, resourceEntity);
+    }
+
+    private BaseResource createResource(final String resourceIdentifier, final ZoneEntity zone,
+            final ResourceEntity resourceEntity) {
         BaseResource resource = this.privilegeConverter.toResource(resourceEntity);
         if (LOGGER.isDebugEnabled() && resource == null) {
             LOGGER.debug(String.format("Unable to find the resource for resourceIdentifier = %s , zone = %s.",
@@ -289,6 +310,23 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     public BaseSubject getBySubjectIdentifier(final String subjectIdentifier) {
         ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
         SubjectEntity subjectEntity = this.subjectRepository.getByZoneAndSubjectIdentifier(zone, subjectIdentifier);
+        return createSubject(subjectIdentifier, zone, subjectEntity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BaseSubject getBySubjectIdentifierWithInheritedAttributes(final String subjectIdentifier) {
+        if (null == this.subjectHierarchicalRepository) {
+            return getBySubjectIdentifier(subjectIdentifier);
+        }
+        ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
+        SubjectEntity subjectEntity = this.subjectHierarchicalRepository
+                .getByZoneAndSubjectIdentifierWithInheritedAttributes(zone, subjectIdentifier);
+        return createSubject(subjectIdentifier, zone, subjectEntity);
+    }
+
+    private BaseSubject createSubject(final String subjectIdentifier, final ZoneEntity zone,
+            final SubjectEntity subjectEntity) {
         BaseSubject subject = this.privilegeConverter.toSubject(subjectEntity);
         if (LOGGER.isDebugEnabled() && subject == null) {
             LOGGER.debug(String.format("Unable to find the subject for subjectIdentifier = %s, zone = %s.",
@@ -300,19 +338,14 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     @Override
     @Transactional(readOnly = true)
     public BaseSubject getBySubjectIdentifierAndScopes(final String subjectIdentifier, final Set<Attribute> scopes) {
-        if (null == this.subjectScopedAccessRepository) {
+        if (null == this.subjectHierarchicalRepository) {
             return getBySubjectIdentifier(subjectIdentifier);
         }
 
         ZoneEntity zone = this.zoneResolver.getZoneEntityOrFail();
-        SubjectEntity subjectEntity = this.subjectScopedAccessRepository.getByZoneAndSubjectIdentifierAndScopes(zone,
+        SubjectEntity subjectEntity = this.subjectHierarchicalRepository.getByZoneAndSubjectIdentifierAndScopes(zone,
                 subjectIdentifier, scopes);
-        BaseSubject subject = this.privilegeConverter.toSubject(subjectEntity);
-        if (LOGGER.isDebugEnabled() && subject == null) {
-            LOGGER.debug(String.format("Unable to find the subject for subjectIdentifier = %s, zone = %s.",
-                    subjectIdentifier, zone));
-        }
-        return subject;
+        return createSubject(subjectIdentifier, zone, subjectEntity);
     }
 
     @Override

@@ -129,7 +129,7 @@ public class ZoneServiceImpl implements ZoneService {
     public Boolean deleteZone(final String zoneName) {
         ZoneEntity currentZone = this.zoneRepository.getByName(zoneName);
         if (currentZone != null) {
-            //Delete child entities in Graph repos first. This is not transactional.
+            // Delete child entities in Graph repos first. This is not transactional.
             List<ResourceEntity> resourcesInZone = this.resourceRepository.findByZone(currentZone);
             this.resourceRepository.delete(resourcesInZone);
             List<SubjectEntity> subjectsInZone = this.subjectRepository.findByZone(currentZone);
