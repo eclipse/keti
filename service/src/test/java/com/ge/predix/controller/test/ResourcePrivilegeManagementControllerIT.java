@@ -16,15 +16,25 @@
 // @formatter:off
 package com.ge.predix.controller.test;
 
+import static com.ge.predix.acs.testutils.XFiles.ASCENSION_ID;
+import static com.ge.predix.acs.testutils.XFiles.BASEMENT_SITE_ID;
+import static com.ge.predix.acs.testutils.XFiles.EVIDENCE_SCULLYS_TESTIMONY_ID;
+import static com.ge.predix.acs.testutils.XFiles.SITE_BASEMENT;
+import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTE;
+import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION;
+import static com.ge.predix.acs.testutils.XFiles.TYPE_MYTHARC;
+import static com.ge.predix.acs.testutils.XFiles.createThreeLevelResourceHierarchy;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isIn;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -70,6 +80,9 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
     private Zone testZone;
 
     private Zone testZone2;
+
+    @Autowired
+    ConfigurableEnvironment env;
 
     @BeforeClass
     public void setup() throws Exception {
@@ -175,6 +188,85 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         getContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(),
                 "/tenant/ge/resource/01928374102398741235123");
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testPostAndGetHierarchicalResources() throws Exception {
+
+        List<BaseResource> resources = createThreeLevelResourceHierarchy();
+
+        // Append a list of resources
+        MockMvcContext postContext = this.testUtils.createWACWithCustomPOSTRequestBuilder(this.wac,
+                this.testZone.getSubdomain(), RESOURCE_BASE_URL);
+        postContext.getMockMvc().perform(postContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(resources))).andExpect(status().isNoContent());
+
+        // Get the child resource without query string specifier.
+        MockMvcContext getContext0 = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
+                this.testZone.getSubdomain(), RESOURCE_BASE_URL + "/"
+                        + URLEncoder.encode(EVIDENCE_SCULLYS_TESTIMONY_ID, "UTF-8"));
+
+        getContext0.getMockMvc().perform(getContext0.getBuilder()).andExpect(status().isOk())
+            .andExpect(jsonPath("resourceIdentifier", is(EVIDENCE_SCULLYS_TESTIMONY_ID)))
+            .andExpect(jsonPath("attributes[0].name", is(TOP_SECRET_CLASSIFICATION.getName())))
+            .andExpect(jsonPath("attributes[0].value", is(TOP_SECRET_CLASSIFICATION.getValue())))
+            .andExpect(jsonPath("attributes[0].issuer", is(TOP_SECRET_CLASSIFICATION.getIssuer())))
+            .andExpect(jsonPath("attributes[1]").doesNotExist());
+
+        // Get the child resource without inherited attributes.
+        MockMvcContext getContext1 = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
+                this.testZone.getSubdomain(), RESOURCE_BASE_URL + "/"
+                        + URLEncoder.encode(EVIDENCE_SCULLYS_TESTIMONY_ID, "UTF-8")
+                        + "?includeInheritedAttributes=false");
+
+        getContext1.getMockMvc().perform(getContext1.getBuilder()).andExpect(status().isOk())
+            .andExpect(jsonPath("resourceIdentifier", is(EVIDENCE_SCULLYS_TESTIMONY_ID)))
+            .andExpect(jsonPath("attributes[0].name", is(TOP_SECRET_CLASSIFICATION.getName())))
+            .andExpect(jsonPath("attributes[0].value", is(TOP_SECRET_CLASSIFICATION.getValue())))
+            .andExpect(jsonPath("attributes[0].issuer", is(TOP_SECRET_CLASSIFICATION.getIssuer())))
+            .andExpect(jsonPath("attributes[1]").doesNotExist());
+
+        // Get the child resource with inherited attributes.
+        MockMvcContext getContext2 = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
+                this.testZone.getSubdomain(), RESOURCE_BASE_URL + "/"
+                        + URLEncoder.encode(EVIDENCE_SCULLYS_TESTIMONY_ID, "UTF-8")
+                        + "?includeInheritedAttributes=true");
+
+        if (!Arrays.asList(this.env.getActiveProfiles()).contains("titan")) {
+            getContext2.getMockMvc().perform(getContext2.getBuilder()).andExpect(status().isOk())
+                .andExpect(jsonPath("resourceIdentifier", is(EVIDENCE_SCULLYS_TESTIMONY_ID)))
+                .andExpect(jsonPath("attributes[0].name", is(TOP_SECRET_CLASSIFICATION.getName())))
+                .andExpect(jsonPath("attributes[0].value", is(TOP_SECRET_CLASSIFICATION.getValue())))
+                .andExpect(jsonPath("attributes[0].issuer", is(TOP_SECRET_CLASSIFICATION.getIssuer())))
+                .andExpect(jsonPath("attributes[1]").doesNotExist());
+        } else {
+            getContext2.getMockMvc().perform(getContext2.getBuilder()).andExpect(status().isOk())
+                .andExpect(jsonPath("resourceIdentifier", is(EVIDENCE_SCULLYS_TESTIMONY_ID)))
+                .andExpect(jsonPath("attributes[0].name", is(TOP_SECRET_CLASSIFICATION.getName())))
+                .andExpect(jsonPath("attributes[0].value", is(TOP_SECRET_CLASSIFICATION.getValue())))
+                .andExpect(jsonPath("attributes[0].issuer", is(TOP_SECRET_CLASSIFICATION.getIssuer())))
+                .andExpect(jsonPath("attributes[1].name", is(SPECIAL_AGENTS_GROUP_ATTRIBUTE.getName())))
+                .andExpect(jsonPath("attributes[1].value", is(SPECIAL_AGENTS_GROUP_ATTRIBUTE.getValue())))
+                .andExpect(jsonPath("attributes[1].issuer", is(SPECIAL_AGENTS_GROUP_ATTRIBUTE.getIssuer())))
+                .andExpect(jsonPath("attributes[2].name", is(TYPE_MYTHARC.getName())))
+                .andExpect(jsonPath("attributes[2].value", is(TYPE_MYTHARC.getValue())))
+                .andExpect(jsonPath("attributes[2].issuer", is(TYPE_MYTHARC.getIssuer())))
+                .andExpect(jsonPath("attributes[3].name", is(SITE_BASEMENT.getName())))
+                .andExpect(jsonPath("attributes[3].value", is(SITE_BASEMENT.getValue())))
+                .andExpect(jsonPath("attributes[3].issuer", is(SITE_BASEMENT.getIssuer())));
+        }
+
+        // Clean up after ourselves.
+        deleteResource(EVIDENCE_SCULLYS_TESTIMONY_ID);
+        deleteResource(ASCENSION_ID);
+        deleteResource(BASEMENT_SITE_ID);
+    }
+
+    private void deleteResource(String resourceIdentifier) throws Exception {
+        String resourceToDeleteURI = RESOURCE_BASE_URL + "/" + URLEncoder.encode(resourceIdentifier, "UTF-8");
+        MockMvcContext deleteContext = this.testUtils.createWACWithCustomDELETERequestBuilder(this.wac,
+                this.testZone.getSubdomain(), resourceToDeleteURI);
+        deleteContext.getMockMvc().perform(deleteContext.getBuilder()).andExpect(status().isNoContent());
     }
 
     @Test

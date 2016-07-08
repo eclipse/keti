@@ -53,7 +53,7 @@ public class DataSourceMBean {
         }
         // For TOMCAT_POOL_DATASOURCE
         if (this.entityManagerFactory.getDataSource().getClass().getName().equals(TOMCAT_POOL_DATASOURCE)) {
-            org.apache.tomcat.jdbc.pool.DataSource tomcatDs = 
+            org.apache.tomcat.jdbc.pool.DataSource tomcatDs =
                     (org.apache.tomcat.jdbc.pool.DataSource) this.entityManagerFactory.getDataSource();
             connectionPool.put("driverClassName", tomcatDs.getDriverClassName());
             connectionPool.put("numActive", tomcatDs.getNumActive());

@@ -11,7 +11,8 @@ import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
-public class GraphResourceRepository extends GraphGenericRepository<ResourceEntity> implements ResourceRepository {
+public class GraphResourceRepository extends GraphGenericRepository<ResourceEntity>
+        implements ResourceRepository, ResourceHierarchicalRepository {
 
     private static final JsonUtils JSON_UTILS = new JsonUtils();
 
@@ -23,6 +24,12 @@ public class GraphResourceRepository extends GraphGenericRepository<ResourceEnti
 
     @Override
     public ResourceEntity getByZoneAndResourceIdentifier(final ZoneEntity zone, final String resourceIdentifier) {
+        return getEntity(zone, resourceIdentifier);
+    }
+
+    @Override
+    public ResourceEntity getByZoneAndResourceIdentifierWithInheritedAttributes(final ZoneEntity zone,
+            final String resourceIdentifier) {
         return getEntityWithInheritedAttributes(zone, resourceIdentifier, Collections.emptySet());
     }
 

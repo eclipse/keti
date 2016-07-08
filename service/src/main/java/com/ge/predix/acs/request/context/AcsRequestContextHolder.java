@@ -31,7 +31,7 @@ public final class AcsRequestContextHolder implements ApplicationContextAware {
     private AcsRequestContextHolder() {
     }
 
-    private static final InheritableThreadLocal<AcsRequestContext> ACS_REQUEST_CONTEXT_STORE = 
+    private static final InheritableThreadLocal<AcsRequestContext> ACS_REQUEST_CONTEXT_STORE =
             new InheritableThreadLocal<>();
 
     // Can only be called by the filter...

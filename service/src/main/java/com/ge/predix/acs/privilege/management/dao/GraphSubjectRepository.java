@@ -1,5 +1,6 @@
 package com.ge.predix.acs.privilege.management.dao;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -11,7 +12,7 @@ import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
 public class GraphSubjectRepository extends GraphGenericRepository<SubjectEntity>
-        implements SubjectRepository, SubjectScopedAccessRepository {
+        implements SubjectRepository, SubjectHierarchicalRepository {
     private static final JsonUtils JSON_UTILS = new JsonUtils();
 
     private static final String EMPTY_ATTRIBUTES = "{}";
@@ -23,6 +24,12 @@ public class GraphSubjectRepository extends GraphGenericRepository<SubjectEntity
     @Override
     public SubjectEntity getByZoneAndSubjectIdentifier(final ZoneEntity zone, final String subjectIdentifier) {
         return getEntity(zone, subjectIdentifier);
+    }
+
+    @Override
+    public SubjectEntity getByZoneAndSubjectIdentifierWithInheritedAttributes(final ZoneEntity zone,
+            final String subjectIdentifier) {
+        return getEntityWithInheritedAttributes(zone, subjectIdentifier, Collections.emptySet());
     }
 
     @Override

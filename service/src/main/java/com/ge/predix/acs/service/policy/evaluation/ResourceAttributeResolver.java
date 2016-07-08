@@ -78,7 +78,8 @@ public class ResourceAttributeResolver {
 
     private Set<Attribute> getResourceAttributes(final String resovledResourceUri) {
         Set<Attribute> resourceAttributes = new HashSet<>();
-        BaseResource resource = this.privilegeService.getByResourceIdentifier(resovledResourceUri);
+        BaseResource resource = this.privilegeService
+                .getByResourceIdentifierWithInheritedAttributes(resovledResourceUri);
         if (null != resource) {
             resourceAttributes.addAll(resource.getAttributes());
         }

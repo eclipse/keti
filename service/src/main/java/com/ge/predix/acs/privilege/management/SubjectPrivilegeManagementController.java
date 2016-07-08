@@ -38,6 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ge.predix.acs.commons.web.BaseRestApi;
@@ -80,8 +81,17 @@ public class SubjectPrivilegeManagementController extends BaseRestApi {
                     + "application/x-www-form-urlencoded format with UTF-8.",
             tags = { "Attribute Management" })
     @RequestMapping(method = GET, value = { V1 + SUBJECT_URL }, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getSubject(@PathVariable("subjectIdentifier") final String subjectIdentifier) {
-        BaseSubject subject = this.service.getBySubjectIdentifier(subjectIdentifier);
+    public ResponseEntity<?> getSubject(@PathVariable("subjectIdentifier") final String subjectIdentifier,
+            @RequestParam(
+                    name = "includeInheritedAttributes",
+                    defaultValue = "false") final boolean includeInheritedAttributes) {
+        BaseSubject subject;
+        if (includeInheritedAttributes) {
+            subject = this.service.getBySubjectIdentifierWithInheritedAttributes(subjectIdentifier);
+        } else {
+            subject = this.service.getBySubjectIdentifier(subjectIdentifier);
+        }
+
         if (subject == null) {
             return notFound();
         }

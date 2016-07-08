@@ -79,6 +79,7 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
         testResource.setAttributes(resourceAttributes);
 
         when(this.privilegeManagementService.getByResourceIdentifier("/site/1234")).thenReturn(testResource);
+        when(this.privilegeManagementService.getByResourceIdentifierWithInheritedAttributes("/site/1234")).thenReturn(testResource);
 
         BaseSubject testSubject = new BaseSubject("test-subject");
         testSubject.setAttributes(Collections.emptySet());

@@ -160,13 +160,34 @@ public class GraphResourceRepositoryTest {
     @Test
     public void testGetByZoneAndResourceIdentifier() {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity resourceEntity1 = persistResource1toZone1AndAssert();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
-        persistResource1toZone2AndAssert();
+        ResourceEntity resourceEntity1 = persist2LevelHierarchicalResource1toZone1();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
+        persistResource1toZone2AndAssert();
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
 
-        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1, DRIVE_ID);
+        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
+                resourceEntity1.getResourceIdentifier());
         assertThat(resource, equalTo(resourceEntity1));
+        // Check that the result does not contain inherited attribute
+        assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(false));
+        assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
+    }
+
+    @Test
+    public void testGetByZoneAndResourceIdentifierWithInheritedAttributes() {
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
+        ResourceEntity resourceEntity1 = persist2LevelHierarchicalResource1toZone1();
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
+        persistResource1toZone2AndAssert();
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
+
+        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifierWithInheritedAttributes(
+                TEST_ZONE_1, resourceEntity1.getResourceIdentifier());
+        assertThat(resource.getZone().getName(), equalTo(resourceEntity1.getZone().getName()));
+        assertThat(resource.getResourceIdentifier(), equalTo(resourceEntity1.getResourceIdentifier()));
+        // Check that the result contains inherited attribute
+        assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
+        assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
     }
 
     @Test
@@ -191,25 +212,25 @@ public class GraphResourceRepositoryTest {
     }
 
     @Test
-    public void testGetByZoneAndResourceIdentifier2LevelHierarchical() {
+    public void testGetByZoneAndResourceIdentifierWithInheritedAttributes2LevelHierarchical() {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
         String resourceIdentifier = persist2LevelHierarchicalResource1toZone1().getResourceIdentifier();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
 
-        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
-                resourceIdentifier);
+        ResourceEntity resource = this.resourceRepository
+                .getByZoneAndResourceIdentifierWithInheritedAttributes(TEST_ZONE_1, resourceIdentifier);
         assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
         assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
     }
 
     @Test
-    public void testGetByZoneAndResourceIdentifier3LevelHierarchical() {
+    public void testGetByZoneAndResourceIdentifierWithInheritedAttributes3LevelHierarchical() {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
         String resourceIdentifier = persist3LevelHierarchicalResource1toZone1().getResourceIdentifier();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
 
-        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
-                resourceIdentifier);
+        ResourceEntity resource = this.resourceRepository
+                .getByZoneAndResourceIdentifierWithInheritedAttributes(TEST_ZONE_1, resourceIdentifier);
         assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
         assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
         assertThat(resource.getAttributes().contains(TOP_SECRET_CLASSIFICATION), equalTo(true));
@@ -380,7 +401,8 @@ public class GraphResourceRepositoryTest {
             assertThat(traversalLimit, equalTo(256L));
             this.resourceRepository.setTraversalLimit(2);
             assertThat(this.resourceRepository.getTraversalLimit(), equalTo(2L));
-            this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1, resource1.getResourceIdentifier());
+            this.resourceRepository.getByZoneAndResourceIdentifierWithInheritedAttributes(TEST_ZONE_1,
+                    resource1.getResourceIdentifier());
         } finally {
             this.resourceRepository.setTraversalLimit(traversalLimit);
             assertThat(this.resourceRepository.getTraversalLimit(), equalTo(256L));
@@ -396,8 +418,9 @@ public class GraphResourceRepositoryTest {
             this.resourceRepository.setTraversalLimit(3);
             assertThat(this.resourceRepository.getTraversalLimit(), equalTo(3L));
             ResourceEntity resource1 = persist3LevelHierarchicalResource1toZone1();
-            ResourceEntity actualResource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
-                    resource1.getResourceIdentifier());
+            ResourceEntity actualResource = this.resourceRepository
+                    .getByZoneAndResourceIdentifierWithInheritedAttributes(TEST_ZONE_1,
+                            resource1.getResourceIdentifier());
             assertThat(actualResource.getAttributes().size(), equalTo(3));
         } finally {
             this.resourceRepository.setTraversalLimit(traversalLimit);

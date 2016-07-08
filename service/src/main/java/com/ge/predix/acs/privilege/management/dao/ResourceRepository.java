@@ -27,4 +27,5 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> 
     List<ResourceEntity> findByZone(final ZoneEntity zone);
 
     ResourceEntity getByZoneAndResourceIdentifier(final ZoneEntity zone, final String resourceIdentifier);
+
 }

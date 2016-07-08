@@ -39,6 +39,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ge.predix.acs.commons.web.BaseRestApi;
@@ -89,8 +90,16 @@ public class ResourcePrivilegeManagementController extends BaseRestApi {
             tags = { "Attribute Management" })
     @RequestMapping(method = GET, value = V1 + MANAGED_RESOURCE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<BaseResource> getResourceV1(
-            @PathVariable("resourceIdentifier") final String resourceIdentifier) {
-        BaseResource resource = this.service.getByResourceIdentifier(resourceIdentifier);
+            @PathVariable("resourceIdentifier") final String resourceIdentifier,
+            @RequestParam(
+                    name = "includeInheritedAttributes",
+                    defaultValue = "false") final boolean includeInheritedAttributes) {
+        BaseResource resource;
+        if (includeInheritedAttributes) {
+            resource = this.service.getByResourceIdentifierWithInheritedAttributes(resourceIdentifier);
+        } else {
+            resource = this.service.getByResourceIdentifier(resourceIdentifier);
+        }
 
         if (resource == null) {
             return notFound();

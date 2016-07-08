@@ -102,6 +102,8 @@ public class ResourceAttributeResolverTest {
         // mock attribute service for the expected resource URI after attributeURITemplate is applied
         when(this.privilegeManagementService.getByResourceIdentifier(testResource.getResourceIdentifier()))
                 .thenReturn(testResource);
+        when(this.privilegeManagementService.getByResourceIdentifierWithInheritedAttributes(
+                testResource.getResourceIdentifier())).thenReturn(testResource);
         ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService,
                 testResource.getResourceIdentifier(), null);
         Assert.assertEquals(resolver.getResourceAttributes(getPolicy(null)), testResourceAttributes);
