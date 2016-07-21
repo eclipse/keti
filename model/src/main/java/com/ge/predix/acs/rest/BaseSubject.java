@@ -52,6 +52,11 @@ public class BaseSubject {
         this.subjectIdentifier = subjectIdentifier;
     }
 
+    public BaseSubject(final String subjectIdentifier, final Set<Attribute> attributes) {
+        this.subjectIdentifier = subjectIdentifier;
+        this.attributes = attributes;
+    }
+
     public Set<Attribute> getAttributes() {
         return this.attributes;
     }
@@ -97,7 +102,7 @@ public class BaseSubject {
 
     @Override
     public String toString() {
-        return "Subject [subjectIdentifier=" + this.subjectIdentifier + "]";
+        return "Subject [subjectIdentifier=" + this.subjectIdentifier + ", attributes=" + attributes + "]";
     }
 
 }

@@ -287,10 +287,10 @@ public class PrivilegeHelper {
             deleteResource(restTemplate, acsUrl, resource.getResourceIdentifier(), headers);
         }
     }
-
-    public BaseResource[] listResources(final RestTemplate restTemplate, final String acsUrl,
+    
+    public BaseResource[] listResources(final RestTemplate restTemplate, final String acsEndpoint,
             final HttpHeaders headers) {
-        URI uri = URI.create(acsUrl + ACS_RESOURCE_API_PATH);
+        URI uri = URI.create(acsEndpoint + ACS_RESOURCE_API_PATH);
         ResponseEntity<BaseResource[]> response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(headers),
                 BaseResource[].class);
         return response.getBody();

@@ -509,7 +509,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <forkCount>0</forkCount>
-                            <parallel>false</parallel>
+                            <parallel>methods</parallel>
                             <argLine></argLine>
                             <systemPropertyVariables>
                                 <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
@@ -535,6 +535,8 @@
                             <includes>
                                 <include>**/*IT.java</include>
                                 <include>**/*Cucumber*.java</include>
+                                <!-- Uncomment to run migration tests, manually --> 
+                                <!-- <include>**/migration/AttributeMigrationTest.java</include> -->
                             </includes>
                         </configuration>
                         <executions>
