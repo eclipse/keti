@@ -122,6 +122,11 @@ public class ZoneHelper {
                 getPrimaryZoneIssuer());
     }
 
+    public Zone createTestZone2() throws JsonParseException, JsonMappingException, IOException {
+        return createTestZone(this.acsRestTemplateFactory.getACSTemplateWithPolicyScope(), this.zone2Name, true,
+                getPrimaryZoneIssuer());
+    }
+
     public Zone createTestZone(final RestTemplate restTemplate, final String zoneId, final boolean registerWithZac)
             throws JsonParseException, JsonMappingException, IOException {
         Map<String, Object> trustedIssuers = null;
@@ -230,6 +235,10 @@ public class ZoneHelper {
 
     public String getZone1Name() {
         return this.zone1Name;
+    }
+    
+    public String getZone2Name() {
+        return this.zone2Name;
     }
 
     public String getZone2Url() {

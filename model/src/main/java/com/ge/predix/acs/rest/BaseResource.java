@@ -50,6 +50,11 @@ public class BaseResource {
         this.resourceIdentifier = resourceIdentifier;
     }
 
+    public BaseResource(final String resourceIdentifier, final Set<Attribute> attributes) {
+        this.resourceIdentifier = resourceIdentifier;
+        this.attributes = attributes;
+    }
+    
     public Set<Attribute> getAttributes() {
         return this.attributes;
     }
@@ -91,5 +96,11 @@ public class BaseResource {
             return new EqualsBuilder().append(this.resourceIdentifier, other.getResourceIdentifier()).isEquals();
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "BaseResource [resourceIdentifier=" + resourceIdentifier + ", attributes=" + attributes + ", parents="
+                + parents + "]";
     }
 }
