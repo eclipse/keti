@@ -76,7 +76,7 @@ public class ZoneControllerIT extends AbstractTestNGSpringContextTests {
                 .andExpect(status().isCreated());
 
         this.mockMvc.perform(get(this.zoneUrl, "zone-1"))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andExpect(status().isOk())
                 .andExpect(jsonPath("name", is("zone-1"))).andExpect(jsonPath("subdomain", is("subdomain-1")));
 
         this.mockMvc.perform(delete(this.zoneUrl, "zone-1")).andExpect(status().isNoContent());
@@ -97,7 +97,7 @@ public class ZoneControllerIT extends AbstractTestNGSpringContextTests {
                         put(this.zoneUrl, "zone-1").contentType(MediaType.APPLICATION_JSON).content(updatedZoneContent))
                 .andExpect(status().isCreated());
         this.mockMvc.perform(get(this.zoneUrl, "zone-1"))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andExpect(status().isOk())
                 .andExpect(jsonPath("name", is("zone-1"))).andExpect(jsonPath("subdomain", is("subdomain-2")));
 
         this.mockMvc.perform(delete(this.zoneUrl, "zone-1")).andExpect(status().isNoContent());
@@ -131,7 +131,7 @@ public class ZoneControllerIT extends AbstractTestNGSpringContextTests {
 
     public void testGetZoneWhichDoesNotExists() throws Exception {
         this.mockMvc.perform(get(this.zoneUrl, "zone-2"))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isNotFound());
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
     }
 
     public void testDeleteZoneWhichDoesNotExist() throws Exception {
