@@ -99,14 +99,14 @@ public class GraphSubjectRepositoryTest {
                 Arrays.asList(new Attribute[] { SECRET_CLASSIFICATION, TOP_SECRET_CLASSIFICATION, SITE_BASEMENT }));
         expectedSubject.setAttributes(expectedAttributes);
         expectedSubject.setAttributesAsJson(JSON_UTILS.serialize(expectedAttributes));
-        SubjectEntity actualSubject = this.subjectRepository.getByZoneAndSubjectIdentifierAndScopes(TEST_ZONE_1,
+        SubjectEntity actualSubject = this.subjectRepository.getSubjectWithInheritedAttributesForScopes(TEST_ZONE_1,
                 subjectIdentifier, new HashSet<>(Arrays.asList(new Attribute[] { SITE_BASEMENT })));
         assertThat(actualSubject, equalTo(expectedSubject));
 
         expectedAttributes = new HashSet<>(Arrays.asList(new Attribute[] { SECRET_CLASSIFICATION, SITE_BASEMENT }));
         expectedSubject.setAttributes(expectedAttributes);
         expectedSubject.setAttributesAsJson(JSON_UTILS.serialize(expectedAttributes));
-        actualSubject = this.subjectRepository.getByZoneAndSubjectIdentifierAndScopes(TEST_ZONE_1, subjectIdentifier,
+        actualSubject = this.subjectRepository.getSubjectWithInheritedAttributesForScopes(TEST_ZONE_1, subjectIdentifier,
                 new HashSet<>(Arrays.asList(new Attribute[] { SITE_PENTAGON })));
         assertThat(actualSubject, equalTo(expectedSubject));
     }
@@ -124,7 +124,7 @@ public class GraphSubjectRepositoryTest {
         agentMulder.setParents(
                 new HashSet<>(Arrays.asList(new Parent[] { new Parent(agentScully.getSubjectIdentifier()) })));
         this.subjectRepository.save(agentMulder);
-        SubjectEntity actualAgentMulder = this.subjectRepository.getByZoneAndSubjectIdentifierAndScopes(TEST_ZONE_1,
+        SubjectEntity actualAgentMulder = this.subjectRepository.getSubjectWithInheritedAttributesForScopes(TEST_ZONE_1,
                 AGENT_MULDER, null);
         assertThat(actualAgentMulder.getAttributes().size(), equalTo(1));
         assertThat(actualAgentMulder.getAttributesAsJson(),
@@ -144,7 +144,7 @@ public class GraphSubjectRepositoryTest {
         agentMulder.setParents(
                 new HashSet<>(Arrays.asList(new Parent[] { new Parent(agentScully.getSubjectIdentifier()) })));
         this.subjectRepository.save(agentMulder);
-        SubjectEntity actualAgentMulder = this.subjectRepository.getByZoneAndSubjectIdentifierAndScopes(TEST_ZONE_1,
+        SubjectEntity actualAgentMulder = this.subjectRepository.getSubjectWithInheritedAttributesForScopes(TEST_ZONE_1,
                 AGENT_MULDER, null);
         assertThat(actualAgentMulder.getAttributes().size(), equalTo(2));
         System.out.println(actualAgentMulder.getAttributesAsJson());

@@ -6,9 +6,8 @@ import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
 public interface SubjectHierarchicalRepository {
-    SubjectEntity getByZoneAndSubjectIdentifierAndScopes(final ZoneEntity zone, final String subjectIdentifier,
-            final Set<Attribute> scopes);
+    SubjectEntity getSubjectWithInheritedAttributesForScopes(final ZoneEntity zone, final String subjectIdentifier,
+                                                             final Set<Attribute> scopes);
 
-    SubjectEntity getByZoneAndSubjectIdentifierWithInheritedAttributes(final ZoneEntity zone,
-            final String subjectIdentifier);
+    SubjectEntity getSubjectWithInheritedAttributes(final ZoneEntity zone, final String subjectIdentifier);
 }

@@ -181,7 +181,7 @@ public class GraphResourceRepositoryTest {
         persistResource1toZone2AndAssert();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
 
-        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifierWithInheritedAttributes(
+        ResourceEntity resource = this.resourceRepository.getResourceWithInheritedAttributes(
                 TEST_ZONE_1, resourceEntity1.getResourceIdentifier());
         assertThat(resource.getZone().getName(), equalTo(resourceEntity1.getZone().getName()));
         assertThat(resource.getResourceIdentifier(), equalTo(resourceEntity1.getResourceIdentifier()));
@@ -218,7 +218,7 @@ public class GraphResourceRepositoryTest {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
 
         ResourceEntity resource = this.resourceRepository
-                .getByZoneAndResourceIdentifierWithInheritedAttributes(TEST_ZONE_1, resourceIdentifier);
+                .getResourceWithInheritedAttributes(TEST_ZONE_1, resourceIdentifier);
         assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
         assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
     }
@@ -230,7 +230,7 @@ public class GraphResourceRepositoryTest {
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
 
         ResourceEntity resource = this.resourceRepository
-                .getByZoneAndResourceIdentifierWithInheritedAttributes(TEST_ZONE_1, resourceIdentifier);
+                .getResourceWithInheritedAttributes(TEST_ZONE_1, resourceIdentifier);
         assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
         assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
         assertThat(resource.getAttributes().contains(TOP_SECRET_CLASSIFICATION), equalTo(true));
@@ -401,7 +401,7 @@ public class GraphResourceRepositoryTest {
             assertThat(traversalLimit, equalTo(256L));
             this.resourceRepository.setTraversalLimit(2);
             assertThat(this.resourceRepository.getTraversalLimit(), equalTo(2L));
-            this.resourceRepository.getByZoneAndResourceIdentifierWithInheritedAttributes(TEST_ZONE_1,
+            this.resourceRepository.getResourceWithInheritedAttributes(TEST_ZONE_1,
                     resource1.getResourceIdentifier());
         } finally {
             this.resourceRepository.setTraversalLimit(traversalLimit);
@@ -419,7 +419,7 @@ public class GraphResourceRepositoryTest {
             assertThat(this.resourceRepository.getTraversalLimit(), equalTo(3L));
             ResourceEntity resource1 = persist3LevelHierarchicalResource1toZone1();
             ResourceEntity actualResource = this.resourceRepository
-                    .getByZoneAndResourceIdentifierWithInheritedAttributes(TEST_ZONE_1,
+                    .getResourceWithInheritedAttributes(TEST_ZONE_1,
                             resource1.getResourceIdentifier());
             assertThat(actualResource.getAttributes().size(), equalTo(3));
         } finally {
