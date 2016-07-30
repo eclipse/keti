@@ -24,11 +24,9 @@ public class GraphBeanDefinitionRegistryPostProcessor implements BeanDefinitionR
     @Override
     public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) throws BeansException {
         BeanDefinition resourceRepositoryBeanDefinition = new RootBeanDefinition(GraphResourceRepository.class);
-        registry.registerBeanDefinition("resourceRepository", resourceRepositoryBeanDefinition);
         registry.registerBeanDefinition("resourceHierarchicalRepository", resourceRepositoryBeanDefinition);
 
         BeanDefinition subjectRepositoryBeanDefinition = new RootBeanDefinition(GraphSubjectRepository.class);
-        registry.registerBeanDefinition("subjectRepository", subjectRepositoryBeanDefinition);
         registry.registerBeanDefinition("subjectHierarchicalRepository", subjectRepositoryBeanDefinition);
     }
 }

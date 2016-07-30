@@ -82,7 +82,7 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
     private Zone testZone2;
 
     @Autowired
-    ConfigurableEnvironment env;
+    private ConfigurableEnvironment env;
 
     @BeforeClass
     public void setup() throws Exception {

@@ -28,8 +28,7 @@ public class GraphResourceRepository extends GraphGenericRepository<ResourceEnti
     }
 
     @Override
-    public ResourceEntity getByZoneAndResourceIdentifierWithInheritedAttributes(final ZoneEntity zone,
-            final String resourceIdentifier) {
+    public ResourceEntity getResourceWithInheritedAttributes(final ZoneEntity zone, final String resourceIdentifier) {
         return getEntityWithInheritedAttributes(zone, resourceIdentifier, Collections.emptySet());
     }
 

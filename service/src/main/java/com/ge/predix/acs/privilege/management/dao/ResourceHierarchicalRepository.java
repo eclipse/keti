@@ -4,7 +4,7 @@ import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
 public interface ResourceHierarchicalRepository {
 
-    ResourceEntity getByZoneAndResourceIdentifierWithInheritedAttributes(final ZoneEntity zone,
-            final String resourceIdentifier);
+    ResourceEntity getResourceWithInheritedAttributes(final ZoneEntity zone,
+                                                      final String resourceIdentifier);
 
 }
