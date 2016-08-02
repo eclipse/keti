@@ -164,4 +164,14 @@ public class ResourceEntity implements ZonableEntity {
         }
         return false;
     }
+
+    @Override
+    public String getEntityId() {
+        return this.getResourceIdentifier();
+    }
+
+    @Override
+    public String getEntityType() {
+        return "resource";
+    }
 }

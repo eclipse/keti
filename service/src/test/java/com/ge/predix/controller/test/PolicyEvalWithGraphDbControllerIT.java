@@ -7,6 +7,7 @@ import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTE;
 import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION;
 import static com.ge.predix.acs.testutils.XFiles.createScopedSubjectHierarchy;
 import static com.ge.predix.acs.testutils.XFiles.createSubjectHierarchy;
+import static com.ge.predix.acs.testutils.XFiles.createTwoLevelResourceHierarchy;
 import static com.ge.predix.acs.testutils.XFiles.createThreeLevelResourceHierarchy;
 import static com.ge.predix.acs.testutils.XFiles.createTwoParentResourceHierarchy;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -39,6 +41,8 @@ import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
+import com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository;
+import com.ge.predix.acs.privilege.management.dao.GraphResourceRepository;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
@@ -64,9 +68,18 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
     private static final String POLICY_SET_URL = "v1/policy-set";
     private static final String SUBJECT_URL = "v1/subject";
     private static final String RESOURCE_URL = "v1/resource";
+    private static final long TEST_TRAVERSAL_LIMIT = 2;
 
     @Autowired
     private PrivilegeManagementService privilegeManagementService;
+
+    @Qualifier("resourceHierarchicalRepository")
+    @Autowired
+    private GraphResourceRepository graphResourceRepository;
+
+    @Qualifier("subjectHierarchicalRepository")
+    @Autowired
+    private GraphSubjectRepository graphSubjectRepository;
 
     @Autowired
     private WebApplicationContext wac;
@@ -115,6 +128,7 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
             final List<BaseResource> resourceHierarchy, final List<BaseSubject> subjectHierarchy,
             final PolicyEvaluationRequestV1 policyEvalRequest, final Effect expectedEffect) throws Exception {
         // Create policy set.
+
         String uri = POLICY_SET_URL + "/" + URLEncoder.encode(testPolicySet.getName(), "UTF-8");
         MockMvcContext putPolicySetContext = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
                 zone.getSubdomain(), uri);
@@ -154,10 +168,73 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
         assertThat(policyEvalResult.getEffect(), equalTo(expectedEffect));
     }
 
+    @Test(dataProvider = "policyEvalExceedingAttributeLimitDataProvider")
+    public void testPolicyEvaluationForAttributesExceedingTraversalLimit(final Zone zone, final PolicySet testPolicySet,
+            final List<BaseResource> resourceHierarchy, final List<BaseSubject> subjectHierarchy,
+            final PolicyEvaluationRequestV1 policyEvalRequest, final Effect expectedEffect,
+            final String expectedMessage) throws Exception {
+        Long traversalLimit = graphResourceRepository.getTraversalLimit();
+
+        graphResourceRepository.setTraversalLimit(TEST_TRAVERSAL_LIMIT);
+        graphSubjectRepository.setTraversalLimit(TEST_TRAVERSAL_LIMIT);
+
+        // Create policy set.
+
+        try {
+            String uri = POLICY_SET_URL + "/" + URLEncoder.encode(testPolicySet.getName(), "UTF-8");
+            MockMvcContext putPolicySetContext = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
+                    zone.getSubdomain(), uri);
+            putPolicySetContext.getMockMvc().perform(putPolicySetContext.getBuilder()
+                    .contentType(MediaType.APPLICATION_JSON).content(OBJECT_WRITER.writeValueAsString(testPolicySet)))
+                    .andExpect(status().isCreated());
+
+            // Create resource hierarchy.
+            if (null != resourceHierarchy) {
+                MockMvcContext postResourcesContext = this.testUtils.createWACWithCustomPOSTRequestBuilder(this.wac,
+                        zone.getSubdomain(), RESOURCE_URL);
+                postResourcesContext.getMockMvc()
+                        .perform(postResourcesContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
+                                .content(OBJECT_MAPPER.writeValueAsString(resourceHierarchy)))
+                        .andExpect(status().isNoContent());
+            }
+
+            // Create subject hierarchy.
+            if (null != subjectHierarchy) {
+                MockMvcContext postSubjectsContext = this.testUtils.createWACWithCustomPOSTRequestBuilder(this.wac,
+                        zone.getSubdomain(), SUBJECT_URL);
+                postSubjectsContext.getMockMvc()
+                        .perform(postSubjectsContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
+                                .content(OBJECT_MAPPER.writeValueAsString(subjectHierarchy)))
+                        .andExpect(status().isNoContent());
+            }
+
+            // Request policy evaluation.
+            MockMvcContext postPolicyEvalContext = this.testUtils.createWACWithCustomPOSTRequestBuilder(this.wac,
+                    zone.getSubdomain(), POLICY_EVAL_URL);
+            MvcResult mvcResult = postPolicyEvalContext.getMockMvc()
+                    .perform(postPolicyEvalContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
+                            .content(OBJECT_MAPPER.writeValueAsString(policyEvalRequest)))
+                    .andExpect(status().isOk()).andReturn();
+            PolicyEvaluationResult policyEvalResult = OBJECT_MAPPER
+                    .readValue(mvcResult.getResponse().getContentAsByteArray(), PolicyEvaluationResult.class);
+            assertThat(policyEvalResult.getEffect(), equalTo(expectedEffect));
+            assertThat(policyEvalResult.getMessage(), equalTo(expectedMessage));
+        } finally{
+            graphResourceRepository.setTraversalLimit(traversalLimit);
+            graphSubjectRepository.setTraversalLimit(traversalLimit);
+        }
+    }
+
     @DataProvider(name = "policyEvalDataProvider")
     private Object[][] policyEvalDataProvider() {
         return new Object[][] { attributeInheritanceData(), scopedAttributeInheritanceData(),
                 evaluationWithNoSubjectAndNoResourceData(), evaluationWithSupplementalAttributesData() };
+    }
+
+    @DataProvider(name = "policyEvalExceedingAttributeLimitDataProvider")
+    private Object[][] policyEvalExceedingAttributeLimitDataProvider() {
+        return new Object[][] { evaluationWithResourceAttributesExceedingTraversalLimitData(),
+                evaluationWithSubjectAttributesExceedingTraversalLimitData() };
     }
 
     /**
@@ -200,6 +277,30 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
                         Arrays.asList(new Attribute[] { SPECIAL_AGENTS_GROUP_ATTRIBUTE, TOP_SECRET_CLASSIFICATION }),
                         Arrays.asList(new Attribute[] { SPECIAL_AGENTS_GROUP_ATTRIBUTE, TOP_SECRET_CLASSIFICATION })),
                 Effect.PERMIT };
+    }
+
+    /**
+     * Test that evaluation is successful when the resource and/or subject attributes exceed the length. The policy set will return
+     * indeterminate because the traversal limit is exceeded.
+     */
+    Object[] evaluationWithResourceAttributesExceedingTraversalLimitData() {
+        String errorMessage = "The number of attributes on this resource '"
+                + EVIDENCE_SCULLYS_TESTIMONY_ID + "' has exceeded the maximum limit of " + TEST_TRAVERSAL_LIMIT;
+        return new Object[] { this.testZone1, this.policySet, createThreeLevelResourceHierarchy(), null,
+                createPolicyEvalRequest("GET", EVIDENCE_SCULLYS_TESTIMONY_ID, AGENT_MULDER),
+                Effect.INDETERMINATE, errorMessage};
+    }
+
+    /**
+     * Test that subjects and resources inherit attributes from their parents. The policy set will permit the request
+     * if the subject and resource successfully inherit the required attributes from their respective parents.
+     */
+    Object[] evaluationWithSubjectAttributesExceedingTraversalLimitData() {
+        String errorMessage = "The number of attributes on this subject '"
+                + AGENT_MULDER + "' has exceeded the maximum limit of " + TEST_TRAVERSAL_LIMIT;
+        return new Object[] { this.testZone1, this.policySet, createTwoLevelResourceHierarchy(),
+                createSubjectHierarchy(), createPolicyEvalRequest("GET", EVIDENCE_SCULLYS_TESTIMONY_ID, AGENT_MULDER),
+                Effect.INDETERMINATE, errorMessage};
     }
 
     PolicyEvaluationRequestV1 createPolicyEvalRequest(final String action, final String resourceIdentifier,

@@ -46,6 +46,7 @@ import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBre
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey.Builder;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
+import com.ge.predix.acs.privilege.management.dao.AttributeLimitExceededException;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
@@ -203,17 +204,27 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
             }
             result = new PolicyEvaluationResult(effect, new ArrayList<>(subjectAttributes),
                     new ArrayList<>(resourceAttributes), resolvedResourceUris);
+        } catch (AttributeLimitExceededException ae) {
+            result = handlePolicyEvaluationException(policySet, subjectIdentifier, resourceURI, ae);
         } catch (Throwable e) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("Exception occured while evaluating the policy set. Policy Set ID:")
-                    .append(policySet.getName()).append(" subject:").append(subjectIdentifier)
-                    .append(", Resource URI: ").append(resourceURI);
-            LOGGER.error(builder.toString(), e);
-            result = new PolicyEvaluationResult(Effect.INDETERMINATE);
+            result = handlePolicyEvaluationException(policySet, subjectIdentifier, resourceURI, e);
         }
         return result;
     }
 
+    private PolicyEvaluationResult handlePolicyEvaluationException(final PolicySet policySet,
+            final String subjectIdentifier, final String resourceURI, final Throwable e) {
+        PolicyEvaluationResult result = new PolicyEvaluationResult(Effect.INDETERMINATE);
+        StringBuilder logMessage = new StringBuilder();
+        logMessage.append("Exception occured while evaluating the policy set. Policy Set ID:'")
+                .append(policySet.getName()).append("' subject:'").append(subjectIdentifier)
+                .append("', Resource URI: '").append(resourceURI).append("'");
+        if (e instanceof AttributeLimitExceededException) {
+            result.setMessage(e.getMessage());
+        }
+        LOGGER.error(logMessage.toString(), e);
+        return result;
+    }
     /**
      * @param subjectHandler
      * @param resourceHandler

@@ -55,6 +55,8 @@ public class PolicyEvaluationResult {
 
     private long timestamp;
 
+    private String message;
+
     public PolicyEvaluationResult() {
         this.effect = Effect.NOT_APPLICABLE;
     }
@@ -122,5 +124,13 @@ public class PolicyEvaluationResult {
     public String toString() {
         return "PolicyEvaluationResult [effect=" + this.effect + ", subjectAttributes=" + this.subjectAttributes
                 + ", resourceAttributes=" + this.resourceAttributes + "]";
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(final String message) {
+        this.message = message;
     }
 }
