@@ -1,7 +1,9 @@
 package com.ge.predix.acs.privilege.management.dao;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,4 +157,12 @@ public class ResourceRepositoryProxy implements ResourceRepository, ResourceHier
         return this.activeRepository.getByZoneAndResourceIdentifier(zone, resourceIdentifier);
     }
 
+    @Override
+    public Set<String> getResourceEntityAndDescendantsIds(final ResourceEntity entity) {
+        if (this.activeRepository == this.graphRepository) { // i.e. titan is enabled
+            return this.graphRepository.getResourceEntityAndDescendantsIds(entity);
+        } else {
+            return new HashSet<String>(Arrays.asList(entity.getResourceIdentifier()));
+        }
+    }
 }

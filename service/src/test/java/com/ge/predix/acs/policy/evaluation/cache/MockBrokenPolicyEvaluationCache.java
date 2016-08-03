@@ -64,4 +64,14 @@ public class MockBrokenPolicyEvaluationCache implements PolicyEvaluationCache {
     public void resetForSubjects(final String zoneId, final List<SubjectEntity> subjectEntities) {
         throw new IllegalStateException("Broken cache.");
     }
+
+    @Override
+    public void resetForResourcesByIds(String zoneId, Set<String> resourceIds) {
+        throw new IllegalStateException("Broken cache.");
+    }
+
+    @Override
+    public void resetForSubjectsByIds(String zoneId, Set<String> subjectIds) {
+        throw new IllegalStateException("Broken cache.");
+    }
 }

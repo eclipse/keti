@@ -158,6 +158,27 @@ public class AbstractPolicyEvaluationCacheTest {
     }
 
     @Test
+    public void testGetWithResetForResourcesByIds() throws Exception {
+
+        PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
+        request.setAction("GET");
+        request.setSubjectIdentifier("mulder");
+        request.setResourceIdentifier("/x-files");
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
+                .policySetId("default").request(request).build();
+
+        PolicyEvaluationResult result = mockPermitResult();
+        this.cache.set(key, result);
+
+        PolicyEvaluationResult cachedResult = this.cache.get(key);
+        assertEquals(cachedResult.getEffect(), result.getEffect());
+
+        Thread.sleep(1);
+        this.cache.resetForResourcesByIds(ZONE_NAME, new HashSet<>(Arrays.asList("/x-files")));
+        assertNull(this.cache.get(key));
+    }
+
+    @Test
     public void testGetWithResetForSubject() throws Exception {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
@@ -175,6 +196,27 @@ public class AbstractPolicyEvaluationCacheTest {
 
         Thread.sleep(1);
         this.cache.resetForSubject(ZONE_NAME, "mulder");
+        assertNull(this.cache.get(key));
+    }
+
+    @Test
+    public void testGetWithResetForSubjectsByIds() throws Exception {
+
+        PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
+        request.setAction("GET");
+        request.setSubjectIdentifier("mulder");
+        request.setResourceIdentifier("/x-files");
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
+                .policySetId("default").request(request).build();
+
+        PolicyEvaluationResult result = mockPermitResult();
+        this.cache.set(key, result);
+
+        PolicyEvaluationResult cachedResult = this.cache.get(key);
+        assertEquals(cachedResult.getEffect(), result.getEffect());
+
+        Thread.sleep(1);
+        this.cache.resetForSubjectsByIds(ZONE_NAME, new HashSet<>(Arrays.asList("mulder")));
         assertNull(this.cache.get(key));
     }
 

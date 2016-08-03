@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
@@ -162,20 +163,31 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     }
 
     @Override
+    public void resetForResourcesByIds(final String zoneId, final Set<String> resourceIds) {
+        multisetForResources(zoneId, resourceIds.stream().collect(Collectors.toList()));
+    }
+
+    @Override
     public void resetForResources(final String zoneId, final List<ResourceEntity> resourceEntities) {
+        multisetForResources(zoneId, resourceEntities.stream().map(resource -> resource.getResourceIdentifier())
+                .collect(Collectors.toList()));
+    }
+
+    private void multisetForResources(final String zoneId, final List<String> resourceIds) {
         String timestamp = timestampValue();
-        List<String> fromKeys = new ArrayList<>();
-        for (ResourceEntity resource : resourceEntities) {
-            fromKeys.add(resourceTranslationKey(zoneId, resource.getResourceIdentifier()));
-        }
+
+        List<String> fromKeys = resourceIds.stream().map(resource -> resourceTranslationKey(zoneId, resource))
+                .collect(Collectors.toList());
+
         List<Object> toKeys = multiGetResourceTranslations(fromKeys);
+
         Map<String, String> map = new HashMap<>();
         for (int i = 0; i < toKeys.size(); i++) {
             @SuppressWarnings("unchecked")
             Set<String> toKeySet = (Set<String>) toKeys.get(i);
             for (String toKey : toKeySet) {
                 map.put(toKey, timestamp);
-                String resourceId = resourceEntities.get(i).getResourceIdentifier();
+                String resourceId = resourceIds.get(i);
                 logSetResourceTimestampsDebugMessage(timestamp, toKey, resourceId);
             }
         }
@@ -199,18 +211,27 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     }
 
     @Override
-    public void resetForSubjects(final String zoneId, final List<SubjectEntity> subjectEntities) {
-        Map<String, String> map = new HashMap<>();
-        for (SubjectEntity subject : subjectEntities) {
-            String key = subjectKey(zoneId, subject.getSubjectIdentifier());
-            String timestamp = timestampValue();
-            String subjectId = subject.getSubjectIdentifier();
-            logSetSubjectTimestampDebugMessage(key, timestamp, subjectId);
-            map.put(key, timestamp);
-        }
-        multiSet(map);
+    public void resetForSubjectsByIds(final String zoneId, final Set<String> subjectIds) {
+        multisetForSubjects(zoneId, subjectIds.stream().collect(Collectors.toList()));
     }
 
+    @Override
+    public void resetForSubjects(final String zoneId, final List<SubjectEntity> subjectEntities) {
+        multisetForSubjects(zoneId, subjectEntities.stream().map(subject -> subject.getSubjectIdentifier())
+                .collect(Collectors.toList()));
+    }
+
+    private void multisetForSubjects(final String zoneId, final List<String> subjectIds) {
+        Map<String, String> map = new HashMap<>();
+        subjectIds.forEach(subjectId -> {
+            String key = subjectKey(zoneId, subjectId);
+            String timestamp = timestampValue();
+            logSetSubjectTimestampDebugMessage(key, timestamp, subjectId);
+            map.put(key, timestamp);
+        });
+        multiSet(map);
+    }
+    
     private void logSetSubjectTimestampDebugMessage(final String key, final String timestamp, final String subjectId) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format("Setting timestamp for subject '%s'; key: '%s', value: '%s' ", subjectId, key,

@@ -43,7 +43,11 @@ public interface PolicyEvaluationCache {
 
     void resetForResources(String zoneId, List<ResourceEntity> entities);
 
+    void resetForResourcesByIds(String zoneId, Set<String> resourceIds);
+
     void resetForSubject(String zoneId, String subjectId);
 
     void resetForSubjects(String zoneId, List<SubjectEntity> subjectEntities);
+
+    void resetForSubjectsByIds(String zoneId, Set<String> subjectIds);
 }

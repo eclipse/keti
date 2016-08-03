@@ -7,6 +7,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.in;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -445,6 +446,15 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
 
         });
         return parentSet;
+    }
+
+    public Set<String> getEntityAndDescendantsIds(final E entity) {
+        if (entity == null) {
+            return Collections.emptySet();
+        }
+
+        return this.graph.traversal().V(entity.getId()).has(getEntityIdKey()).emit().repeat(in().has(getEntityIdKey()))
+                .until(eq(null)).values(getEntityIdKey()).toStream().map(Object::toString).collect(Collectors.toSet());
     }
 
     abstract String getEntityId(E entity);
