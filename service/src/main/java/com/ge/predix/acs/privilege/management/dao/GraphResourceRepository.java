@@ -77,4 +77,9 @@ public class GraphResourceRepository extends GraphGenericRepository<ResourceEnti
         resourceEntity.setParents(parentSet);
         return resourceEntity;
     }
+
+    @Override
+    public Set<String> getResourceEntityAndDescendantsIds(final ResourceEntity entity) {
+        return getEntityAndDescendantsIds(entity);
+    }
 }

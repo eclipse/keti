@@ -192,7 +192,8 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
         }
 
         try {
-            this.cache.resetForResource(zone.getName(), resource.getResourceIdentifier());
+            this.cache.resetForResourcesByIds(zone.getName(),
+                    this.resourceRepository.getResourceEntityAndDescendantsIds(updatedResource));
             this.resourceRepository.save(updatedResource);
         } catch (Exception e) {
             String message = String.format(
@@ -225,7 +226,8 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
         ResourceEntity resourceEntity = this.resourceRepository.getByZoneAndResourceIdentifier(zone,
                 resourceIdentifier);
         if (resourceEntity != null) {
-            this.cache.resetForResource(zone.getName(), resourceIdentifier);
+            this.cache.resetForResourcesByIds(zone.getName(),
+                    this.resourceRepository.getResourceEntityAndDescendantsIds(resourceEntity));
             this.resourceRepository.delete(resourceEntity.getId());
             deleted = true;
             LOGGER.info(String.format("Deleted resource with resourceId = %s, zone = %s.", resourceIdentifier,
@@ -352,7 +354,8 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
         }
 
         try {
-            this.cache.resetForSubject(zone.getName(), subject.getSubjectIdentifier());
+            this.cache.resetForSubjectsByIds(zone.getName(),
+                    this.subjectRepository.getSubjectEntityAndDescendantsIds(updatedSubject));
             this.subjectRepository.save(updatedSubject);
         } catch (Exception e) {
             String message = String.format(
@@ -377,7 +380,8 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
 
         SubjectEntity subjectEntity = this.subjectRepository.getByZoneAndSubjectIdentifier(zone, subjectIdentifier);
         if (subjectEntity != null) {
-            this.cache.resetForSubject(zone.getName(), subjectIdentifier);
+            this.cache.resetForSubjectsByIds(zone.getName(),
+                    this.subjectRepository.getSubjectEntityAndDescendantsIds(subjectEntity));
             this.subjectRepository.delete(subjectEntity.getId());
             deleted = true;
             LOGGER.info(String.format("Deleted subject with subjectIdentifier=%s, zone = %s.", subjectIdentifier,

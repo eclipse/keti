@@ -138,4 +138,18 @@ public class HystrixPolicyEvaluationCacheCircuitBreaker implements PolicyEvaluat
     public void setCachingEnabled(final boolean cachingEnabled) {
         this.cachingEnabled = cachingEnabled;
     }
+
+    @Override
+    public void resetForResourcesByIds(final String zoneId, final Set<String> resourceIds) {
+        if (this.cachingEnabled) {
+            this.cacheImpl.resetForResourcesByIds(zoneId, resourceIds);
+        }
+    }
+
+    @Override
+    public void resetForSubjectsByIds(final String zoneId, final Set<String> subjectIds) {
+        if (this.cachingEnabled) {
+            this.cacheImpl.resetForSubjectsByIds(zoneId, subjectIds);
+        }
+    }
 }

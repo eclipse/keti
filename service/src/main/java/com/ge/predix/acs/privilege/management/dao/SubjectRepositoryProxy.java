@@ -1,6 +1,7 @@
 package com.ge.predix.acs.privilege.management.dao;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -139,8 +140,7 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
 
     @Override
     public SubjectEntity getSubjectWithInheritedAttributesForScopes(final ZoneEntity zone,
-                                                                    final String subjectIdentifier,
-                                                                    final Set<Attribute> scopes) {
+            final String subjectIdentifier, final Set<Attribute> scopes) {
         if (this.activeRepository == this.graphRepository) { // i.e. titan is enabled
             return this.graphRepository.getSubjectWithInheritedAttributesForScopes(zone, subjectIdentifier, scopes);
         } else {
@@ -165,6 +165,15 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
     @Override
     public SubjectEntity getByZoneAndSubjectIdentifier(final ZoneEntity zone, final String subjectIdentifier) {
         return this.activeRepository.getByZoneAndSubjectIdentifier(zone, subjectIdentifier);
+    }
+
+    @Override
+    public Set<String> getSubjectEntityAndDescendantsIds(final SubjectEntity entity) {
+        if (this.activeRepository == this.graphRepository) { // i.e. titan is enabled
+            return this.graphRepository.getSubjectEntityAndDescendantsIds(entity);
+        } else {
+            return new HashSet<String>(Arrays.asList(entity.getSubjectIdentifier()));
+        }
     }
 
 }

@@ -7,6 +7,8 @@ import static com.ge.predix.acs.privilege.management.dao.GraphResourceRepository
 import static com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository.SUBJECT_ID_KEY;
 import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
 import static com.ge.predix.acs.testutils.XFiles.AGENT_SCULLY;
+import static com.ge.predix.acs.testutils.XFiles.FBI;
+import static com.ge.predix.acs.testutils.XFiles.FBI_ATTRIBUTES;
 import static com.ge.predix.acs.testutils.XFiles.MULDERS_ATTRIBUTES;
 import static com.ge.predix.acs.testutils.XFiles.PENTAGON_ATTRIBUTES;
 import static com.ge.predix.acs.testutils.XFiles.SECRET_CLASSIFICATION;
@@ -14,11 +16,16 @@ import static com.ge.predix.acs.testutils.XFiles.SECRET_GROUP;
 import static com.ge.predix.acs.testutils.XFiles.SECRET_GROUP_ATTRIBUTES;
 import static com.ge.predix.acs.testutils.XFiles.SITE_BASEMENT;
 import static com.ge.predix.acs.testutils.XFiles.SITE_PENTAGON;
+import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP;
+import static com.ge.predix.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTES;
 import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION;
 import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_GROUP;
 import static com.ge.predix.acs.testutils.XFiles.TOP_SECRET_GROUP_ATTRIBUTES;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -190,6 +197,52 @@ public class GraphSubjectRepositoryTest {
                 .iterator().next().getScopes().contains(SITE_BASEMENT));
     }
 
+    @Test
+    public void testGetSubjectEntityAndDescendantsIds() {
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
+
+        SubjectEntity fbi = persistSubjectToZoneAndAssert(TEST_ZONE_1, FBI, FBI_ATTRIBUTES);
+
+        SubjectEntity specialAgentsGroup = persistSubjectWithParentsToZoneAndAssert(TEST_ZONE_1, SPECIAL_AGENTS_GROUP,
+                SPECIAL_AGENTS_GROUP_ATTRIBUTES,
+                new HashSet<>(Arrays.asList(new Parent[] { new Parent(fbi.getSubjectIdentifier()) })));
+
+        SubjectEntity topSecretGroup = persistSubjectToZoneAndAssert(TEST_ZONE_1, TOP_SECRET_GROUP,
+                TOP_SECRET_GROUP_ATTRIBUTES);
+
+        SubjectEntity agentMulder = persistSubjectWithParentsToZoneAndAssert(TEST_ZONE_1, AGENT_MULDER,
+                MULDERS_ATTRIBUTES,
+                new HashSet<>(Arrays.asList(new Parent[] { new Parent(specialAgentsGroup.getSubjectIdentifier()),
+                        new Parent(topSecretGroup.getSubjectIdentifier()) })));
+
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(4L));
+
+        Set<String> descendantsIds = this.subjectRepository.getSubjectEntityAndDescendantsIds(fbi);
+        assertThat(descendantsIds, hasSize(3));
+        assertThat(descendantsIds, hasItems(fbi.getSubjectIdentifier(), specialAgentsGroup.getSubjectIdentifier(),
+                agentMulder.getSubjectIdentifier()));
+
+        descendantsIds = this.subjectRepository.getSubjectEntityAndDescendantsIds(specialAgentsGroup);
+        assertThat(descendantsIds, hasSize(2));
+        assertThat(descendantsIds,
+                hasItems(specialAgentsGroup.getSubjectIdentifier(), agentMulder.getSubjectIdentifier()));
+
+        descendantsIds = this.subjectRepository.getSubjectEntityAndDescendantsIds(topSecretGroup);
+        assertThat(descendantsIds, hasSize(2));
+        assertThat(descendantsIds, hasItems(topSecretGroup.getSubjectIdentifier(), agentMulder.getSubjectIdentifier()));
+
+        descendantsIds = this.subjectRepository.getSubjectEntityAndDescendantsIds(agentMulder);
+        assertThat(descendantsIds, hasSize(1));
+        assertThat(descendantsIds, hasItems(agentMulder.getSubjectIdentifier()));
+
+        descendantsIds = this.subjectRepository.getSubjectEntityAndDescendantsIds(null);
+        assertThat(descendantsIds, empty());
+
+        descendantsIds = this.subjectRepository
+                .getSubjectEntityAndDescendantsIds(new SubjectEntity(TEST_ZONE_1, "/nonexistent-subject"));
+        assertThat(descendantsIds, empty());
+    }
+
     private SubjectEntity persistSubject1toZone1AndAssert() {
         return persistSubjectToZoneAndAssert(TEST_ZONE_1, AGENT_SCULLY, Collections.emptySet());
     }
@@ -211,6 +264,17 @@ public class GraphSubjectRepositoryTest {
         SubjectEntity subject = new SubjectEntity(zone, subjectIdentifier);
         subject.setAttributes(attributes);
         subject.setAttributesAsJson(JSON_UTILS.serialize(subject.getAttributes()));
+        SubjectEntity subjectEntity = this.subjectRepository.save(subject);
+        assertThat(this.subjectRepository.findOne(subjectEntity.getId()), equalTo(subject));
+        return subjectEntity;
+    }
+
+    private SubjectEntity persistSubjectWithParentsToZoneAndAssert(final ZoneEntity zoneEntity,
+            final String subjectIdentifier, final Set<Attribute> attributes, final Set<Parent> parents) {
+        SubjectEntity subject = new SubjectEntity(zoneEntity, subjectIdentifier);
+        subject.setAttributes(attributes);
+        subject.setAttributesAsJson(JSON_UTILS.serialize(subject.getAttributes()));
+        subject.setParents(parents);
         SubjectEntity subjectEntity = this.subjectRepository.save(subject);
         assertThat(this.subjectRepository.findOne(subjectEntity.getId()), equalTo(subject));
         return subjectEntity;

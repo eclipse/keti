@@ -227,6 +227,7 @@
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
+                                <exclude>**/PolicyEvalCachingWithGraphDBIT.java</exclude>
                             </excludes>
                             <includes>
                                 <include>**/*IT.java</include>
@@ -531,6 +532,7 @@
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
+                                <exclude>**/PolicyEvalCachingWithGraphDBIT.java</exclude>
                             </excludes>
                             <includes>
                                 <include>**/*IT.java</include>
@@ -641,15 +643,7 @@
                                 <ZONE2_UAA_URL>http://localhost:8080/uaa</ZONE2_UAA_URL>
                                 <ZONE3_NAME>testzone3</ZONE3_NAME>
                             </systemPropertyVariables>
-<!--                             <includes>
-                                <include>**/*IT.java</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/ACSCorsFilterIT.java</exclude>
-                                <exclude>**/ACSMeteringIT.java</exclude>
-                                <exclude>**/DefaultZoneAuthorizationIT.java</exclude>
-                            </excludes>
- -->                            <suiteXmlFiles>
+                            <suiteXmlFiles>
                                 <suiteXmlFile>testng-public.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>
@@ -751,7 +745,7 @@
                                 <ZONE3_NAME>testzone3</ZONE3_NAME>
                             </systemPropertyVariables>
                             <suiteXmlFiles>
-                                <suiteXmlFile>testng-public.xml</suiteXmlFile>
+                                <suiteXmlFile>testng-public-titan.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>
                         <executions>
