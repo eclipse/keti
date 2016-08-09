@@ -10,4 +10,6 @@ public interface ResourceHierarchicalRepository {
                                                       final String resourceIdentifier);
 
     Set<String> getResourceEntityAndDescendantsIds(final ResourceEntity entity); 
+    int getVersion();
+    void setVersion(final int version);
 }

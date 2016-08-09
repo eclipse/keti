@@ -26,6 +26,7 @@ import com.thinkaurelius.titan.core.PropertyKey;
 import com.thinkaurelius.titan.core.TitanFactory;
 import com.thinkaurelius.titan.core.TitanFactory.Builder;
 import com.thinkaurelius.titan.core.TitanGraph;
+import com.thinkaurelius.titan.core.VertexLabel;
 import com.thinkaurelius.titan.core.schema.SchemaAction;
 import com.thinkaurelius.titan.core.schema.SchemaStatus;
 import com.thinkaurelius.titan.core.schema.TitanManagement;
@@ -40,6 +41,7 @@ public class GraphConfig {
     public static final String BY_SUBJECT_UNIQUE_INDEX_NAME = "bySubjectUnique";
     public static final String BY_RESOURCE_UNIQUE_INDEX_NAME = "byResourceUnique";
     public static final String BY_ZONE_INDEX_NAME = "byZone";
+    public static final String BY_VERSION_UNIQUE_INDEX_NAME = "byVersion";
     public static final String BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME = "byZoneAndResourceUnique";
     public static final String BY_ZONE_AND_SUBJECT_UNIQUE_INDEX_NAME = "byZoneAndSubjectUnique";
 
@@ -104,7 +106,6 @@ public class GraphConfig {
             throws InterruptedException {
         newGraph.tx().rollback(); // Never create new indexes while a transaction is active
         TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
-        // Create index for zones.
         if (!mgmt.containsGraphIndex(indexName)) {
             PropertyKey indexPropertyKey = mgmt.makePropertyKey(indexKey).dataType(String.class).make();
             mgmt.buildIndex(indexName, Vertex.class).addKey(indexPropertyKey).buildCompositeIndex();
@@ -114,14 +115,16 @@ public class GraphConfig {
         ManagementSystem.awaitGraphIndexStatus((TitanGraph) newGraph, indexName).status(SchemaStatus.ENABLED).call();
     }
 
-    public static void createUniqueIndex(final Graph newGraph, final String indexName, final String indexKey)
-            throws InterruptedException {
+    public static void createUniqueIndexForLabel(final Graph newGraph, final String indexName, final String indexKey,
+            final String label) throws InterruptedException {
         newGraph.tx().rollback(); // Never create new indexes while a transaction is active
         TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
-        // Create index for zones.
         if (!mgmt.containsGraphIndex(indexName)) {
-            PropertyKey indexPropertyKey = mgmt.makePropertyKey(indexKey).dataType(String.class).make();
-            mgmt.buildIndex(indexName, Vertex.class).addKey(indexPropertyKey).unique().buildCompositeIndex();
+            PropertyKey indexPropertyKey = mgmt.makePropertyKey(indexKey).dataType(Integer.class).make();
+            VertexLabel versionLabel = mgmt.makeVertexLabel(label).make();
+            // Create a unique composite index for the property key that indexes only vertices with a given label
+            mgmt.buildIndex(indexName, Vertex.class).addKey(indexPropertyKey).indexOnly(versionLabel).unique()
+                    .buildCompositeIndex();
         }
         mgmt.commit();
         // Wait for the index to become available

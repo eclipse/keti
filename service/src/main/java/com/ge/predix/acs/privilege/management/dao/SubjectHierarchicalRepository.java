@@ -13,4 +13,6 @@ public interface SubjectHierarchicalRepository {
             final String subjectIdentifier);
 
     Set<String> getSubjectEntityAndDescendantsIds(final SubjectEntity entity); 
+    int getVersion();
+    void setVersion(final int version);
 }
