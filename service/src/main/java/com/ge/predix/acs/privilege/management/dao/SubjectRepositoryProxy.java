@@ -176,4 +176,22 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
         }
     }
 
+    @Override
+    public int getVersion() {
+        if (this.activeRepository == this.graphRepository) { // i.e. titan is enabled
+            return this.graphRepository.getVersion();
+        } else {
+            throw new RuntimeException("method not supported");
+        }
+    }
+
+    @Override
+    public void setVersion(final int version) {
+        if (this.activeRepository == this.graphRepository) { // i.e. titan is enabled
+            this.graphRepository.setVersion(version);
+        } else {
+            throw new RuntimeException("method not supported");
+        }
+    }
+
 }

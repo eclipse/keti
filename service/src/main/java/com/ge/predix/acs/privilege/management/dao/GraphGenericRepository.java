@@ -46,6 +46,8 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     public static final String SCOPE_PROPERTY_KEY = "scope";
     public static final String ZONE_NAME_PROPERTY_KEY = "zoneName";
     public static final String ZONE_ID_KEY = "zoneId";
+    public static final String VERSION_PROPERTY_KEY = "schemaVersion";
+    public static final String VERSION_VERTEX_LABEL = "version";
 
     @Autowired
     private Graph graph;
@@ -302,6 +304,64 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
             parents.add(new ParentEntity(vertexToEntity(traversal.next()), parent.getScopes()));
         });
         return parents;
+    }
+
+    public int getVersion() {
+        try {
+            Vertex versionVertex = getOrCreateVersionVertex();
+            VertexProperty<Integer> property = versionVertex.property(VERSION_PROPERTY_KEY);
+            Assert.isTrue(property.isPresent(), String.format(
+                    "The schema version vertex does not contain the expected property '%s'.", VERSION_PROPERTY_KEY));
+            return property.value();
+        } finally {
+            this.graph.tx().commit();
+        }
+
+    }
+
+    public void setVersion(final int version) {
+        try {
+            Vertex versionVertex = getOrCreateVersionVertex();
+            versionVertex.property(VERSION_PROPERTY_KEY, version);
+            this.graph.tx().commit();
+        } catch (Exception e) {
+            this.graph.tx().rollback();
+            throw (e);
+        }
+
+    }
+
+    private Vertex getOrCreateVersionVertex() {
+        try {
+            Vertex versionVertex;
+            // hasLabel() produces a warning that indexing is recommended.
+            // hasNext() produces a warning that indexing is recommended.
+            // Need to define an index (composite or mixed) that supports this query.
+            GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V().has(VERSION_PROPERTY_KEY);
+            if (traversal.hasNext()) {
+                versionVertex = traversal.next();
+                // There should be only one version entity with a given version
+                // entity id.
+                Assert.isTrue(!traversal.hasNext(), "There are two schema version vertices in the graph");
+            } else {
+                versionVertex = createVersionVertex(0);
+            }
+
+            return versionVertex;
+        } finally {
+            this.graph.tx().commit();
+        }
+    }
+
+    private Vertex createVersionVertex(final int version) {
+        try {
+            Vertex versionVertex = this.graph.addVertex(T.label, VERSION_VERTEX_LABEL, VERSION_PROPERTY_KEY, version);
+            this.graph.tx().commit();
+            return versionVertex;
+        } catch (Exception e) {
+            this.graph.tx().rollback();
+            throw (e);
+        }
     }
 
     public List<E> findByZone(final ZoneEntity zoneEntity) {
