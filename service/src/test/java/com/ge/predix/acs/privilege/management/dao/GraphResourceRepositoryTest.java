@@ -52,7 +52,6 @@ import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
-import com.thinkaurelius.titan.core.QueryException;
 import com.thinkaurelius.titan.core.SchemaViolationException;
 import com.thinkaurelius.titan.core.TitanFactory;
 
@@ -401,8 +400,8 @@ public class GraphResourceRepositoryTest {
     }
 
     @Test(
-            expectedExceptions = QueryException.class,
-            expectedExceptionsMessageRegExp = "Graph search failed: traversal limit exceeded.")
+            expectedExceptions = AttributeLimitExceededException.class,
+            expectedExceptionsMessageRegExp = "The number of attributes on this resource .* has exceeded the maximum limit of .*")
     public void testSearchAttributesTraversalLimitException() {
         long traversalLimit = 256L;
         try {

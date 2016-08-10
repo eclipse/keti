@@ -113,6 +113,19 @@ public final class XFiles {
         return Arrays.asList(new BaseResource[] { pentagon, ascension, evidenceImplant });
     }
 
+    public static List<BaseResource> createTwoLevelResourceHierarchy() {
+
+        BaseResource basement = new BaseResource(BASEMENT_SITE_ID);
+        basement.setAttributes(BASEMENT_ATTRIBUTES);
+
+        BaseResource scullysTestimony = new BaseResource(EVIDENCE_SCULLYS_TESTIMONY_ID);
+        scullysTestimony.setAttributes(SCULLYS_TESTIMONY_ATTRIBUTES);
+        scullysTestimony.setParents(new HashSet<>(Arrays.asList(new Parent[] {
+                new Parent(basement.getResourceIdentifier())})));
+
+        return Arrays.asList(new BaseResource[] { basement, scullysTestimony });
+    }
+
     public static List<BaseResource> createThreeLevelResourceHierarchy() {
         BaseResource basement = new BaseResource(BASEMENT_SITE_ID);
         basement.setAttributes(BASEMENT_ATTRIBUTES);

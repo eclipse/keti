@@ -35,7 +35,6 @@ import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.google.common.collect.Sets;
-import com.thinkaurelius.titan.core.QueryException;
 import com.thinkaurelius.titan.core.SchemaViolationException;
 
 public abstract class GraphGenericRepository<E extends ZonableEntity> implements JpaRepository<E, Long> {
@@ -462,7 +461,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
                         attributes.addAll(deserializedAttributes);
                         // This enforces the limit on the count of attributes returned from the traversal, instead of
                         // number of vertices traversed. To do the latter will require traversing the graph twice.
-                        checkTraversalLimitOrFail(attributes);
+                        checkTraversalLimitOrFail(entity, attributes);
                     }
                 });
 
@@ -475,16 +474,18 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
                             Attribute.class);
                     if (deserializedAttributes != null) {
                         attributes.addAll(deserializedAttributes);
-                        checkTraversalLimitOrFail(attributes);
+                        checkTraversalLimitOrFail(entity, attributes);
                     }
                 });
         entity.setAttributes(attributes);
         entity.setAttributesAsJson(JSON_UTILS.serialize(attributes));
     }
 
-    private void checkTraversalLimitOrFail(final Set<Attribute> attributes) {
+    private void checkTraversalLimitOrFail(final E e, final Set<Attribute> attributes) {
         if (attributes.size() > this.traversalLimit) {
-            throw new QueryException("Graph search failed: traversal limit exceeded.");
+            String exceptionMessage = String.format("The number of attributes on this " + e.getEntityType() + " '"
+                    + e.getEntityId() + "' has exceeded the maximum limit of %d", this.traversalLimit);
+            throw new AttributeLimitExceededException(exceptionMessage);
         }
     }
 
