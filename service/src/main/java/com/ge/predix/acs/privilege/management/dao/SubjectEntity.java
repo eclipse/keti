@@ -169,4 +169,14 @@ public class SubjectEntity implements ZonableEntity {
         }
         return false;
     }
+
+    @Override
+    public String getEntityId() {
+        return this.getSubjectIdentifier();
+    }
+
+    @Override
+    public String getEntityType() {
+        return "subject";
+    }
 }

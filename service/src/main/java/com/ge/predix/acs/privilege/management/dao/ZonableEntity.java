@@ -9,6 +9,10 @@ import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 public interface ZonableEntity {
     Long getId();
 
+    String getEntityId();
+
+    String getEntityType();
+
     void setId(Long id);
 
     ZoneEntity getZone();
