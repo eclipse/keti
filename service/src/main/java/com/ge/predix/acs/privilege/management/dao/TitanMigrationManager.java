@@ -55,41 +55,44 @@ public final class TitanMigrationManager {
     }
 
     private void doResourceMigration() {
-        int totalResources = 0;
+        int numOfResourcesSaved = 0;
         Pageable pageRequest = new PageRequest(0, PAGE_SIZE);
         long numOfResourceEntitiesToMigrate = resourceRepository.count();
-        Page<ResourceEntity> pageOfResources = resourceRepository.findAll(pageRequest);
+        Page<ResourceEntity> pageOfResources;
 
         do {
-            List<ResourceEntity> listOfResources = pageOfResources.getContent();
-            totalResources += pageOfResources.getNumberOfElements();
+            pageOfResources = resourceRepository.findAll(pageRequest);
+            List<ResourceEntity> resourceListToSave = pageOfResources.getContent();
+            numOfResourcesSaved += pageOfResources.getNumberOfElements();
             // Clear the auto-generated id field prior to migrating to graphDB
-            listOfResources.forEach(item -> item.setId((long) 0));
-            resourceHierarchicalRepository.save(listOfResources);
-            LOGGER.info("Total migrated so far: " + totalResources + "/" + numOfResourceEntitiesToMigrate);
+            resourceListToSave.forEach(item -> item.setId((long) 0));
+            resourceHierarchicalRepository.save(resourceListToSave);
+            LOGGER.info(
+                    "Total resources migrated so far: " + numOfResourcesSaved + "/" + numOfResourceEntitiesToMigrate);
             pageRequest = pageOfResources.nextPageable();
         } while (pageOfResources.hasNext());
 
-        LOGGER.info("Number of resource entities migrated: " + totalResources);
+        LOGGER.info("Number of resource entities migrated: " + numOfResourcesSaved);
         LOGGER.info("Resource migration to Titan completed.");
     }
 
     private void doSubjectMigration() {
-        int totalSubjects = 0;
+        int numOfSubjectsSaved = 0;
         Pageable pageRequest = new PageRequest(0, PAGE_SIZE);
         long numOfSubjectEntitiesToMigrate = subjectRepository.count();
-        Page<SubjectEntity> pageOfSubjects = subjectRepository.findAll(pageRequest);
+        Page<SubjectEntity> pageOfSubjects;
 
         do {
-            List<SubjectEntity> listOfSubjects = pageOfSubjects.getContent();
-            totalSubjects += pageOfSubjects.getNumberOfElements();
-            listOfSubjects.forEach(item -> item.setId((long) 0));
-            subjectHierarchicalRepository.save(listOfSubjects);
-            LOGGER.info("Total migrated so far: " + totalSubjects + "/" + numOfSubjectEntitiesToMigrate);
+            pageOfSubjects = subjectRepository.findAll(pageRequest);
+            List<SubjectEntity> subjectListToSave = pageOfSubjects.getContent();
+            numOfSubjectsSaved += pageOfSubjects.getNumberOfElements();
+            subjectListToSave.forEach(item -> item.setId((long) 0));
+            subjectHierarchicalRepository.save(subjectListToSave);
+            LOGGER.info("Total subjects migrated so far: " + numOfSubjectsSaved + "/" + numOfSubjectEntitiesToMigrate);
             pageRequest = pageOfSubjects.nextPageable();
         } while (pageOfSubjects.hasNext());
 
-        LOGGER.info("Number of subject entities migrated: " + totalSubjects);
+        LOGGER.info("Number of subject entities migrated: " + numOfSubjectsSaved);
         LOGGER.info("Subject migration to Titan completed.");
 
     }
