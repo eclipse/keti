@@ -26,17 +26,9 @@ public class ResourceRepositoryProxy implements ResourceRepository, ResourceHier
     @Autowired(required = false)
     private GraphResourceRepository graphRepository;
 
-    public GraphResourceRepository getGraphRepository() {
-        return graphRepository;
-    }
-
     @Autowired
     @Qualifier("resourceRepository") // This is the bean id registered by Spring data JPA.
     private ResourceRepository nonGraphRepository;
-
-    public ResourceRepository getNonGraphRepository() {
-        return nonGraphRepository;
-    }
 
     @Autowired
     private Environment environment;

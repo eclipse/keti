@@ -2,8 +2,6 @@ package com.ge.predix.acs.privilege.management.dao;
 
 import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.PARENT_EDGE_LABEL;
 import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.SCOPE_PROPERTY_KEY;
-import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.VERSION_PROPERTY_KEY;
-import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.VERSION_VERTEX_LABEL;
 import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.ZONE_ID_KEY;
 import static com.ge.predix.acs.privilege.management.dao.GraphResourceRepository.RESOURCE_ID_KEY;
 import static com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository.SUBJECT_ID_KEY;
@@ -73,7 +71,6 @@ public class GraphResourceRepositoryTest {
     private void setupTitanGraph() throws InterruptedException, ExecutionException {
         this.graph = TitanFactory.build().set("storage.backend", "inmemory").open();
         GraphConfig.createIndex(this.graph, GraphConfig.BY_ZONE_INDEX_NAME, ZONE_ID_KEY);
-        GraphConfig.createUniqueIndexForLabel(this.graph, GraphConfig.BY_VERSION_UNIQUE_INDEX_NAME, VERSION_PROPERTY_KEY, VERSION_VERTEX_LABEL);
         GraphConfig.createTwoKeyUniqueCompositeIndex(this.graph, GraphConfig.BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME,
                 ZONE_ID_KEY, RESOURCE_ID_KEY);
         GraphConfig.createTwoKeyUniqueCompositeIndex(this.graph, GraphConfig.BY_ZONE_AND_SUBJECT_UNIQUE_INDEX_NAME,

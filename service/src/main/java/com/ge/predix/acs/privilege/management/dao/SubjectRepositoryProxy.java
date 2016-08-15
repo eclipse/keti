@@ -27,17 +27,9 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
     @Autowired(required = false)
     private GraphSubjectRepository graphRepository;
 
-    public GraphSubjectRepository getGraphRepository() {
-        return graphRepository;
-    }
-
     @Autowired
     @Qualifier("subjectRepository") // This is the bean id registered by Spring data JPA.
     private SubjectRepository nonGraphRepository;
-
-    public SubjectRepository getNonGraphRepository() {
-        return nonGraphRepository;
-    }
 
     @Autowired
     private Environment environment;
