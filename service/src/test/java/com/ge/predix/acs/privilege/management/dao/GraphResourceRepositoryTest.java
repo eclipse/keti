@@ -301,6 +301,23 @@ public class GraphResourceRepositoryTest {
         assertThat(traversal.hasNext(), equalTo(true));
         assertThat(traversal.next().property(RESOURCE_ID_KEY).value(), equalTo(resourceId));
     }
+    
+    @Test(expectedExceptions=IllegalArgumentException.class)
+    public void testSaveWithNoZoneName() {
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
+        ResourceEntity resourceEntity = new ResourceEntity();
+        resourceEntity.setResourceIdentifier("testResource");
+        resourceEntity.setZone(new ZoneEntity());
+        this.resourceRepository.save(resourceEntity);
+    }
+
+    @Test(expectedExceptions=IllegalArgumentException.class)
+    public void testSaveWithNoZoneEntity() {
+        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
+        ResourceEntity resourceEntity = new ResourceEntity();
+        resourceEntity.setResourceIdentifier("testResource");
+        this.resourceRepository.save(resourceEntity);
+    }
 
     @Test
     public void testSaveHierarchical() {
