@@ -157,8 +157,8 @@ public class GraphConfig {
             final String indexKey) throws InterruptedException {
         newGraph.tx().rollback(); // Never create new indexes while a transaction is active
         TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
-        if (!mgmt.containsGraphIndex(indexName)) {
-            EdgeLabel edgeLabel = mgmt.getOrCreateEdgeLabel(label);
+        EdgeLabel edgeLabel = mgmt.getOrCreateEdgeLabel(label);
+        if (!mgmt.containsRelationIndex(edgeLabel, indexName)) {
             PropertyKey indexPropertyKey = mgmt.getPropertyKey(indexKey);
             if (null == indexPropertyKey) {
                 indexPropertyKey = mgmt.makePropertyKey(indexKey).dataType(String.class).make();
