@@ -231,7 +231,9 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
         if ((null == entity.getId()) || (0 == entity.getId())) {
             verifyEntityNotSelfReferencing(entity);
             String entityId = getEntityId(entity);
+            Assert.notNull(entity.getZone(),"ZonableEntity must have a non-null zone.");
             String zoneId = entity.getZone().getName();
+            Assert.hasText(zoneId,"zoneName is required.");
             Vertex entityVertex = this.graph.addVertex(T.label, getEntityLabel(), ZONE_ID_KEY, zoneId, getEntityIdKey(),
                     entityId);
             updateVertexProperties(entity, entityVertex);
