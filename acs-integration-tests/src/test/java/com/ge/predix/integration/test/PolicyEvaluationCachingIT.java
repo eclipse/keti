@@ -36,6 +36,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -119,6 +120,13 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
         this.zoneHelper.createTestZone(this.acsAdminRestTemplate, this.acsZone1Name, false);
     }
 
+    @AfterMethod
+    public void cleanup() throws Exception {
+        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers);
+        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers);
+        this.policyHelper.deletePolicySets(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers);
+    }
+
     /**
      * This test makes sure that cached policy evaluation results are properly invalidated when a policy set changes.
      * Policy set name that is used to derive part of cache key does not change.
@@ -130,40 +138,31 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
                 .createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanramon");
         String endpoint = this.acsUrl;
 
-        String testPolicyName = null;
-        try {
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultAttribute());
-            String policyFile = "src/test/resources/policies/single-site-based.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultAttribute());
+        String policyFile = "src/test/resources/policies/single-site-based.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
 
-            ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            PolicyEvaluationResult responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
 
-            policyFile = "src/test/resources/policies/deny-all.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
+        policyFile = "src/test/resources/policies/deny-all.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.DENY);
-        } finally {
-            if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        testPolicyName, this.acsZone1Headers);
-                this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        subject.getSubjectIdentifier(), this.acsZone1Headers);
-            }
-        }
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.DENY);
+    
     }
 
     /**
@@ -174,39 +173,33 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
     public void testPolicyEvalCacheWhenPolicySetNameChanges() throws Exception {
         String testPolicyName = null;
         String endpoint = this.acsUrl;
-        try {
-            String policyFile = "src/test/resources/policies/indeterminate.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
-            PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION,
-                    DEFAULT_SUBJECT_ID, DEFAULT_RESOURCE_IDENTIFIER, null);
-            ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            PolicyEvaluationResult responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
-            this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(), testPolicyName,
-                    this.acsZone1Headers);
+        String policyFile = "src/test/resources/policies/indeterminate.json";
+        testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
+        PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION,
+                DEFAULT_SUBJECT_ID, DEFAULT_RESOURCE_IDENTIFIER, null);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
+        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(), testPolicyName,
+                this.acsZone1Headers);
 
-            policyFile = "src/test/resources/policies/permit-admin-only-using-condition.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
+        policyFile = "src/test/resources/policies/permit-admin-only-using-condition.json";
+        testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
 
-            policyEvaluationRequest = this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION, DEFAULT_SUBJECT_ID,
-                    DEFAULT_RESOURCE_IDENTIFIER, null);
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        policyEvaluationRequest = this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION, DEFAULT_SUBJECT_ID,
+                DEFAULT_RESOURCE_IDENTIFIER, null);
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.DENY);
-        } finally {
-            if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        testPolicyName, this.acsZone1Headers);
-            }
-        }
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.DENY);
+
     }
 
     /**
@@ -221,43 +214,32 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
                 .createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanramon");
         String endpoint = this.acsUrl;
 
-        String testPolicyName = null;
-        try {
-            this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultOrgAttribute());
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultOrgAttribute());
-            String policyFile = "src/test/resources/policies/single-org-based.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
+        this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultOrgAttribute());
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultOrgAttribute());
+        String policyFile = "src/test/resources/policies/single-org-based.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
 
-            ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            PolicyEvaluationResult responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
 
-            this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getAlternateOrgAttribute());
+        this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getAlternateOrgAttribute());
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
-        } finally {
-            if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        testPolicyName, this.acsZone1Headers);
-                this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        subject.getSubjectIdentifier(), this.acsZone1Headers);
-                this.privilegeHelper.deleteResource(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        resource.getResourceIdentifier(), this.acsZone1Headers);
-            }
-        }
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
+
     }
 
     /**
@@ -272,41 +254,31 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
                 .createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanramon");
         String endpoint = this.acsUrl;
 
-        String testPolicyName = null;
-        try {
-            this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultOrgAttribute());
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultOrgAttribute());
-            String policyFile = "src/test/resources/policies/single-org-based.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
+        this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultOrgAttribute());
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultOrgAttribute());
+        String policyFile = "src/test/resources/policies/single-org-based.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
 
-            ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            PolicyEvaluationResult responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
 
-            this.privilegeHelper.deleteResource(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                    resource.getResourceIdentifier(), this.acsZone1Headers);
+        this.privilegeHelper.deleteResource(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
+                resource.getResourceIdentifier(), this.acsZone1Headers);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
-        } finally {
-            if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        testPolicyName, this.acsZone1Headers);
-                this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        subject.getSubjectIdentifier(), this.acsZone1Headers);
-            }
-        }
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
     }
 
     /**
@@ -321,43 +293,31 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
                 MARISSA_V1.getSubjectIdentifier(), "/secured-by-value/sites/sanramon", null);
         String endpoint = this.acsUrl;
 
-        String testPolicyName = null;
-        try {
-            this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultOrgAttribute());
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultOrgAttribute());
-            String policyFile = "src/test/resources/policies/single-org-based-no-target.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
+        this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultOrgAttribute());
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultOrgAttribute());
+        String policyFile = "src/test/resources/policies/single-org-based-no-target.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
 
-            ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            PolicyEvaluationResult responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
 
-            this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getAlternateOrgAttribute());
+        this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getAlternateOrgAttribute());
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
-        } finally {
-            if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        testPolicyName, this.acsZone1Headers);
-                this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        subject.getSubjectIdentifier(), this.acsZone1Headers);
-                this.privilegeHelper.deleteResource(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        resource.getResourceIdentifier(), this.acsZone1Headers);
-            }
-        }
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
     }
 
     /**
@@ -371,42 +331,34 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
                 MARISSA_V1.getSubjectIdentifier(), "/v1/site/1/plant/asset/1", null);
         String endpoint = this.acsUrl;
 
-        String testPolicyName = null;
-        try {
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultOrgAttribute());
-            String policyFile = "src/test/resources/policies/multiple-attribute-uri-templates.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
 
-            ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultOrgAttribute());
+        String policyFile = "src/test/resources/policies/multiple-attribute-uri-templates.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            PolicyEvaluationResult responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            BaseResource siteResource = new BaseResource("/site/1");
-            siteResource.setAttributes(new HashSet<Attribute>(
-                    Arrays.asList(new Attribute[] { this.privilegeHelper.getDefaultOrgAttribute() })));
-            this.privilegeHelper.putResource(this.acsAdminRestTemplate, siteResource, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultOrgAttribute());
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        BaseResource siteResource = new BaseResource("/site/1");
+        siteResource.setAttributes(new HashSet<Attribute>(
+                Arrays.asList(new Attribute[] { this.privilegeHelper.getDefaultOrgAttribute() })));
+        this.privilegeHelper.putResource(this.acsAdminRestTemplate, siteResource, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultOrgAttribute());
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
-        } finally {
-            if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        testPolicyName, this.acsZone1Headers);
-                this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        subject.getSubjectIdentifier(), this.acsZone1Headers);
-            }
-        }
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+
     }
 
     /**
@@ -424,63 +376,50 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
                 .createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanfrancisco");
         String endpoint = this.acsUrl;
 
-        String testPolicyName = null;
-        try {
-            resource1.setAttributes(new HashSet<Attribute>(
-                    Arrays.asList(new Attribute[] { this.privilegeHelper.getDefaultOrgAttribute() })));
-            resource2.setAttributes(new HashSet<Attribute>(
-                    Arrays.asList(new Attribute[] { this.privilegeHelper.getDefaultOrgAttribute() })));
-            this.privilegeHelper.postResources(this.acsAdminRestTemplate, endpoint, this.acsZone1Headers, resource1,
-                    resource2);
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultOrgAttribute());
-            String policyFile = "src/test/resources/policies/single-org-based.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
 
-            ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest1, this.acsZone1Headers), PolicyEvaluationResult.class);
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            PolicyEvaluationResult responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+        resource1.setAttributes(new HashSet<Attribute>(
+                Arrays.asList(new Attribute[] { this.privilegeHelper.getDefaultOrgAttribute() })));
+        resource2.setAttributes(new HashSet<Attribute>(
+                Arrays.asList(new Attribute[] { this.privilegeHelper.getDefaultOrgAttribute() })));
+        this.privilegeHelper.postResources(this.acsAdminRestTemplate, endpoint, this.acsZone1Headers, resource1,
+                resource2);
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultOrgAttribute());
+        String policyFile = "src/test/resources/policies/single-org-based.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest2, this.acsZone1Headers), PolicyEvaluationResult.class);
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest1, this.acsZone1Headers), PolicyEvaluationResult.class);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
 
-            resource1.setAttributes(new HashSet<Attribute>(
-                    Arrays.asList(new Attribute[] { this.privilegeHelper.getAlternateOrgAttribute() })));
-            resource2.setAttributes(new HashSet<Attribute>(
-                    Arrays.asList(new Attribute[] { this.privilegeHelper.getAlternateOrgAttribute() })));
-            this.privilegeHelper.postResources(this.acsAdminRestTemplate, endpoint, this.acsZone1Headers, resource1,
-                    resource2);
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest2, this.acsZone1Headers), PolicyEvaluationResult.class);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest1, this.acsZone1Headers), PolicyEvaluationResult.class);
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
+        resource1.setAttributes(new HashSet<Attribute>(
+                Arrays.asList(new Attribute[] { this.privilegeHelper.getAlternateOrgAttribute() })));
+        resource2.setAttributes(new HashSet<Attribute>(
+                Arrays.asList(new Attribute[] { this.privilegeHelper.getAlternateOrgAttribute() })));
+        this.privilegeHelper.postResources(this.acsAdminRestTemplate, endpoint, this.acsZone1Headers, resource1,
+                resource2);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest2, this.acsZone1Headers), PolicyEvaluationResult.class);
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
-        } finally {
-            if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        testPolicyName, this.acsZone1Headers);
-                this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        subject.getSubjectIdentifier(), this.acsZone1Headers);
-                this.privilegeHelper.deleteResource(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        resource1.getResourceIdentifier(), this.acsZone1Headers);
-                this.privilegeHelper.deleteResource(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        resource2.getResourceIdentifier(), this.acsZone1Headers);
-            }
-        }
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest1, this.acsZone1Headers), PolicyEvaluationResult.class);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
+
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest2, this.acsZone1Headers), PolicyEvaluationResult.class);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
     }
 
     /**
@@ -494,39 +433,31 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
                 .createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanramon");
         String endpoint = this.acsUrl;
 
-        String testPolicyName = null;
-        try {
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultAttribute());
-            String policyFile = "src/test/resources/single-site-based-policy-set.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
 
-            ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultAttribute());
+        String policyFile = "src/test/resources/single-site-based-policy-set.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            PolicyEvaluationResult responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getAlternateAttribute());
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getAlternateAttribute());
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
-        } finally {
-            if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        testPolicyName, this.acsZone1Headers);
-                this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        subject.getSubjectIdentifier(), this.acsZone1Headers);
-            }
-        }
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
+
     }
 
     /**
@@ -545,59 +476,48 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
 
         String endpoint = this.acsUrl;
 
-        String testPolicyName = null;
-        try {
-            this.privilegeHelper.postSubjectsWithDefaultAttributes(this.acsAdminRestTemplate, endpoint,
-                    this.acsZone1Headers, subject1, subject2);
-            String policyFile = "src/test/resources/single-site-based-policy-set.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
+        this.privilegeHelper.postSubjectsWithDefaultAttributes(this.acsAdminRestTemplate, endpoint,
+                this.acsZone1Headers, subject1, subject2);
+        String policyFile = "src/test/resources/single-site-based-policy-set.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
 
-            ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest1, this.acsZone1Headers), PolicyEvaluationResult.class);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest1, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            PolicyEvaluationResult responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest2, this.acsZone1Headers), PolicyEvaluationResult.class);
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest2, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
 
-            subject1.setAttributes(new HashSet<Attribute>(
-                    Arrays.asList(new Attribute[] { this.privilegeHelper.getAlternateAttribute() })));
-            subject2.setAttributes(new HashSet<Attribute>(
-                    Arrays.asList(new Attribute[] { this.privilegeHelper.getAlternateAttribute() })));
-            this.privilegeHelper.postSubjects(this.acsAdminRestTemplate, endpoint, this.acsZone1Headers, subject1,
-                    subject2);
+        subject1.setAttributes(new HashSet<Attribute>(
+                Arrays.asList(new Attribute[] { this.privilegeHelper.getAlternateAttribute() })));
+        subject2.setAttributes(new HashSet<Attribute>(
+                Arrays.asList(new Attribute[] { this.privilegeHelper.getAlternateAttribute() })));
+        this.privilegeHelper.postSubjects(this.acsAdminRestTemplate, endpoint, this.acsZone1Headers, subject1,
+                subject2);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest1, this.acsZone1Headers), PolicyEvaluationResult.class);
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest1, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest2, this.acsZone1Headers), PolicyEvaluationResult.class);
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest2, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
-        } finally {
-            if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        testPolicyName, this.acsZone1Headers);
-                this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        subject1.getSubjectIdentifier(), this.acsZone1Headers);
-                this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        subject2.getSubjectIdentifier(), this.acsZone1Headers);
-            }
-        }
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
+
     }
 
     /**
@@ -611,43 +531,29 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
                 .createEvalRequest(subject.getSubjectIdentifier(), "sanramon");
         String endpoint = this.acsUrl;
 
-        String testPolicyName = null;
-        try {
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
-                    this.privilegeHelper.getDefaultAttribute());
-            String policyFile = "src/test/resources/policies/single-site-subject-based-policy-set.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                    policyFile);
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultAttribute());
+        String policyFile = "src/test/resources/policies/single-site-subject-based-policy-set.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
+                policyFile);
 
-            ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            PolicyEvaluationResult responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
 
-            this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                    subject.getSubjectIdentifier(), this.acsZone1Headers);
+        this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
+                subject.getSubjectIdentifier(), this.acsZone1Headers);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+        postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
 
-            Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
-            responseBody = postForEntity.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
-        } finally {
-            if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                        testPolicyName, this.acsZone1Headers);
-            }
-        }
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
     }
-
-    @AfterClass
-    public void cleanup() throws Exception {
-        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers);
-        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers);
-        this.policyHelper.deletePolicySets(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers);
-    }
+    
 }
