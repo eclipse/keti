@@ -369,6 +369,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                     <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
+                          and retained by Jenkins for each profile -->
+                    <reportsDirectory>${basedir}/surefire-reports</reportsDirectory>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/unit-tests.xml</suiteXmlFile>
                     </suiteXmlFiles>
@@ -379,8 +382,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
-                    <reportsDirectory>${project.build.directory}/surefire-reports/controller-tests</reportsDirectory>
-                    <summaryFile>${project.build.directory}/surefire-reports/controller-tests/failsafe-summary.xml</summaryFile>
+                    <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
+                         and retained by Jenkins for each profile -->
+                    <reportsDirectory>${basedir}/surefire-reports/controller-tests</reportsDirectory>
+                    <summaryFile>${basedir}/surefire-reports/controller-tests/failsafe-summary.xml</summaryFile>
                     <systemProperties>
                         <ZAC_URL>http://localhost:8888</ZAC_URL>
                         <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
@@ -507,7 +512,11 @@
                         <configuration>
                             <environmentVariables>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
+                                <reportsDirectory>${project.build.directory}/surefire-reports-postgres</reportsDirectory>
                             </environmentVariables>
+                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
+                                 and retained by Jenkins for each profile -->
+                            <reportsDirectory>${basedir}/surefire-reports-postgres</reportsDirectory>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/unit-tests.xml</suiteXmlFile>
                             </suiteXmlFiles>
@@ -521,8 +530,10 @@
                             <environmentVariables>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
                             </environmentVariables>
-                            <reportsDirectory>${project.build.directory}/surefire-reports/controller-tests</reportsDirectory>
-                            <summaryFile>${project.build.directory}/surefire-reports/controller-tests/failsafe-summary.xml</summaryFile>
+                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
+                                 and retained by Jenkins for each profile -->
+                            <reportsDirectory>${basedir}/surefire-reports-postgres/controller-tests</reportsDirectory>
+                            <summaryFile>${basedir}/surefire-reports-postgres/controller-tests/failsafe-summary.xml</summaryFile>
                             <systemProperties>
                                 <ZAC_URL>http://localhost:8888</ZAC_URL>
                                 <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
@@ -531,6 +542,10 @@
                                 <ZAC_CLIENT_ID>fake-client</ZAC_CLIENT_ID>
                                 <ZAC_CLIENT_SECRET>fake-client</ZAC_CLIENT_SECRET>
                             </systemProperties>
+                            <excludes>
+                                <!-- Exclude graph database specific test for postgres profile -->
+                                <exclude>**/PolicyEvalWithGraphDbControllerIT.java</exclude>
+                            </excludes>
                         </configuration>
                         <executions>
                             <execution>

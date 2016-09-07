@@ -4,7 +4,6 @@
 .classpath
 .project
 .settings
-target
 /test-output/
 .DS_Store
 .springBeans
@@ -12,5 +11,4 @@ target
 *.ipr
 *.iml
 /target/
-/target/
-/target/
+/failsafe-reports*/

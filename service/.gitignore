@@ -6,13 +6,10 @@
 .settings
 target
 /test-output/
-<<<<<<< Updated upstream
-data
-=======
+/surefire-reports*/
 .DS_Store
 .springBeans
 .idea
 *.ipr
 *.iml
->>>>>>> Stashed changes
 .checkstyle
