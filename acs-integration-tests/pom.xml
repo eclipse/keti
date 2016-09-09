@@ -198,6 +198,10 @@
                         <configuration>
                             <forkCount>0</forkCount>
                             <parallel>false</parallel>
+                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
+                                 and retained by Jenkins for each profile -->
+                            <reportsDirectory>${basedir}/failsafe-reports-cloud</reportsDirectory>
+                            <summaryFile>${basedir}/failsafe-reports-cloud/failsafe-summary.xml</summaryFile>
                             <systemPropertyVariables>
                                 <ACS_CF_DOMAIN>${acs.cf.domain}</ACS_CF_DOMAIN>
                                 <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
@@ -354,6 +358,10 @@
                         <configuration>
                             <forkCount>0</forkCount>
                             <parallel>false</parallel>
+                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
+                                 and retained by Jenkins for each profile -->
+                            <reportsDirectory>${basedir}/failsafe-reports-cloud-titan</reportsDirectory>
+                            <summaryFile>${basedir}/failsafe-reports-cloud-titan/failsafe-summary.xml</summaryFile>
                             <systemPropertyVariables>
                                 <ACS_CF_DOMAIN>${acs.cf.domain}</ACS_CF_DOMAIN>
                                 <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
@@ -629,6 +637,10 @@
                                 <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
                                 <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
                             </environmentVariables>
+                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
+                                 and retained by Jenkins for each profile -->
+                            <reportsDirectory>${basedir}/failsafe-reports-public</reportsDirectory>
+                            <summaryFile>${basedir}/failsafe-reports-public/failsafe-summary.xml</summaryFile>
                             <skipTests>false</skipTests>
                             <!-- <forkCount>0</forkCount>-->
                             <parallel>false</parallel>
@@ -732,6 +744,10 @@
                                 <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
                                 <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
                             </environmentVariables>
+                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
+                                 and retained by Jenkins for each profile -->
+                            <reportsDirectory>${basedir}/failsafe-reports-public-titan</reportsDirectory>
+                            <summaryFile>${basedir}/failsafe-reports-public-titan/failsafe-summary.xml</summaryFile>
                             <parallel>false</parallel>
                             <skipTests>false</skipTests>
                             <systemPropertyVariables>
