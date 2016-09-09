@@ -1,5 +1,10 @@
 package com.ge.predix.acs.privilege.management.dao;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyCollectionOf;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,14 +15,9 @@ import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
@@ -76,14 +76,12 @@ public class TitanMigrationManagerTest {
 
     @Test
     public void migrationManagerTest() {
-
         ZoneEntity zone1 = new ZoneEntity((long) 1, "testzone1");
 
         ResourceEntity entityResource1 = new ResourceEntity(zone1, "testresource1");
         ResourceEntity entityResource2 = new ResourceEntity(zone1, "testresource2");
         SubjectEntity entitySubject1 = new SubjectEntity(zone1, "testsubject1");
         SubjectEntity entitySubject2 = new SubjectEntity(zone1, "testsubject2");
-        Pageable page = new PageRequest(0, TitanMigrationManager.getPageSize()); // Titan manager page size
 
         Mockito.when(this.resourceRepository.findAll()).thenReturn(fromListForResource);
         Mockito.when(this.resourceHierarchicalRepository.findAll()).thenReturn(this.toListForResource);

@@ -66,6 +66,8 @@ public class GraphSubjectRepositoryTest {
 
     private void setupTitanGraph() throws InterruptedException, ExecutionException {
         this.graph = TitanFactory.build().set("storage.backend", "inmemory").open();
+        GraphConfig.createVertexLabel(this.graph, GraphResourceRepository.RESOURCE_LABEL);
+        GraphConfig.createVertexLabel(this.graph, GraphSubjectRepository.SUBJECT_LABEL);
         GraphConfig.createIndex(this.graph, GraphConfig.BY_ZONE_INDEX_NAME, ZONE_ID_KEY);
         GraphConfig.createTwoKeyUniqueCompositeIndex(this.graph, GraphConfig.BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME,
                 ZONE_ID_KEY, RESOURCE_ID_KEY);
