@@ -21,6 +21,8 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.ge.predix.acs.privilege.management.dao.GraphResourceRepository;
+import com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository;
 import com.thinkaurelius.titan.core.EdgeLabel;
 import com.thinkaurelius.titan.core.PropertyKey;
 import com.thinkaurelius.titan.core.TitanFactory;
@@ -92,6 +94,8 @@ public class GraphConfig {
             newGraph = TitanFactory.build().set("storage.backend", "inmemory").open();
         }
 
+        createVertexLabel(newGraph, GraphResourceRepository.RESOURCE_LABEL);
+        createVertexLabel(newGraph, GraphSubjectRepository.SUBJECT_LABEL);
         createIndex(newGraph, BY_ZONE_INDEX_NAME, ZONE_ID_KEY);
         createTwoKeyUniqueCompositeIndex(newGraph, BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME, ZONE_ID_KEY,
                 RESOURCE_ID_KEY);
@@ -169,6 +173,13 @@ public class GraphConfig {
         // Wait for the index to become available
         ManagementSystem.awaitRelationIndexStatus((TitanGraph) newGraph, indexName, label).status(SchemaStatus.ENABLED)
                 .call();
+    }
+
+    public static void createVertexLabel(final Graph newGraph, final String vertexLabel) throws InterruptedException {
+        newGraph.tx().rollback();
+        TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
+        mgmt.getOrCreateVertexLabel(vertexLabel);
+        mgmt.commit();
     }
 
     public static void reIndex(final Graph newGraph, final String indexName)

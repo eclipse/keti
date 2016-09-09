@@ -18,8 +18,8 @@ public class GraphResourceRepository extends GraphGenericRepository<ResourceEnti
 
     private static final String EMPTY_ATTRIBUTES = "{}";
     private static final String HAS_RESOURCE_RELATIONSHIP_KEY = "hasResource";
-    private static final String RESOURCE_LABEL = "resource";
 
+    public static final String RESOURCE_LABEL = "resource";
     public static final String RESOURCE_ID_KEY = "resourceId";
 
     @Override

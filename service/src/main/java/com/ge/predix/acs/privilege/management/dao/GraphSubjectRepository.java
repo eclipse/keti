@@ -17,8 +17,8 @@ public class GraphSubjectRepository extends GraphGenericRepository<SubjectEntity
 
     private static final String EMPTY_ATTRIBUTES = "{}";
     private static final String HAS_SUBJECT_RELATIONSHIP_KEY = "hasSubject";
-    private static final String SUBJECT_LABEL = "subject";
 
+    public static final String SUBJECT_LABEL = "subject";
     public static final String SUBJECT_ID_KEY = "subjectId";
 
     @Override
