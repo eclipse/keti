@@ -4,7 +4,7 @@ script:
     - echo "Running unit and controller tests for 'h2,public,simple-cache' spring profile"
     - mvn clean verify -Ppostgres
     - echo "Running unit and controller tests for 'h2,public,simple-cache,titan' spring profile"
-    - mvn verify deploy -s acs-ci-config/mvn_settings.xml -Pwith.jacoco -Dartifactory.password=
+    - mvn verify deploy -s acs-ci-config/mvn_settings.xml -Pwith.jacoco -Dartifactory.password=${ARTIFACTORY_PASSWORD}
     - tar zcvf acs-model-jacoco.tar.gz model/target/site/jacoco
     - tar zcvf acs-commons-jacoco.tar.gz commons/target/site/jacoco
     - tar zcvf acs-service-jacoco.tar.gz service/target/site/jacoco
