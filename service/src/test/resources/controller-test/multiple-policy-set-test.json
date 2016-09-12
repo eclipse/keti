@@ -1,0 +1,8 @@
+{
+    "name" : "multiple-policy-set-test",
+    "policies" : [
+        {
+            "effect" : "PERMIT"
+        }
+    ]
+}

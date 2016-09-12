@@ -127,8 +127,8 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
         } else if (allPolicySets.size() > 1) {
             LOGGER.error("Found more than one policy set during policy evaluation. Subject: " + subjectIdentifier
                     + ", Resource: " + uri);
-            throw new IllegalArgumentException(
-                    "Request to create policy set rejected. Only one policy set is supported.");
+            throw new IllegalArgumentException("More than one policy set exists for this zone. "
+                    + "Remove unnecessary policy sets using DELETE /policy-set/{id} and resubmit request.");
         } else {
             // NOTE: When multiple policy sets are supported, this code needs to
             // delegate to a "InterPolicySetDecisionAggregator"

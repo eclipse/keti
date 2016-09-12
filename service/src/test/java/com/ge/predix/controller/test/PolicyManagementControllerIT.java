@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.ge.predix.acs.commons.web.UriTemplateUtils;
 import com.ge.predix.acs.model.PolicySet;
+import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.acs.testutils.MockAcsRequestContext;
 import com.ge.predix.acs.testutils.MockMvcContext;
@@ -115,6 +116,58 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("name").value(policySetName)).andExpect(jsonPath("policies").isArray())
                 .andExpect(jsonPath("policies[1].target.resource.attributes[0].name").value("group"));
+    }
+    
+    @Test
+    public void testCreateMultiplePolicySets() throws Exception {
+        //create first policy set
+        String policySetName = upsertPolicySet(this.policySet);
+
+        MockMvcContext mockMvcContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
+                this.testZone.getSubdomain(), this.version + "policy-set/" + policySetName);
+
+        //assert first policy set
+        mockMvcContext.getMockMvc().perform(mockMvcContext.getBuilder()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("name").value(policySetName)).andExpect(jsonPath("policies").isArray())
+                .andExpect(jsonPath("policies[1].target.resource.attributes[0].name").value("group"));
+        
+        String policySet2Name = "";
+        try {
+            //create second policy set
+            PolicySet policySet2 = this.jsonUtils.deserializeFromFile("controller-test/multiple-policy-set-test.json",
+                    PolicySet.class);
+            Assert.assertNotNull(policySet2, "multiple-policy-set-test.json file not found or invalid");
+            policySet2Name = upsertPolicySet(policySet2);
+
+            mockMvcContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
+                    this.testZone.getSubdomain(), this.version + "policy-set/" + policySet2Name);
+
+            //assert second policy set
+            mockMvcContext.getMockMvc().perform(mockMvcContext.getBuilder()).andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(jsonPath("name").value(policySet2Name));
+            
+            //assert that policy evaluation fails
+            PolicyEvaluationRequestV1 evalRequest = new PolicyEvaluationRequestV1();
+            evalRequest.setAction("GET");
+            evalRequest.setSubjectIdentifier("test-user");
+            evalRequest.setResourceIdentifier("/app/testuri");
+            String evalRequestJson = this.objectWriter.writeValueAsString(evalRequest);
+            mockMvcContext = this.testUtils.createWACWithCustomPOSTRequestBuilder(this.wac,
+                    this.testZone.getSubdomain(), this.version + "policy-evaluation");
+            mockMvcContext.getMockMvc()
+                    .perform(mockMvcContext.getBuilder().content(evalRequestJson)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("ErrorDetails.errorMessage")
+                          .value("More than one policy set exists for this zone. Remove unnecessary policy sets using "
+                               + "DELETE /policy-set/{id} and resubmit request."));
+        } finally {
+            mockMvcContext = this.testUtils.createWACWithCustomDELETERequestBuilder(this.wac,
+                    this.testZone.getSubdomain(), this.version + "policy-set/" + policySet2Name);
+            mockMvcContext.getMockMvc().perform(mockMvcContext.getBuilder()).andExpect(status().is2xxSuccessful());
+        }
     }
 
     public void testGetNonExistentPolicySet() throws Exception {
