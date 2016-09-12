@@ -23,9 +23,10 @@
     <persistence-unit name="default">
         <description>My Persistence Unit</description>
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
-        <!-- <properties>
-            <property name="openjpa.Log" value="DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE"/>
-        </properties> -->
+        <properties>
+<!--        <property name="openjpa.Log" value="DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE"/>
+            <property name="openjpa.ConnectionFactoryProperties" value="PrintParameters=true" /> -->
+        </properties>
     </persistence-unit>
 
 </persistence>
