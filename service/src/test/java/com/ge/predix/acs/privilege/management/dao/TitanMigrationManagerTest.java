@@ -12,8 +12,6 @@ import java.util.List;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.testng.annotations.BeforeClass;
@@ -23,24 +21,10 @@ import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
 public class TitanMigrationManagerTest {
 
-    @Autowired
-    @Qualifier("resourceRepository")
     private ResourceRepository resourceRepository;
-
-    @Autowired
-    @Qualifier("resourceHierarchicalRepository")
     private GraphResourceRepository resourceHierarchicalRepository;
-
-    @Autowired
-    @Qualifier("subjectRepository")
     private SubjectRepository subjectRepository;
-
-    @Autowired
-    @Qualifier("subjectHierarchicalRepository")
     private GraphSubjectRepository subjectHierarchicalRepository;
-
-    @Autowired
-    private TitanMigrationManager titanMigrationManager;
 
     private List<ResourceEntity> fromListForResource = new ArrayList<ResourceEntity>();
     private List<SubjectEntity> fromListForSubject = new ArrayList<SubjectEntity>();
@@ -53,10 +37,6 @@ public class TitanMigrationManagerTest {
         this.subjectRepository = Mockito.mock(SubjectRepository.class);
         this.resourceHierarchicalRepository = Mockito.mock(GraphResourceRepository.class);
         this.subjectHierarchicalRepository = Mockito.mock(GraphSubjectRepository.class);
-
-        titanMigrationManager = new TitanMigrationManager(this.resourceRepository, this.resourceHierarchicalRepository,
-                this.subjectRepository, this.subjectHierarchicalRepository);
-
     }
 
     // Save the given Resource entities to a local list to mock graph-save
@@ -100,13 +80,13 @@ public class TitanMigrationManagerTest {
         // This mocked findAll() takes in a Pageable and returns a Page.
         Mockito.when(this.resourceRepository.findAll(any(Pageable.class)))
                 .thenAnswer(new Answer<PageImpl<ResourceEntity>>() {
-                    public PageImpl<ResourceEntity> answer(InvocationOnMock invocation) {
+                    public PageImpl<ResourceEntity> answer(final InvocationOnMock invocation) {
                         return new PageImpl<ResourceEntity>(fromListForResource, null, fromListForResource.size());
                     }
                 });
         Mockito.when(this.subjectRepository.findAll(any(Pageable.class)))
                 .thenAnswer(new Answer<PageImpl<SubjectEntity>>() {
-                    public PageImpl<SubjectEntity> answer(InvocationOnMock invocation) {
+                    public PageImpl<SubjectEntity> answer(final InvocationOnMock invocation) {
                         return new PageImpl<SubjectEntity>(fromListForSubject, null, fromListForSubject.size());
                     }
                 });
@@ -123,16 +103,14 @@ public class TitanMigrationManagerTest {
         // Mock graph-save function with a locally defined saveResourcesToGraph()
         Mockito.when(this.resourceHierarchicalRepository.save(anyCollectionOf(ResourceEntity.class)))
                 .thenAnswer(new Answer<List<ResourceEntity>>() {
-                    public List<ResourceEntity> answer(InvocationOnMock invocation) {
+                    public List<ResourceEntity> answer(final InvocationOnMock invocation) {
                         Object[] args = invocation.getArguments();
-                        @SuppressWarnings("unchecked")
-                        List<ResourceEntity> list = (List<ResourceEntity>) args[0];
-                        return saveResourcesToGraph(list);
+                        return saveResourcesToGraph((List<ResourceEntity>) args[0]);
                     }
                 });
         Mockito.when(this.subjectHierarchicalRepository.save(anyCollectionOf(SubjectEntity.class)))
                 .thenAnswer(new Answer<List<SubjectEntity>>() {
-                    public List<SubjectEntity> answer(InvocationOnMock invocation) {
+                    public List<SubjectEntity> answer(final InvocationOnMock invocation) {
                         Object[] args = invocation.getArguments();
                         @SuppressWarnings("unchecked")
                         List<SubjectEntity> list = (List<SubjectEntity>) args[0];
@@ -140,7 +118,10 @@ public class TitanMigrationManagerTest {
                     }
                 });
 
-        titanMigrationManager.doMigration();
+        new ResourceMigrationManager().doResourceMigration(resourceRepository,
+                resourceHierarchicalRepository, TitanMigrationManager.PAGE_SIZE);
+        new SubjectMigrationManager().doSubjectMigration(subjectRepository,
+                subjectHierarchicalRepository, TitanMigrationManager.PAGE_SIZE);
 
         // Verify that the data from non-graph repo has been copied over to graph-repo, post-migration.
         assertThat(this.resourceRepository.findAll().size(), equalTo(2));

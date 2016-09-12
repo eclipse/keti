@@ -38,6 +38,7 @@ public final class AcsMonitoringConstants {
     public static final String UAA_SUCCESS_STATUS = "SUCCESS";
 
     public static final String ACS_DB_OUT_OF_SERVICE = "ACS_DB_OUT_OF_SERVICE";
+    public static final String ACS_DB_MIGRATION_INCOMPLETE = "ACS_DB_MIGRATION_INCOMPLETE";
     public static final String UAA_OUT_OF_SERVICE = "UAA_OUT_OF_SERVICE";
 
 }

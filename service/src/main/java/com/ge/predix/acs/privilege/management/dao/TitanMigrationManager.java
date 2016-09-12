@@ -1,6 +1,6 @@
 package com.ge.predix.acs.privilege.management.dao;
 
-import java.util.List;
+import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
@@ -10,9 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 @Component
 @Profile("titan")
@@ -35,86 +32,49 @@ public final class TitanMigrationManager {
     @Qualifier("subjectHierarchicalRepository")
     private GraphSubjectRepository subjectHierarchicalRepository;
 
-    private static final int PAGE_SIZE = 100;
+    private Boolean isMigrationComplete = false;
 
-    public static int getPageSize() {
-        return PAGE_SIZE;
-    }
-
-    public TitanMigrationManager(final ResourceRepository resourceRepository,
-            final GraphResourceRepository resourceHierarchicalRepository, final SubjectRepository subjectRepository,
-            final GraphSubjectRepository subjectHierarchicalRepository) {
-        this.resourceRepository = resourceRepository;
-        this.resourceHierarchicalRepository = resourceHierarchicalRepository;
-        this.subjectRepository = subjectRepository;
-        this.subjectHierarchicalRepository = subjectHierarchicalRepository;
-    }
-
-    public TitanMigrationManager() {
-
-    }
-
-    private void doResourceMigration() {
-        int numOfResourcesSaved = 0;
-        Pageable pageRequest = new PageRequest(0, PAGE_SIZE);
-        long numOfResourceEntitiesToMigrate = resourceRepository.count();
-        Page<ResourceEntity> pageOfResources;
-
-        do {
-            pageOfResources = resourceRepository.findAll(pageRequest);
-            List<ResourceEntity> resourceListToSave = pageOfResources.getContent();
-            numOfResourcesSaved += pageOfResources.getNumberOfElements();
-            // Clear the auto-generated id field prior to migrating to graphDB
-            resourceListToSave.forEach(item -> item.setId((long) 0));
-            resourceHierarchicalRepository.save(resourceListToSave);
-            LOGGER.info(
-                    "Total resources migrated so far: " + numOfResourcesSaved + "/" + numOfResourceEntitiesToMigrate);
-            pageRequest = pageOfResources.nextPageable();
-        } while (pageOfResources.hasNext());
-
-        LOGGER.info("Number of resource entities migrated: " + numOfResourcesSaved);
-        LOGGER.info("Resource migration to Titan completed.");
-    }
-
-    private void doSubjectMigration() {
-        int numOfSubjectsSaved = 0;
-        Pageable pageRequest = new PageRequest(0, PAGE_SIZE);
-        long numOfSubjectEntitiesToMigrate = subjectRepository.count();
-        Page<SubjectEntity> pageOfSubjects;
-
-        do {
-            pageOfSubjects = subjectRepository.findAll(pageRequest);
-            List<SubjectEntity> subjectListToSave = pageOfSubjects.getContent();
-            numOfSubjectsSaved += pageOfSubjects.getNumberOfElements();
-            subjectListToSave.forEach(item -> item.setId((long) 0));
-            subjectHierarchicalRepository.save(subjectListToSave);
-            LOGGER.info("Total subjects migrated so far: " + numOfSubjectsSaved + "/" + numOfSubjectEntitiesToMigrate);
-            pageRequest = pageOfSubjects.nextPageable();
-        } while (pageOfSubjects.hasNext());
-
-        LOGGER.info("Number of subject entities migrated: " + numOfSubjectsSaved);
-        LOGGER.info("Subject migration to Titan completed.");
-
-    }
+    static final int PAGE_SIZE = 1024;
 
     @PostConstruct
     public void doMigration() {
         try {
-
             // This version vertex is common to both subject and resource repositories. So this check is sufficient to
             // trigger migrations in both repos.
             if (this.resourceHierarchicalRepository.getVersion() == 0) {
 
-                LOGGER.info("Starting attribute migration process to Titan.");
-                doResourceMigration();
-                doSubjectMigration();
-                this.resourceHierarchicalRepository.setVersion(1);
-                LOGGER.info("Exiting from Titan attribute migration process.");
+                //Migration needs to be performed in a separate thread to prevent cloud-foundry health check timeout,
+                //which restarts the service. (Max timeout is 180 seconds which is not enough)
+                Executors.newSingleThreadExecutor().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        LOGGER.info("Starting attribute migration process to Titan.");
 
+                        //Resource and Subject must be performed sequentially for now to prevent a lock exception being 
+                        //thrown from titan.
+                        new ResourceMigrationManager().doResourceMigration(resourceRepository,
+                                resourceHierarchicalRepository, PAGE_SIZE);
+                        new SubjectMigrationManager().doSubjectMigration(subjectRepository,
+                                subjectHierarchicalRepository, PAGE_SIZE);
+
+                        resourceHierarchicalRepository.setVersion(1);
+                        isMigrationComplete = true;
+
+                        LOGGER.info("Exiting from Titan attribute migration process.");
+                    }
+                });
+            }  else {
+                isMigrationComplete = true;
+                LOGGER.info("Attribute Graph migration not required.");
             }
-            return;
         } catch (Throwable e) {
-            LOGGER.error("Exception doing migration: ", e);
+            LOGGER.error("Exception during attribute migration: ", e);
+            throw e;
         }
     }
+
+    public boolean isMigrationComplete() {
+        return this.isMigrationComplete;
+    }
+    
 }

@@ -17,6 +17,7 @@
 package com.ge.predix.acs.monitoring;
 
 import static com.ge.predix.acs.monitoring.AcsMonitoringConstants.ACS_DB_OUT_OF_SERVICE;
+import static com.ge.predix.acs.monitoring.AcsMonitoringConstants.ACS_DB_MIGRATION_INCOMPLETE;
 import static com.ge.predix.acs.monitoring.AcsMonitoringConstants.DB_FAILED_STATUS;
 import static com.ge.predix.acs.monitoring.AcsMonitoringConstants.DB_MISCONFIGURATION_STATUS;
 import static com.ge.predix.acs.monitoring.AcsMonitoringConstants.DB_UNAVAILABLE_STATUS;
@@ -35,6 +36,8 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookupFailureException;
 import org.springframework.stereotype.Component;
 
+import com.ge.predix.acs.privilege.management.dao.TitanMigrationManager;
+
 /**
  *
  * @author 212360328
@@ -43,6 +46,9 @@ import org.springframework.stereotype.Component;
 public class AcsDBHealthIndicator implements HealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AcsDBHealthIndicator.class);
+
+    @Autowired(required = false)
+    private TitanMigrationManager migrationManager;
 
     @Autowired
     private AcsMonitoringRepository acsMonitoringRepository;
@@ -55,6 +61,12 @@ public class AcsDBHealthIndicator implements HealthIndicator {
         if (errorCode != 0) {
             return Health.status(ACS_DB_OUT_OF_SERVICE).withDetail("Error Code for ACS DB", errorCode).build();
         }
+
+        if (null != this.migrationManager && !this.migrationManager.isMigrationComplete()) {
+            return Health.status(ACS_DB_MIGRATION_INCOMPLETE).withDetail("Migration not complete.", FAILED_CHECK)
+                    .build();
+        }
+
         return Health.up().build();
     }
 
