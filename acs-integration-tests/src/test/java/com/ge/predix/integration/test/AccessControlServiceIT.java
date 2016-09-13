@@ -254,31 +254,6 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     }
 
     @Test(dataProvider = "endpointProvider")
-    public void testMultiplePolicySetCreation(final String endpoint) throws Exception {
-        String policyFile = "src/test/resources/single-site-based-policy-set.json";
-        String testPolicyName = "";
-        boolean policyCreated = false;
-        try {
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, endpoint, policyFile);
-            policyCreated = true;
-
-            try {
-                policyFile = "src/test/resources/multiple-site-based-policy-set.json";
-                testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, endpoint, policyFile);
-                Assert.fail("testPolicyCreationInValidPolicy should have failed");
-            } catch (HttpClientErrorException e) {
-                this.acsTestUtil.assertExceptionResponseBody(e, "Multiple policy sets");
-                Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
-                return;
-            }
-        } finally {
-            if (policyCreated) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
-            }
-        }
-    }
-
-    @Test(dataProvider = "endpointProvider")
     public void testPolicyCreationInValidPolicy(final String endpoint) throws Exception {
         String testPolicyName = "";
         try {

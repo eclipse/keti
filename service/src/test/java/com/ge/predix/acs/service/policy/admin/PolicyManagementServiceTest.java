@@ -125,7 +125,9 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
         this.policyService.upsertPolicySet(policySet);
         PolicySet savedPolicySet = this.policyService.getPolicySet(policyName);
         Assert.assertNotNull(savedPolicySet);
-        Assert.assertEquals(savedPolicySet.getName(), policyName);
+        Assert.assertEquals(savedPolicySet.getPolicies().size(), 1);
+        Assert.assertEquals(savedPolicySet.getPolicies().get(0).getTarget().getResource().getUriTemplate(),
+                "/secured-by-value/sites/sanramon");
         this.policyService.deletePolicySet(policyName);
         Assert.assertEquals(this.policyService.getAllPolicySets().size(), 0);
     }
@@ -166,7 +168,7 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
 
     }
 
-    public void testCreateMultiplePolicySet() {
+    public void testCreateMultiplePolicySets() {
         PolicySet policySet = this.jsonUtils.deserializeFromFile("set-with-1-policy.json", PolicySet.class);
         PolicySet policySet2 = this.jsonUtils.deserializeFromFile("policy-set-with-one-policy-one-condition.json",
                 PolicySet.class);
@@ -174,15 +176,17 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
         this.policyService.upsertPolicySet(policySet);
         try {
             this.policyService.upsertPolicySet(policySet2);
-            Assert.fail("Creation of 2nd policySet did not throw an exception");
+            List<PolicySet> expectedPolicySets = this.policyService.getAllPolicySets();
+            Assert.assertEquals(expectedPolicySets.size(), 2);
         } catch (PolicyManagementException e) {
-            // expected
+            Assert.fail("Creation of 2nd policySet failed.");
         } finally {
             this.policyService.deletePolicySet(policySet.getName());
+            this.policyService.deletePolicySet(policySet2.getName());
             Assert.assertEquals(this.policyService.getAllPolicySets().size(), 0);
         }
     }
-
+    
     @Test(expectedExceptions = { PolicyManagementException.class })
     public void testCreatePolicySetWithInvalidConditions() {
         PolicySet policySet = this.jsonUtils.deserializeFromFile("policy-set-with-one-policy-invalid-condition.json",

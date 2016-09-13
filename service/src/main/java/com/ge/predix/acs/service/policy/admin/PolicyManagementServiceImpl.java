@@ -192,18 +192,5 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
             throw new PolicyManagementException(e.getMessage(), e);
         }
 
-        // Ensure there is only 1 policy-set in the repository
-        List<PolicySetEntity> policySets = this.policySetRepository.findByZone(zone);
-        if (policySets.isEmpty()) {
-            return;
-        }
-        String currentPolicySetName = policySets.get(0).getPolicySetID();
-        if (!currentPolicySetName.equals((policySet.getName()))) {
-            String errMsg = String.format(
-                    "Multiple policy sets file is not allowed. "
-                            + "Existing PolicySetName: %s, New PolicySetName: %s, zone: %s .",
-                    currentPolicySetName, policySet.getName(), zone.toString());
-            throw new PolicyManagementException(errMsg);
-        }
     }
 }
