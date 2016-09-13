@@ -1,0 +1,785 @@
+#+TITLE: ACS Demo
+#+AUTHOR: Dario Amiri
+
+* Overview
+  This document provides basic information intended to get users started with Access Control Service (ACS). We will explore two use cases:
+  - Access control based on group membership.
+  - Access control based on dynamic roles. The roles are dynamic in the sense that a user's role will depend on the resources they are attempting to access. E.g. the user tom@ge.com is an analyst only when accessing resources that belong to a specific site.
+  
+  In order to use this document as the source for demonstration, you will have to install emacs and configure it as described [[file:.emacs.d/config.org][here]].
+
+** Technology Stack
+   The ACS technology makes heavy use of various Spring frameworks including:
+   - [[http://projects.spring.io/spring-boot/][Spring Boot]]
+   - [[http://projects.spring.io/spring-data-jpa/][Spring Data JPA]]
+   - [[http://projects.spring.io/spring-security-oauth/][Spring Security OAuth]]
+   
+   The ACS attribute store is a graph database built on:
+   - [[http://tinkerpop.apache.org/][Apache TinkerPop]]
+   - [[http://titan.thinkaurelius.com/][Titan]]
+
+   Persistence storage includes:
+   - [[https://www.postgresql.org/][PostgreSQL]]
+   - [[http://cassandra.apache.org/][Apache Cassandra]]
+
+#+begin_src ditaa :exports results :file architecture.png :cmdline -r
+                 /---------------------------------------\
+                 | cGRE     spring security oauth        |
+                 +---------------------------------------+
+                 | cGRE          spring mvc              |
++----------+     +-------------------+-------------------+     +----------+
+|{s}       |     | cGRE              | cBLU              |     |{s}       |
+| postgres +-----+ spring data JPA   | apache tinkerpop  +-----+ cassandra|
+|          |     +-------------------+-------------------+     |          |
++----------+     | cGRE              | cBLU              |     +----------+
+                 | spring boot       | titan db          |
+                 +-------------------+-------------------+
+                 | cPNK             java                 |
+                 \---------------------------------------/
+#+end_src
+
+#+RESULTS:
+[[file:architecture.png]]
+
+** Documentation
+   Comprehensive documentation for ACS is available [[https://www.predix.io/docs#IGyNp2eM][here]].
+
+
+* Setting up UAA
+** Getting and running UAA
+  - Clone UAA next to ACS project
+#+BEGIN_SRC sh
+git clone https://github.com/cloudfoundry/uaa ../uaa
+#+END_SRC
+
+  - Copy UAA config file. ACS requires a UAA configuration that uses asymmetric signing of tokens instead of the default symmetric singing.
+#+BEGIN_SRC sh
+cp acs-integration-tests/uaa/config/uaa.yml ../uaa/uaa/src/main/resources/uaa.yml
+#+END_SRC
+
+  - Start UAA
+#+BEGIN_SRC sh
+../uaa/gradlew run --info
+#+END_SRC
+
+** Use OAuth 2.0 client credentials to get admin token
+
+We'll use the UAA admin client to further configure UAA for our demo. You can get an admin access token by using the OAuth 2.0 client credentials grant type with the client id and secret submitted using HTTP basic auth.
+
+#+NAME: get_admin_token
+#+BEGIN_SRC http :exports both :pretty :noproxy
+POST http://localhost:8080/uaa/oauth/token
+Authorization: Basic YWRtaW46YWRtaW5zZWNyZXQ=
+
+grant_type=client_credentials
+#+END_SRC
+
+#+RESULTS: get_admin_token
+: {
+:   "jti": "ea09297877b54225b01c5a739d48b850",
+:   "scope": "clients.read clients.secret clients.write uaa.admin clients.admin scim.write scim.read",
+:   "expires_in": 43199,
+:   "token_type": "bearer",
+:   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiJlYTA5Mjk3ODc3YjU0MjI1YjAxYzVhNzM5ZDQ4Yjg1MCIsInN1YiI6ImFkbWluIiwiYXV0aG9yaXRpZXMiOlsiY2xpZW50cy5yZWFkIiwiY2xpZW50cy5zZWNyZXQiLCJjbGllbnRzLndyaXRlIiwidWFhLmFkbWluIiwiY2xpZW50cy5hZG1pbiIsInNjaW0ud3JpdGUiLCJzY2ltLnJlYWQiXSwic2NvcGUiOlsiY2xpZW50cy5yZWFkIiwiY2xpZW50cy5zZWNyZXQiLCJjbGllbnRzLndyaXRlIiwidWFhLmFkbWluIiwiY2xpZW50cy5hZG1pbiIsInNjaW0ud3JpdGUiLCJzY2ltLnJlYWQiXSwiY2xpZW50X2lkIjoiYWRtaW4iLCJjaWQiOiJhZG1pbiIsImF6cCI6ImFkbWluIiwiZ3JhbnRfdHlwZSI6ImNsaWVudF9jcmVkZW50aWFscyIsInJldl9zaWciOiI5N2M1MDBiYiIsImlhdCI6MTQ2OTU2MzU0NiwiZXhwIjoxNDY5NjA2NzQ2LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImFkbWluIiwiY2xpZW50cyIsInVhYSIsInNjaW0iXX0.SZvhSsc0qmquQU4ojkUJTiEt_HCkUFPbTPE233AX4jmuTXUkfAhyCToeL2huEF4qrPlZ5pPJ_pvNYwhKfu0xXmMnMDDce6XQ_e_FP3fJWuhyMQ8T2ZlUdn-W9d4O89RecPoSFpr8dp6ttnLbIr8d3_LWQQ80HsRdom8Z5ek6lr5hcNfCyxmSgKLa7rbb8fxd0NkIiDAkgxrGuT6Thr8hh0wqC5p5P8xv3Ncxaenado4GIZeQf7Ek9UTmMuarnD0BT6GYu3NRLlB9ZKy8j2MhoCr5fqTeA13ywm1Secph1L7wc2IaZMlFG9eo0njz7QamLLcBJWmsagENXMztOiI6NQ"
+: }
+
+Use Ruby, Python, or similar to parse the OAuth 2.0 JSON response and extract the JWT access token.
+
+#+NAME: admin_token
+#+BEGIN_SRC ruby :exports both :var access_token=get_admin_token
+  require 'json'
+  JSON.parse(access_token)['access_token']
+#+END_SRC
+
+#+RESULTS: admin_token
+: eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiJiMDkzYmYzZmVkYjY0YzU0OWM5MTBiNmJiMmNlYjg2NSIsInN1YiI6ImFkbWluIiwiYXV0aG9yaXRpZXMiOlsiY2xpZW50cy5yZWFkIiwiY2xpZW50cy5zZWNyZXQiLCJjbGllbnRzLndyaXRlIiwidWFhLmFkbWluIiwiY2xpZW50cy5hZG1pbiIsInNjaW0ud3JpdGUiLCJzY2ltLnJlYWQiXSwic2NvcGUiOlsiY2xpZW50cy5yZWFkIiwiY2xpZW50cy5zZWNyZXQiLCJjbGllbnRzLndyaXRlIiwidWFhLmFkbWluIiwiY2xpZW50cy5hZG1pbiIsInNjaW0ud3JpdGUiLCJzY2ltLnJlYWQiXSwiY2xpZW50X2lkIjoiYWRtaW4iLCJjaWQiOiJhZG1pbiIsImF6cCI6ImFkbWluIiwiZ3JhbnRfdHlwZSI6ImNsaWVudF9jcmVkZW50aWFscyIsInJldl9zaWciOiI5N2M1MDBiYiIsImlhdCI6MTQ2OTU2MzU3MiwiZXhwIjoxNDY5NjA2NzcyLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImFkbWluIiwiY2xpZW50cyIsInVhYSIsInNjaW0iXX0.iwI9YI6I2CK-B706GazOsYfdM83E5DfUIW5nm0NGu0c6XjNgLZzFjwuMp_AQfZwcG15xU-QTeg6tITyiqml29mZin6R_VuxJPVva4HXuB2tpuNX7wGHQs6iVNSMQZKngfUuOBx-3VdnDmPiNfo9z9bKC9uxKuHYfFNGZe4KlWWk8yLcwSZL7Wai-hrfGkaPfKe7GpqeCR4wr7dOn-9BcVmfRgFF8si7asXAiRvOs5ESH74w_0AW5-yZYvFNHs8g77R6GxP_CURaqofgufrcfPAV3x9MnSRDPy19BC3d4BSBug8Nm8Aq6Zla1dylevOHi2aSY_-eLeNl-d1zQXJnLHw
+
+** Create ACS admin
+
+Create an OAuth client that we can use to consume the ACS RESTful API.
+
+#+NAME: create_acs_admin
+#+BEGIN_SRC http :exports both :pretty :var access_token=admin_token
+POST http://localhost:8080/uaa/oauth/clients
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name" : "ACS admin",
+  "authorities" : [
+    "acs.attributes.read",
+    "acs.attributes.write",
+    "acs.policies.read",
+    "acs.policies.write",
+    "acs.zones.admin",
+    "predix-acs.zones.demo.admin",
+    "predix-acs.zones.demo.user" ],
+  "authorized_grant_types" : [ "client_credentials" ],
+  "client_id" : "acs_admin",
+  "client_secret" : "acs_admin_secret",
+  "scope" : [ "uaa.none" ]
+}
+#+END_SRC
+
+#+RESULTS: create_acs_admin
+#+begin_example
+{
+  "lastModified": 1469563591343,
+  "name": "ACS admin",
+  "authorities": [
+    "acs.policies.read",
+    "acs.policies.write",
+    "acs.attributes.read",
+    "predix-acs.zones.demo.user",
+    "acs.attributes.write",
+    "acs.zones.admin",
+    "predix-acs.zones.demo.admin"
+  ],
+  "action": "none",
+  "autoapprove": [],
+  "authorized_grant_types": [
+    "client_credentials"
+  ],
+  "resource_ids": [
+    "none"
+  ],
+  "client_id": "acs_admin",
+  "scope": [
+    "uaa.none"
+  ]
+}
+#+end_example
+
+
+* Setting up ACS
+** Running ACS
+  - Start ACS
+#+BEGIN_SRC sh
+service/start-acs-public-titan.sh
+#+END_SRC
+
+** Creating an ACS zone
+  - Get ACS admin token
+#+NAME: get_acs_admin_token
+#+BEGIN_SRC http :pretty :noproxy :exports both
+POST http://localhost:8080/uaa/oauth/token
+Authorization: Basic YWNzX2FkbWluOmFjc19hZG1pbl9zZWNyZXQ=
+
+grant_type=client_credentials
+#+END_SRC
+
+#+RESULTS: get_acs_admin_token
+: {
+:   "jti": "d937401207364668a83a2ed506f70ce0",
+:   "scope": "acs.policies.read acs.policies.write acs.attributes.read predix-acs.zones.demo.user acs.attributes.write acs.zones.admin predix-acs.zones.demo.admin",
+:   "expires_in": 43199,
+:   "token_type": "bearer",
+:   "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiJkOTM3NDAxMjA3MzY0NjY4YTgzYTJlZDUwNmY3MGNlMCIsInN1YiI6ImFjc19hZG1pbiIsImF1dGhvcml0aWVzIjpbImFjcy5wb2xpY2llcy5yZWFkIiwiYWNzLnBvbGljaWVzLndyaXRlIiwiYWNzLmF0dHJpYnV0ZXMucmVhZCIsInByZWRpeC1hY3Muem9uZXMuZGVtby51c2VyIiwiYWNzLmF0dHJpYnV0ZXMud3JpdGUiLCJhY3Muem9uZXMuYWRtaW4iLCJwcmVkaXgtYWNzLnpvbmVzLmRlbW8uYWRtaW4iXSwic2NvcGUiOlsiYWNzLnBvbGljaWVzLnJlYWQiLCJhY3MucG9saWNpZXMud3JpdGUiLCJhY3MuYXR0cmlidXRlcy5yZWFkIiwicHJlZGl4LWFjcy56b25lcy5kZW1vLnVzZXIiLCJhY3MuYXR0cmlidXRlcy53cml0ZSIsImFjcy56b25lcy5hZG1pbiIsInByZWRpeC1hY3Muem9uZXMuZGVtby5hZG1pbiJdLCJjbGllbnRfaWQiOiJhY3NfYWRtaW4iLCJjaWQiOiJhY3NfYWRtaW4iLCJhenAiOiJhY3NfYWRtaW4iLCJncmFudF90eXBlIjoiY2xpZW50X2NyZWRlbnRpYWxzIiwicmV2X3NpZyI6ImQ4NTlkYThmIiwiaWF0IjoxNDY5MTQ3OTE5LCJleHAiOjE0NjkxOTExMTksImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC91YWEvb2F1dGgvdG9rZW4iLCJ6aWQiOiJ1YWEiLCJhdWQiOlsiYWNzX2FkbWluIiwiYWNzLnBvbGljaWVzIiwiYWNzLmF0dHJpYnV0ZXMiLCJwcmVkaXgtYWNzLnpvbmVzLmRlbW8iLCJhY3Muem9uZXMiXX0.wLH3RTAEGP4MR6F6C53y02s3VtsR_DNXfSs0W3BMT4LkR2jMUJD5HBK7n2hXDhTgaRMtlsQQFWbGYTGfefjpFkmpwHsLfd1_yCxuqisDANF98ee9QbtU2ZOzstsoFkjopd-YeKphDTCLuccl19ToRMYkNTEGV1DswEJjMAU3bnF9VQOleHyS308k-jOEOXiCZnhHihoZbUDv1kn6j8RZusfFZqVm6zowpKaKg8EewdA1duPKlhn_5UWVPhmSYdYTCFyEYG9--RpPmc16L0hojpbUwDDsuTUgyVbR87USfMxBmrBGANiT-Dz8QBysfBhwweA1EFpBjNrOnO2rA8Sz9w"
+: }
+
+#+NAME: acs_admin_token
+#+BEGIN_SRC ruby :exports both :var access_token=get_acs_admin_token
+  require 'json'
+  JSON.parse(access_token)['access_token']
+#+END_SRC
+
+#+RESULTS: acs_admin_token
+: eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiJkZTJlYjU4Y2VhMGU0ODJlODE2NTRmNzZiYmJiNzA3MCIsInN1YiI6ImFjc19hZG1pbiIsImF1dGhvcml0aWVzIjpbImFjcy5wb2xpY2llcy5yZWFkIiwiYWNzLnBvbGljaWVzLndyaXRlIiwiYWNzLmF0dHJpYnV0ZXMucmVhZCIsInByZWRpeC1hY3Muem9uZXMuZGVtby51c2VyIiwiYWNzLmF0dHJpYnV0ZXMud3JpdGUiLCJhY3Muem9uZXMuYWRtaW4iLCJwcmVkaXgtYWNzLnpvbmVzLmRlbW8uYWRtaW4iXSwic2NvcGUiOlsiYWNzLnBvbGljaWVzLnJlYWQiLCJhY3MucG9saWNpZXMud3JpdGUiLCJhY3MuYXR0cmlidXRlcy5yZWFkIiwicHJlZGl4LWFjcy56b25lcy5kZW1vLnVzZXIiLCJhY3MuYXR0cmlidXRlcy53cml0ZSIsImFjcy56b25lcy5hZG1pbiIsInByZWRpeC1hY3Muem9uZXMuZGVtby5hZG1pbiJdLCJjbGllbnRfaWQiOiJhY3NfYWRtaW4iLCJjaWQiOiJhY3NfYWRtaW4iLCJhenAiOiJhY3NfYWRtaW4iLCJncmFudF90eXBlIjoiY2xpZW50X2NyZWRlbnRpYWxzIiwicmV2X3NpZyI6ImQ4NTlkYThmIiwiaWF0IjoxNDY5MTQ3OTQxLCJleHAiOjE0NjkxOTExNDEsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC91YWEvb2F1dGgvdG9rZW4iLCJ6aWQiOiJ1YWEiLCJhdWQiOlsiYWNzX2FkbWluIiwiYWNzLnBvbGljaWVzIiwiYWNzLmF0dHJpYnV0ZXMiLCJwcmVkaXgtYWNzLnpvbmVzLmRlbW8iLCJhY3Muem9uZXMiXX0.lNUF-oLqCq0EAHRmgY-zXunVkMnNewarq2PC0KrC_SbD3NGozDEDdKaW9oCIeGJTy92M3LEk6CuF96F7Jyn4VJtwKGsounkaKB9WHpyZVYDa7H9eMBasCOO75YKqum2Pi288wbV5anUdzmVF136QNtr3asPyEfFT6qTins3-6Tm1GjxzbYLCzbVW53W-RsbQuXV750AnMf4AU1Odo5UJIQZgomqQnvWofoLPndaXK0lYL_k_d3Fhntflmk0qvYXlUS6U_FfX8GsqjKnlaL2gbsRVKNM9JdMU4np6WDT53b6USotuHC2HTIDZ36tnT8AhkcycFqZzd7nblcST_G5hjQ
+
+  - Create ACS zone. ACS is a multi-tenant service. For /mysterious/ reasons, we've adopted the term "zone" for each separate ACS tenancy. Before you can start using ACS you have to create a zone. In this example, we create a zone called "demo".
+
+#+NAME: create_acs_zone
+#+BEGIN_SRC http :exports both :var access_token=acs_admin_token
+PUT http://localhost:8181/v1/zone/demo
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name" : "demo",
+  "description" : "demo",
+  "subdomain" : "demo"
+}
+#+END_SRC
+
+#+RESULTS: create_acs_zone
+#+begin_example
+HTTP/1.1 201 Created
+Date: Fri, 22 Jul 2016 00:54:02 GMT
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Correlation-Id: 7c4b28d6-c252-4a7e-bf8f-1594e9a9efe3
+X-Application-Context: application:h2,public,simple-cache,titan:8181
+Content-Length: 0
+Server: Jetty(9.2.15.v20160210)
+
+#+end_example
+
+
+* Simple group-based access control example
+** Create a subject and set the subject attributes
+
+#+NAME: create_subject
+#+BEGIN_SRC http :exports both :var access_token=acs_admin_token
+PUT http://localhost:8181/v1/subject/tom%40ge.com
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "subjectIdentifier" : "tom@ge.com",
+  "attributes" : [
+    {
+      "issuer" : "https://acs.predix.io",
+      "name"   : "org",
+      "value"  : "ge"
+    },
+    {
+      "issuer" : "https://acs.predix.io",
+      "name"   : "group",
+      "value"  : "research"
+    },
+    {
+      "issuer" : "https://acs.predix.io",
+      "name"   : "role",
+      "value"  : "analyst"
+    }
+  ]
+}
+#+END_SRC
+
+#+RESULTS: create_subject
+#+begin_example
+HTTP/1.1 201 Created
+Date: Fri, 22 Jul 2016 00:54:11 GMT
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Correlation-Id: 623880ec-dc83-4616-8aed-d82c48504ebe
+X-Application-Context: application:h2,public,simple-cache,titan:8181
+Location: /subject/tom@ge.com
+Content-Length: 0
+Server: Jetty(9.2.15.v20160210)
+
+#+end_example
+
+** Create a resource and set the resource attributes
+
+#+NAME: create_resource
+#+BEGIN_SRC http :exports both :var access_token=acs_admin_token
+PUT http://localhost:8181/v1/resource/%2fengines%2f9
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "subjectIdentifier" : "/engines/9",
+  "attributes" : [
+    {
+      "issuer" : "https://acs.predix.io",
+      "name"   : "org",
+      "value"  : "ge"
+    },
+    {
+      "issuer" : "https://acs.predix.io",
+      "name"   : "group",
+      "value"  : "research"
+    }
+  ]
+}
+#+END_SRC
+
+
+#+RESULTS: create_resource
+#+begin_example
+HTTP/1.1 201 Created
+Date: Fri, 22 Jul 2016 00:54:21 GMT
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Correlation-Id: 8371bd64-9562-430e-b60a-8ef7292154f5
+X-Application-Context: application:h2,public,simple-cache,titan:8181
+Location: /resource//engines/9
+Content-Length: 0
+Server: Jetty(9.2.15.v20160210)
+
+#+end_example
+
+** Create a policy set
+
+#+NAME: create_policy_set
+#+BEGIN_SRC http :exports both :var access_token=acs_admin_token
+PUT http://localhost:8181/v1/policy-set/default
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "name" : "default",
+  "policies" : [
+    {
+      "name" : "Analysts can access engines if they belong to the same group.",
+      "target" : {
+        "resource" : {
+          "name" : "Engine",
+          "uriTemplate" : "/engines/{engine_id}"
+        },
+        "action" : "GET",
+        "subject" : {
+          "name" : "Analysts",
+          "attributes" : [
+            {
+              "issuer" : "https://acs.predix.io",
+              "name"   : "role",
+              "value"  : "analyst"
+            }
+          ]
+        }
+      },
+      "conditions" : [
+        { 
+          "name"      : "is a member of the same group",
+          "condition" : "resource.and(subject).haveSame('https://acs.predix.io', 'group').result()" 
+        }
+      ],
+      "effect" : "PERMIT"
+    },
+    {
+      "name" : "Deny all other requests.",
+      "effect" : "DENY"
+    }
+  ]
+}
+#+END_SRC
+
+#+RESULTS: create_policy_set
+#+begin_example
+HTTP/1.1 201 Created
+Date: Fri, 22 Jul 2016 00:54:33 GMT
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Correlation-Id: 14a07d7b-41e7-43c0-b79d-77e3927d0294
+X-Application-Context: application:h2,public,simple-cache,titan:8181
+Location: /policy-set/default
+Content-Length: 0
+Server: Jetty(9.2.15.v20160210)
+
+#+end_example
+
+** Submit a authorization request for policy evaluation
+
+#+NAME: evaluate_authz_request
+#+BEGIN_SRC http :exports both :pretty :var access_token=acs_admin_token
+POST http://localhost:8181/v1/policy-evaluation
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "action" : "GET",
+  "resourceIdentifier" : "/engines/9",
+  "subjectIdentifier" : "tom@ge.com"
+}
+#+END_SRC
+
+
+#+RESULTS: evaluate_authz_request
+#+begin_example
+{
+  "timestamp": 0,
+  "resolvedResourceUris": [
+    "\/engines\/9"
+  ],
+  "resourceAttributes": [
+    {
+      "value": "ge",
+      "name": "org",
+      "issuer": "https:\/\/acs.predix.io"
+    },
+    {
+      "value": "research",
+      "name": "group",
+      "issuer": "https:\/\/acs.predix.io"
+    }
+  ],
+  "subjectAttributes": [
+    {
+      "value": "analyst",
+      "name": "role",
+      "issuer": "https:\/\/acs.predix.io"
+    },
+    {
+      "value": "ge",
+      "name": "org",
+      "issuer": "https:\/\/acs.predix.io"
+    },
+    {
+      "value": "research",
+      "name": "group",
+      "issuer": "https:\/\/acs.predix.io"
+    }
+  ],
+  "effect": "PERMIT"
+}
+#+end_example
+
+
+* Hierarchical attributes with dynamic role example
+** Create a subject role
+
+This subject represents the =analyst= role.
+
+#+NAME: create_subject_analyst
+#+BEGIN_SRC http :exports both :var access_token=acs_admin_token
+PUT http://localhost:8181/v1/subject/role-analyst
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "subjectIdentifier" : "role-analyst",
+  "attributes" : [
+    {
+      "issuer" : "https://acs.predix.io",
+      "name"   : "role",
+      "value"  : "analyst"
+    }
+  ]
+}
+#+END_SRC
+
+#+RESULTS: create_subject_analyst
+#+begin_example
+HTTP/1.1 201 Created
+Date: Fri, 22 Jul 2016 00:43:24 GMT
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Correlation-Id: 1d06af08-3d01-4892-8957-5d455002441e
+X-Application-Context: application:h2,public,simple-cache,titan:8181
+Location: /subject/role-analyst
+Content-Length: 0
+Server: Jetty(9.2.15.v20160210)
+
+#+end_example
+
+** Create a subject user
+
+This user will inherit the =analyst= role only when accessing engines in the =san-ramon= site.
+
+#+NAME: create_subject_user
+#+BEGIN_SRC http :exports both :var access_token=acs_admin_token
+PUT http://localhost:8181/v1/subject/tom%40ge.com
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "subjectIdentifier" : "tom@ge.com",
+  "parents" : [
+    {
+      "identifier" : "role-analyst",
+      "scopes" : [
+        {
+          "issuer" : "https://acs.predix.io",
+          "name"   : "site",
+          "value"  : "san-ramon"
+        }
+      ]
+    }
+  ]
+}
+#+END_SRC
+
+#+RESULTS: create_subject_user
+#+begin_example
+HTTP/1.1 204 No Content
+Date: Fri, 22 Jul 2016 00:43:43 GMT
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Correlation-Id: 92053b82-9458-49ca-8b0e-aba3ba18c84c
+X-Application-Context: application:h2,public,simple-cache,titan:8181
+Location: /subject/tom@ge.com
+Server: Jetty(9.2.15.v20160210)
+
+#+end_example
+
+** Create a resource site
+
+#+NAME: create_resource_site
+#+BEGIN_SRC http :exports both :var access_token=acs_admin_token
+PUT http://localhost:8181/v1/resource/%2fsites%2fsan-ramon
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "subjectIdentifier" : "/sites/san-ramon",
+  "attributes" : [
+    {
+      "issuer" : "https://acs.predix.io",
+      "name"   : "site",
+      "value"  : "san-ramon"
+    }
+  ]
+}
+#+END_SRC
+
+
+#+RESULTS: create_resource_site
+#+begin_example
+HTTP/1.1 201 Created
+Date: Fri, 22 Jul 2016 00:44:06 GMT
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Correlation-Id: 03febd4b-ef28-43b7-9c76-37663cd393b1
+X-Application-Context: application:h2,public,simple-cache,titan:8181
+Location: /resource//sites/san-ramon
+Content-Length: 0
+Server: Jetty(9.2.15.v20160210)
+
+#+end_example
+
+** Create a resource engine in the san-ramon site
+
+#+NAME: create_resource_engine_san_ramon
+#+BEGIN_SRC http :exports both :var access_token=acs_admin_token
+PUT http://localhost:8181/v1/resource/%2fengines%2f9
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "subjectIdentifier" : "/engines/9",
+  "parents" : [
+    {
+      "identifier" : "/sites/san-ramon"
+    }
+  ]
+}
+#+END_SRC
+
+
+#+RESULTS: create_resource_engine_san_ramon
+#+begin_example
+HTTP/1.1 204 No Content
+Date: Fri, 22 Jul 2016 00:44:23 GMT
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Correlation-Id: ca036e30-2f17-4287-981c-0ca5731999bc
+X-Application-Context: application:h2,public,simple-cache,titan:8181
+Location: /resource//engines/9
+Server: Jetty(9.2.15.v20160210)
+
+#+end_example
+
+** Create a resource engine that is not in the san-ramon site
+
+#+NAME: create_resource_engine_other
+#+BEGIN_SRC http :exports both :var access_token=acs_admin_token
+PUT http://localhost:8181/v1/resource/%2fengines%2f11
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "subjectIdentifier" : "/engines/11"
+}
+#+END_SRC
+
+
+#+RESULTS: create_resource_engine_other
+#+begin_example
+HTTP/1.1 201 Created
+Date: Fri, 22 Jul 2016 00:44:39 GMT
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Correlation-Id: 2fcb9168-ee4f-4953-aa3d-fcd944de1a44
+X-Application-Context: application:h2,public,simple-cache,titan:8181
+Location: /resource//engines/11
+Content-Length: 0
+Server: Jetty(9.2.15.v20160210)
+
+#+end_example
+
+** Create a policy set
+
+#+NAME: create_policy_set_1
+#+BEGIN_SRC http :exports both :var access_token=acs_admin_token
+PUT http://localhost:8181/v1/policy-set/default
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "name" : "default",
+  "policies" : [
+    {
+      "name" : "Analysts can access engines.",
+      "target" : {
+        "resource" : {
+          "name" : "Engine",
+          "uriTemplate" : "/engines/{engine_id}"
+        },
+        "action" : "GET",
+        "subject" : {
+          "name" : "Analysts",
+          "attributes" : [
+            {
+              "issuer" : "https://acs.predix.io",
+              "name"   : "role",
+              "value"  : "analyst"
+            }
+          ]
+        }
+      },
+      "conditions" : [
+        { 
+          "name"      : "is an analyst",
+          "condition" : "match.single(subject.attributes('https://acs.predix.io', 'role'), 'analyst')" 
+        }
+      ],
+      "effect" : "PERMIT"
+    },
+    {
+      "name" : "Deny all other requests.",
+      "effect" : "DENY"
+    }
+  ]
+}
+#+END_SRC
+
+#+RESULTS: create_policy_set_1
+#+begin_example
+HTTP/1.1 201 Created
+Date: Fri, 22 Jul 2016 00:44:57 GMT
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Correlation-Id: c22d3f09-4f0a-4b3c-a38d-0286f4eb4780
+X-Application-Context: application:h2,public,simple-cache,titan:8181
+Location: /policy-set/default
+Content-Length: 0
+Server: Jetty(9.2.15.v20160210)
+
+#+end_example
+
+** Submit a permitted authorization request for policy evaluation
+
+#+NAME: evaluate_authz_request_1
+#+BEGIN_SRC http :exports both :pretty :var access_token=acs_admin_token
+POST http://localhost:8181/v1/policy-evaluation
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "action" : "GET",
+  "resourceIdentifier" : "/engines/9",
+  "subjectIdentifier" : "tom@ge.com"
+}
+#+END_SRC
+
+
+#+RESULTS: evaluate_authz_request_1
+#+begin_example
+{
+  "timestamp": 0,
+  "resolvedResourceUris": [
+    "\/engines\/9"
+  ],
+  "resourceAttributes": [
+    {
+      "value": "san-ramon",
+      "name": "site",
+      "issuer": "https:\/\/acs.predix.io"
+    }
+  ],
+  "subjectAttributes": [
+    {
+      "value": "analyst",
+      "name": "role",
+      "issuer": "https:\/\/acs.predix.io"
+    }
+  ],
+  "effect": "PERMIT"
+}
+#+end_example
+
+** Submit a denied authorization request for policy evaluation
+
+#+NAME: evaluate_authz_request_2
+#+BEGIN_SRC http :exports both :pretty :var access_token=acs_admin_token
+POST http://localhost:8181/v1/policy-evaluation
+Authorization: bearer ${access_token}
+Accept: application/json
+Content-Type: application/json
+Predix-Zone-Id: demo
+
+{
+  "action" : "GET",
+  "resourceIdentifier" : "/engines/11",
+  "subjectIdentifier" : "tom@ge.com"
+}
+#+END_SRC
+
+
+#+RESULTS: evaluate_authz_request_2
+: {
+:   "timestamp": 0,
+:   "resolvedResourceUris": [
+:     "\/engines\/11"
+:   ],
+:   "resourceAttributes": [],
+:   "subjectAttributes": [],
+:   "effect": "DENY"
+: }
+
