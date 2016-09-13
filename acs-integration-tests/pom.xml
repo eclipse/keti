@@ -24,7 +24,7 @@
     <parent>
         <groupId>com.ge.predix</groupId>
         <artifactId>acs</artifactId>
-        <version>4.6.3-SNAPSHOT</version>
+        <version>4.6.4-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
 
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>com.ge.predix</groupId>
             <artifactId>acs-service</artifactId>
-            <version>4.6.3-SNAPSHOT</version>
+            <version>4.6.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
