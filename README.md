@@ -13,8 +13,8 @@ To run the service locally, go to service/ directory
 cd service
 ./start-acs-public.sh
 ```
-The ACS service requires a UAA (User Account and Authentication: https://github.com/cloudfoundry/uaa) service to mange OAuth clients and users used in conjunction with ACS.
-When running ACS locally, by default the service is configured to trust the local UAA. You can modify the environment varibale ACS_DEFAULT_ISSUER_ID and UAA_CHECK_HEALTH_URL to correspond to your existing UAA.
+The ACS service requires a UAA (User Account and Authentication: https://github.com/cloudfoundry/uaa) service to manage OAuth clients and users used in conjunction with ACS.
+When running ACS locally, by default the service is configured to trust the local UAA. You can modify the environment variable ACS_DEFAULT_ISSUER_ID and UAA_CHECK_HEALTH_URL to correspond to your existing UAA.
 
 ### How to run UAA locally
 
