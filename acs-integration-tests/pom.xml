@@ -275,7 +275,7 @@
                                 <NUREGO_API_KEY>${NUREGO_API_KEY}</NUREGO_API_KEY>
                                 <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
                                 <NUREGO_BATCH_MAX_MAP_SIZE>1</NUREGO_BATCH_MAX_MAP_SIZE>
-                                <SPRING_PROFILES_ACTIVE>integration,predix,cloud-redis</SPRING_PROFILES_ACTIVE>
+                                <SPRING_PROFILES_ACTIVE>integration,predix,cloud-redis,cloudDbConfig</SPRING_PROFILES_ACTIVE>
                                 <UAA_CHECK_HEALTH_URL>${UAA_CHECK_HEALTH_URL}</UAA_CHECK_HEALTH_URL>
                                 <ZAC_CLIENT_ID>${ZAC_CLIENT_ID}</ZAC_CLIENT_ID>
                                 <ZAC_CLIENT_SECRET>${ZAC_CLIENT_SECRET}</ZAC_CLIENT_SECRET>
@@ -434,7 +434,7 @@
                                 <NUREGO_API_KEY>${NUREGO_API_KEY}</NUREGO_API_KEY>
                                 <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
                                 <NUREGO_BATCH_MAX_MAP_SIZE>1</NUREGO_BATCH_MAX_MAP_SIZE>
-                                <SPRING_PROFILES_ACTIVE>integration,predix,cloud-redis,titan</SPRING_PROFILES_ACTIVE>
+                                <SPRING_PROFILES_ACTIVE>integration,predix,cloud-redis,titan,cloudDbConfig</SPRING_PROFILES_ACTIVE>
                                 <TITAN_ENABLE_CASSANDRA>${TITAN_ENABLE_CASSANDRA}</TITAN_ENABLE_CASSANDRA>
                                 <TITAN_STORAGE_CASSANDRA_KEYSPACE>${TITAN_STORAGE_CASSANDRA_KEYSPACE}</TITAN_STORAGE_CASSANDRA_KEYSPACE>
                                 <TITAN_STORAGE_HOSTNAME>${TITAN_STORAGE_HOSTNAME}</TITAN_STORAGE_HOSTNAME>

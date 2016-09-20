@@ -19,14 +19,11 @@ package com.ge.predix.acs.config;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.cloud.config.java.AbstractCloudConfig;
-import org.springframework.cloud.service.PooledServiceConnectorConfig.PoolConfig;
-import org.springframework.cloud.service.relational.DataSourceConfig;
-import org.springframework.cloud.service.relational.DataSourceConfig.ConnectionConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -35,19 +32,25 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
- * DataSourceConfig used for all cloud profiles.
+ * DataSourceConfig used for connecting directly to a postgres database.
  */
 @Configuration
-@Profile({ "cloudDbConfig" })
+@Profile({ "envDbConfig" })
 @EnableAutoConfiguration
 @EnableJpaRepositories("com.ge.predix.acs")
-public class CloudDataSourceConfig extends AbstractCloudConfig {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudDataSourceConfig.class);
+public class EnvDataSourceConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvDataSourceConfig.class);
 
     private final AcsConfigUtil acsConfigUtil = new AcsConfigUtil();
 
-    @Value("${ACS_DB}")
-    private String acsDb;
+    @Value("${DB_DRIVER_CLASS_NAME:org.postgresql.Driver}")
+    private String driverClassName;
+    @Value("${DB_URL:jdbc:postgresql:acs}")
+    private String url;
+    @Value("${DB_USERNAME:postgres}")
+    private String username;
+    @Value("${DB_PASSWORD:}")
+    private String password;
     @Value("${MIN_ACTIVE:0}")
     private int minActive;
     @Value("${MAX_ACTIVE:100}")
@@ -56,17 +59,17 @@ public class CloudDataSourceConfig extends AbstractCloudConfig {
     private int maxWaitTime;
 
     @Bean
-    public DataSourceConfig dataSourceConfig() {
-        PoolConfig poolConfig = new PoolConfig(this.minActive, this.maxActive, this.maxWaitTime);
-        ConnectionConfig connect = new ConnectionConfig("charset=utf-8");
-        return new DataSourceConfig(poolConfig, connect);
-    }
-
-    @Bean
     public DataSource dataSource() {
-        LOGGER.info("Starting ACS with the database that is bound to it:" + this.acsDb); //$NON-NLS-1$
-        DataSource ds = connectionFactory().dataSource(this.acsDb, dataSourceConfig());
-        return ds;
+        LOGGER.info("Starting ACS with the database connection: '" + this.url + "'."); //$NON-NLS-1$
+        PoolProperties poolProperties = new PoolProperties();
+        poolProperties.setDriverClassName(this.driverClassName);
+        poolProperties.setUrl(this.url);
+        poolProperties.setUsername(this.username);
+        poolProperties.setPassword(this.password);
+        poolProperties.setMaxActive(this.maxActive);
+        poolProperties.setMinIdle(this.minActive);
+        poolProperties.setMaxWait(this.maxWaitTime);
+        return new org.apache.tomcat.jdbc.pool.DataSource(poolProperties);
     }
 
     @Bean
@@ -78,5 +81,4 @@ public class CloudDataSourceConfig extends AbstractCloudConfig {
     public PlatformTransactionManager transactionManager(final EntityManagerFactory emf) {
         return this.acsConfigUtil.transactionManager(emf);
     }
-
 }
