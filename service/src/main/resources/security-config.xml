@@ -206,7 +206,7 @@
                     <value>${TRUSTED_ISSUER_ID:${UAA_URL:http://localhost:8080/uaa}/oauth/token}</value>
                 </list>
             </property>
-            <property name="useHttps" value="false" />
+            <property name="useHttps" value="${UAA_USE_HTTPS:false}" />
         </bean>
 
         <bean id="defaultZoneConfig" class="com.ge.predix.uaa.token.lib.DefaultZoneConfiguration">
