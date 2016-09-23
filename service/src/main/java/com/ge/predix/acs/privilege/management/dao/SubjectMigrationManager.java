@@ -44,4 +44,9 @@ public class SubjectMigrationManager {
         LOGGER.info("Subject migration to Titan completed.");
     }
 
+    public void rollbackMigratedData(final GraphSubjectRepository subjectHierarchicalRepository) {
+        LOGGER.info("Initiating rollback for subjectHierarchicalRepository");
+        subjectHierarchicalRepository.deleteAll();
+    }
+
 }
