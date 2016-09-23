@@ -42,4 +42,10 @@ public class ResourceMigrationManager {
         LOGGER.info("Number of resource entities migrated: " + numOfResourcesSaved);
         LOGGER.info("Resource migration to Titan completed.");
     }
+
+    public void rollbackMigratedData(final GraphResourceRepository resourceHierarchicalRepository) {
+        LOGGER.info("Initiating rollback for resourceHierarchicalRepository");
+        resourceHierarchicalRepository.deleteAll();
+    }
+
 }
