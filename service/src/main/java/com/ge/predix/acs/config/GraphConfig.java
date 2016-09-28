@@ -20,7 +20,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.Assert;
 
+import com.ge.predix.acs.privilege.management.dao.GraphGenericRepository;
 import com.ge.predix.acs.privilege.management.dao.GraphResourceRepository;
 import com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository;
 import com.thinkaurelius.titan.core.EdgeLabel;
@@ -32,6 +34,7 @@ import com.thinkaurelius.titan.core.VertexLabel;
 import com.thinkaurelius.titan.core.schema.SchemaAction;
 import com.thinkaurelius.titan.core.schema.SchemaStatus;
 import com.thinkaurelius.titan.core.schema.TitanManagement;
+import com.thinkaurelius.titan.core.schema.TitanManagement.IndexBuilder;
 import com.thinkaurelius.titan.graphdb.database.management.ManagementSystem;
 
 @Configuration
@@ -93,17 +96,27 @@ public class GraphConfig {
         } else {
             newGraph = TitanFactory.build().set("storage.backend", "inmemory").open();
         }
-
-        createVertexLabel(newGraph, GraphResourceRepository.RESOURCE_LABEL);
-        createVertexLabel(newGraph, GraphSubjectRepository.SUBJECT_LABEL);
-        createIndex(newGraph, BY_ZONE_INDEX_NAME, ZONE_ID_KEY);
-        createTwoKeyUniqueCompositeIndex(newGraph, BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME, ZONE_ID_KEY,
-                RESOURCE_ID_KEY);
-        createTwoKeyUniqueCompositeIndex(newGraph, BY_ZONE_AND_SUBJECT_UNIQUE_INDEX_NAME, ZONE_ID_KEY, SUBJECT_ID_KEY);
-        createEdgeIndex(newGraph, BY_SCOPE_INDEX_NAME, PARENT_EDGE_LABEL, SCOPE_PROPERTY_KEY);
-
+        createSchemaElements(newGraph);
         LOGGER.info("Initialized titan db.");
         return newGraph;
+    }
+
+    public static void createSchemaElements(final Graph newGraph) throws InterruptedException {
+        createVertexLabel(newGraph, GraphResourceRepository.RESOURCE_LABEL);
+        createVertexLabel(newGraph, GraphSubjectRepository.SUBJECT_LABEL);
+        createVertexLabel(newGraph, GraphGenericRepository.VERSION_VERTEX_LABEL);
+
+        createIndex(newGraph, BY_ZONE_INDEX_NAME, ZONE_ID_KEY);
+        createUniqueCompositeIndex(newGraph, BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME,
+                new String[] { ZONE_ID_KEY, RESOURCE_ID_KEY });
+
+        createUniqueCompositeIndex(newGraph, BY_ZONE_AND_SUBJECT_UNIQUE_INDEX_NAME,
+                new String[] { ZONE_ID_KEY, SUBJECT_ID_KEY });
+
+        createUniqueCompositeIndex(newGraph, BY_VERSION_UNIQUE_INDEX_NAME,
+                new String[] { GraphGenericRepository.VERSION_PROPERTY_KEY }, Integer.class);
+
+        createEdgeIndex(newGraph, BY_SCOPE_INDEX_NAME, PARENT_EDGE_LABEL, SCOPE_PROPERTY_KEY);
     }
 
     public static void createIndex(final Graph newGraph, final String indexName, final String indexKey)
@@ -135,26 +148,37 @@ public class GraphConfig {
         ManagementSystem.awaitGraphIndexStatus((TitanGraph) newGraph, indexName).status(SchemaStatus.ENABLED).call();
     }
 
-    public static void createTwoKeyUniqueCompositeIndex(final Graph newGraph, final String indexName,
-            final String indexKey1, final String indexKey2) throws InterruptedException {
+    private static void createUniqueCompositeIndex(final Graph newGraph, final String indexName,
+            final String[] propertyKeyNames) throws InterruptedException {
+        createUniqueCompositeIndex(newGraph, indexName, propertyKeyNames, String.class);
+    }
+
+    public static void createUniqueCompositeIndex(final Graph newGraph, final String indexName,
+            final String[] propertyKeyNames, final Class<?> propertyKeyType) throws InterruptedException {
+
+        Assert.notEmpty(propertyKeyNames);
         newGraph.tx().rollback(); // Never create new indexes while a transaction is active
         TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
-        // Create index for zones.
+        IndexBuilder indexBuilder = mgmt.buildIndex(indexName, Vertex.class);
         if (!mgmt.containsGraphIndex(indexName)) {
-            PropertyKey indexPropertyKey1 = mgmt.getPropertyKey(indexKey1);
-            if (null == indexPropertyKey1) {
-                indexPropertyKey1 = mgmt.makePropertyKey(indexKey1).dataType(String.class).make();
+            for (String propertyKeyName : propertyKeyNames) {
+                PropertyKey indexPropertyKey = getOrCreatePropertyKey(propertyKeyName, propertyKeyType, mgmt);
+                indexBuilder.addKey(indexPropertyKey);
             }
-            PropertyKey indexPropertyKey2 = mgmt.getPropertyKey(indexKey2);
-            if (null == indexPropertyKey2) {
-                indexPropertyKey2 = mgmt.makePropertyKey(indexKey2).dataType(String.class).make();
-            }
-            mgmt.buildIndex(indexName, Vertex.class).addKey(indexPropertyKey1).addKey(indexPropertyKey2).unique()
-                    .buildCompositeIndex();
+            indexBuilder.unique().buildCompositeIndex();
         }
         mgmt.commit();
         // Wait for the index to become available
         ManagementSystem.awaitGraphIndexStatus((TitanGraph) newGraph, indexName).status(SchemaStatus.ENABLED).call();
+    }
+
+    private static PropertyKey getOrCreatePropertyKey(final String keyName, final Class<?> keyType,
+            final TitanManagement mgmt) {
+        PropertyKey propertyKey = mgmt.getPropertyKey(keyName);
+        if (null == propertyKey) {
+            propertyKey = mgmt.makePropertyKey(keyName).dataType(keyType).make();
+        }
+        return propertyKey;
     }
 
     public static void createEdgeIndex(final Graph newGraph, final String indexName, final String label,
@@ -163,10 +187,7 @@ public class GraphConfig {
         TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
         EdgeLabel edgeLabel = mgmt.getOrCreateEdgeLabel(label);
         if (!mgmt.containsRelationIndex(edgeLabel, indexName)) {
-            PropertyKey indexPropertyKey = mgmt.getPropertyKey(indexKey);
-            if (null == indexPropertyKey) {
-                indexPropertyKey = mgmt.makePropertyKey(indexKey).dataType(String.class).make();
-            }
+            PropertyKey indexPropertyKey = getOrCreatePropertyKey(indexKey, String.class, mgmt);
             mgmt.buildEdgeIndex(edgeLabel, indexName, Direction.OUT, indexPropertyKey);
         }
         mgmt.commit();

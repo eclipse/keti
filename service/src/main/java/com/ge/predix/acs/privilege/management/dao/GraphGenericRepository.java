@@ -307,58 +307,28 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
         return parents;
     }
 
-    public int getVersion() {
+    public boolean checkVersionVertexExists(final int versionNumber) {
         try {
-            Vertex versionVertex = getOrCreateVersionVertex();
-            VertexProperty<Integer> property = versionVertex.property(VERSION_PROPERTY_KEY);
-            Assert.isTrue(property.isPresent(), String.format(
-                    "The schema version vertex does not contain the expected property '%s'.", VERSION_PROPERTY_KEY));
-            return property.value();
-        } finally {
-            this.graph.tx().commit();
-        }
-
-    }
-
-    public void setVersion(final int version) {
-        try {
-            Vertex versionVertex = getOrCreateVersionVertex();
-            versionVertex.property(VERSION_PROPERTY_KEY, version);
-            this.graph.tx().commit();
-        } catch (Exception e) {
-            this.graph.tx().rollback();
-            throw (e);
-        }
-
-    }
-
-    private Vertex getOrCreateVersionVertex() {
-        try {
-            Vertex versionVertex;
-            // hasLabel() produces a warning that indexing is recommended.
-            // hasNext() produces a warning that indexing is recommended.
-            // Need to define an index (composite or mixed) that supports this query.
-            GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V().has(VERSION_PROPERTY_KEY);
+            Vertex versionVertex = null;
+            // Value has to be provided to the has() method for index to be used. Composite indexes only work on
+            // equality comparisons.
+            GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V().has(VERSION_VERTEX_LABEL,
+                    VERSION_PROPERTY_KEY, versionNumber);
             if (traversal.hasNext()) {
                 versionVertex = traversal.next();
                 // There should be only one version entity with a given version
-                // entity id.
                 Assert.isTrue(!traversal.hasNext(), "There are two schema version vertices in the graph");
-            } else {
-                versionVertex = createVersionVertex(0);
             }
-
-            return versionVertex;
+            return versionVertex != null;
         } finally {
             this.graph.tx().commit();
         }
     }
 
-    private Vertex createVersionVertex(final int version) {
+    public void createVersionVertex(final int version) {
         try {
-            Vertex versionVertex = this.graph.addVertex(T.label, VERSION_VERTEX_LABEL, VERSION_PROPERTY_KEY, version);
+            this.graph.addVertex(T.label, VERSION_VERTEX_LABEL, VERSION_PROPERTY_KEY, version);
             this.graph.tx().commit();
-            return versionVertex;
         } catch (Exception e) {
             this.graph.tx().rollback();
             throw (e);

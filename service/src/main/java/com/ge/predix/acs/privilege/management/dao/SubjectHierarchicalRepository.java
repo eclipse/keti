@@ -9,10 +9,7 @@ public interface SubjectHierarchicalRepository {
     SubjectEntity getSubjectWithInheritedAttributesForScopes(final ZoneEntity zone, final String subjectIdentifier,
                                                              final Set<Attribute> scopes);
 
-    SubjectEntity getSubjectWithInheritedAttributes(final ZoneEntity zone,
-            final String subjectIdentifier);
+    SubjectEntity getSubjectWithInheritedAttributes(final ZoneEntity zone, final String subjectIdentifier);
 
     Set<String> getSubjectEntityAndDescendantsIds(final SubjectEntity entity); 
-    int getVersion();
-    void setVersion(final int version);
 }

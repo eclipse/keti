@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 public class TitanMigrationRollbackTest {
 
-    private final ResourceHierarchicalRepository resourceHierarchicalRepository = mock(
+    private final GraphResourceRepository resourceHierarchicalRepository = mock(
             GraphResourceRepository.class);
     private final SubjectHierarchicalRepository subjectHierarchicalRepository = mock(GraphSubjectRepository.class);
     private ResourceMigrationManager resourceMigrationManager;
@@ -36,7 +36,7 @@ public class TitanMigrationRollbackTest {
 
     @Test
     public void testMigrationRollbackCalled() throws InterruptedException {
-        Mockito.when(this.resourceHierarchicalRepository.getVersion()).thenReturn(0);
+        Mockito.when(this.resourceHierarchicalRepository.checkVersionVertexExists(1)).thenReturn(false);
         this.titanMigrationManager.doMigration();
 
         // This sleep is because TitanMigrationManager invokes resourceMigrationManager asynchronously
@@ -48,7 +48,7 @@ public class TitanMigrationRollbackTest {
 
     @Test
     public void testMigrationRollbackNotCalled() throws InterruptedException {
-        Mockito.when(this.resourceHierarchicalRepository.getVersion()).thenReturn(1);
+        Mockito.when(this.resourceHierarchicalRepository.checkVersionVertexExists(1)).thenReturn(true);
         this.titanMigrationManager.doMigration();
 
         // This sleep is because TitanMigrationManager invokes resourceMigrationManager asynchronously

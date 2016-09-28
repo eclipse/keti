@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("titan")
 public final class TitanMigrationManager {
+    private static final int INITIAL_ATTRIBUTE_GRAPH_VERSION = 1;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TitanMigrationManager.class);
 
     @Autowired
@@ -43,7 +45,7 @@ public final class TitanMigrationManager {
     public void doMigration() {
         // This version vertex is common to both subject and resource repositories. So this check is sufficient to
         // trigger migrations in both repos.
-        if (this.resourceHierarchicalRepository.getVersion() == 0) {
+        if (!this.resourceHierarchicalRepository.checkVersionVertexExists(INITIAL_ATTRIBUTE_GRAPH_VERSION)) {
 
             // Migration needs to be performed in a separate thread to prevent cloud-foundry health check timeout,
             // which restarts the service. (Max timeout is 180 seconds which is not enough)
@@ -51,21 +53,24 @@ public final class TitanMigrationManager {
                 @Override
                 public void run() {
                     try {
-
                         LOGGER.info("Starting attribute migration process to Titan.");
+
                         //Rollback in the beginning to start with a clean state
                         resourceMigrationManager.rollbackMigratedData(resourceHierarchicalRepository);
                         subjectMigrationManager.rollbackMigratedData(subjectHierarchicalRepository);
-                        // Resource and Subject must be performed sequentially for now to prevent a lock exception
-                        // being thrown from titan.
+
+                        //Run migration
                         resourceMigrationManager.doResourceMigration(resourceRepository,
                                 resourceHierarchicalRepository, PAGE_SIZE);
                         subjectMigrationManager.doSubjectMigration(subjectRepository,
                                 subjectHierarchicalRepository, PAGE_SIZE);
 
-                        resourceHierarchicalRepository.setVersion(1);
+                        //Create version vertex, to record completion.
+                        resourceHierarchicalRepository.createVersionVertex(INITIAL_ATTRIBUTE_GRAPH_VERSION);
                         isMigrationComplete = true;
-                        LOGGER.info("Titan attribute migration complete.");
+
+                        LOGGER.info("Titan attribute migration complete. Created version: "
+                                + INITIAL_ATTRIBUTE_GRAPH_VERSION);
                     } catch (Throwable e) {
                         LOGGER.error("Exception during attribute migration: ", e);
                     }

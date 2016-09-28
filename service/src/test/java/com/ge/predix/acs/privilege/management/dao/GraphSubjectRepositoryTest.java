@@ -1,9 +1,6 @@
 package com.ge.predix.acs.privilege.management.dao;
 
 import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.PARENT_EDGE_LABEL;
-import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.SCOPE_PROPERTY_KEY;
-import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.ZONE_ID_KEY;
-import static com.ge.predix.acs.privilege.management.dao.GraphResourceRepository.RESOURCE_ID_KEY;
 import static com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository.SUBJECT_ID_KEY;
 import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
 import static com.ge.predix.acs.testutils.XFiles.AGENT_SCULLY;
@@ -66,14 +63,7 @@ public class GraphSubjectRepositoryTest {
 
     private void setupTitanGraph() throws InterruptedException, ExecutionException {
         this.graph = TitanFactory.build().set("storage.backend", "inmemory").open();
-        GraphConfig.createVertexLabel(this.graph, GraphResourceRepository.RESOURCE_LABEL);
-        GraphConfig.createVertexLabel(this.graph, GraphSubjectRepository.SUBJECT_LABEL);
-        GraphConfig.createIndex(this.graph, GraphConfig.BY_ZONE_INDEX_NAME, ZONE_ID_KEY);
-        GraphConfig.createTwoKeyUniqueCompositeIndex(this.graph, GraphConfig.BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME,
-                ZONE_ID_KEY, RESOURCE_ID_KEY);
-        GraphConfig.createTwoKeyUniqueCompositeIndex(this.graph, GraphConfig.BY_ZONE_AND_SUBJECT_UNIQUE_INDEX_NAME,
-                ZONE_ID_KEY, SUBJECT_ID_KEY);
-        GraphConfig.createEdgeIndex(this.graph, GraphConfig.BY_SCOPE_INDEX_NAME, PARENT_EDGE_LABEL, SCOPE_PROPERTY_KEY);
+        GraphConfig.createSchemaElements(this.graph);
     }
 
     @BeforeMethod
@@ -115,8 +105,8 @@ public class GraphSubjectRepositoryTest {
         expectedAttributes = new HashSet<>(Arrays.asList(new Attribute[] { SECRET_CLASSIFICATION, SITE_BASEMENT }));
         expectedSubject.setAttributes(expectedAttributes);
         expectedSubject.setAttributesAsJson(JSON_UTILS.serialize(expectedAttributes));
-        actualSubject = this.subjectRepository.getSubjectWithInheritedAttributesForScopes(TEST_ZONE_1, subjectIdentifier,
-                new HashSet<>(Arrays.asList(new Attribute[] { SITE_PENTAGON })));
+        actualSubject = this.subjectRepository.getSubjectWithInheritedAttributesForScopes(TEST_ZONE_1,
+                subjectIdentifier, new HashSet<>(Arrays.asList(new Attribute[] { SITE_PENTAGON })));
         assertThat(actualSubject, equalTo(expectedSubject));
     }
 
