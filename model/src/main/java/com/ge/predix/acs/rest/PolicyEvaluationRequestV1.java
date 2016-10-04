@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.ge.predix.acs.rest;
 
-import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -33,9 +33,9 @@ public class PolicyEvaluationRequestV1 {
 
     private String subjectIdentifier;
 
-    private List<Attribute> subjectAttributes;
+    private Set<Attribute> subjectAttributes;
 
-    private List<Attribute> resourceAttributes;
+    private Set<Attribute> resourceAttributes;
 
     private String action;
 
@@ -58,11 +58,11 @@ public class PolicyEvaluationRequestV1 {
     }
 
     @ApiModelProperty(value = "Supplemental resource attributes provided by the requestor")
-    public List<Attribute> getResourceAttributes() {
+    public Set<Attribute> getResourceAttributes() {
         return this.resourceAttributes;
     }
 
-    public void setResourceAttributes(final List<Attribute> resourceAttributes) {
+    public void setResourceAttributes(final Set<Attribute> resourceAttributes) {
         this.resourceAttributes = resourceAttributes;
     }
 
@@ -70,7 +70,7 @@ public class PolicyEvaluationRequestV1 {
      * @return the subjectAttributes
      */
     @ApiModelProperty(value = "Supplemental subject attributes provided by the requestor")
-    public List<Attribute> getSubjectAttributes() {
+    public Set<Attribute> getSubjectAttributes() {
         return this.subjectAttributes;
     }
 
@@ -78,7 +78,7 @@ public class PolicyEvaluationRequestV1 {
      * @param subjectAttributes
      *            the subjectAttributes to set
      */
-    public void setSubjectAttributes(final List<Attribute> subjectAttributes) {
+    public void setSubjectAttributes(final Set<Attribute> subjectAttributes) {
         this.subjectAttributes = subjectAttributes;
     }
 
@@ -119,9 +119,12 @@ public class PolicyEvaluationRequestV1 {
                 return false;
             }
             if ((null != this.subjectAttributes) && (this.subjectAttributes.size() == other.subjectAttributes.size())) {
-                for (int i = 0; i < this.subjectAttributes.size(); i++) {
-                    equalsBuilder.append(this.subjectAttributes.get(i), other.subjectAttributes.get(i));
-                }
+                // Element by element comparison may produce true negative in Sets so use built in equals
+                // From AbstractSet's (HashSet's ancestor) documentation
+                // This implementation first checks if the specified object is this set; if so it returns true.
+                // Then, it checks if the specified object is a set whose size is identical to the size of this set;
+                // if not, it returns false. If so, it returns containsAll((Collection) o).
+                equalsBuilder.append(this.subjectAttributes, other.subjectAttributes);
             }
             equalsBuilder.append(this.action, other.action).append(this.resourceIdentifier, other.resourceIdentifier)
                     .append(this.subjectIdentifier, other.subjectIdentifier);

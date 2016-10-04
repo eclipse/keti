@@ -26,6 +26,7 @@ import static com.ge.predix.test.utils.PrivilegeHelper.DEFAULT_SUBJECT_IDENTIFIE
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -187,7 +188,7 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
     @When("^Evaluation request which has the subject attribute role with the value (.*)$")
     public void evaluationRequestWithSubjectAttribute(final String subjectAttribute) throws Throwable {
 
-        List<Attribute> subjectAttributes = new ArrayList<Attribute>();
+        Set<Attribute> subjectAttributes = new HashSet<Attribute>();
         subjectAttributes.add(new Attribute(DEFAULT_ATTRIBUTE_ISSUER, "role", subjectAttribute));
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
                 this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID, DEFAULT_RESOURCE_IDENTIFIER,
@@ -198,7 +199,7 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
     public void evaluationRequestForResourceWithSubjectAttribute(final String resourceIdentifier,
             final String attributeName, final String attributeValue) throws Throwable {
 
-        List<Attribute> subjectAttributes = new ArrayList<Attribute>();
+        Set<Attribute> subjectAttributes = new HashSet<Attribute>();
         subjectAttributes.add(new Attribute(DEFAULT_ATTRIBUTE_ISSUER, attributeName, attributeValue));
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
                 this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID, resourceIdentifier,
@@ -222,7 +223,7 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
 
     @When("^Evaluation request which has no subject attribute$")
     public void evaluation_request_which_has_no_subject_attribute() throws Throwable {
-        List<Attribute> subjectAttributes = new ArrayList<Attribute>();
+        Set<Attribute> subjectAttributes = Collections.emptySet();
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
                 this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID, DEFAULT_RESOURCE_IDENTIFIER,
                         subjectAttributes));
@@ -267,7 +268,7 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
 
     @When("^A policy evaluation is requested with any HTTP action$")
     public void a_policy_evaluation_is_requested_with_any_HTTP_action() throws Throwable {
-        List<Attribute> subjectAttributes = new ArrayList<Attribute>();
+        Set<Attribute> subjectAttributes = Collections.emptySet();
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
                 this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID, DEFAULT_RESOURCE_IDENTIFIER,
                         subjectAttributes));
@@ -275,7 +276,7 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
 
     @When("^A policy evaluation is requested with an HTTP action matching .*$")
     public void a_policy_evaluation_is_requested_with_an_HTTP_action_matching() throws Throwable {
-        List<Attribute> subjectAttributes = new ArrayList<Attribute>();
+        Set<Attribute> subjectAttributes = Collections.emptySet();
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
                 this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID, DEFAULT_RESOURCE_IDENTIFIER,
                         subjectAttributes));
@@ -283,7 +284,7 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
 
     @When("^A policy evaluation is requested with an HTTP action not matching .*$")
     public void a_policy_evaluation_is_requested_with_an_HTTP_action_not_matching() throws Throwable {
-        List<Attribute> subjectAttributes = new ArrayList<Attribute>();
+        Set<Attribute> subjectAttributes = Collections.emptySet();
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
                 this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION, DEFAULT_SUBJECT_ID,
                         DEFAULT_RESOURCE_IDENTIFIER, subjectAttributes));

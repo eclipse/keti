@@ -20,9 +20,9 @@ import static com.ge.predix.test.utils.ACSTestUtil.ACS_VERSION;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 import java.util.Random;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -102,13 +102,13 @@ public class PolicyHelper {
 
     public PolicyEvaluationRequestV1 createRandomEvalRequest() {
         Random r = new Random(System.currentTimeMillis());
-        List<Attribute> subjectAttributes = new ArrayList<Attribute>();
+        Set<Attribute> subjectAttributes = Collections.emptySet();
         return this.createEvalRequest(ACTIONS[r.nextInt(4)], String.valueOf(r.nextLong()),
                 "/alarms/sites/" + String.valueOf(r.nextLong()), subjectAttributes);
     }
 
     public PolicyEvaluationRequestV1 createEvalRequest(final String action, final String subjectIdentifier,
-            final String resourceIdentifier, final List<Attribute> subjectAttributes) {
+            final String resourceIdentifier, final Set<Attribute> subjectAttributes) {
         PolicyEvaluationRequestV1 policyEvaluationRequest = new PolicyEvaluationRequestV1();
         policyEvaluationRequest.setAction(action);
         policyEvaluationRequest.setSubjectIdentifier(subjectIdentifier);

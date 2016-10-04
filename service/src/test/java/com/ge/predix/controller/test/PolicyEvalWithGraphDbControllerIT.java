@@ -16,7 +16,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -219,7 +221,7 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
                     .readValue(mvcResult.getResponse().getContentAsByteArray(), PolicyEvaluationResult.class);
             assertThat(policyEvalResult.getEffect(), equalTo(expectedEffect));
             assertThat(policyEvalResult.getMessage(), equalTo(expectedMessage));
-        } finally{
+        } finally {
             graphResourceRepository.setTraversalLimit(traversalLimit);
             graphSubjectRepository.setTraversalLimit(traversalLimit);
         }
@@ -274,14 +276,24 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
     Object[] evaluationWithSupplementalAttributesData() {
         return new Object[] { this.testZone1, this.policySet, null, null,
                 createPolicyEvalRequest("GET", EVIDENCE_IMPLANT_ID, AGENT_MULDER,
-                        Arrays.asList(new Attribute[] { SPECIAL_AGENTS_GROUP_ATTRIBUTE, TOP_SECRET_CLASSIFICATION }),
-                        Arrays.asList(new Attribute[] { SPECIAL_AGENTS_GROUP_ATTRIBUTE, TOP_SECRET_CLASSIFICATION })),
+                        new HashSet<Attribute>(
+                                Arrays.asList(
+                                        new Attribute[] {
+                                                SPECIAL_AGENTS_GROUP_ATTRIBUTE,
+                                                TOP_SECRET_CLASSIFICATION
+                                        })),
+                        new HashSet<Attribute>(
+                                Arrays.asList(
+                                        new Attribute[] {
+                                                SPECIAL_AGENTS_GROUP_ATTRIBUTE,
+                                                TOP_SECRET_CLASSIFICATION
+                                        }))),
                 Effect.PERMIT };
     }
 
     /**
-     * Test that evaluation is successful when the resource and/or subject attributes exceed the length. The policy set will return
-     * indeterminate because the traversal limit is exceeded.
+     * Test that evaluation is successful when the resource and/or subject attributes exceed the length.
+     * The policy set will return indeterminate because the traversal limit is exceeded.
      */
     Object[] evaluationWithResourceAttributesExceedingTraversalLimitData() {
         String errorMessage = "The number of attributes on this resource '"
@@ -313,8 +325,8 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
     }
 
     PolicyEvaluationRequestV1 createPolicyEvalRequest(final String action, final String resourceIdentifier,
-            final String subjectIdentifier, final List<Attribute> supplementalResourceAttributes,
-            final List<Attribute> supplementalSubjectAttributes) {
+            final String subjectIdentifier, final Set<Attribute> supplementalResourceAttributes,
+            final Set<Attribute> supplementalSubjectAttributes) {
         PolicyEvaluationRequestV1 policyEvalRequest = new PolicyEvaluationRequestV1();
         policyEvalRequest.setAction("GET");
         policyEvalRequest.setResourceIdentifier(resourceIdentifier);
