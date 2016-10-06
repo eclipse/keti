@@ -103,6 +103,7 @@ public class TitanMigrationManagerTest {
         // Mock graph-save function with a locally defined saveResourcesToGraph()
         Mockito.when(this.resourceHierarchicalRepository.save(anyCollectionOf(ResourceEntity.class)))
                 .thenAnswer(new Answer<List<ResourceEntity>>() {
+                    @SuppressWarnings("unchecked")
                     public List<ResourceEntity> answer(final InvocationOnMock invocation) {
                         Object[] args = invocation.getArguments();
                         return saveResourcesToGraph((List<ResourceEntity>) args[0]);
