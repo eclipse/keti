@@ -1,6 +1,6 @@
 {
 	"subjectIdentifier" : "dave",
-	"subjectId" : "dave"
+	"subjectId" : "dave",
 	"attributes" : [
 	    { "issuer" : "https://acs.attributes.int",
 	      "name" : "group",

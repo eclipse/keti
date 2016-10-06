@@ -40,7 +40,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 @Profile({ "cloudDbConfig" })
 @EnableAutoConfiguration
-@EnableJpaRepositories("com.ge.predix.acs")
+@EnableJpaRepositories({ "com.ge.predix.acs.service.policy.admin.dao",
+        "com.ge.predix.acs.privilege.management.dao",
+        "com.ge.predix.acs.zone.management.dao" })
 public class CloudDataSourceConfig extends AbstractCloudConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudDataSourceConfig.class);
 

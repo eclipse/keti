@@ -1,5 +1,5 @@
 {
     "name": "my-acs-zone",
     "subdomain": "my-zone-subdomain",
-    "description": "Sample acs zone",
+    "description": "Sample acs zone"
 }
