@@ -37,7 +37,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 @Profile({ "envDbConfig" })
 @EnableAutoConfiguration
-@EnableJpaRepositories("com.ge.predix.acs")
+@EnableJpaRepositories({ "com.ge.predix.acs.service.policy.admin.dao",
+    "com.ge.predix.acs.privilege.management.dao",
+    "com.ge.predix.acs.zone.management.dao" })
 public class EnvDataSourceConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvDataSourceConfig.class);
 

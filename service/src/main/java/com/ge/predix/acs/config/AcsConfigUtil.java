@@ -36,7 +36,9 @@ public class AcsConfigUtil {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(final DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
-        em.setPackagesToScan(new String[] { "com.ge.predix.acs" //$NON-NLS-1$
+        em.setPackagesToScan(new String[] { "com.ge.predix.acs.service.policy.admin.dao",
+                "com.ge.predix.acs.privilege.management.dao",
+                "com.ge.predix.acs.zone.management.dao"
         });
 
         JpaVendorAdapter vendorAdapter = new OpenJpaVendorAdapter();
