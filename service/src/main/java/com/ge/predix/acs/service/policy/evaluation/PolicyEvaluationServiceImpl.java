@@ -202,7 +202,7 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
                     break;
                 }
             }
-            result = new PolicyEvaluationResult(effect, new ArrayList<>(subjectAttributes),
+            result = new PolicyEvaluationResult(effect, subjectAttributes,
                     new ArrayList<>(resourceAttributes), resolvedResourceUris);
         } catch (AttributeLimitExceededException ae) {
             result = handlePolicyEvaluationException(policySet, subjectIdentifier, resourceURI, ae);

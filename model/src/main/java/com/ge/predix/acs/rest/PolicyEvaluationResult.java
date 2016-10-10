@@ -38,7 +38,7 @@ public class PolicyEvaluationResult {
     private Effect effect;
 
     @ApiModelProperty(value = "The collection of the subject's attributes", required = false)
-    private List<Attribute> subjectAttributes = Collections.emptyList();
+    private Set<Attribute> subjectAttributes = Collections.emptySet();
 
     @ApiModelProperty(value = "The collection of the resource's attributes", required = false)
     private List<Attribute> resourceAttributes = Collections.emptyList();
@@ -65,14 +65,14 @@ public class PolicyEvaluationResult {
         this.effect = decision;
     }
 
-    public PolicyEvaluationResult(final Effect effect, final List<Attribute> subjectAttributes,
+    public PolicyEvaluationResult(final Effect effect, final Set<Attribute> subjectAttributes,
             final List<Attribute> resourceAttributes) {
         this.effect = effect;
         this.subjectAttributes = subjectAttributes;
         this.resourceAttributes = resourceAttributes;
     }
 
-    public PolicyEvaluationResult(final Effect effect, final List<Attribute> subjectAttributes,
+    public PolicyEvaluationResult(final Effect effect, final Set<Attribute> subjectAttributes,
             final List<Attribute> resourceAttributes, final Set<String> resolvedResourceUris) {
         this.effect = effect;
         this.subjectAttributes = subjectAttributes;
@@ -88,11 +88,11 @@ public class PolicyEvaluationResult {
         this.effect = effect;
     }
 
-    public List<Attribute> getSubjectAttributes() {
+    public Set<Attribute> getSubjectAttributes() {
         return this.subjectAttributes;
     }
 
-    public void setSubjectAttributes(final List<Attribute> subjectAttributes) {
+    public void setSubjectAttributes(final Set<Attribute> subjectAttributes) {
         this.subjectAttributes = subjectAttributes;
     }
 
