@@ -16,6 +16,9 @@
 
 package com.ge.predix.acs.policy.evaluation.cache;
 
+import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
+import static com.ge.predix.acs.testutils.XFiles.XFILES_ID;
+
 import static org.mockito.internal.util.reflection.Whitebox.getInternalState;
 import static org.testng.Assert.assertEquals;
 
@@ -34,6 +37,7 @@ public class InMemoryPolicyEvaluationCacheTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String ZONE_NAME = "testzone1";
+    public static final String ACTION_GET = "GET";
     private final InMemoryPolicyEvaluationCache cache = new InMemoryPolicyEvaluationCache();
 
     @AfterMethod
@@ -45,11 +49,11 @@ public class InMemoryPolicyEvaluationCacheTest {
     @Test
     public void testSetPolicyEvalResult() throws Exception {
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = new PolicyEvaluationResult(Effect.PERMIT);
         String value = OBJECT_MAPPER.writeValueAsString(result);
@@ -64,7 +68,7 @@ public class InMemoryPolicyEvaluationCacheTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSetPolicyPolicySetChangedTimestamp() throws Exception {
-        String key = AbstractPolicyEvaluationCache.policySetKey("testzone1", "default");
+        String key = AbstractPolicyEvaluationCache.policySetKey(ZONE_NAME, "testSetPolicyPolicySetChangedTimestamp");
         String value = OBJECT_MAPPER.writeValueAsString(new DateTime());
         this.cache.set(key, value);
 
@@ -77,7 +81,7 @@ public class InMemoryPolicyEvaluationCacheTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSetPolicyResourceChangedTimestamp() throws Exception {
-        String key = AbstractPolicyEvaluationCache.resourceKey("testzone1", "/x-files");
+        String key = AbstractPolicyEvaluationCache.resourceKey(ZONE_NAME, XFILES_ID);
         String value = OBJECT_MAPPER.writeValueAsString(new DateTime());
         this.cache.set(key, value);
 
@@ -90,7 +94,7 @@ public class InMemoryPolicyEvaluationCacheTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSetPolicySubjectChangedTimestamp() throws Exception {
-        String key = AbstractPolicyEvaluationCache.subjectKey("testzone1", "mulder");
+        String key = AbstractPolicyEvaluationCache.subjectKey(ZONE_NAME, AGENT_MULDER);
         String value = OBJECT_MAPPER.writeValueAsString(new DateTime());
         this.cache.set(key, value);
 

@@ -1,0 +1,13 @@
+{
+    "name" : "not-applicable-policy-set",
+    "policies" : [
+        {
+            "name" : "This policy should not match during test.",
+            "conditions" : [
+                { "name" : "is always false",
+                  "condition" : "'sanramon'.equals('ny')" }
+            ],
+            "effect" : "PERMIT"
+        }
+    ]
+}

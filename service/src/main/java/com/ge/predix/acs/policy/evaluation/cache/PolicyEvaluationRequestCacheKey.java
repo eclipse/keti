@@ -16,6 +16,8 @@
 
 package com.ge.predix.acs.policy.evaluation.cache;
 
+import java.util.LinkedHashSet;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -24,24 +26,24 @@ import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 public class PolicyEvaluationRequestCacheKey {
 
     private final PolicyEvaluationRequestV1 request;
-    private final String policySetId;
+    private final LinkedHashSet<String> policySetIds;
     private final String resourceId;
     private final String subjectId;
     private final String zoneId;
 
-    public PolicyEvaluationRequestCacheKey(final PolicyEvaluationRequestV1 request, final String policySetId,
-            final String zoneId) {
+    public PolicyEvaluationRequestCacheKey(final PolicyEvaluationRequestV1 request,
+            final LinkedHashSet<String> policySetIds, final String zoneId) {
         this.request = request;
-        this.policySetId = policySetId;
+        this.policySetIds = policySetIds;
         this.resourceId = request.getResourceIdentifier();
         this.subjectId = request.getSubjectIdentifier();
         this.zoneId = zoneId;
     }
 
-    public PolicyEvaluationRequestCacheKey(final String policySetId, final String resourceId, final String subjectId,
-            final String zoneId) {
+    public PolicyEvaluationRequestCacheKey(final LinkedHashSet<String> policySetIds, final String resourceId,
+            final String subjectId, final String zoneId) {
         this.request = null;
-        this.policySetId = policySetId;
+        this.policySetIds = policySetIds;
         this.resourceId = resourceId;
         this.subjectId = subjectId;
         this.zoneId = zoneId;
@@ -53,12 +55,6 @@ public class PolicyEvaluationRequestCacheKey {
             keyBuilder.append("*:");
         } else {
             keyBuilder.append(this.zoneId);
-            keyBuilder.append(":");
-        }
-        if (null == this.policySetId) {
-            keyBuilder.append("*:");
-        } else {
-            keyBuilder.append(Integer.toHexString(this.policySetId.hashCode()));
             keyBuilder.append(":");
         }
         if (null == this.subjectId) {
@@ -83,15 +79,14 @@ public class PolicyEvaluationRequestCacheKey {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(this.request).append(this.policySetId).append(this.zoneId).toHashCode();
+        return new HashCodeBuilder().append(this.request).append(this.zoneId).toHashCode();
     }
 
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof PolicyEvaluationRequestCacheKey) {
             final PolicyEvaluationRequestCacheKey other = (PolicyEvaluationRequestCacheKey) obj;
-            return new EqualsBuilder().append(this.request, other.request).append(this.policySetId, other.policySetId)
-                    .append(this.zoneId, other.zoneId).isEquals();
+            return new EqualsBuilder().append(this.request, other.request).append(this.zoneId, other.zoneId).isEquals();
         }
         return false;
     }
@@ -100,8 +95,8 @@ public class PolicyEvaluationRequestCacheKey {
         return this.request;
     }
 
-    public String getPolicySetId() {
-        return this.policySetId;
+    public LinkedHashSet<String> getPolicySetIds() {
+        return this.policySetIds;
     }
 
     public String getResourceId() {
@@ -118,7 +113,7 @@ public class PolicyEvaluationRequestCacheKey {
 
     public static class Builder {
         private PolicyEvaluationRequestV1 builderRequest;
-        private String builderPolicySetId;
+        private LinkedHashSet<String> builderPolicySetIds = new LinkedHashSet<String>();
         private String builderResourceId;
         private String builderSubjectId;
         private String builderZoneId;
@@ -128,8 +123,14 @@ public class PolicyEvaluationRequestCacheKey {
             return this;
         }
 
-        public Builder policySetId(final String policySet) {
-            this.builderPolicySetId = policySet;
+        public Builder policySetIds(final LinkedHashSet<String> policySets) {
+            if (null != this.builderRequest && !this.builderRequest.getPolicySetsEvaluationOrder().isEmpty()) {
+                throw new IllegalStateException(
+                        "Cannot set policy sets evaluation order if set in the policy request.");
+            }
+            if (null != policySets) {
+                this.builderPolicySetIds = policySets;
+            }
             return this;
         }
 
@@ -156,10 +157,15 @@ public class PolicyEvaluationRequestCacheKey {
 
         public PolicyEvaluationRequestCacheKey build() {
             if (null != this.builderRequest) {
-                return new PolicyEvaluationRequestCacheKey(this.builderRequest, this.builderPolicySetId,
-                        this.builderZoneId);
+                if (this.builderRequest.getPolicySetsEvaluationOrder().isEmpty()) {
+                    return new PolicyEvaluationRequestCacheKey(this.builderRequest, this.builderPolicySetIds,
+                            this.builderZoneId);
+                } else {
+                    return new PolicyEvaluationRequestCacheKey(this.builderRequest,
+                            this.builderRequest.getPolicySetsEvaluationOrder(), this.builderZoneId);
+                }
             }
-            return new PolicyEvaluationRequestCacheKey(this.builderPolicySetId, this.builderResourceId,
+            return new PolicyEvaluationRequestCacheKey(this.builderPolicySetIds, this.builderResourceId,
                     this.builderSubjectId, this.builderZoneId);
         }
     }

@@ -1,5 +1,7 @@
 package com.ge.predix.acs.policy.evaluation.cache;
 
+import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
+import static com.ge.predix.acs.testutils.XFiles.XFILES_ID;
 import static com.ge.predix.acs.policy.evaluation.cache.AbstractPolicyEvaluationCacheTest.ZONE_NAME;
 import static com.ge.predix.acs.policy.evaluation.cache.AbstractPolicyEvaluationCacheTest.mockPermitResult;
 import static org.testng.Assert.assertNotNull;
@@ -34,6 +36,8 @@ import com.ge.predix.acs.rest.PolicyEvaluationResult;
         classes = { DefaultPolicyEvaluationCacheCircuitBreakerTest.Config.class,
                 HystrixPolicyEvaluationCacheCircuitBreaker.class })
 public class DefaultPolicyEvaluationCacheCircuitBreakerTest extends AbstractTestNGSpringContextTests {
+    public static final String ACTION_GET = "GET";
+
     @Autowired
     private PolicyEvaluationCacheCircuitBreaker policyEvaluationCacheCircuitBreaker;
     @Autowired
@@ -57,11 +61,11 @@ public class DefaultPolicyEvaluationCacheCircuitBreakerTest extends AbstractTest
     @Test
     public void testGetAndSetPolicyEvaluationCache() {
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = mockPermitResult();
         this.policyEvaluationCacheCircuitBreaker.set(key, result);
@@ -82,13 +86,13 @@ public class DefaultPolicyEvaluationCacheCircuitBreakerTest extends AbstractTest
      */
     @Test
     public void testResourceTranslationPolicyEvaluationCache() {
-        this.policyEvaluationCacheCircuitBreaker.setResourceTranslation(ZONE_NAME, "/x-files", "/v1/x-files");
+        this.policyEvaluationCacheCircuitBreaker.setResourceTranslation(ZONE_NAME, XFILES_ID, "/v1/x-files");
         this.policyEvaluationCacheCircuitBreaker.setResourceTranslations(ZONE_NAME,
-                new HashSet<>(Arrays.asList(new String[] { "/x-files" })), "/v1/x-files");
+                new HashSet<>(Arrays.asList(new String[] { XFILES_ID })), "/v1/x-files");
         openCircuit();
-        this.policyEvaluationCacheCircuitBreaker.setResourceTranslation(ZONE_NAME, "/x-files", "/v1/x-files");
+        this.policyEvaluationCacheCircuitBreaker.setResourceTranslation(ZONE_NAME, XFILES_ID, "/v1/x-files");
         this.policyEvaluationCacheCircuitBreaker.setResourceTranslations(ZONE_NAME,
-                new HashSet<>(Arrays.asList(new String[] { "/x-files" })), "/v1/x-files");
+                new HashSet<>(Arrays.asList(new String[] { XFILES_ID })), "/v1/x-files");
         // Success happens if the calls above do not throw an exception.
     }
 
@@ -113,10 +117,10 @@ public class DefaultPolicyEvaluationCacheCircuitBreakerTest extends AbstractTest
      */
     @Test
     public void testCircuitBreakerResetForSubject() {
-        this.policyEvaluationCacheCircuitBreaker.resetForSubject(ZONE_NAME, "mulder");
+        this.policyEvaluationCacheCircuitBreaker.resetForSubject(ZONE_NAME, AGENT_MULDER);
         openCircuit();
         try {
-            this.policyEvaluationCacheCircuitBreaker.resetForSubject(ZONE_NAME, "mulder");
+            this.policyEvaluationCacheCircuitBreaker.resetForSubject(ZONE_NAME, AGENT_MULDER);
         } catch (IllegalStateException ex) {
             // Success
             return;
@@ -145,10 +149,10 @@ public class DefaultPolicyEvaluationCacheCircuitBreakerTest extends AbstractTest
      */
     @Test
     public void testCircuitBreakerResetForResource() {
-        this.policyEvaluationCacheCircuitBreaker.resetForResource(ZONE_NAME, "/x-files");
+        this.policyEvaluationCacheCircuitBreaker.resetForResource(ZONE_NAME, XFILES_ID);
         openCircuit();
         try {
-            this.policyEvaluationCacheCircuitBreaker.resetForResource(ZONE_NAME, "/x-files");
+            this.policyEvaluationCacheCircuitBreaker.resetForResource(ZONE_NAME, XFILES_ID);
         } catch (IllegalStateException ex) {
             // Success
             return;
