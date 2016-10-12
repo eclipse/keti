@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +73,8 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
     private List<String> assembleKeys(final PolicyEvaluationRequestCacheKey key) {
         List<String> keys = new ArrayList<>();
-        keys.add(policySetKey(key.getZoneId(), key.getPolicySetId()));
+        LinkedHashSet<String> policySetIds = key.getPolicySetIds();
+        policySetIds.forEach(policySetId -> keys.add(policySetKey(key.getZoneId(), policySetId)));
         keys.add(resourceKey(key.getZoneId(), key.getResourceId()));
         keys.add(subjectKey(key.getZoneId(), key.getSubjectId()));
         keys.add(key.toRedisKey());
@@ -82,8 +84,10 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     private void logCacheGetDebugMessages(final PolicyEvaluationRequestCacheKey key, final String redisKey,
             final List<String> keys, final List<String> values) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("Getting timestamp for policy set: '%s', key: '%s', timestamp:'%s'.",
-                    key.getPolicySetId(), keys.get(0), values.get(0)));
+            LinkedHashSet<String> policySetIds = key.getPolicySetIds();
+            policySetIds.forEach(policySetId -> LOGGER
+                    .debug(String.format("Getting timestamp for policy set: '%s', key: '%s', timestamp:'%s'.",
+                            policySetId, keys.get(0), values.get(0))));
             LOGGER.debug(String.format("Getting timestamp for resource: '%s', key: '%s', timestamp:'%s'.",
                     key.getResourceId(), keys.get(1), values.get(1)));
             LOGGER.debug(String.format("Getting timestamp for subject: '%s', key: '%s', timestamp:'%s'.",
@@ -284,7 +288,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     }
 
     static boolean isPolicyEvalResultKey(final String key) {
-        return key.matches("^[^:]*:[^:]*:[^:]*:[^:]*:[^:]*$");
+        return key.matches("^[^:]*:[^:]*:[^:]*:[^:]*$");
     }
 
     static boolean isPolicySetChangedKey(final String key) {

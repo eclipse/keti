@@ -1,8 +1,8 @@
 {
-    "name" : "test-policy-set",
+    "name" : "policy-set-with-one-policy-one-condition",
     "policies" : [
         {
-            "name" : "Operators can read a site if they are assigned to the site.",
+            "name" : "Operators assigned to a site can read a resource from any site.",
             "target" : {
                 "name" : "When an operator reads a site",
                 "resource" : {

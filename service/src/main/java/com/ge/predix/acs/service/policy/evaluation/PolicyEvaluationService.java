@@ -15,15 +15,10 @@
  *******************************************************************************/
 package com.ge.predix.acs.service.policy.evaluation;
 
-import java.util.Set;
-
-import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 
 public interface PolicyEvaluationService {
     PolicyEvaluationResult evalPolicy(PolicyEvaluationRequestV1 request);
 
-    PolicyEvaluationResult evalPolicy(final String uri, final String subjectIdentifier, final String action,
-            final Set<Attribute> supplementalResourceAttributes, final Set<Attribute> supplementalSubjectAttributes);
 }

@@ -27,13 +27,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.util.reflection.Whitebox;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -52,16 +57,22 @@ import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.Policy;
 import com.ge.predix.acs.model.PolicySet;
+import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
+import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
+import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.service.policy.admin.PolicyManagementService;
 import com.ge.predix.acs.service.policy.matcher.MatchResult;
 import com.ge.predix.acs.service.policy.matcher.PolicyMatchCandidate;
 import com.ge.predix.acs.service.policy.matcher.PolicyMatcher;
 import com.ge.predix.acs.service.policy.validation.PolicySetValidator;
 import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
+import com.ge.predix.acs.utils.JsonUtils;
+import com.ge.predix.acs.zone.management.dao.ZoneEntity;
+import com.ge.predix.acs.zone.resolver.ZoneResolver;
 
 /**
  * Unit tests for PolicyEvaluationService. Uses mocks, no external dependencies.
@@ -79,6 +90,9 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     private static final String RES_ATTRIB_ROLE_REQUIRED = "role_required";
     private static final String RES_ATTRIB_LOCATION = "location";
     private static final String RES_ATTRIB_LOCATION_VALUE = "sanramon";
+
+    private final JsonUtils jsonUtils = new JsonUtils();
+
     @InjectMocks
     private PolicyEvaluationServiceImpl evaluationService;
     @Mock
@@ -89,6 +103,10 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     private PolicyMatcher policyMatcher;
     @Mock
     private PolicyContextResolver policyScopeResolver;
+    @Mock
+    private ZoneResolver zoneResolver;
+    @Mock
+    private PolicyEvaluationCacheCircuitBreaker cache;
     @Autowired
     private PolicySetValidator policySetValidator;
 
@@ -106,28 +124,21 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
         this.evaluationService = new PolicyEvaluationServiceImpl();
         Whitebox.setInternalState(this.evaluationService, "policySetValidator", this.policySetValidator);
         MockitoAnnotations.initMocks(this);
+        when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
+        when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
     }
 
     @Test(dataProvider = "policyRequestParameterProvider", expectedExceptions = IllegalArgumentException.class)
     public void testEvaluateWithNullParameters(final String resource, final String subject, final String action) {
-        this.evaluationService.evalPolicy(resource, subject, action, EMPTY_ATTRS, EMPTY_ATTRS);
+        this.evaluationService.evalPolicy(createRequest(resource, subject, action));
     }
 
     public void testEvaluateWithNoPolicySet() {
-        PolicyEvaluationResult result = this.evaluationService.evalPolicy("resource1", "subject1", "GET", EMPTY_ATTRS,
-                EMPTY_ATTRS);
+        PolicyEvaluationResult result = this.evaluationService
+                .evalPolicy(createRequest("resource1", "subject1", "GET"));
         Assert.assertEquals(result.getEffect(), Effect.NOT_APPLICABLE);
         Assert.assertEquals(result.getResourceAttributes().size(), 0);
         Assert.assertEquals(result.getSubjectAttributes().size(), 0);
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testEvaluateWithTwoPolicySets() {
-        List<PolicySet> policySets = new ArrayList<>();
-        policySets.add(new PolicySet());
-        policySets.add(new PolicySet());
-        when(this.policyService.getAllPolicySets()).thenReturn(policySets);
-        this.evaluationService.evalPolicy("resource1", "subject1", "GET", EMPTY_ATTRS, EMPTY_ATTRS);
     }
 
     public void testEvaluateWithOnePolicySetNoPolicies() {
@@ -137,8 +148,8 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
         List<MatchedPolicy> matchedPolicies = Collections.emptyList();
         when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
                 .thenReturn(new MatchResult(matchedPolicies, new HashSet<String>()));
-        PolicyEvaluationResult evalPolicy = this.evaluationService.evalPolicy("resource1", "subject1", "GET",
-                EMPTY_ATTRS, EMPTY_ATTRS);
+        PolicyEvaluationResult evalPolicy = this.evaluationService
+                .evalPolicy(createRequest("resource1", "subject1", "GET"));
         Assert.assertEquals(evalPolicy.getEffect(), Effect.NOT_APPLICABLE);
     }
 
@@ -146,8 +157,8 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     public void testEvaluateWithPolicy(final File inputPolicy, final Effect effect)
             throws JsonParseException, JsonMappingException, IOException {
         initializePolicyMock(inputPolicy);
-        PolicyEvaluationResult evalPolicy = this.evaluationService.evalPolicy("resource1", "subject1", "GET",
-                EMPTY_ATTRS, EMPTY_ATTRS);
+        PolicyEvaluationResult evalPolicy = this.evaluationService
+                .evalPolicy(createRequest("resource1", "subject1", "GET"));
         Assert.assertEquals(evalPolicy.getEffect(), effect);
     }
 
@@ -168,8 +179,8 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
         when(this.privilegeManagementService.getByResourceIdentifier(anyString())).thenReturn(this.getResource());
         when(this.privilegeManagementService.getBySubjectIdentifier(anyString()))
                 .thenReturn(this.getSubject(acsSubjectAttributeValue));
-        PolicyEvaluationResult evalPolicyResponse = this.evaluationService.evalPolicy("resource1", "subject1", "GET",
-                EMPTY_ATTRS, EMPTY_ATTRS);
+        PolicyEvaluationResult evalPolicyResponse = this.evaluationService
+                .evalPolicy(createRequest("resource1", "subject1", "GET"));
         Assert.assertEquals(evalPolicyResponse.getEffect(), effect);
         Assert.assertTrue(evalPolicyResponse.getResourceAttributes().contains(roleAttribute));
         Assert.assertTrue(evalPolicyResponse.getResourceAttributes().contains(locationAttribute));
@@ -182,6 +193,59 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
                 Assert.assertTrue(evalPolicyResponse.getSubjectAttributes().contains(attribute));
             }
         }
+    }
+
+    @Test(
+            dataProvider = "filterPolicySetsInvalidRequestDataProvider",
+            expectedExceptions = IllegalArgumentException.class)
+    public void testFilterPolicySetsByPriorityForInvalidRequest(final List<PolicySet> allPolicySets,
+            final LinkedHashSet<String> policySetsPriority) {
+        this.evaluationService.filterPolicySetsByPriority("subject1", "resource1", allPolicySets, policySetsPriority);
+    }
+
+    @Test(dataProvider = "filterPolicySetsDataProvider")
+    public void testFilterPolicySetsByPriority(final List<PolicySet> allPolicySets,
+            final LinkedHashSet<String> policySetsPriority, LinkedHashSet<PolicySet> expectedFilteredPolicySets) {
+        LinkedHashSet<PolicySet> actualFilteredPolicySets = this.evaluationService
+                .filterPolicySetsByPriority("subject1", "resource1", allPolicySets, policySetsPriority);
+        Assert.assertEquals(actualFilteredPolicySets, expectedFilteredPolicySets);
+    }
+
+    @Test(dataProvider = "multiplePolicySetsRequestDataProvider")
+    public void testEvaluateWithMultiplePolicySets(final List<PolicySet> allPolicySets,
+            final LinkedHashSet<String> policySetsPriority, final Effect effect) {
+        when(this.policyService.getAllPolicySets()).thenReturn(allPolicySets);
+        when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
+                .thenAnswer(new Answer<MatchResult>() {
+                    public MatchResult answer(final InvocationOnMock invocation) {
+                        Object[] args = invocation.getArguments();
+                        @SuppressWarnings("unchecked")
+                        List<Policy> policyList = (List<Policy>) args[1];
+                        List<MatchedPolicy> matchedPolicies = new ArrayList<>();
+                        // Mocking the policyMatcher to return all policies as matched.
+                        policyList.forEach(
+                                policy -> matchedPolicies.add(new MatchedPolicy(policy, EMPTY_ATTRS, EMPTY_ATTRS)));
+                        return new MatchResult(matchedPolicies, new HashSet<String>());
+                    }
+                });
+
+        PolicyEvaluationResult result = this.evaluationService
+                .evalPolicy(createRequest("anyresource", "anysubject", "GET", policySetsPriority));
+        Assert.assertEquals(result.getEffect(), effect);
+    }
+
+    @Test
+    public void testPolicyEvaluationExceptionHandling() {
+        List<PolicySet> twoPolicySets = createNotApplicableAndDenyPolicySets();
+        when(this.policyService.getAllPolicySets()).thenReturn(twoPolicySets);
+        when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
+                .thenThrow(new RuntimeException("This policy matcher is designed to throw an exception."));
+
+        PolicyEvaluationResult result = this.evaluationService.evalPolicy(createRequest("anyresource", "anysubject",
+                "GET", Stream.of(twoPolicySets.get(0).getName(), twoPolicySets.get(1).getName())
+                        .collect(Collectors.toCollection(LinkedHashSet::new))));
+
+        Assert.assertEquals(result.getEffect(), Effect.INDETERMINATE);
     }
 
     /**
@@ -284,4 +348,147 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
         return new Object[][] { { null, "s1", "a1" }, { "r1", null, "a1" }, { "r1", "s1", null }, };
     }
 
+    @DataProvider(name = "filterPolicySetsInvalidRequestDataProvider")
+    private Object[][] filterPolicySetsInvalidRequestDataProvider()
+            throws JsonParseException, JsonMappingException, IOException {
+        List<PolicySet> onePolicySet = createDenyPolicySet();
+        List<PolicySet> twoPolicySets = createNotApplicableAndDenyPolicySets();
+        return new Object[][] { filterOnePolicySetByNonexistentPolicySet(onePolicySet),
+                filterTwoPolisySetsByEmptyList(twoPolicySets),
+                filterTwoPolicySetsByByNonexistentPolicySet(twoPolicySets) };
+    }
+
+    private Object[] filterOnePolicySetByNonexistentPolicySet(List<PolicySet> onePolicySet) {
+        return new Object[] { onePolicySet,
+                Stream.of("nonexistent-policy-set").collect(Collectors.toCollection(LinkedHashSet::new)) };
+    }
+
+    private Object[] filterTwoPolisySetsByEmptyList(List<PolicySet> twoPolicySets) {
+        return new Object[] { twoPolicySets, PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER };
+    }
+
+    private Object[] filterTwoPolicySetsByByNonexistentPolicySet(List<PolicySet> twoPolicySets) {
+        return new Object[] { twoPolicySets, Stream.of(twoPolicySets.get(0).getName(), "noexistent-policy-set")
+                .collect(Collectors.toCollection(LinkedHashSet::new)) };
+    }
+
+    @DataProvider(name = "filterPolicySetsDataProvider")
+    private Object[][] filterPolicySetsDataProvider() {
+        List<PolicySet> denyPolicySet = createDenyPolicySet();
+        List<PolicySet> notApplicableAndDenyPolicySets = createNotApplicableAndDenyPolicySets();
+        return new Object[][] { filterOnePolicySetByEmptyEvaluationOrder(denyPolicySet), filterOnePolicySetByItself(denyPolicySet),
+                filterTwoPolicySetsByFirstSet(notApplicableAndDenyPolicySets),
+                filterTwoPolicySetsBySecondPolicySet(notApplicableAndDenyPolicySets),
+                filterTwoPolicySetsByItself(notApplicableAndDenyPolicySets) };
+    }
+
+    private Object[] filterTwoPolicySetsByItself(List<PolicySet> twoPolicySets) {
+        return new Object[] { twoPolicySets,
+                Stream.of(twoPolicySets.get(0).getName(), twoPolicySets.get(1).getName())
+                        .collect(Collectors.toCollection(LinkedHashSet::new)),
+                twoPolicySets.stream().collect(Collectors.toCollection(LinkedHashSet::new)) };
+    }
+
+    private Object[] filterTwoPolicySetsBySecondPolicySet(List<PolicySet> twoPolicySets) {
+        return new Object[] { twoPolicySets,
+                Stream.of(twoPolicySets.get(1).getName()).collect(Collectors.toCollection(LinkedHashSet::new)),
+                Stream.of(twoPolicySets.get(1)).collect(Collectors.toCollection(LinkedHashSet::new)) };
+    }
+
+    private Object[] filterTwoPolicySetsByFirstSet(List<PolicySet> twoPolicySets) {
+        return new Object[] { twoPolicySets,
+                Stream.of(twoPolicySets.get(0).getName()).collect(Collectors.toCollection(LinkedHashSet::new)),
+                Stream.of(twoPolicySets.get(0)).collect(Collectors.toCollection(LinkedHashSet::new)) };
+    }
+
+    private Object[] filterOnePolicySetByItself(List<PolicySet> onePolicySet) {
+        return new Object[] { onePolicySet,
+                Stream.of(onePolicySet.get(0).getName()).collect(Collectors.toCollection(LinkedHashSet::new)),
+                onePolicySet.stream().collect(Collectors.toCollection(LinkedHashSet::new)) };
+    }
+
+    private Object[] filterOnePolicySetByEmptyEvaluationOrder(List<PolicySet> onePolicySet) {
+        return new Object[] { onePolicySet, PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER,
+                onePolicySet.stream().collect(Collectors.toCollection(LinkedHashSet::new)) };
+    }
+
+    @DataProvider(name = "multiplePolicySetsRequestDataProvider")
+    private Object[][] multiplePolicySetsRequestDataProvider()
+            throws JsonParseException, JsonMappingException, IOException {
+        List<PolicySet> denyPolicySet = createDenyPolicySet();
+        List<PolicySet> notApplicableAndDenyPolicySets = createNotApplicableAndDenyPolicySets();
+        return new Object[][] { requestEvaluationWithEmptyPolicySetsListAndEmptyPriorityList(),
+                requestEvaluationWithOnePolicySetAndEmptyPriorityList(denyPolicySet),
+                requestEvaluationWithFirstOfOnePolicySets(denyPolicySet),
+                requestEvaluationWithFirstOfTwoPolicySets(notApplicableAndDenyPolicySets),
+                requestEvaluationWithSecondOfTwoPolicySets(notApplicableAndDenyPolicySets),
+                requestEvaluationWithAllOfTwoPolicySets(notApplicableAndDenyPolicySets) };
+    }
+
+    private Object[] requestEvaluationWithAllOfTwoPolicySets(List<PolicySet> twoPolicySets) {
+        return new Object[] { twoPolicySets, Stream.of(twoPolicySets.get(0).getName(), twoPolicySets.get(1).getName())
+                .collect(Collectors.toCollection(LinkedHashSet::new)), Effect.DENY };
+    }
+
+    private Object[] requestEvaluationWithSecondOfTwoPolicySets(List<PolicySet> twoPolicySets) {
+        return new Object[] { twoPolicySets,
+                Stream.of(twoPolicySets.get(1).getName()).collect(Collectors.toCollection(LinkedHashSet::new)),
+                Effect.DENY };
+    }
+
+    private Object[] requestEvaluationWithFirstOfTwoPolicySets(List<PolicySet> twoPolicySets) {
+        return new Object[] { twoPolicySets,
+                Stream.of(twoPolicySets.get(0).getName()).collect(Collectors.toCollection(LinkedHashSet::new)),
+                Effect.NOT_APPLICABLE };
+    }
+
+    private Object[] requestEvaluationWithFirstOfOnePolicySets(List<PolicySet> onePolicySet) {
+        return new Object[] { onePolicySet,
+                Stream.of(onePolicySet.get(0).getName()).collect(Collectors.toCollection(LinkedHashSet::new)),
+                Effect.DENY };
+    }
+
+    private Object[] requestEvaluationWithOnePolicySetAndEmptyPriorityList(List<PolicySet> onePolicySet) {
+        return new Object[] { onePolicySet, PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER, Effect.DENY };
+    }
+
+    private Object[] requestEvaluationWithEmptyPolicySetsListAndEmptyPriorityList() {
+        return new Object[] { Collections.emptyList(), PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER,
+                Effect.NOT_APPLICABLE };
+    }
+
+    private List<PolicySet> createDenyPolicySet() {
+        List<PolicySet> policySets = new ArrayList<PolicySet>();
+        policySets.add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalDeny.json", PolicySet.class));
+        Assert.assertNotNull(policySets, "Policy set file is not found or invalid");
+        return policySets;
+    }
+
+    private List<PolicySet> createNotApplicableAndDenyPolicySets() {
+        List<PolicySet> policySets = new ArrayList<PolicySet>();
+        policySets
+                .add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalNotApplicable.json", PolicySet.class));
+        policySets.add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalDeny.json", PolicySet.class));
+        Assert.assertNotNull(policySets, "Policy set files are not found or invalid");
+        Assert.assertTrue(policySets.size() == 2, "One or more policy set files are not found or invalid");
+        return policySets;
+    }
+
+    private PolicyEvaluationRequestV1 createRequest(final String resource, final String subject, final String action) {
+        PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
+        request.setAction(action);
+        request.setSubjectIdentifier(subject);
+        request.setResourceIdentifier(resource);
+        return request;
+    }
+
+    private PolicyEvaluationRequestV1 createRequest(final String resource, final String subject, final String action,
+            LinkedHashSet<String> policySetsEvaluationOrder) {
+        PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
+        request.setAction(action);
+        request.setSubjectIdentifier(subject);
+        request.setResourceIdentifier(resource);
+        request.setPolicySetsEvaluationOrder(policySetsEvaluationOrder);
+        return request;
+    }
 }

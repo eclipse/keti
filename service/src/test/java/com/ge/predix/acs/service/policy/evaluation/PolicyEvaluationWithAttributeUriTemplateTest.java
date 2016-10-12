@@ -38,14 +38,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
+import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
+import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementServiceImpl;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
+import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.acs.service.policy.admin.PolicyManagementService;
 import com.ge.predix.acs.service.policy.admin.PolicyManagementServiceImpl;
 import com.ge.predix.acs.service.policy.matcher.PolicyMatcherImpl;
+import com.ge.predix.acs.zone.management.dao.ZoneEntity;
+import com.ge.predix.acs.zone.resolver.ZoneResolver;
 
 public class PolicyEvaluationWithAttributeUriTemplateTest {
 
@@ -60,12 +65,20 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
 
     private final PolicyMatcherImpl policyMatcher = new PolicyMatcherImpl();
 
+    @Mock
+    private ZoneResolver zoneResolver;
+
+    @Mock
+    private PolicyEvaluationCacheCircuitBreaker cache; 
+
     @SuppressWarnings("unchecked")
     @Test(enabled = true)
     public void testEvaluateWithURIAttributeTemplate() throws JsonParseException, JsonMappingException, IOException {
         MockitoAnnotations.initMocks(this);
         Whitebox.setInternalState(this.policyMatcher, "privilegeManagementService", this.privilegeManagementService);
         Whitebox.setInternalState(this.evaluationService, "policyMatcher", this.policyMatcher);
+        when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
+        when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
 
         // set policy
         PolicySet policySet = new ObjectMapper()
@@ -88,14 +101,23 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
                 .thenReturn(testSubject);
 
         // resourceURI matches attributeURITemplate
-        PolicyEvaluationResult evalResult = this.evaluationService.evalPolicy("/v1/site/1234/asset/456", "test-subject",
-                "GET", null, null);
+        PolicyEvaluationResult evalResult = this.evaluationService
+                .evalPolicy(createRequest("/v1/site/1234/asset/456", "test-subject", "GET"));
         Assert.assertEquals(evalResult.getEffect(), Effect.PERMIT);
 
         // resourceURI does NOT match attributeURITemplate
-        evalResult = this.evaluationService.evalPolicy("/v1/no-match/asset/123", "test-subject", "GET", null, null);
+        evalResult = this.evaluationService
+                .evalPolicy(createRequest("/v1/no-match/asset/123", "test-subject", "GET"));
         // second policy will match.
         Assert.assertEquals(evalResult.getEffect(), Effect.DENY);
 
+    }
+    
+    private PolicyEvaluationRequestV1 createRequest(final String resource, final String subject, final String action) {
+        PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
+        request.setAction(action);
+        request.setSubjectIdentifier(subject);
+        request.setResourceIdentifier(resource);
+        return request;
     }
 }

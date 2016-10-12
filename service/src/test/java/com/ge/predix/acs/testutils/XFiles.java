@@ -57,6 +57,8 @@ public final class XFiles {
     public static final Set<Attribute> PENTAGON_ATTRIBUTES = new HashSet<>(
             Arrays.asList(new Attribute[] { SITE_PENTAGON }));
 
+    public static final String XFILES_ID = "/x-files";
+
     public static final String ASCENSION_ID = "/x-files/ascension";
     public static final Set<Attribute> ASCENSION_ATTRIBUTES = new HashSet<>(
             Arrays.asList(new Attribute[] { SPECIAL_AGENTS_GROUP_ATTRIBUTE, TYPE_MYTHARC }));

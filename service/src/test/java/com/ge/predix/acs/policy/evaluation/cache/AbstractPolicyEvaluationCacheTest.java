@@ -16,11 +16,18 @@
 
 package com.ge.predix.acs.policy.evaluation.cache;
 
+import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
+import static com.ge.predix.acs.testutils.XFiles.XFILES_ID;
+
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
@@ -36,6 +43,14 @@ public class AbstractPolicyEvaluationCacheTest {
 
     public static final String ZONE_NAME = "testzone1";
     public static final ZoneEntity ZONE_ENTITY = new ZoneEntity(1L, ZONE_NAME);
+    public static final String ACTION_GET = "GET";
+    public static final LinkedHashSet<String> EVALUATION_ORDER_POLICYONE_POLICYTWO = Stream.of("policyOne", "policyTwo")
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    public static final LinkedHashSet<String> EVALUATION_ORDER_POLICYTWO_POLICYONE = Stream.of("policyTwo", "policyOne")
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    public static final LinkedHashSet<String> EVALUATION_ORDER_POLICYONE = Stream.of("policyOne")
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
     private final InMemoryPolicyEvaluationCache cache = new InMemoryPolicyEvaluationCache();
 
     @AfterMethod
@@ -47,11 +62,11 @@ public class AbstractPolicyEvaluationCacheTest {
     public void testGetWithCacheMiss() {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
         assertNull(this.cache.get(key));
     }
 
@@ -59,11 +74,11 @@ public class AbstractPolicyEvaluationCacheTest {
     public void testGetWithCacheHit() {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = mockPermitResult();
         this.cache.set(key, result);
@@ -76,11 +91,12 @@ public class AbstractPolicyEvaluationCacheTest {
     public void testGetWithPolicyInvalidation() throws Exception {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
+        request.setPolicySetsEvaluationOrder(EVALUATION_ORDER_POLICYONE);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = mockPermitResult();
         this.cache.set(key, result);
@@ -89,7 +105,56 @@ public class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult.getEffect(), result.getEffect());
 
         Thread.sleep(1);
-        this.cache.resetForPolicySet(ZONE_NAME, "default");
+        this.cache.resetForPolicySet(ZONE_NAME, "policyOne");
+        assertNull(this.cache.get(key));
+    }
+
+    @Test
+    public void testGetWithResetForMultiplePolicySets() throws Exception {
+
+        PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
+        request.setPolicySetsEvaluationOrder(EVALUATION_ORDER_POLICYONE_POLICYTWO);
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
+                .request(request).build();
+
+        PolicyEvaluationResult result = mockPermitResult();
+        this.cache.set(key, result);
+
+        PolicyEvaluationResult cachedResult = this.cache.get(key);
+        assertNotNull(cachedResult);
+        assertEquals(cachedResult.getEffect(), result.getEffect());
+
+        Thread.sleep(1);
+        this.cache.resetForPolicySet(ZONE_NAME, "policyTwo");
+        assertNull(this.cache.get(key));
+    }
+    
+    @Test
+    public void testGetWithPolicyEvaluationOrderChange() throws Exception {
+
+        PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
+        request.setPolicySetsEvaluationOrder(EVALUATION_ORDER_POLICYONE_POLICYTWO);
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
+                .request(request).build();
+
+        PolicyEvaluationResult result = mockPermitResult();
+        this.cache.set(key, result);
+
+        PolicyEvaluationResult cachedResult = this.cache.get(key);
+        assertNotNull(cachedResult);
+        assertEquals(cachedResult.getEffect(), result.getEffect());
+
+        Thread.sleep(1);
+
+        request.setPolicySetsEvaluationOrder(EVALUATION_ORDER_POLICYTWO_POLICYONE);
+        key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME).request(request).build();
+
         assertNull(this.cache.get(key));
     }
 
@@ -97,11 +162,11 @@ public class AbstractPolicyEvaluationCacheTest {
     public void testGetWithResetForResource() throws Exception {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = mockPermitResult();
         this.cache.set(key, result);
@@ -110,7 +175,7 @@ public class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult.getEffect(), result.getEffect());
 
         Thread.sleep(1);
-        this.cache.resetForResource(ZONE_NAME, "/x-files");
+        this.cache.resetForResource(ZONE_NAME, XFILES_ID);
         assertNull(this.cache.get(key));
     }
 
@@ -118,11 +183,11 @@ public class AbstractPolicyEvaluationCacheTest {
     public void testGetWithResetForLongResource() throws Exception {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
         request.setResourceIdentifier("/v1/x-files");
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = mockPermitResult();
         this.cache.set(key, result);
@@ -131,7 +196,7 @@ public class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult.getEffect(), result.getEffect());
 
         Thread.sleep(1);
-        this.cache.resetForResource(ZONE_NAME, "/x-files");
+        this.cache.resetForResource(ZONE_NAME, XFILES_ID);
         assertNull(this.cache.get(key));
     }
 
@@ -139,11 +204,11 @@ public class AbstractPolicyEvaluationCacheTest {
     public void testGetWithResetForResources() throws Exception {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = mockPermitResult();
         this.cache.set(key, result);
@@ -153,7 +218,7 @@ public class AbstractPolicyEvaluationCacheTest {
 
         Thread.sleep(1);
         this.cache.resetForResources(ZONE_NAME,
-                Arrays.asList(new ResourceEntity[] { new ResourceEntity(ZONE_ENTITY, "/x-files") }));
+                Arrays.asList(new ResourceEntity[] { new ResourceEntity(ZONE_ENTITY, XFILES_ID) }));
         assertNull(this.cache.get(key));
     }
 
@@ -161,11 +226,11 @@ public class AbstractPolicyEvaluationCacheTest {
     public void testGetWithResetForResourcesByIds() throws Exception {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = mockPermitResult();
         this.cache.set(key, result);
@@ -174,7 +239,7 @@ public class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult.getEffect(), result.getEffect());
 
         Thread.sleep(1);
-        this.cache.resetForResourcesByIds(ZONE_NAME, new HashSet<>(Arrays.asList("/x-files")));
+        this.cache.resetForResourcesByIds(ZONE_NAME, new HashSet<>(Arrays.asList(XFILES_ID)));
         assertNull(this.cache.get(key));
     }
 
@@ -182,11 +247,11 @@ public class AbstractPolicyEvaluationCacheTest {
     public void testGetWithResetForSubject() throws Exception {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = mockPermitResult();
         this.cache.set(key, result);
@@ -195,7 +260,7 @@ public class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult.getEffect(), result.getEffect());
 
         Thread.sleep(1);
-        this.cache.resetForSubject(ZONE_NAME, "mulder");
+        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER);
         assertNull(this.cache.get(key));
     }
 
@@ -203,11 +268,11 @@ public class AbstractPolicyEvaluationCacheTest {
     public void testGetWithResetForSubjectsByIds() throws Exception {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = mockPermitResult();
         this.cache.set(key, result);
@@ -216,7 +281,7 @@ public class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult.getEffect(), result.getEffect());
 
         Thread.sleep(1);
-        this.cache.resetForSubjectsByIds(ZONE_NAME, new HashSet<>(Arrays.asList("mulder")));
+        this.cache.resetForSubjectsByIds(ZONE_NAME, new HashSet<>(Arrays.asList(AGENT_MULDER)));
         assertNull(this.cache.get(key));
     }
 
@@ -224,11 +289,11 @@ public class AbstractPolicyEvaluationCacheTest {
     public void testGetWithResetForSubjects() throws Exception {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = mockPermitResult();
         this.cache.set(key, result);
@@ -238,7 +303,7 @@ public class AbstractPolicyEvaluationCacheTest {
 
         Thread.sleep(1);
         this.cache.resetForSubjects(ZONE_NAME,
-                Arrays.asList(new SubjectEntity[] { new SubjectEntity(ZONE_ENTITY, "mulder") }));
+                Arrays.asList(new SubjectEntity[] { new SubjectEntity(ZONE_ENTITY, AGENT_MULDER) }));
         assertNull(this.cache.get(key));
     }
 
@@ -246,11 +311,11 @@ public class AbstractPolicyEvaluationCacheTest {
     public void testGetWithReset() {
 
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setAction("GET");
-        request.setSubjectIdentifier("mulder");
-        request.setResourceIdentifier("/x-files");
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetId("default").request(request).build();
+                .request(request).build();
 
         PolicyEvaluationResult result = mockPermitResult();
         this.cache.set(key, result);
@@ -264,7 +329,7 @@ public class AbstractPolicyEvaluationCacheTest {
 
     public static PolicyEvaluationResult mockPermitResult() {
         PolicyEvaluationResult result = new PolicyEvaluationResult(Effect.PERMIT);
-        result.setResolvedResourceUris(new HashSet<>(Arrays.asList(new String[] { "/x-files" })));
+        result.setResolvedResourceUris(new HashSet<>(Arrays.asList(new String[] { XFILES_ID })));
         return result;
     }
 }
