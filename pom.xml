@@ -67,7 +67,7 @@
         <flyway.version>3.0</flyway.version>
         <spring-security-oauth2.version>2.0.3.RELEASE</spring-security-oauth2.version>
         <spring-security-jwt.version>1.0.2.RELEASE</spring-security-jwt.version>
-        <titandb.version>1.0.0</titandb.version>
+        <titandb.version>1.1.0-SNAPSHOT</titandb.version>
         <openjpa.version>2.4.0</openjpa.version>
         <postgres.version>9.3-1103-jdbc4</postgres.version>
         <uaa-token-lib.version>3.1.6</uaa-token-lib.version>
@@ -80,6 +80,20 @@
         <cucumber.testng.version>1.2.2</cucumber.testng.version>
         <groovy-all.version>2.4.4</groovy-all.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>staging</id>
+            <name>Maven Staging Repo</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <distributionManagement>
          <repository>
