@@ -173,7 +173,7 @@
         <dependency>
             <groupId>org.cloudfoundry.identity</groupId>
             <artifactId>cloudfoundry-identity-uaa</artifactId>
-            <version>3.2.1</version>
+            <version>3.6.0</version>
             <type>war</type>
         </dependency>
     </dependencies>
