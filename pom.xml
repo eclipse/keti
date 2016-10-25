@@ -54,7 +54,7 @@
         <lettuce.version>2.3.3</lettuce.version>
         <springframework.version>4.3.1.RELEASE</springframework.version>
         <springframework-boot.version>1.2.1.RELEASE</springframework-boot.version>
-        <spring-metering-filter.version>1.2.1-SNAPSHOT</spring-metering-filter.version>
+        <spring-metering-filter.version>1.2.1</spring-metering-filter.version>
         <spring-cloud.version>1.0.5.RELEASE</spring-cloud.version>
         <spring-cloud-netflix.version>1.0.7.RELEASE</spring-cloud-netflix.version>
         <spring-data-redis.version>1.6.4.RELEASE</spring-data-redis.version>
