@@ -15,19 +15,21 @@
     limitations under the License.
  -->
 
-<!DOCTYPE xml>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <!-- Introducing logback.xml for acs-int-tests package. Adding log level 
     control for class ResourceOwnerPasswordAccessTokenProvider to avoid printing 
     password details in log file -->
-<configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%date{YYYY-MM-dd HH:mm:ss} %level [%thread]
-                %logger{10} [%file:%line] %msg%n</pattern>
-        </encoder>
+<log4j:configuration debug="true"
+    xmlns:log4j='http://jakarta.apache.org/log4j/'>
+    <appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+        <param name="ConversionPattern" value="%date{YYYY-MM-dd HH:mm:ss} %p [%t] %c{2} [%F:%L] %msg%n"/>
+        </layout>
     </appender>
 
-    <logger name="java" level="WARN" />
+    <logger name="java">
+        <level value="warn" />
+    </logger>
 
     <!-- To avoid printing UAA password credentials info in log file, changing 
         the log level for the following class to INFO. -->
@@ -35,15 +37,26 @@
         name="org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider"
         level="INFO" /> -->
 
-    <logger name="org.springframework.security" level="DEBUG" />
-    <logger name="com.ge.predix" level="DEBUG" />
+    <logger name="org.springframework.security">
+        <level value ="info" />
+    </logger>
 
-    <!-- This category will log all httpclient requests/responses. Only enable to troubleshoot. -->
-    <logger name="org.apache.http.wire" level="DEBUG" />
-    <logger name="http.wire" level="DEBUG" />
+    <logger name="com.ge.predix">
+        <level value ="debug" />
+    </logger>
 
-    <root level="INFO">
-        <appender-ref ref="STDOUT" />
+    <logger name="org.apache.http.wire">
+        <level value ="debug" />
+    </logger>
+
+    <logger name="http.wire">
+        <level value ="debug" />
+    </logger>
+
+
+    <root>
+        <level value = "INFO" />
+        <appender-ref ref="console" />
     </root>
 
 </configuration>

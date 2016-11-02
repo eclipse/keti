@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Copyright 2016 General Electric Company. 
+   
+    Licensed under the Apache License, Version 2.0 (the "License"); 
+    you may not use this file except in compliance with the License. 
+    You may obtain a copy of the License at
+   
+    http://www.apache.org/licenses/LICENSE-2.0
+   
+    Unless required by applicable law or agreed to in writing, software 
+    distributed under the License is distributed on an "AS IS" BASIS, 
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+    See the License for the specific language governing permissions and 
+    limitations under the License.
+ -->
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration debug="true"
+    xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+    <appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+        <param name="ConversionPattern"
+          value="[Z:%X{Zone-Id} C:%X{Correlation-Id}] %d{YYYY-MM-dd HH:mm:ss} %p [%t] %c{2} [%F:%L] %msg%n"/>
+        </layout>
+    </appender>
+
+   <logger name="java">
+        <level value="warn" />
+    </logger>
+
+    <logger name="org.springframework.security">
+        <level value="info" />
+    </logger>
+
+    <logger name="org.flywaydb.core.internal.dbsupport">
+        <level value="warn" />
+    </logger>
+
+
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+        <level value="error" />
+    </logger>
+
+    <logger name="org.springframework.boot.actuate.endpoint.mvc.EndpointHandlerMapping">
+        <level value="error" />
+    </logger>
+
+    <logger name="org.springframework.boot.actuate.endpoint.mvc.FilterRegistrationBean">
+        <level value="error" />
+    </logger>
+
+    <logger name="org.springframework.security.config.http.FilterInvocationSecurityMetadataSourceParser">
+        <level value="error" />
+    </logger>
+
+    <logger name="springfox.documentation">
+        <level value="error" />
+    </logger>
+
+    <logger name="com.ge.predix.acs">
+        <level value="info" />
+        <appender-ref ref="console" />
+    </logger>
+
+    <root>
+        <level value="INFO" />
+        <appender-ref ref="console" />
+    </root>
+
+
+
+</log4j:configuration>
