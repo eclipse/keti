@@ -23,7 +23,7 @@
     xmlns:log4j='http://jakarta.apache.org/log4j/'>
     <appender name="console" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
-        <param name="ConversionPattern" value="%date{YYYY-MM-dd HH:mm:ss} %p [%t] %c [%F:%L] %m%n"/>
+        <param name="ConversionPattern" value="%d{YYYY-MM-dd HH:mm:ss} %p [%t] %c [%F:%L] %m%n"/>
         </layout>
     </appender>
 

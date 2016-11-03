@@ -21,7 +21,7 @@
     <appender name="console" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
         <param name="ConversionPattern"
-          value="[Z:%X{Zone-Id} C:%X{Correlation-Id}] %d{YYYY-MM-dd HH:mm:ss} %p [%t] %c{2} [%F:%L] %msg%n"/>
+          value="[Z:%X{Zone-Id} C:%X{Correlation-Id}] %d{YYYY-MM-dd HH:mm:ss} %p [%t] %c [%F:%L] %m%n"/>
         </layout>
     </appender>
 
