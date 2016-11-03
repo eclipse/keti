@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -37,8 +38,8 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.config.GraphConfig;
@@ -47,15 +48,19 @@ import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.thinkaurelius.titan.core.SchemaViolationException;
+import com.thinkaurelius.titan.core.TitanException;
 import com.thinkaurelius.titan.core.TitanFactory;
 
 public class GraphResourceRepositoryTest {
     private static final JsonUtils JSON_UTILS = new JsonUtils();
     private static final ZoneEntity TEST_ZONE_1 = new ZoneEntity(1L, "testzone1");
     private static final ZoneEntity TEST_ZONE_2 = new ZoneEntity(2L, "testzone2");
+    private static final int CONCURRENT_TEST_THREAD_COUNT = 3;
+    private static final int CONCURRENT_TEST_INVOCATIONS = 20;
 
     private GraphResourceRepository resourceRepository;
     private Graph graph;
+    private Random randomGenerator = new Random();
 
     @BeforeClass
     public void setup() throws Exception {
@@ -64,61 +69,65 @@ public class GraphResourceRepositoryTest {
         this.resourceRepository.setGraph(this.graph);
     }
 
+    @AfterClass
+    public void teardown() {
+        this.dropAllResources();
+    }
+
     private void setupTitanGraph() throws InterruptedException, ExecutionException {
         this.graph = TitanFactory.build().set("storage.backend", "inmemory").open();
-
         GraphConfig.createSchemaElements(this.graph);
     }
 
-    @BeforeMethod
-    public void setupTest() {
-        // Drop all vertices.
+    private void dropAllResources() {
         this.graph.traversal().V().drop().iterate();
     }
 
     @Test
     public void testCount() {
+        dropAllResources();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        persistResource1toZone1AndAssert();
+
+        persistRandomResourcetoZone1AndAssert();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
+
         persistResource2toZone1AndAssert();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
         assertThat(this.resourceRepository.count(), equalTo(2L));
     }
 
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testDelete() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity resourceEntity = persistResource1toZone1AndAssert();
+        ResourceEntity resourceEntity = persistRandomResourcetoZone1AndAssert();
         long id = resourceEntity.getId();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
+
         this.resourceRepository.delete(id);
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
         assertThat(this.resourceRepository.findOne(id), nullValue());
     }
 
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testDeleteMultiple() {
         List<ResourceEntity> resourceEntities = new ArrayList<>();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity resourceEntity1 = persistResource1toZone1AndAssert();
+
+        ResourceEntity resourceEntity1 = persistRandomResourcetoZone1AndAssert();
         Long resourceId1 = resourceEntity1.getId();
         resourceEntities.add(resourceEntity1);
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
-        ResourceEntity resourceEntity2 = persistResource2toZone1AndAssert();
+
+        ResourceEntity resourceEntity2 = persistRandomResourcetoZone1AndAssert();
         Long resourceId2 = resourceEntity2.getId();
         resourceEntities.add(resourceEntity2);
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
+
         this.resourceRepository.delete(resourceEntities);
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
+
         assertThat(this.resourceRepository.findOne(resourceId1), nullValue());
         assertThat(this.resourceRepository.findOne(resourceId2), nullValue());
     }
 
     @Test
     public void testDeleteAll() {
+        dropAllResources();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        Long resourceId1 = persistResource1toZone1AndAssert().getId();
+        Long resourceId1 = persistRandomResourcetoZone1AndAssert().getId();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
         Long resourceId2 = persistResource2toZone1AndAssert().getId();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
@@ -130,8 +139,9 @@ public class GraphResourceRepositoryTest {
 
     @Test
     public void testFindAll() {
+        dropAllResources();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity resourceEntity1 = persistResource1toZone1AndAssert();
+        ResourceEntity resourceEntity1 = persistRandomResourcetoZone1AndAssert();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
         ResourceEntity resourceEntity2 = persistResource2toZone1AndAssert();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
@@ -141,90 +151,65 @@ public class GraphResourceRepositoryTest {
         assertThat(resources, hasItems(resourceEntity1, resourceEntity2));
     }
 
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testFindByZone() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity resourceEntity1 = persistResource1toZone1AndAssert();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
-        ResourceEntity resourceEntity2 = persistResource2toZone1AndAssert();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
+        ResourceEntity resourceEntity1 = persistRandomResourcetoZone1AndAssert();
+        ResourceEntity resourceEntity2 = persistRandomResourcetoZone1AndAssert();
 
         List<ResourceEntity> resources = this.resourceRepository.findByZone(TEST_ZONE_1);
-        assertThat(resources.size(), equalTo(2));
         assertThat(resources, hasItems(resourceEntity1, resourceEntity2));
     }
 
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testGetByZoneAndResourceIdentifier() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity resourceEntity1 = persist2LevelHierarchicalResource1toZone1();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
-        persistResource1toZone2AndAssert();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
+        ResourceEntity resourceEntity1 = persist2LevelRandomResourcetoZone1();
 
         ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
                 resourceEntity1.getResourceIdentifier());
         assertThat(resource, equalTo(resourceEntity1));
-        // Check that the result does not contain inherited attribute
-        assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(false));
         assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
+        
+        //Check that the result does not contain inherited attribute. use getResourceWithInheritedAttributes inherit 
+        //attributes 
+        assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(false));
     }
-
-    @Test
-    public void testGetByZoneAndResourceIdentifierWithInheritedAttributes() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity resourceEntity1 = persist2LevelHierarchicalResource1toZone1();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
-        persistResource1toZone2AndAssert();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
+    
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
+    public void testGetResourceWithInheritedAttributesWithInheritedAttributes() {
+        ResourceEntity resourceEntity1 = persist2LevelRandomResourcetoZone1();
 
         ResourceEntity resource = this.resourceRepository.getResourceWithInheritedAttributes(TEST_ZONE_1,
                 resourceEntity1.getResourceIdentifier());
         assertThat(resource.getZone().getName(), equalTo(resourceEntity1.getZone().getName()));
         assertThat(resource.getResourceIdentifier(), equalTo(resourceEntity1.getResourceIdentifier()));
+        assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
         // Check that the result contains inherited attribute
         assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
-        assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
     }
 
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testGetByZoneAndResourceIdentifierWithEmptyAttributes() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity persistedResourceEntity = persistResourceToZoneAndAssert(TEST_ZONE_1, DRIVE_ID,
-                Collections.emptySet());
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
 
-        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1, DRIVE_ID);
+        ResourceEntity persistedResourceEntity = persistResourceToZoneAndAssert(TEST_ZONE_1,
+                DRIVE_ID + getRandomNumber(), Collections.emptySet());
+
+        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
+                persistedResourceEntity.getResourceIdentifier());
         assertThat(resource, equalTo(persistedResourceEntity));
     }
 
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testGetByZoneAndResourceIdentifierWithNullAttributes() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity persistedResourceEntity = persistResourceToZoneAndAssert(TEST_ZONE_1, DRIVE_ID, null);
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
-
-        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1, DRIVE_ID);
+        ResourceEntity persistedResourceEntity = persistResourceToZoneAndAssert(TEST_ZONE_1,
+                DRIVE_ID + getRandomNumber(), null);
+        ResourceEntity resource = this.resourceRepository.getByZoneAndResourceIdentifier(TEST_ZONE_1,
+                persistedResourceEntity.getResourceIdentifier());
         assertThat(resource, equalTo(persistedResourceEntity));
     }
 
-    @Test
-    public void testGetByZoneAndResourceIdentifierWithInheritedAttributes2LevelHierarchical() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        String resourceIdentifier = persist2LevelHierarchicalResource1toZone1().getResourceIdentifier();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
-
-        ResourceEntity resource = this.resourceRepository.getResourceWithInheritedAttributes(TEST_ZONE_1,
-                resourceIdentifier);
-        assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
-        assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
-    }
-
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testGetByZoneAndResourceIdentifierWithInheritedAttributes3LevelHierarchical() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        String resourceIdentifier = persist3LevelHierarchicalResource1toZone1().getResourceIdentifier();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(3L));
+        String resourceIdentifier = persist3LevelRandomResourcetoZone1().getResourceIdentifier();
 
         ResourceEntity resource = this.resourceRepository.getResourceWithInheritedAttributes(TEST_ZONE_1,
                 resourceIdentifier);
@@ -235,7 +220,6 @@ public class GraphResourceRepositoryTest {
 
     @Test(expectedExceptions = SchemaViolationException.class)
     public void testPreventEntityParentSelfReference() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
         ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, BASEMENT_SITE_ID);
         resource.setAttributes(BASEMENT_ATTRIBUTES);
         resource.setAttributesAsJson(JSON_UTILS.serialize(resource.getAttributes()));
@@ -249,6 +233,7 @@ public class GraphResourceRepositoryTest {
      */
     @Test
     public void testPreventEntityParentCyclicReference() {
+        this.dropAllResources();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
         ResourceEntity resource1 = persistResource0toZone1AndAssert();
 
@@ -280,22 +265,19 @@ public class GraphResourceRepositoryTest {
         Assert.fail("save() did not throw the expected exception.");
     }
 
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testSave() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        String resourceIdentifier = persistResource1toZone1AndAssert().getResourceIdentifier();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
+        String resourceId = persistRandomResourcetoZone1AndAssert().getResourceIdentifier();
 
         GraphTraversalSource g = this.graph.traversal();
-        String resourceId = resourceIdentifier;
         GraphTraversal<Vertex, Vertex> traversal = g.V().has(RESOURCE_ID_KEY, resourceId);
+
         assertThat(traversal.hasNext(), equalTo(true));
         assertThat(traversal.next().property(RESOURCE_ID_KEY).value(), equalTo(resourceId));
     }
-    
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSaveWithNoZoneName() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
         ResourceEntity resourceEntity = new ResourceEntity();
         resourceEntity.setResourceIdentifier("testResource");
         resourceEntity.setZone(new ZoneEntity());
@@ -304,77 +286,78 @@ public class GraphResourceRepositoryTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSaveWithNoZoneEntity() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
         ResourceEntity resourceEntity = new ResourceEntity();
         resourceEntity.setResourceIdentifier("testResource");
         this.resourceRepository.save(resourceEntity);
     }
 
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testSaveHierarchical() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        String resourceIdentifier = persist2LevelHierarchicalResource1toZone1().getResourceIdentifier();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
+        ResourceEntity childResource = persist2LevelRandomResourcetoZone1();
+        String childResourceId = childResource.getResourceIdentifier();
 
         GraphTraversalSource g = this.graph.traversal();
-        String resourceId = resourceIdentifier;
-        GraphTraversal<Vertex, Vertex> traversal = g.V().has(RESOURCE_ID_KEY, resourceId);
+        GraphTraversal<Vertex, Vertex> traversal = g.V().has(RESOURCE_ID_KEY, childResourceId);
         assertThat(traversal.hasNext(), equalTo(true));
-        Vertex resourceVertex = traversal.next();
-        assertThat(resourceVertex.property(RESOURCE_ID_KEY).value(), equalTo(resourceId));
+        Vertex childResourceVertex = traversal.next();
+        assertThat(childResourceVertex.property(RESOURCE_ID_KEY).value(), equalTo(childResourceId));
 
-        traversal = this.graph.traversal().V(resourceVertex.id()).out("parent").has(RESOURCE_ID_KEY, BASEMENT_SITE_ID);
+        Parent parent = (Parent) childResource.getParents().toArray()[0];
+        traversal = this.graph.traversal().V(childResourceVertex.id()).out("parent").has(RESOURCE_ID_KEY,
+                parent.getIdentifier());
         assertThat(traversal.hasNext(), equalTo(true));
-        resourceVertex = traversal.next();
-        assertThat(resourceVertex.property(RESOURCE_ID_KEY).value(), equalTo(BASEMENT_SITE_ID));
+        Vertex parentVertex = traversal.next();
+        assertThat(parentVertex.property(RESOURCE_ID_KEY).value(), equalTo(parent.getIdentifier()));
     }
 
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testUpdateAttachedEntity() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        ResourceEntity resourceEntity = persistResource1toZone1AndAssert();
-        String resourceIdentifier = resourceEntity.getResourceIdentifier();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
+        ResourceEntity resourceEntity = persistRandomResourcetoZone1AndAssert();
+        String resourceId = resourceEntity.getResourceIdentifier();
 
         GraphTraversalSource g = this.graph.traversal();
-        String resourceId = resourceIdentifier;
         GraphTraversal<Vertex, Vertex> traversal = g.V().has(RESOURCE_ID_KEY, resourceId);
         assertThat(traversal.hasNext(), equalTo(true));
         assertThat(traversal.next().property(RESOURCE_ID_KEY).value(), equalTo(resourceId));
 
         // Update the resource.
-        resourceEntity.setAttributesAsJson("{\'status':'test'}");
-        this.resourceRepository.save(resourceEntity);
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
+        String updateJSON = "{\'status':'test'}";
+        resourceEntity.setAttributesAsJson(updateJSON);
+        saveWithRetry(this.resourceRepository, resourceEntity, 3);
+        assertThat(this.resourceRepository.getEntity(TEST_ZONE_1, resourceEntity.getResourceIdentifier())
+                .getAttributesAsJson(), equalTo(updateJSON));
     }
 
     @Test(expectedExceptions = SchemaViolationException.class)
     public void testUpdateUnattachedEntity() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
-        String resourceIdentifier = persistResource1toZone1AndAssert().getResourceIdentifier();
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
+        String resourceId = persistRandomResourcetoZone1AndAssert().getResourceIdentifier();
 
         GraphTraversalSource g = this.graph.traversal();
-        String resourceId = resourceIdentifier;
         GraphTraversal<Vertex, Vertex> traversal = g.V().has(RESOURCE_ID_KEY, resourceId);
         assertThat(traversal.hasNext(), equalTo(true));
         assertThat(traversal.next().property(RESOURCE_ID_KEY).value(), equalTo(resourceId));
 
         // Save a new resource which violates the uniqueness constraint.
-        persistResource1toZone1AndAssert();
+        persistResourceToZoneAndAssert(TEST_ZONE_1, resourceId, DRIVE_ATTRIBUTES);
     }
 
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testSaveMultiple() {
         List<ResourceEntity> resourceEntitiesToSave = new ArrayList<>();
-        resourceEntitiesToSave.add(new ResourceEntity(TEST_ZONE_1, DRIVE_ID));
-        resourceEntitiesToSave.add(new ResourceEntity(TEST_ZONE_1, JOSECHUNG_ID));
+        ResourceEntity resourceEntity1 = new ResourceEntity(TEST_ZONE_1, DRIVE_ID + getRandomNumber());
+        ResourceEntity resourceEntity2 = new ResourceEntity(TEST_ZONE_1, JOSECHUNG_ID + getRandomNumber());
+        resourceEntitiesToSave.add(resourceEntity1);
+        resourceEntitiesToSave.add(resourceEntity2);
         this.resourceRepository.save(resourceEntitiesToSave);
-        assertThat(this.resourceRepository.count(), equalTo(2L));
+        assertThat(this.resourceRepository.getEntity(TEST_ZONE_1, resourceEntity1.getResourceIdentifier()),
+                equalTo(resourceEntity1));
+        assertThat(this.resourceRepository.getEntity(TEST_ZONE_1, resourceEntity2.getResourceIdentifier()),
+                equalTo(resourceEntity2));
     }
 
     @Test
     public void testSaveResourceWithNonexistentParent() {
+        this.dropAllResources();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
         ResourceEntity resource = new ResourceEntity(TEST_ZONE_1, DRIVE_ID);
         resource.setParents(new HashSet<>(Arrays.asList(new Parent(BASEMENT_SITE_ID))));
@@ -389,6 +372,7 @@ public class GraphResourceRepositoryTest {
             return;
         }
         Assert.fail("save() did not throw the expected IllegalStateException exception.");
+        
     }
 
     @Test(enabled = false)
@@ -411,7 +395,7 @@ public class GraphResourceRepositoryTest {
     public void testSearchAttributesTraversalLimitException() {
         long traversalLimit = 256L;
         try {
-            ResourceEntity resource1 = persist3LevelHierarchicalResource1toZone1();
+            ResourceEntity resource1 = persist3LevelRandomResourcetoZone1();
             traversalLimit = this.resourceRepository.getTraversalLimit();
             assertThat(traversalLimit, equalTo(256L));
             this.resourceRepository.setTraversalLimit(2);
@@ -431,7 +415,7 @@ public class GraphResourceRepositoryTest {
             assertThat(traversalLimit, equalTo(256L));
             this.resourceRepository.setTraversalLimit(3);
             assertThat(this.resourceRepository.getTraversalLimit(), equalTo(3L));
-            ResourceEntity resource1 = persist3LevelHierarchicalResource1toZone1();
+            ResourceEntity resource1 = persist3LevelRandomResourcetoZone1();
             ResourceEntity actualResource = this.resourceRepository.getResourceWithInheritedAttributes(TEST_ZONE_1,
                     resource1.getResourceIdentifier());
             assertThat(actualResource.getAttributes().size(), equalTo(3));
@@ -441,26 +425,26 @@ public class GraphResourceRepositoryTest {
         }
     }
 
-    @Test
+    @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT, invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testGetResourceEntityAndDescendantsIds() {
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
 
-        ResourceEntity basement = persistResourceToZoneAndAssert(TEST_ZONE_1, BASEMENT_SITE_ID, BASEMENT_ATTRIBUTES);
+        ResourceEntity basement = persistResourceToZoneAndAssert(TEST_ZONE_1, BASEMENT_SITE_ID + getRandomNumber(),
+                BASEMENT_ATTRIBUTES);
 
-        ResourceEntity drive = persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1, DRIVE_ID, DRIVE_ATTRIBUTES,
+        ResourceEntity drive = persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1, DRIVE_ID + getRandomNumber(),
+                DRIVE_ATTRIBUTES,
                 new HashSet<>(Arrays.asList(new Parent[] { new Parent(basement.getResourceIdentifier()) })));
-        ResourceEntity ascension = persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1, ASCENSION_ID,
-                ASCENSION_ATTRIBUTES,
+        ResourceEntity ascension = persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1,
+                ASCENSION_ID + getRandomNumber(), ASCENSION_ATTRIBUTES,
                 new HashSet<>(Arrays.asList(new Parent[] { new Parent(basement.getResourceIdentifier()) })));
 
-        ResourceEntity implant = persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1, EVIDENCE_IMPLANT_ID,
-                EVIDENCE_IMPLANT_ATTRIBUTES, new HashSet<>(Arrays.asList(new Parent[] {
-                        new Parent(drive.getResourceIdentifier()), new Parent(ascension.getResourceIdentifier()) })));
+        ResourceEntity implant = persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1,
+                EVIDENCE_IMPLANT_ID + getRandomNumber(), EVIDENCE_IMPLANT_ATTRIBUTES,
+                new HashSet<>(Arrays.asList(new Parent[] { new Parent(drive.getResourceIdentifier()),
+                        new Parent(ascension.getResourceIdentifier()) })));
         ResourceEntity scullysTestimony = persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1,
-                EVIDENCE_SCULLYS_TESTIMONY_ID, SCULLYS_TESTIMONY_ATTRIBUTES,
+                EVIDENCE_SCULLYS_TESTIMONY_ID + getRandomNumber(), SCULLYS_TESTIMONY_ATTRIBUTES,
                 new HashSet<>(Arrays.asList(new Parent[] { new Parent(ascension.getResourceIdentifier()) })));
-
-        assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(5L));
 
         Set<String> descendantsIds = this.resourceRepository.getResourceEntityAndDescendantsIds(basement);
         assertThat(descendantsIds, hasSize(5));
@@ -494,32 +478,45 @@ public class GraphResourceRepositoryTest {
         assertThat(descendantsIds, empty());
     }
 
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testChildWithDifferentZone() {
+        ResourceEntity basement = persistResourceToZoneAndAssert(TEST_ZONE_1, BASEMENT_SITE_ID + getRandomNumber(),
+                BASEMENT_ATTRIBUTES);
+
+        persistResourceWithParentsToZoneAndAssert(TEST_ZONE_2, DRIVE_ID + getRandomNumber(), DRIVE_ATTRIBUTES,
+                new HashSet<>(Arrays.asList(new Parent[] { new Parent(basement.getResourceIdentifier()) })));
+
+    }
+
     @Test
     public void testVersion() {
+        this.dropAllResources();
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(0L));
         assertThat(this.resourceRepository.checkVersionVertexExists(1), equalTo(false));
         this.resourceRepository.createVersionVertex(1);
         assertThat(this.resourceRepository.checkVersionVertexExists(1), equalTo(true));
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(1L));
-        
-        //assert that createVersionVertex creates a new vertex.
+
+        // assert that createVersionVertex creates a new vertex.
         this.resourceRepository.createVersionVertex(2);
         assertThat(IteratorUtils.count(this.graph.vertices()), equalTo(2L));
     }
 
-    public ResourceEntity persist2LevelHierarchicalResource1toZone1() {
-        ResourceEntity parentResource = persistResource0toZone1AndAssert();
+    public ResourceEntity persist2LevelRandomResourcetoZone1() {
+        ResourceEntity parentResource = persistResourceToZoneAndAssert(TEST_ZONE_1,
+                BASEMENT_SITE_ID + getRandomNumber(), BASEMENT_ATTRIBUTES);
         HashSet<Parent> parents = new HashSet<>(
                 Arrays.asList(new Parent[] { new Parent(parentResource.getResourceIdentifier()) }));
-        return persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1, DRIVE_ID, DRIVE_ATTRIBUTES, parents);
+        return persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1, DRIVE_ID + getRandomNumber(), DRIVE_ATTRIBUTES,
+                parents);
     }
 
-    public ResourceEntity persist3LevelHierarchicalResource1toZone1() {
-        ResourceEntity parentResource = persist2LevelHierarchicalResource1toZone1();
+    public ResourceEntity persist3LevelRandomResourcetoZone1() {
+        ResourceEntity parentResource = persist2LevelRandomResourcetoZone1();
         HashSet<Parent> parents = new HashSet<>(
                 Arrays.asList(new Parent[] { new Parent(parentResource.getResourceIdentifier()) }));
-        return persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1, EVIDENCE_IMPLANT_ID, EVIDENCE_IMPLANT_ATTRIBUTES,
-                parents);
+        return persistResourceWithParentsToZoneAndAssert(TEST_ZONE_1, EVIDENCE_IMPLANT_ID + getRandomNumber(),
+                EVIDENCE_IMPLANT_ATTRIBUTES, parents);
     }
 
     private ResourceEntity persistResourceWithParentsToZoneAndAssert(final ZoneEntity zoneEntity,
@@ -528,33 +525,84 @@ public class GraphResourceRepositoryTest {
         resource.setAttributes(attributes);
         resource.setAttributesAsJson(JSON_UTILS.serialize(resource.getAttributes()));
         resource.setParents(parents);
-        ResourceEntity resourceEntity = this.resourceRepository.save(resource);
+        ResourceEntity resourceEntity = saveWithRetry(this.resourceRepository, resource, 3);
         assertThat(this.resourceRepository.findOne(resourceEntity.getId()), equalTo(resource));
         return resourceEntity;
+    }
+
+    private ResourceEntity persistRandomResourcetoZone1AndAssert() {
+        return persistResourceToZoneAndAssert(TEST_ZONE_1, DRIVE_ID + getRandomNumber(), DRIVE_ATTRIBUTES);
     }
 
     private ResourceEntity persistResource0toZone1AndAssert() {
         return persistResourceToZoneAndAssert(TEST_ZONE_1, BASEMENT_SITE_ID, BASEMENT_ATTRIBUTES);
     }
 
-    private ResourceEntity persistResource1toZone1AndAssert() {
-        return persistResourceToZoneAndAssert(TEST_ZONE_1, DRIVE_ID, DRIVE_ATTRIBUTES);
-    }
-
     private ResourceEntity persistResource2toZone1AndAssert() {
         return persistResourceToZoneAndAssert(TEST_ZONE_1, JOSECHUNG_ID, DRIVE_ATTRIBUTES);
     }
 
-    private ResourceEntity persistResource1toZone2AndAssert() {
-        return persistResourceToZoneAndAssert(TEST_ZONE_2, DRIVE_ID, DRIVE_ATTRIBUTES);
+    private int getRandomNumber() {
+        return randomGenerator.nextInt(10000000);
+    }
+
+    //Because of unique indices, saves on ZonableEntity can throw a lock exception due to contention on the index
+    //update. This method allows does a sleep and retry the save.
+    
+    /*
+     * Sample Exception: [Z: C:] 2016-11-03 15:13:33 ERROR [TestNG] database.StandardTitanGraph
+     * [StandardTitanGraph.java:779] Could not commit transaction [10] due to exceptionsg
+     * com.thinkaurelius.titan.diskstorage.locking.PermanentLockingException: Local lock contention at
+     * com.thinkaurelius.titan.diskstorage.locking.AbstractLocker.writeLock(AbstractLocker.java:313) at
+     * com.thinkaurelius.titan.diskstorage.locking.consistentkey.ExpectedValueCheckingStore.acquireLock(
+     * ExpectedValueCheckingStore.java:89) at
+     * com.thinkaurelius.titan.diskstorage.keycolumnvalue.KCVSProxy.acquireLock(KCVSProxy.java:40) at
+     * com.thinkaurelius.titan.diskstorage.BackendTransaction.acquireIndexLock(BackendTransaction.java:240) at
+     * com.thinkaurelius.titan.graphdb.database.StandardTitanGraph.prepareCommit(StandardTitanGraph.java:554) at
+     * com.thinkaurelius.titan.graphdb.database.StandardTitanGraph.commit(StandardTitanGraph.java:683) at
+     * com.thinkaurelius.titan.graphdb.transaction.StandardTitanTx.commit(StandardTitanTx.java:1352) at
+     * com.thinkaurelius.titan.graphdb.tinkerpop.TitanBlueprintsGraph$GraphTransaction.doCommit(TitanBlueprintsGraph.
+     * java:263) at
+     * org.apache.tinkerpop.gremlin.structure.util.AbstractTransaction.commit(AbstractTransaction.java:105) at
+     * com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.save(GraphGenericRepository.java:221) at
+     * com.ge.predix.acs.privilege.management.dao.GraphResourceRepositoryTest.saveWithRetry(
+     * GraphResourceRepositoryTest.java:554) at
+     * com.ge.predix.acs.privilege.management.dao.GraphSubjectRepositoryTest.saveWithRetry(GraphSubjectRepositoryTest.
+     * java:277) at
+     * com.ge.predix.acs.privilege.management.dao.GraphSubjectRepositoryTest.persistSubjectToZoneAndAssert(
+     * GraphSubjectRepositoryTest.java:246) at
+     * com.ge.predix.acs.privilege.management.dao.GraphSubjectRepositoryTest.persistRandomSubjectToZone1AndAssert(
+     * GraphSubjectRepositoryTest.java:221) at
+     * com.ge.predix.acs.privilege.management.dao.GraphSubjectRepositoryTest.testGetByZoneAndSubjectIdentifier(
+     * GraphSubjectRepositoryTest.java:71)
+     */
+    public static <E extends ZonableEntity> E saveWithRetry(final GraphGenericRepository<E> repository,
+            final E zonableEntity, final int retryCount) throws TitanException {
+        try {
+            repository.save(zonableEntity);
+        } catch (TitanException te) {
+            if (te.getCause().getCause().getMessage().contains("Local lock") && retryCount > 0) {
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                zonableEntity.setId(0L); // Repository does not reset the vertex Id, on commit failure. Clear.
+                saveWithRetry(repository, zonableEntity, retryCount - 1);
+            } else {
+                throw te;
+            }
+        }
+        return zonableEntity;
     }
 
     private ResourceEntity persistResourceToZoneAndAssert(final ZoneEntity zoneEntity, final String resourceIdentifier,
             final Set<Attribute> attributes) {
+
         ResourceEntity resource = new ResourceEntity(zoneEntity, resourceIdentifier);
         resource.setAttributes(attributes);
         resource.setAttributesAsJson(JSON_UTILS.serialize(resource.getAttributes()));
-        ResourceEntity resourceEntity = this.resourceRepository.save(resource);
+        ResourceEntity resourceEntity = saveWithRetry(this.resourceRepository, resource, 3);
         assertThat(this.resourceRepository.findOne(resourceEntity.getId()), equalTo(resource));
         return resourceEntity;
     }
