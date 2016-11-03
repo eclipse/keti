@@ -32,6 +32,8 @@
     <!-- Register Oauth AuthN Manager -->
     <sec:authentication-manager />
 
+    <import resource="classpath:META-INF/spring/tasks.xml"/>
+
     <bean
         class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
         <property name="order" value="-1"></property>
