@@ -6,6 +6,7 @@ import static com.ge.predix.acs.privilege.management.dao.GraphGenericRepository.
 import static com.ge.predix.acs.privilege.management.dao.GraphResourceRepository.RESOURCE_ID_KEY;
 import static com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository.SUBJECT_ID_KEY;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.PostConstruct;
@@ -82,7 +83,8 @@ public class GraphConfig {
         Graph newGraph;
         if (this.cassandraEnabled) {
             Builder titanBuilder = TitanFactory.build().set("storage.backend", "cassandra")
-                    .set("storage.cassandra.keyspace", this.cassandraKeyspace).set("storage.hostname", this.hostname)
+                    .set("storage.cassandra.keyspace", this.cassandraKeyspace)
+                    .set("storage.hostname", Arrays.asList(hostname.split(",")))
                     .set("storage.port", this.port).set("cache.db-cache", this.cacheEnabled)
                     .set("cache.db-cache-clean-wait", this.titanCacheCleanWait)
                     .set("cache.db-cache-time", this.titanCacheTime).set("cache.db-cache-size", this.titanCacheSize);
