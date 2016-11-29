@@ -242,6 +242,7 @@
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
                                 <exclude>**/PolicyEvalCachingWithGraphDBIT.java</exclude>
+                                <exclude>**/Hierarchical*IT.java</exclude>
                             </excludes>
                             <includes>
                                 <include>**/*IT.java</include>
@@ -402,6 +403,7 @@
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
+                                <exclude>**/NonHierarchical*IT.java</exclude>
                             </excludes>
                             <includes>
                                 <include>**/*IT.java</include>
@@ -552,6 +554,7 @@
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
                                 <exclude>**/PolicyEvalCachingWithGraphDBIT.java</exclude>
+                                <exclude>**/NonHierarchical*IT.java</exclude>
                             </excludes>
                             <includes>
                                 <include>**/*IT.java</include>
@@ -669,6 +672,9 @@
                             <suiteXmlFiles>
                                 <suiteXmlFile>testng-public.xml</suiteXmlFile>
                             </suiteXmlFiles>
+                            <excludes>
+                                <exclude>**/Hierarchical*IT.java</exclude>
+                            </excludes>
                         </configuration>
                         <executions>
                             <execution>
@@ -774,6 +780,9 @@
                             <suiteXmlFiles>
                                 <suiteXmlFile>testng-public-titan.xml</suiteXmlFile>
                             </suiteXmlFiles>
+                            <excludes>
+                                <exclude>**/NonHierarchical*IT.java</exclude>
+                            </excludes>
                         </configuration>
                         <executions>
                             <execution>
@@ -841,6 +850,9 @@
                             <includes>
                                 <include>**/ACSAcceptanceIT.java</include>
                             </includes>
+                            <excludes>
+                                <exclude>**/NonHierarchical*IT.java</exclude>
+                            </excludes>
                         </configuration>
                         <executions>
                             <execution>

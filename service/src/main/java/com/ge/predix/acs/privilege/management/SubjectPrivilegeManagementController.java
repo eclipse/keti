@@ -15,6 +15,30 @@
  *******************************************************************************/
 package com.ge.predix.acs.privilege.management;
 
+import com.ge.predix.acs.commons.web.BaseRestApi;
+import com.ge.predix.acs.commons.web.RestApiException;
+import com.ge.predix.acs.commons.web.UriTemplateUtils;
+import com.ge.predix.acs.rest.BaseSubject;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.SUBJECTS_URL;
 import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.SUBJECT_URL;
 import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.V1;
@@ -27,33 +51,32 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
-import java.net.URI;
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.ge.predix.acs.commons.web.BaseRestApi;
-import com.ge.predix.acs.commons.web.RestApiException;
-import com.ge.predix.acs.commons.web.UriTemplateUtils;
-import com.ge.predix.acs.rest.BaseSubject;
-
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
 @RestController
 public class SubjectPrivilegeManagementController extends BaseRestApi {
     @Autowired
     private PrivilegeManagementService service;
+
+    private Boolean titanProfileActive = null;
+
+    private Boolean getTitanProfileActive() {
+        if (this.titanProfileActive == null) {
+            this.titanProfileActive = Arrays.asList(this.getEnvironment().getActiveProfiles()).contains("titan");
+        }
+
+        return this.titanProfileActive;
+    }
+
+    private void failIfParentsSpecified(final List<BaseSubject> subjects) {
+        if (this.getTitanProfileActive()) {
+            return;
+        }
+
+        for (BaseSubject subject : subjects) {
+            if (!CollectionUtils.isEmpty(subject.getParents())) {
+                throw new RestApiException(HttpStatus.NOT_IMPLEMENTED, PARENTS_ATTR_NOT_SUPPORTED_MSG);
+            }
+        }
+    }
 
     @ApiOperation(
             value = "Creates a list of subjects. Existing subjects will be updated with the provided values.",
@@ -62,8 +85,14 @@ public class SubjectPrivilegeManagementController extends BaseRestApi {
     @RequestMapping(method = POST, value = { V1 + SUBJECTS_URL }, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> appendsubjects(@RequestBody final List<BaseSubject> subjects) {
         try {
+            this.failIfParentsSpecified(subjects);
+
             this.service.appendSubjects(subjects);
             return noContent();
+        } catch (RestApiException e) {
+            // NOTE: This block is necessary to avoid accidentally
+            // converting the HTTP status code to an unintended one
+            throw e;
         } catch (Exception e) {
             throw new RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e);
         }
@@ -102,8 +131,9 @@ public class SubjectPrivilegeManagementController extends BaseRestApi {
     @RequestMapping(method = PUT, value = V1 + SUBJECT_URL, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<BaseSubject> putSubject(@RequestBody final BaseSubject subject,
             @PathVariable("subjectIdentifier") final String subjectIdentifier) {
-
         try {
+            this.failIfParentsSpecified(Collections.singletonList(subject));
+
             if (StringUtils.isEmpty(subject.getSubjectIdentifier())) {
                 subject.setSubjectIdentifier(subjectIdentifier);
             }
@@ -119,6 +149,10 @@ public class SubjectPrivilegeManagementController extends BaseRestApi {
             }
 
             return created(subjectUri.getRawPath(), true);
+        } catch (RestApiException e) {
+            // NOTE: This block is necessary to avoid accidentally
+            // converting the HTTP status code to an unintended one
+            throw e;
         } catch (Exception e) {
             throw new RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e);
         }

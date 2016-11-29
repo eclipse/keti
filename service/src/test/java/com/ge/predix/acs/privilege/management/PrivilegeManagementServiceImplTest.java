@@ -15,25 +15,6 @@
  *******************************************************************************/
 package com.ge.predix.acs.privilege.management;
 
-import static java.util.Arrays.asList;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
 import com.ge.predix.acs.config.GraphBeanDefinitionRegistryPostProcessor;
 import com.ge.predix.acs.config.GraphConfig;
@@ -54,6 +35,24 @@ import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.zone.management.ZoneService;
 import com.ge.predix.acs.zone.management.ZoneServiceImpl;
 import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static java.util.Arrays.asList;
 
 @ContextConfiguration(
         classes = { AcsRequestContextHolder.class, HystrixPolicyEvaluationCacheCircuitBreaker.class,

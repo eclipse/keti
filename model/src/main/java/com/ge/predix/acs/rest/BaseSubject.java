@@ -15,18 +15,16 @@
  *******************************************************************************/
 package com.ge.predix.acs.rest;
 
-import java.util.Collections;
-import java.util.Set;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ge.predix.acs.model.Attribute;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.ge.predix.acs.model.Attribute;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Represents a Subject in the system identified by a subjectIdentifier.
@@ -104,5 +102,4 @@ public class BaseSubject {
     public String toString() {
         return "Subject [subjectIdentifier=" + this.subjectIdentifier + ", attributes=" + attributes + "]";
     }
-
 }
