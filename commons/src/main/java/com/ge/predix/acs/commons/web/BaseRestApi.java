@@ -15,12 +15,14 @@
  *******************************************************************************/
 package com.ge.predix.acs.commons.web;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Base class for REST Apis that provides common error handler.
@@ -29,9 +31,17 @@ import org.springframework.web.servlet.ModelAndView;
  *
  */
 public class BaseRestApi {
+    public static final String PARENTS_ATTR_NOT_SUPPORTED_MSG = "The parents attribute isn't supported yet";
 
     @Autowired
     private RestErrorHandler restErrorHandler;
+
+    @Resource
+    private Environment environment;
+
+    public Environment getEnvironment() {
+        return this.environment;
+    }
 
     /**
      * Annotated method that handles a given exception.

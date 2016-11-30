@@ -425,6 +425,9 @@
                         <ZAC_CLIENT_ID>fake-client</ZAC_CLIENT_ID>
                         <ZAC_CLIENT_SECRET>fake-client</ZAC_CLIENT_SECRET>
                     </systemProperties>
+                    <excludes>
+                        <exclude>**/NonHierarchical*IT.java</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -576,6 +579,7 @@
                             <excludes>
                                 <!-- Exclude graph database specific test for postgres profile -->
                                 <exclude>**/PolicyEvalWithGraphDbControllerIT.java</exclude>
+                                <exclude>**/Hierarchical*IT.java</exclude>
                             </excludes>
                         </configuration>
                         <executions>

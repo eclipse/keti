@@ -1,0 +1,26 @@
+{
+	"subjectIdentifier" : "dave-with-parents",
+	"attributes" : [
+	    { "issuer" : "https://acs.attributes.int",
+	      "name" : "group",
+	      "value": "supervisor"
+	    }
+	    ,
+	    { "issuer" : "https://acs.attributes.int",
+	      "name" : "department",
+	       "value": "it"
+	    }
+	],
+	"parents" : [
+		{
+			"identifier" : "role-analyst",
+			"scopes" : [
+				{
+					"issuer" : "https://acs.predix.io",
+					"name"   : "site",
+					"value"  : "san-ramon"
+				}
+			]
+		}
+	]
+}

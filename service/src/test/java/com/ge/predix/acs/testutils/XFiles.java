@@ -1,14 +1,14 @@
 package com.ge.predix.acs.testutils;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.Parent;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public final class XFiles {
     private XFiles() {
