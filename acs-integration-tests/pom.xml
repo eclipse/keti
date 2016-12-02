@@ -40,7 +40,7 @@
         <acs.appname>acs-ci-${jenkins.build.number}</acs.appname>
         <acs.db>acs-db-ci-${jenkins.build.number}</acs.db>
         <acs.redis>acs-redis-ci-${jenkins.build.number}</acs.redis>
-        <acs.cf.domain>predix-acs-test</acs.cf.domain>
+        <acs.cf.domain>predix-acs-integration</acs.cf.domain>
         <acs.zone.subdomain>test-zone-${zone.var}</acs.zone.subdomain>
         <cf.base.domain>${CF_BASE_DOMAIN}</cf.base.domain>
         <uaa.zone>acs.</uaa.zone>
@@ -294,16 +294,22 @@
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
                                 <ZAC_URL>${ZAC_URL}</ZAC_URL>
                                 <ENABLED_REDIS_HEALTH_CHECK>true</ENABLED_REDIS_HEALTH_CHECK>
+                                <DEPLOYMENT_TYPE>${DEPLOYMENT_TYPE}</DEPLOYMENT_TYPE>
+                                <BASE_APP_NAME>${BASE_APP_NAME}</BASE_APP_NAME>
+                                <CONFIG_CLIENT_ID>${CONFIG_CLIENT_ID}</CONFIG_CLIENT_ID>
+                                <CONFIG_CLIENT_SECRET>${CONFIG_CLIENT_SECRET}</CONFIG_CLIENT_SECRET>
+                                <CONFIG_SERVER_URI>${CONFIG_SERVER_URI}</CONFIG_SERVER_URI>
+                                <CONFIG_OAUTH_TOKEN_URI>${CONFIG_OAUTH_TOKEN_URI}</CONFIG_OAUTH_TOKEN_URI>
                             </env>
                             <services>
                                 <service>
                                     <name>${acs.db}</name>
-                                    <label>postgresql93-1</label>
-                                    <plan>free</plan>
+                                    <label>postgres</label>
+                                    <plan>shared-nr</plan>
                                 </service>
                                 <service>
                                     <name>${acs.redis}</name>
-                                    <label>p-redis</label>
+                                    <label>redis</label>
                                     <plan>shared-vm</plan>
                                 </service>
 <!--                                 <service> -->
@@ -438,6 +444,7 @@
                             <space>${cf.space}</space>
                             <appname>${acs.appname}</appname>
                             <memory>1024</memory>
+                            <buildpack>java_buildpack</buildpack>
                             <env>
                                 <ACS_BASE_DOMAIN>${acs.cf.domain}.${cf.base.domain}</ACS_BASE_DOMAIN>
                                 <ACS_DB>${acs.db}</ACS_DB>
@@ -460,16 +467,22 @@
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
                                 <ZAC_URL>${ZAC_URL}</ZAC_URL>
                                 <ENABLED_REDIS_HEALTH_CHECK>true</ENABLED_REDIS_HEALTH_CHECK>
+                                <DEPLOYMENT_TYPE>${DEPLOYMENT_TYPE}</DEPLOYMENT_TYPE>
+                                <BASE_APP_NAME>${BASE_APP_NAME}</BASE_APP_NAME>
+                                <CONFIG_CLIENT_ID>${CONFIG_CLIENT_ID}</CONFIG_CLIENT_ID>
+                                <CONFIG_CLIENT_SECRET>${CONFIG_CLIENT_SECRET}</CONFIG_CLIENT_SECRET>
+                                <CONFIG_SERVER_URI>${CONFIG_SERVER_URI}</CONFIG_SERVER_URI>
+                                <CONFIG_OAUTH_TOKEN_URI>${CONFIG_OAUTH_TOKEN_URI}</CONFIG_OAUTH_TOKEN_URI>
                             </env>
                             <services>
                                 <service>
                                     <name>${acs.db}</name>
-                                    <label>postgresql93-1</label>
-                                    <plan>free</plan>
+                                    <label>postgres</label>
+                                    <plan>shared-nr</plan>
                                 </service>
                                 <service>
                                     <name>${acs.redis}</name>
-                                    <label>p-redis</label>
+                                    <label>redis</label>
                                     <plan>shared-vm</plan>
                                 </service>
                             </services>

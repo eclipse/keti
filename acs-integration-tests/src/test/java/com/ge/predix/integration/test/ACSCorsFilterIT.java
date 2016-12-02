@@ -48,6 +48,8 @@ public class ACSCorsFilterIT extends AbstractTestNGSpringContextTests {
     @Autowired
     private ZacTestUtil zacTestUtil;
 
+    private HttpClient client;
+
     @Autowired
     Environment env;
 
@@ -56,11 +58,11 @@ public class ACSCorsFilterIT extends AbstractTestNGSpringContextTests {
         if (!Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
             this.zacTestUtil.assumeZacServerAvailable();
         }
+        client = HttpClientBuilder.create().useSystemProperties().build();
     }
 
     @Test
     public void testCorsXHRRequestFromAllowedOriginForSwaggerUIApi() throws Exception {
-        HttpClient client = HttpClientBuilder.create().build();
         HttpGet request = new HttpGet(this.acsBaseUrl + SWAGGER_API);
         request.setHeader(HttpHeaders.ORIGIN, "http://someone.predix.io");
         request.setHeader("X-Requested-With", "true");
@@ -77,7 +79,6 @@ public class ACSCorsFilterIT extends AbstractTestNGSpringContextTests {
 
     @Test
     public void testCorsXHRRequestFromNotWhitelistedOriginForSwaggerUIApi() throws Exception {
-        HttpClient client = HttpClientBuilder.create().build();
         HttpGet request = new HttpGet(this.acsBaseUrl + SWAGGER_API);
         request.setHeader(HttpHeaders.ORIGIN, "Origin: http://someone.predix.nert");
         request.setHeader("X-Requested-With", "true");
@@ -93,7 +94,6 @@ public class ACSCorsFilterIT extends AbstractTestNGSpringContextTests {
 
     @Test
     public void testCorsXHRRequestFromWhitelistedOriginForNonSwaggerUIApi() throws Exception {
-        HttpClient client = HttpClientBuilder.create().build();
         HttpGet request = new HttpGet(this.acsBaseUrl + "/acs");
         request.setHeader(HttpHeaders.ORIGIN, "http://someone.predix.io");
         request.setHeader("X-Requested-With", "true");
