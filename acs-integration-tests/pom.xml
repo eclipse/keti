@@ -277,7 +277,7 @@
                             <space>${cf.space}</space>
                             <appname>${acs.appname}</appname>
                             <memory>1024</memory>
-                            <buildpack>java_buildpack</buildpack>
+                            <buildpack>java-buildpack</buildpack>
                             <env>
                                 <ACS_BASE_DOMAIN>${acs.cf.domain}.${cf.base.domain}</ACS_BASE_DOMAIN>
                                 <ACS_DB>${acs.db}</ACS_DB>
@@ -444,7 +444,7 @@
                             <space>${cf.space}</space>
                             <appname>${acs.appname}</appname>
                             <memory>1024</memory>
-                            <buildpack>java_buildpack</buildpack>
+                            <buildpack>java-buildpack</buildpack>
                             <env>
                                 <ACS_BASE_DOMAIN>${acs.cf.domain}.${cf.base.domain}</ACS_BASE_DOMAIN>
                                 <ACS_DB>${acs.db}</ACS_DB>
