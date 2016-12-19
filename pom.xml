@@ -46,8 +46,6 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven-bundle-plugin.version>2.3.7</maven-bundle-plugin.version>
-        <archaius.version>0.7.1</archaius.version>
-        <hystrix.version>1.5.2</hystrix.version>
         <!-- Spring framework upgrade to 4.3.1 requires this version of Jackson -->
         <jackson.version>2.5.0</jackson.version>
         <jedis.version>2.8.1</jedis.version>
@@ -55,8 +53,6 @@
         <springframework.version>4.3.1.RELEASE</springframework.version>
         <springframework-boot.version>1.2.1.RELEASE</springframework-boot.version>
         <spring-metering-filter.version>1.2.1</spring-metering-filter.version>
-        <spring-cloud.version>1.0.5.RELEASE</spring-cloud.version>
-        <spring-cloud-netflix.version>1.0.7.RELEASE</spring-cloud-netflix.version>
         <spring-data-redis.version>1.6.4.RELEASE</spring-data-redis.version>
         <spring-log-filter.version>1.0.1</spring-log-filter.version>
         <springfox.swagger.version>2.2.2</springfox.swagger.version>
@@ -130,44 +126,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Begin dependencies added for Hystrix circuit breaker functionality. -->
-        <dependency>
-            <groupId>com.netflix.hystrix</groupId>
-            <artifactId>hystrix-core</artifactId>
-            <version>${hystrix.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.netflix.archaius</groupId>
-                    <artifactId>archaius-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.netflix.archaius</groupId>
-            <artifactId>archaius-core</artifactId>
-            <version>${archaius.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.netflix.hystrix</groupId>
-            <artifactId>hystrix-javanica</artifactId>
-            <version>${hystrix.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.netflix.hystrix</groupId>
-            <artifactId>hystrix-metrics-event-stream</artifactId>
-            <version>${hystrix.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-commons</artifactId>
-            <version>${spring-cloud.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-netflix-core</artifactId>
-            <version>${spring-cloud-netflix.version}</version>
-        </dependency>
-        <!-- End dependencies added for Hystrix circuit breaker functionality. -->
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>

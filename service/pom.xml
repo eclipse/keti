@@ -29,6 +29,15 @@
     <name>Predix Access Control Service Implementation</name>
     <packaging>jar</packaging>
 
+    <properties>
+        <archaius.version>0.7.1</archaius.version>
+        <hystrix.version>1.5.2</hystrix.version>
+        <jenkins.build.number>dev</jenkins.build.number>
+        <spring-cloud.version>1.0.5.RELEASE</spring-cloud.version>
+        <spring-cloud-netflix.version>1.0.7.RELEASE</spring-cloud-netflix.version>
+        <start-class>com.ge.predix.acs.AccessControlService</start-class>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -336,11 +345,6 @@
             <version>${jedis.version}</version><!--$NO-MVN-MAN-VER$-->
         </dependency>
     </dependencies>
-
-    <properties>
-        <start-class>com.ge.predix.acs.AccessControlService</start-class>
-        <jenkins.build.number>dev</jenkins.build.number>
-    </properties>
 
     <build>
         <plugins>
