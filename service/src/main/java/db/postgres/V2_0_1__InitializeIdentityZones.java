@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 //CHECKSTYLE:OFF
+//Naming convention for the class name is being enforced by spring
 @SuppressWarnings("deprecation")
 public class V2_0_1__InitializeIdentityZones implements SpringJdbcMigration {
     // CHECKSTYLE:ON
