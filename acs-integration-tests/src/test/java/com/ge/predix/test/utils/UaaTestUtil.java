@@ -56,19 +56,20 @@ public class UaaTestUtil {
         this.zone = zone;
     }
 
-    public void setup(List<String> acsZones) {
-        if (acsZones == null || acsZones.size() == 0)
+    public void setup(final List<String> acsZones) {
+        if (acsZones == null || acsZones.size() == 0) {
             throw new RuntimeException("At least one ACS zone is expected to setup UAA");
+        }
         createAcsAdminClient(acsZones, "acs_admin", "acs_admin_secret");
         createNoPolicyScopeClient(acsZones);
         createReadOnlyPolicyScopeClient(acsZones);
     }
 
-    public void setupAcsZoneClient(String acsZone, String clientId, String clientSecret) {
+    public void setupAcsZoneClient(final String acsZone, final String clientId, final String clientSecret) {
         createAcsZoneClient(acsZone, clientId, clientSecret);
     }
 
-    private void createAcsZoneClient(String acsZone, String clientId, String clientSecret) {
+    private void createAcsZoneClient(final String acsZone, final String clientId, final String clientSecret) {
         BaseClientDetails acsZoneAdminClient = new BaseClientDetails();
         ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority("acs.attributes.read"));
@@ -85,7 +86,7 @@ public class UaaTestUtil {
         createOrUpdateClient(acsZoneAdminClient);
     }
 
-    private void createAcsAdminClient(List<String> acsZones, String clientId, String clientSecret) {
+    private void createAcsAdminClient(final List<String> acsZones, final String clientId, final String clientSecret) {
         BaseClientDetails acsAdminClient = new BaseClientDetails();
         ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority("acs.zones.admin"));
@@ -106,7 +107,7 @@ public class UaaTestUtil {
         createOrUpdateClient(acsAdminClient);
     }
 
-    private void createReadOnlyPolicyScopeClient(List<String> acsZones) {
+    private void createReadOnlyPolicyScopeClient(final List<String> acsZones) {
         BaseClientDetails readOnlyPolicyScopeClient = new BaseClientDetails();
         Collection<? extends GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority[] {
                 new SimpleGrantedAuthority("predix-acs.zones." + acsZones.get(0) + ".user"),
@@ -120,7 +121,7 @@ public class UaaTestUtil {
 
     }
 
-    private void createNoPolicyScopeClient(List<String> acsZones) {
+    private void createNoPolicyScopeClient(final List<String> acsZones) {
         BaseClientDetails noPolicyScopeClient = new BaseClientDetails();
         Collection<? extends GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority[] {
                 new SimpleGrantedAuthority("predix-acs.zones." + acsZones.get(0) + ".user") });

@@ -15,11 +15,12 @@
  *******************************************************************************/
 package com.ge.predix.acs.service.policy.evaluation;
 
-import static org.mockito.Mockito.when;
-
-import java.util.HashSet;
-import java.util.Set;
-
+import com.ge.predix.acs.model.Attribute;
+import com.ge.predix.acs.model.Policy;
+import com.ge.predix.acs.model.ResourceType;
+import com.ge.predix.acs.model.Target;
+import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
+import com.ge.predix.acs.rest.BaseResource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
@@ -27,12 +28,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.model.Policy;
-import com.ge.predix.acs.model.ResourceType;
-import com.ge.predix.acs.model.Target;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
-import com.ge.predix.acs.rest.BaseResource;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.mockito.Mockito.when;
 
 @Test
 public class ResourceAttributeResolverTest {
@@ -83,10 +82,6 @@ public class ResourceAttributeResolverTest {
     }
 
     public void testResolveResourceUriNoResource() {
-        Target t = new Target();
-        t.setAction("GET");
-        Policy p = new Policy();
-        p.setTarget(t);
         ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, "/a/b",
                 null);
         Assert.assertEquals(resolver.resolveResourceURI(new Policy()), null);

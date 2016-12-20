@@ -1,30 +1,5 @@
 package com.ge.predix.controller.test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.context.WebApplicationContext;
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
@@ -42,6 +17,30 @@ import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.ZoneService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.context.WebApplicationContext;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
@@ -138,7 +137,8 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
     private Object[] requestEvaluationWithEmptyPolicySet() {
         return new Object[] {
                 createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
-                        this.testSubject.getSubjectIdentifier(), PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER),
+                                        this.testSubject.getSubjectIdentifier(),
+                                        PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER),
                 Collections.emptyList(), Effect.NOT_APPLICABLE };
     }
 
@@ -172,7 +172,8 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
     private Object[] requestEvaluationWithOnePolicySetAndEmptyPriorityList() {
         return new Object[] {
                 createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
-                        this.testSubject.getSubjectIdentifier(), PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER),
+                                        this.testSubject.getSubjectIdentifier(),
+                                        PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER),
                 this.denyPolicySet, Effect.DENY };
     }
 
@@ -206,7 +207,8 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
     private Object[] requestEvaluationWithTwoPolicySetsAndNoPriorityList() {
         return new Object[] {
                 createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
-                        this.testSubject.getSubjectIdentifier(), PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER),
+                                        this.testSubject.getSubjectIdentifier(),
+                                        PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER),
                 this.notApplicableAndDenyPolicySets };
     }
 

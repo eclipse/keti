@@ -16,10 +16,10 @@
 
 package com.ge.predix.acs.service.policy.matcher;
 
-import java.util.List;
-
 import com.ge.predix.acs.model.Policy;
 import com.ge.predix.acs.service.policy.evaluation.MatchedPolicy;
+
+import java.util.List;
 
 /**
  * Matches an access control request to a policy.
@@ -34,7 +34,7 @@ public interface PolicyMatcher {
      *            the list of potential policy matches
      * @return the policies that match the access control request.
      */
-    List<MatchedPolicy> match(final PolicyMatchCandidate candidate, final List<Policy> policies);
+    List<MatchedPolicy> match(PolicyMatchCandidate candidate, List<Policy> policies);
 
     /**
      * @param candidate
@@ -44,5 +44,5 @@ public interface PolicyMatcher {
      * @return the policies that match the access control request and the set of resolved URIs from applying all
      *         attribute URI templates.
      */
-    MatchResult matchForResult(final PolicyMatchCandidate candidate, final List<Policy> policies);
+    MatchResult matchForResult(PolicyMatchCandidate candidate, List<Policy> policies);
 }

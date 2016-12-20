@@ -16,25 +16,6 @@
 
 package com.ge.predix.acs.service.policy.evaluation;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.Whitebox;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import com.ge.predix.acs.commons.policy.condition.ConditionShell;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
@@ -45,6 +26,24 @@ import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.service.policy.validation.PolicySetValidator;
 import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
+import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.Whitebox;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 
 /**
  *
@@ -168,15 +167,65 @@ public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
                                 + " resource.attributes(\"acs\", \"site\"))")),
                         true, false, "", ""
 
-                }, { new HashSet<>(Arrays.asList(new Attribute("acs", "location", "San Ramon"), new Attribute("acs", "location", "New York"))), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "San Ramon"), new Attribute("acs", "site", "New York"))), Arrays.asList(new Condition("match.any(resource.attributes(\"acs\", \"location\")," + " subject.attributes(\"acs\", \"site\"))")), true, false, "", ""
+                }, { new HashSet<>(Arrays.asList(new Attribute("acs", "location", "San Ramon"),
+                                                 new Attribute("acs", "location", "New York"))),
+                     new HashSet<>(Arrays.asList(new Attribute("acs", "site", "San Ramon"),
+                                                 new Attribute("acs", "site", "New York"))),
+                     Arrays.asList(new Condition("match.any(resource.attributes(\"acs\", \"location\"),"
+                                                 + " subject.attributes(\"acs\", \"site\"))")), true, false, "", ""
 
-                }, { new HashSet<>(Arrays.asList(new Attribute("acs", "site", "San Ramon"), new Attribute("acs", "site", "New York"))), Collections.emptySet(), Arrays.asList(new Condition("match.single(resource.attributes(\"acs\", \"site\"), \"San Ramon\")")), true, false, "", ""
+                }, { new HashSet<>(Arrays.asList(new Attribute("acs", "site", "San Ramon"),
+                                                 new Attribute("acs", "site", "New York"))),
+                     Collections.emptySet(),
+                     Arrays.asList(new Condition(
+                         "match.single(resource.attributes(\"acs\", \"site\"), \"San Ramon\")")),
+                     true, false, "", ""
 
-                }, { Collections.emptySet(), Collections.emptySet(), Arrays.asList(new Condition("resource.uriVariable(\"site_id\").equals(\"boston\")")), true, false, "http://assets.predix.io/site/boston", "site/{site_id}"
+                }, { Collections.emptySet(), Collections.emptySet(),
+                     Arrays.asList(new Condition("resource.uriVariable(\"site_id\").equals(\"boston\")")),
+                     true, false, "http://assets.predix.io/site/boston", "site/{site_id}"
 
-                }, { Collections.emptySet(), Collections.emptySet(), Arrays.asList(new Condition("resource.uriVariable(\"site_id\").equals(\"newyork\")")), false, false, "http://assets.predix.io/site/boston", "site/{site_id}" }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "boston"), new Attribute("acs", "site", "New York"))), Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\"))")), true, false, "http://assets.predix.io/site/boston", "site/{site_id}"
+                }, { Collections.emptySet(), Collections.emptySet(),
+                     Arrays.asList(new Condition("resource.uriVariable(\"site_id\").equals(\"newyork\")")),
+                     false, false, "http://assets.predix.io/site/boston", "site/{site_id}"
 
-                }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "LA"), new Attribute("acs", "site", "New York"))), Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\"))")), false, false, "http://assets.predix.io/site/boston", "site/{site_id}" }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "LA"), new Attribute("acs", "site", "New York"))), Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\"))")), false, false, "http://assets.predix.io/site", "site/{site_id}" }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "boston"), new Attribute("acs", "department", "sales"))), Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\"))"), new Condition("match.single(subject.attributes(\"acs\", \"department\")," + " resource.uriVariable(\"department_id\"))")), true, false, "http://assets.predix.io/site/boston/department/sales", "site/{site_id}/department/{department_id}" }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "boston"), new Attribute("acs", "department", "sales"))), Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\")) " + "and match.single(subject.attributes(\"acs\", \"department\")," + " resource.uriVariable(\"department_id\"))")), true, false, "http://assets.predix.io/site/boston/department/sales", "site/{site_id}/department/{department_id}" }, };
+                }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "boston"),
+                                                                         new Attribute("acs", "site", "New York"))),
+                     Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
+                                                 + " resource.uriVariable(\"site_id\"))")),
+                     true, false, "http://assets.predix.io/site/boston", "site/{site_id}"
+
+                }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "LA"),
+                                                                         new Attribute("acs", "site", "New York"))),
+                     Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
+                                                 + " resource.uriVariable(\"site_id\"))")),
+                     false, false, "http://assets.predix.io/site/boston", "site/{site_id}"
+
+                }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "LA"),
+                                                                         new Attribute("acs", "site", "New York"))),
+                     Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
+                                                 + " resource.uriVariable(\"site_id\"))")),
+                     false, false, "http://assets.predix.io/site", "site/{site_id}"
+
+                }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "boston"),
+                                                                         new Attribute("acs", "department", "sales"))),
+                     Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
+                                                 + " resource.uriVariable(\"site_id\"))"),
+                                   new Condition("match.single(subject.attributes(\"acs\", \"department\"),"
+                                                 + " resource.uriVariable(\"department_id\"))")),
+                     true, false,
+                     "http://assets.predix.io/site/boston/department/sales", "site/{site_id}/department/{department_id}"
+
+                }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "boston"),
+                                                                         new Attribute("acs", "department", "sales"))),
+                     Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
+                                                 + " resource.uriVariable(\"site_id\")) "
+                                                 + "and match.single(subject.attributes(\"acs\", \"department\"),"
+                                                 + " resource.uriVariable(\"department_id\"))")),
+                     true, false,
+                     "http://assets.predix.io/site/boston/department/sales", "site/{site_id}/department/{department_id}"
+
+                }, };
         return data;
     }
 

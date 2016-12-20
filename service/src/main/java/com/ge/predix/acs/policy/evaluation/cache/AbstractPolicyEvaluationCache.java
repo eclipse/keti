@@ -16,6 +16,16 @@
 
 package com.ge.predix.acs.policy.evaluation.cache;
 
+import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
+import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
+import com.ge.predix.acs.rest.PolicyEvaluationResult;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,17 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
-import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
-import com.ge.predix.acs.rest.PolicyEvaluationResult;
 
 @Component
 public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationCache {
@@ -311,25 +310,25 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         }
     }
 
-    abstract void delete(final String key);
+    abstract void delete(String key);
 
-    abstract void delete(final Collection<String> keys);
+    abstract void delete(Collection<String> keys);
 
     abstract void flushAll();
 
-    abstract Set<String> getResourceTranslations(final String fromKey);
+    abstract Set<String> getResourceTranslations(String fromKey);
 
-    abstract Set<String> keys(final String key);
+    abstract Set<String> keys(String key);
 
-    abstract List<String> multiGet(final List<String> keys);
+    abstract List<String> multiGet(List<String> keys);
 
-    abstract void multiSet(final Map<String, String> map);
+    abstract void multiSet(Map<String, String> map);
 
-    abstract List<Object> multiGetResourceTranslations(final List<String> fromKeys);
+    abstract List<Object> multiGetResourceTranslations(List<String> fromKeys);
 
-    abstract void set(final String key, final String value);
+    abstract void set(String key, String value);
 
-    abstract void setResourceTranslation(final String fromKey, final String toKey);
+    abstract void setResourceTranslation(String fromKey, String toKey);
 
-    abstract void setResourceTranslations(final Set<String> fromKeys, final String toKey);
+    abstract void setResourceTranslations(Set<String> fromKeys, String toKey);
 }

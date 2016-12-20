@@ -5,7 +5,11 @@ import org.testng.annotations.BeforeSuite;
 
 import com.ge.predix.acs.AccessControlService;
 
-public class TestConfig {
+public final class TestConfig {
+    
+    private TestConfig() {
+        //not called
+     }
 
     private static boolean acsStarted;
 

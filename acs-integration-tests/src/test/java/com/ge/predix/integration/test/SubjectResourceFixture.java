@@ -18,7 +18,12 @@ package com.ge.predix.integration.test;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 
-public class SubjectResourceFixture {
+public final class SubjectResourceFixture {
+    
+    private SubjectResourceFixture() {
+        //not called
+        throw new IllegalAccessError("Class is non-instantiable");
+     }
 
     public static final BaseSubject MARISSA_V1 = new BaseSubject("marissa");
     public static final BaseSubject BOB_V1 = new BaseSubject("GE/bob");

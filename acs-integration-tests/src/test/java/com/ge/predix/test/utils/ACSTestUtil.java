@@ -42,11 +42,11 @@ public class ACSTestUtil {
                 String.format("Expected=[%s], Actual=[%s]", message, responseBody));
     }
 
-    public static boolean isServerListening(URI url) {
+    public static boolean isServerListening(final URI url) {
         RestTemplate restTemplate = new RestTemplate();
         try {
             restTemplate.getForObject(url, String.class);
-        } catch(RestClientException e) {
+        } catch (RestClientException e) {
             if (e.getCause() instanceof ConnectException) {
                 return false;
             }

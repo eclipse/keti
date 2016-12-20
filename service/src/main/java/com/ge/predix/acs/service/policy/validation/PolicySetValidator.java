@@ -16,12 +16,12 @@
 
 package com.ge.predix.acs.service.policy.validation;
 
-import java.util.List;
-
 import com.ge.predix.acs.commons.policy.condition.ConditionScript;
 import com.ge.predix.acs.commons.policy.condition.ConditionShell;
 import com.ge.predix.acs.model.Condition;
 import com.ge.predix.acs.model.PolicySet;
+
+import java.util.List;
 
 /**
  *
@@ -33,14 +33,14 @@ public interface PolicySetValidator {
      * @param policySet
      *            PolicySet to be validated
      */
-    void validatePolicySet(final PolicySet policySet);
+    void validatePolicySet(PolicySet policySet);
 
     /**
      * @param conditions
      *            Policy conditions to be validated
      * @return A list of the corresponding ConditionScript for validated conditions
      */
-    List<ConditionScript> validatePolicyConditions(final List<Condition> conditions);
+    List<ConditionScript> validatePolicyConditions(List<Condition> conditions);
 
     /**
      * @param conditions
@@ -49,6 +49,6 @@ public interface PolicySetValidator {
      *            The shell used to compile the condition scripts
      * @return A list of the corresponding ConditionScript for validated conditions
      */
-    List<ConditionScript> validatePolicyConditions(final List<Condition> conditions,
-            final ConditionShell conditionShell);
+    List<ConditionScript> validatePolicyConditions(List<Condition> conditions,
+            ConditionShell conditionShell);
 }

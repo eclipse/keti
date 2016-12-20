@@ -15,17 +15,16 @@
  *******************************************************************************/
 package com.ge.predix.acs.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.ge.predix.acs.model.Attribute;
+import com.ge.predix.acs.model.PolicySet;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.model.PolicySet;
 
 public class JsonUtilsTest {
 
@@ -129,7 +128,7 @@ public class JsonUtilsTest {
         private String name;
         private List<String> courses;
 
-        public Student() {
+        Student() {
         }
 
         public String getId() {

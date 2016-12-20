@@ -106,15 +106,16 @@ public class AttributeMigrationTest extends AbstractTestNGSpringContextTests {
         this.testSubjects.stream()
                 .forEach(testSubject -> assertTestSubjectExists(testSubject, Arrays.asList(migratedSubjects)));
     }
-    
-    private void assertTestResourceExists(final BaseResource expectedResource, final List<BaseResource> actualResources) {
+
+    private void assertTestResourceExists(final BaseResource expectedResource,
+            final List<BaseResource> actualResources) {
         for (BaseResource actualResource : actualResources) {
             if (expectedResource.getResourceIdentifier().equals(actualResource.getResourceIdentifier())) {
                 Assert.assertEquals(expectedResource.getAttributes(), actualResource.getAttributes());
                 return;
             }
         }
-        Assert.fail("Expected Resource not found: "+expectedResource);
+        Assert.fail("Expected Resource not found: " + expectedResource);
     }
     
     private void assertTestSubjectExists(final BaseSubject expectedSubject, final List<BaseSubject> actualSubjects) {
@@ -124,7 +125,7 @@ public class AttributeMigrationTest extends AbstractTestNGSpringContextTests {
                 return;
             }
         }
-        Assert.fail("Expected Subject not found: "+expectedSubject);
+        Assert.fail("Expected Subject not found: " + expectedSubject);
     }
 
     @DataProvider

@@ -180,9 +180,6 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
                     e1);
         }
 
-        if ((null == policySet) || StringUtils.isEmpty(policySet.getName())) {
-            throw new IllegalArgumentException("PolicySet must have id and name");
-        }
         try {
             this.policySetValidator.validatePolicySet(policySet);
         } catch (PolicySetValidationException e) {

@@ -84,7 +84,7 @@ public class ZoneHelper {
     private String zacUrl;
 
     @Value("${ACS_SERVICE_ID:predix-acs}")
-    private String service_id;
+    private String serviceId;
 
     @Autowired
     private OAuth2RestTemplate zacRestTemplate;
@@ -130,7 +130,9 @@ public class ZoneHelper {
     public Zone createTestZone(final RestTemplate restTemplate, final String zoneId, final boolean registerWithZac)
             throws JsonParseException, JsonMappingException, IOException {
         Map<String, Object> trustedIssuers = null;
-        if (registerWithZac) trustedIssuers = getPrimaryZoneIssuer();
+        if (registerWithZac) {
+            trustedIssuers = getPrimaryZoneIssuer();
+        }
         return createTestZone(restTemplate, zoneId, registerWithZac, trustedIssuers);
     }
 
@@ -164,7 +166,7 @@ public class ZoneHelper {
                 headers);
 
         ResponseEntity<String> response = this.zacRestTemplate.exchange(
-                this.zacUrl + "/v1/registration/" + this.service_id + "/" + zoneId, HttpMethod.PUT, requestEntity,
+                this.zacUrl + "/v1/registration/" + this.serviceId + "/" + zoneId, HttpMethod.PUT, requestEntity,
                 String.class);
         return response;
     }
@@ -177,7 +179,7 @@ public class ZoneHelper {
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
         ResponseEntity<String> response = this.zacRestTemplate.exchange(
-                this.zacUrl + "/v1/registration/" + this.service_id + "/" + zoneId, HttpMethod.DELETE, requestEntity,
+                this.zacUrl + "/v1/registration/" + this.serviceId + "/" + zoneId, HttpMethod.DELETE, requestEntity,
                 String.class);
         return response;
     }
@@ -221,8 +223,9 @@ public class ZoneHelper {
             final boolean registeredWithZac) {
         try {
             restTemplate.delete(this.acsBaseUrl + ACS_ZONE_API_PATH + zoneName);
-            if (registeredWithZac)
+            if (registeredWithZac) {
                 deleteServiceFromZac(zoneName);
+            }
             return HttpStatus.NO_CONTENT;
         } catch (HttpClientErrorException httpException) {
             return httpException.getStatusCode();

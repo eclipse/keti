@@ -1,9 +1,11 @@
 package com.ge.predix.controller.test;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.ge.predix.acs.rest.Zone;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
+import com.ge.predix.acs.utils.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -19,12 +21,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.ge.predix.acs.rest.Zone;
-import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
-import com.ge.predix.acs.utils.JsonUtils;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
@@ -45,7 +44,7 @@ public class URLPathMatchingIT extends AbstractTestNGSpringContextTests {
     }
 
     @Test(dataProvider = "nonMatchedUrlPatternDp")
-    public void test_returnNotFoundForNotMatchedURLs(final RequestBuilder request) throws Exception {
+    public void testReturnNotFoundForNotMatchedURLs(final RequestBuilder request) throws Exception {
         this.mockMvc.perform(request).andExpect(status().isNotFound());
     }
 

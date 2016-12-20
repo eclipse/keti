@@ -16,12 +16,12 @@
 
 package com.ge.predix.acs.policy.evaluation.cache;
 
-import java.util.List;
-import java.util.Set;
-
 import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
 import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
+
+import java.util.List;
+import java.util.Set;
 
 public interface PolicyEvaluationCacheCircuitBreaker {
 
@@ -51,7 +51,7 @@ public interface PolicyEvaluationCacheCircuitBreaker {
 
     void resetForSubjectsByIds(String zoneId, Set<String> subjectIds);
 
-    void setCacheImpl(final PolicyEvaluationCache cacheImpl);
+    void setCacheImpl(PolicyEvaluationCache cacheImpl);
 
-    void setCachingEnabled(final boolean cachingEnabled);
+    void setCachingEnabled(boolean cachingEnabled);
 }

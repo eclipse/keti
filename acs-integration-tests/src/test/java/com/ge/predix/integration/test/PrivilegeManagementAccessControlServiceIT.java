@@ -95,7 +95,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     private ZacTestUtil zacTestUtil;
 
     @Autowired
-    Environment env;
+    private Environment env;
 
     @Value("${UAA_URL:http://localhost:8080/uaa}")
     private String uaaUrl;
@@ -216,8 +216,8 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
 
     public void testCreateBatchResourcesWithMalformedJSON() {
         try {
-            String badResource = "{\"resource\":{\"name\" : \"Site\", \"uriTemplate\" : \"/secured-by-value/sites/{site_id}\"},"
-                    + "{\"resource\": bad-resource-form\"}";
+            String badResource = "{\"resource\":{\"name\" : \"Site\", \"uriTemplate\" : "
+                    + "\"/secured-by-value/sites/{site_id}\"},{\"resource\": bad-resource-form\"}";
             MultiValueMap<String, String> headers = new HttpHeaders();
             headers.add("Content-type", "application/json");
             HttpEntity<String> httpEntity = new HttpEntity<String>(badResource, headers);

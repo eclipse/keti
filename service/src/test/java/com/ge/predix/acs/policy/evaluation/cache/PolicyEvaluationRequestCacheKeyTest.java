@@ -1,19 +1,18 @@
 package com.ge.predix.acs.policy.evaluation.cache;
 
+import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
+import org.testng.annotations.Test;
+
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
 import static com.ge.predix.acs.testutils.XFiles.XFILES_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
-
-import java.util.LinkedHashSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.testng.annotations.Test;
-
-import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 
 public class PolicyEvaluationRequestCacheKeyTest {
     public static final String ZONE_NAME = "testzone1";
@@ -71,27 +70,39 @@ public class PolicyEvaluationRequestCacheKeyTest {
         assertEquals(key.getRequest(), request);
     }
 
+    @SuppressWarnings("unused")
     @Test(expectedExceptions = IllegalStateException.class)
     public void testIllegalStateExceptionForSettingPolicySetIds() {
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
         request.setPolicySetsEvaluationOrder(
                 Stream.of("policyOne").collect(Collectors.toCollection(LinkedHashSet::new)));
-        new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .request(request).policySetIds(request.getPolicySetsEvaluationOrder()).build();
+        PolicyEvaluationRequestCacheKey policyEvaluationRequestCacheKey =
+            new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
+                                                         .request(request)
+                                                         .policySetIds(request.getPolicySetsEvaluationOrder())
+                                                         .build();
     }
 
+    @SuppressWarnings("unused")
     @Test(expectedExceptions = IllegalStateException.class)
     public void testIllegalStateExceptionForSettingSubjectId() {
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .request(request).subjectId("subject").build();
+        PolicyEvaluationRequestCacheKey policyEvaluationRequestCacheKey =
+            new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
+                                                         .request(request)
+                                                         .subjectId("subject")
+                                                         .build();
     }
 
+    @SuppressWarnings("unused")
     @Test(expectedExceptions = IllegalStateException.class)
     public void testIllegalStateExceptionForSettingResourceId() {
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .request(request).resourceId("resource").build();
+        PolicyEvaluationRequestCacheKey policyEvaluationRequestCacheKey =
+            new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
+                                                         .request(request)
+                                                         .resourceId("resource")
+                                                         .build();
     }
 
     @Test

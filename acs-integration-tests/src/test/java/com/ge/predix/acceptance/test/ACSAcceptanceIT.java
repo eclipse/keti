@@ -82,7 +82,7 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
     private ZacTestUtil zacTestUtil;
 
     @Autowired
-    Environment env;
+    private Environment env;
 
     @Autowired
     private ACSRestTemplateFactory acsRestTemplateFactory;

@@ -15,9 +15,7 @@
  *******************************************************************************/
 package com.ge.predix.acs.commons.web;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.ge.predix.acs.commons.exception.UntrustedIssuerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -26,7 +24,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
-import com.ge.predix.acs.commons.exception.UntrustedIssuerException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Common Error Handler for REST APIs.
@@ -56,7 +55,7 @@ public class RestErrorHandler {
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         RestApiErrorResponse restApiErrorResponse = new RestApiErrorResponse();
 
-        if (RestApiException.class.isAssignableFrom(e.getClass())) {
+        if (e instanceof RestApiException) {
             RestApiException restEx = (RestApiException) e;
             response.setStatus(restEx.getHttpStatusCode().value());
             restApiErrorResponse.setErrorMessage(restEx.getMessage());

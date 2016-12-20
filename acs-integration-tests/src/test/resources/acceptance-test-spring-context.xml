@@ -29,8 +29,8 @@
                 class="org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails">
                 <property name="accessTokenUri"
                     value="${zone1UaaUrl}/oauth/token" />
-                <property name="clientId" value="${clientId}" />
-                <property name="clientSecret" value="${clientSecret}" />
+                <property name="clientId" value="${acsClientId}" />
+                <property name="clientSecret" value="${acsClientSecret}" />
                 <property name="username" value="${userName}" />
                 <property name="password" value="${userPassword}" />
             </bean>

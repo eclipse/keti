@@ -15,26 +15,6 @@
  *******************************************************************************/
 package com.ge.predix.controller.test;
 
-import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.POLICY_SET_URL;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.net.URI;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.web.context.WebApplicationContext;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -49,6 +29,25 @@ import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.ZoneService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.context.WebApplicationContext;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import java.net.URI;
+
+import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.POLICY_SET_URL;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
@@ -73,7 +72,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
     private Zone testZone;
     private Zone testZone2;
 
-    private final String version = "v1/";
+    private static final String VERSION = "v1/";
 
     @BeforeClass
     public void setup() throws Exception {
@@ -89,7 +88,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
     }
 
     public void testCreateSamePolicyDifferentZones() throws Exception {
-        String thisUri = this.version + "/policy-set/" + this.policySet.getName();
+        String thisUri = VERSION + "/policy-set/" + this.policySet.getName();
         // create policy-set in first zone
         MockMvcContext putContext = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
                 this.testZone.getSubdomain(), thisUri);
@@ -111,7 +110,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
     public void testCreatePolicy() throws Exception {
         String policySetName = upsertPolicySet(this.policySet);
         MockMvcContext mockMvcContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), this.version + "policy-set/" + policySetName);
+                this.testZone.getSubdomain(), VERSION + "policy-set/" + policySetName);
         mockMvcContext.getMockMvc().perform(mockMvcContext.getBuilder()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("name").value(policySetName)).andExpect(jsonPath("policies").isArray())
@@ -124,7 +123,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
         String policySetName = upsertPolicySet(this.policySet);
 
         MockMvcContext mockMvcContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), this.version + "policy-set/" + policySetName);
+                this.testZone.getSubdomain(), VERSION + "policy-set/" + policySetName);
 
         //assert first policy set
         mockMvcContext.getMockMvc().perform(mockMvcContext.getBuilder()).andExpect(status().isOk())
@@ -141,7 +140,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
             policySet2Name = upsertPolicySet(policySet2);
 
             mockMvcContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
-                    this.testZone.getSubdomain(), this.version + "policy-set/" + policySet2Name);
+                    this.testZone.getSubdomain(), VERSION + "policy-set/" + policySet2Name);
 
             //assert second policy set
             mockMvcContext.getMockMvc().perform(mockMvcContext.getBuilder()).andExpect(status().isOk())
@@ -155,7 +154,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
             evalRequest.setResourceIdentifier("/app/testuri");
             String evalRequestJson = this.objectWriter.writeValueAsString(evalRequest);
             mockMvcContext = this.testUtils.createWACWithCustomPOSTRequestBuilder(this.wac,
-                    this.testZone.getSubdomain(), this.version + "policy-evaluation");
+                    this.testZone.getSubdomain(), VERSION + "policy-evaluation");
             mockMvcContext.getMockMvc()
                     .perform(mockMvcContext.getBuilder().content(evalRequestJson)
                             .contentType(MediaType.APPLICATION_JSON))
@@ -165,21 +164,21 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
                                   + "of policy set names to consider for this evaluation and resubmit the request."));
         } finally {
             mockMvcContext = this.testUtils.createWACWithCustomDELETERequestBuilder(this.wac,
-                    this.testZone.getSubdomain(), this.version + "policy-set/" + policySet2Name);
+                    this.testZone.getSubdomain(), VERSION + "policy-set/" + policySet2Name);
             mockMvcContext.getMockMvc().perform(mockMvcContext.getBuilder()).andExpect(status().is2xxSuccessful());
         }
     }
 
     public void testGetNonExistentPolicySet() throws Exception {
         MockMvcContext mockMvcContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), this.version + "/policy-set/non-existent");
+                this.testZone.getSubdomain(), VERSION + "/policy-set/non-existent");
         mockMvcContext.getMockMvc().perform(mockMvcContext.getBuilder().accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
     public void testCreatePolicyWithNoPolicySet() throws Exception {
         MockMvcContext ctxt = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), this.version + "policy-set/policyNoBody");
+                this.testZone.getSubdomain(), VERSION + "policy-set/policyNoBody");
         ctxt.getMockMvc().perform(ctxt.getBuilder().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isBadRequest());
     }
@@ -187,19 +186,19 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
     public void testDeletePolicySet() throws Exception {
         String policySetName = upsertPolicySet(this.policySet);
         MockMvcContext ctxt = this.testUtils.createWACWithCustomDELETERequestBuilder(this.wac,
-                this.testZone.getSubdomain(), this.version + "/policy-set/" + policySetName);
+                this.testZone.getSubdomain(), VERSION + "/policy-set/" + policySetName);
         ctxt.getMockMvc().perform(ctxt.getBuilder()).andExpect(status().isNoContent());
 
         // assert policy is gone
         MockMvcContext getContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), this.version + "/policy-set/" + policySetName);
+                this.testZone.getSubdomain(), VERSION + "/policy-set/" + policySetName);
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isNotFound());
     }
 
     public void testGetAllPolicySets() throws Exception {
         String firstPolicySetName = upsertPolicySet(this.policySet);
         MockMvcContext mockMvcContext = this.testUtils.createWACWithCustomGETRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), this.version + "policy-set");
+                this.testZone.getSubdomain(), VERSION + "policy-set");
         mockMvcContext.getMockMvc().perform(mockMvcContext.getBuilder().accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$[0].name", is(firstPolicySetName)));
@@ -211,7 +210,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
         String policySetContent = this.objectWriter.writeValueAsString(myPolicySet);
         String policySetName = myPolicySet.getName();
         MockMvcContext ctxt = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), this.version + "policy-set/" + myPolicySet.getName());
+                this.testZone.getSubdomain(), VERSION + "policy-set/" + myPolicySet.getName());
         URI policySetUri = UriTemplateUtils.expand(POLICY_SET_URL, "policySetId:" + policySetName);
         String policySetPath = policySetUri.getPath();
 
@@ -227,7 +226,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
         Assert.assertNotNull(simplePolicyEmptyName, "simple-policy-set-empty-name.json file not found or invalid");
 
         MockMvcContext ctxt = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), this.version + "policy-set/policyWithEmptyName");
+                this.testZone.getSubdomain(), VERSION + "policy-set/policyWithEmptyName");
 
         String policySetPayload = this.jsonUtils.serialize(simplePolicyEmptyName);
         ctxt.getMockMvc().perform(ctxt.getBuilder().contentType(MediaType.APPLICATION_JSON).content(policySetPayload))
@@ -240,7 +239,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
         Assert.assertNotNull(simplePolicyNoName, "simple-policy-set-no-name.json file not found or invalid");
 
         MockMvcContext ctxt = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), this.version + "policy-set/policyWithNoName");
+                this.testZone.getSubdomain(), VERSION + "policy-set/policyWithNoName");
         String policySetPayload = this.jsonUtils.serialize(simplePolicyNoName);
         ctxt.getMockMvc().perform(ctxt.getBuilder().contentType(MediaType.APPLICATION_JSON).content(policySetPayload))
                 .andExpect(status().isUnprocessableEntity());
@@ -251,7 +250,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
 
         String policySetPayload = this.jsonUtils.serialize(this.policySet);
         MockMvcContext ctxt = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), this.version + "policy-set/mismatchWithPolicy");
+                this.testZone.getSubdomain(), VERSION + "policy-set/mismatchWithPolicy");
         ctxt.getMockMvc().perform(ctxt.getBuilder().contentType(MediaType.APPLICATION_JSON).content(policySetPayload))
                 .andExpect(status().isUnprocessableEntity());
     }

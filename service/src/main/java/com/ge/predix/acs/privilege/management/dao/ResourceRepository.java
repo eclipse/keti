@@ -16,16 +16,15 @@
 
 package com.ge.predix.acs.privilege.management.dao;
 
-import java.util.List;
-
+import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.ge.predix.acs.zone.management.dao.ZoneEntity;
+import java.util.List;
 
 public interface ResourceRepository extends JpaRepository<ResourceEntity, Long> {
 
-    List<ResourceEntity> findByZone(final ZoneEntity zone);
+    List<ResourceEntity> findByZone(ZoneEntity zone);
 
-    ResourceEntity getByZoneAndResourceIdentifier(final ZoneEntity zone, final String resourceIdentifier);
+    ResourceEntity getByZoneAndResourceIdentifier(ZoneEntity zone, String resourceIdentifier);
 
 }

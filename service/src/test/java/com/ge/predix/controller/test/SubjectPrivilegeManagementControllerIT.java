@@ -89,8 +89,8 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         BaseSubject subject = JSON_UTILS.deserializeFromFile("controller-test/a-subject.json", BaseSubject.class);
         String thisUri = SUBJECT_BASE_URL + "/dave";
         // create subject in first zone
-        MockMvcContext putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext putContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(subject))).andExpect(status().isCreated());
 
@@ -115,14 +115,14 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         Assert.assertNotNull(subjects);
 
         // Append a list of subjects
-        MockMvcContext postContext = TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac,
-                                                                                           this.testZone.getSubdomain(), SUBJECT_BASE_URL);
+        MockMvcContext postContext =
+            TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), SUBJECT_BASE_URL);
         postContext.getMockMvc().perform(postContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(subjects))).andExpect(status().isNoContent());
 
         // Get the list of subjects
-        MockMvcContext getContext = TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), SUBJECT_BASE_URL);
+        MockMvcContext getContext =
+            TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(), SUBJECT_BASE_URL);
 
         ResultActions resultActions = getContext.getMockMvc().perform(getContext.getBuilder());
         assertSubjects(resultActions, 2, new String[] { "dave", "vineet" });
@@ -136,8 +136,8 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
 
         String thisUri = SUBJECT_BASE_URL + "/dave";
 
-        MockMvcContext putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext putContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(subject))).andExpect(status().isNoContent());
 
@@ -151,8 +151,8 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
 
         // Delete resources from created collection
         thisUri = SUBJECT_BASE_URL + "/vineet";
-        MockMvcContext deleteContext = TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac,
-                                                                                               this.testZone.getSubdomain(), thisUri);
+        MockMvcContext deleteContext =
+            TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         deleteContext.getMockMvc().perform(deleteContext.getBuilder()).andExpect(status().isNoContent());
         // Make sure subject does not exist anymore
         getContext = TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(),
@@ -182,8 +182,8 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         Assert.assertNotNull(subjects);
 
         // Append a list of subjects
-        MockMvcContext postContext = TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac,
-                                                                                           this.testZone.getSubdomain(), SUBJECT_BASE_URL);
+        MockMvcContext postContext =
+            TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), SUBJECT_BASE_URL);
         postContext.getMockMvc()
                 .perform(postContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(subjects)))
@@ -199,8 +199,8 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         Assert.assertNotNull(subjects);
 
         // Append a list of subjects
-        MockMvcContext postContext = TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac,
-                                                                                           this.testZone.getSubdomain(), SUBJECT_BASE_URL);
+        MockMvcContext postContext =
+            TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), SUBJECT_BASE_URL);
         postContext.getMockMvc()
                 .perform(postContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(subjects)))
@@ -216,8 +216,8 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
 
         // Update a given resource
         String thisUri = SUBJECT_BASE_URL + "/dave";
-        MockMvcContext putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext putContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc()
                 .perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(subject)))
@@ -237,14 +237,14 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
 
         // Update a given resource
         String thisUri = SUBJECT_BASE_URL + "/fermin";
-        MockMvcContext putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext putContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(subject))).andExpect(status().is2xxSuccessful());
 
         // Get a given resource
-        MockMvcContext getContext = TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext getContext =
+            TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         ResultActions resultActions = getContext.getMockMvc().perform(getContext.getBuilder());
 
         resultActions.andExpect(status().isOk()).andExpect(jsonPath("subjectIdentifier", is("fermin")))
@@ -252,8 +252,8 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
                 .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         // Delete a given resource
-        MockMvcContext deleteContext = TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac,
-                                                                                               this.testZone.getSubdomain(), thisUri);
+        MockMvcContext deleteContext =
+            TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         deleteContext.getMockMvc().perform(deleteContext.getBuilder()).andExpect(status().isNoContent());
 
         // Make sure subject does not exist anymore
@@ -270,13 +270,13 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         String subjectIdentifier = "fermin";
         String thisUri = SUBJECT_BASE_URL + "/" + subjectIdentifier;
 
-        MockMvcContext putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext putContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(subject))).andExpect(status().isCreated());
 
-        MockMvcContext getContext = TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext getContext =
+            TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         ResultActions resultActions = getContext.getMockMvc().perform(getContext.getBuilder());
 
         resultActions.andExpect(status().isOk()).andExpect(jsonPath("subjectIdentifier", is(subjectIdentifier)))
@@ -303,8 +303,8 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
                 .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         // Delete a given resource
-        MockMvcContext deleteContext = TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac,
-                                                                                               this.testZone.getSubdomain(), thisUri);
+        MockMvcContext deleteContext =
+            TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         deleteContext.getMockMvc().perform(deleteContext.getBuilder()).andExpect(status().isNoContent());
 
     }
@@ -318,13 +318,13 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         Assert.assertNotNull(subjects);
 
         // Append a list of subjects
-        MockMvcContext postContext = TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac,
-                                                                                           this.testZone.getSubdomain(), SUBJECT_BASE_URL);
+        MockMvcContext postContext =
+            TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), SUBJECT_BASE_URL);
         postContext.getMockMvc().perform(postContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(subjects))).andExpect(status().isNoContent());
 
-        MockMvcContext getContext = TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), SUBJECT_BASE_URL);
+        MockMvcContext getContext =
+            TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(), SUBJECT_BASE_URL);
         ResultActions resultActions = getContext.getMockMvc().perform(getContext.getBuilder());
 
         assertSubjects(resultActions, 2, new String[] { "dave", "vineet" });
@@ -348,8 +348,9 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
                 new String[] { "different", "sales" }, new String[] { "https://acs.attributes.int" });
 
         // delete dave
-        MockMvcContext deleteContext = TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac,
-                                                                                               this.testZone.getSubdomain(), SUBJECT_BASE_URL + "/dave");
+        MockMvcContext deleteContext =
+            TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac, this.testZone.getSubdomain(),
+                                                               SUBJECT_BASE_URL + "/dave");
         deleteContext.getMockMvc().perform(deleteContext.getBuilder()).andExpect(status().isNoContent());
 
         // delete vineet
@@ -369,18 +370,19 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         Assert.assertNotNull(subjects);
 
         // Append a list of subjects
-        MockMvcContext postContext = TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac,
-                                                                                           this.testZone.getSubdomain(), SUBJECT_BASE_URL);
+        MockMvcContext postContext =
+            TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), SUBJECT_BASE_URL);
         postContext.getMockMvc().perform(postContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(subjects))).andExpect(status().isNoContent());
 
-        MockMvcContext getContext = TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), SUBJECT_BASE_URL);
+        MockMvcContext getContext =
+            TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(), SUBJECT_BASE_URL);
         ResultActions resultActions = getContext.getMockMvc().perform(getContext.getBuilder());
         assertSubjects(resultActions, 1, new String[] { "dave" });
 
-        MockMvcContext deleteContext = TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac,
-                                                                                               this.testZone.getSubdomain(), SUBJECT_BASE_URL + "/dave");
+        MockMvcContext deleteContext =
+            TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac, this.testZone.getSubdomain(),
+                                                               SUBJECT_BASE_URL + "/dave");
         deleteContext.getMockMvc().perform(deleteContext.getBuilder()).andExpect(status().isNoContent());
     }
 

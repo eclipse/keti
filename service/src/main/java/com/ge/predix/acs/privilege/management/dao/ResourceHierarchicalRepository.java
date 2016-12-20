@@ -1,12 +1,12 @@
 package com.ge.predix.acs.privilege.management.dao;
 
-import java.util.Set;
-
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
+
+import java.util.Set;
 
 public interface ResourceHierarchicalRepository {
 
-    ResourceEntity getResourceWithInheritedAttributes(final ZoneEntity zone, final String resourceIdentifier);
+    ResourceEntity getResourceWithInheritedAttributes(ZoneEntity zone, String resourceIdentifier);
 
-    Set<String> getResourceEntityAndDescendantsIds(final ResourceEntity entity); 
+    Set<String> getResourceEntityAndDescendantsIds(ResourceEntity entity); 
 }

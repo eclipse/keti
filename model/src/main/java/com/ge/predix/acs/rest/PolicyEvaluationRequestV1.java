@@ -15,16 +15,14 @@
  *******************************************************************************/
 package com.ge.predix.acs.rest;
 
-import java.util.Set;
-import java.util.LinkedHashSet;
-
+import com.ge.predix.acs.model.Attribute;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import com.ge.predix.acs.model.Attribute;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @SuppressWarnings({ "javadoc", "nls" })
 @ApiModel(description = "Policy evaluation request for V1.")

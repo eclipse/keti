@@ -32,5 +32,5 @@ public interface ConditionShell {
      * @throws ConditionParsingException
      *             on validation error
      */
-    ConditionScript parse(final String script) throws ConditionParsingException;
+    ConditionScript parse(String script) throws ConditionParsingException;
 }

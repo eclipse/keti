@@ -35,12 +35,12 @@ public class ZacTestUtil {
         if (StringUtils.isEmpty(this.zacUrl)) {
             this.zacUrl = System.getenv("ZAC_URL");
         }
-        if(!isServerListening(URI.create(this.zacUrl))) {
+        if (!isServerListening(URI.create(this.zacUrl))) {
             throw new SkipException("Skipping tests because ZAC is not available.");
         }
     }
 
-    public void setZacUrl(String zacUrl) {
+    public void setZacUrl(final String zacUrl) {
         this.zacUrl = zacUrl;
     }
 }

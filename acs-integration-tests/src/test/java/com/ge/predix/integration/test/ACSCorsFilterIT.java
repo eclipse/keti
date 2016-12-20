@@ -51,7 +51,7 @@ public class ACSCorsFilterIT extends AbstractTestNGSpringContextTests {
     private HttpClient client;
 
     @Autowired
-    Environment env;
+    private Environment env;
 
     @BeforeClass
     public void setup() throws JsonParseException, JsonMappingException, IOException {

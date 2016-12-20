@@ -84,8 +84,8 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
                                                                     BaseResource.class);
         String thisUri = RESOURCE_BASE_URL + "/%2Fservices%2Fsecured-api";
         // create resource in first zone
-        MockMvcContext putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext putContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(resource))).andExpect(status().isCreated());
 
@@ -110,14 +110,14 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         Assert.assertNotNull(resources);
 
         // Append a list of resources
-        MockMvcContext postContext = TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac,
-                                                                                           this.testZone.getSubdomain(), RESOURCE_BASE_URL);
+        MockMvcContext postContext =
+            TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), RESOURCE_BASE_URL);
         postContext.getMockMvc().perform(postContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(resources))).andExpect(status().isNoContent());
 
         // Get the list of resources
-        MockMvcContext getContext = TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), RESOURCE_BASE_URL);
+        MockMvcContext getContext =
+            TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(), RESOURCE_BASE_URL);
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isOk())
                 .andExpect(
                         jsonPath("$[0].resourceIdentifier",
@@ -139,8 +139,8 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         String aResourceURI = RESOURCE_BASE_URL + "/%2Fservices%2Fsecured-api";
 
         // Update a given resource
-        MockMvcContext updateContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
-                                                                                            this.testZone.getSubdomain(), aResourceURI);
+        MockMvcContext updateContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), aResourceURI);
         updateContext.getMockMvc().perform(updateContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(resource))).andExpect(status().isNoContent());
 
@@ -152,8 +152,8 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
                 .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "supervisor", "it" })))
                 .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
-        MockMvcContext deleteContext = TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac,
-                                                                                               this.testZone.getSubdomain(), aResourceURI);
+        MockMvcContext deleteContext =
+            TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac, this.testZone.getSubdomain(), aResourceURI);
 
         // Delete a given resource
         deleteContext.getMockMvc().perform(deleteContext.getBuilder()).andExpect(status().isNoContent());
@@ -170,7 +170,7 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
 
         // Make sure resource does not exist anymore
         getContext = TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(),
-                                                                          "/tenant/ge/resource/01928374102398741235123");
+                                                                     "/tenant/ge/resource/01928374102398741235123");
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isNotFound());
     }
 
@@ -183,8 +183,8 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         Assert.assertNotNull(resources);
 
         // Append a list of resources
-        MockMvcContext postContext = TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac,
-                                                                                           this.testZone.getSubdomain(), RESOURCE_BASE_URL);
+        MockMvcContext postContext =
+            TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), RESOURCE_BASE_URL);
         postContext.getMockMvc()
                 .perform(postContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(resources)))
@@ -201,8 +201,8 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         Assert.assertNotNull(resources);
 
         // Append a list of resources
-        MockMvcContext postContext = TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac,
-                                                                                           this.testZone.getSubdomain(), RESOURCE_BASE_URL);
+        MockMvcContext postContext =
+            TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), RESOURCE_BASE_URL);
         postContext.getMockMvc()
                 .perform(postContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(resources)))
@@ -219,8 +219,8 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         Assert.assertNotNull(resources);
 
         // Append a list of resources
-        MockMvcContext postContext = TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac,
-                                                                                           this.testZone.getSubdomain(), RESOURCE_BASE_URL);
+        MockMvcContext postContext =
+            TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), RESOURCE_BASE_URL);
         postContext.getMockMvc()
                 .perform(postContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(resources)))
@@ -237,8 +237,8 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
         String thisUri = RESOURCE_BASE_URL + "/%2Fservices%2Fsecured-api";
 
         // Update a given resource
-        MockMvcContext putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext putContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc()
                 .perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(resource)))
@@ -255,22 +255,22 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
 
         String thisUri = RESOURCE_BASE_URL + "/%2Fservices%2Fsecured-api%2Fsubresource";
         // Update a given resource
-        MockMvcContext putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext putContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(resource))).andExpect(status().is2xxSuccessful());
 
         // Get a given resource
-        MockMvcContext getContext = TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext getContext =
+            TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isOk())
                 .andExpect(jsonPath("resourceIdentifier", is("/services/secured-api/subresource")))
                 .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "supervisor", "it" })))
                 .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         // Delete a given resource
-        MockMvcContext deleteContext = TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac,
-                                                                                               this.testZone.getSubdomain(), thisUri);
+        MockMvcContext deleteContext =
+            TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         deleteContext.getMockMvc().perform(deleteContext.getBuilder()).andExpect(status().isNoContent());
     }
 
@@ -283,14 +283,14 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
 
         String thisUri = RESOURCE_BASE_URL + "/%2Fservices%2Fsecured-api%2Fsubresource";
 
-        MockMvcContext putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext putContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(resource))).andExpect(status().isCreated());
 
         // Get a given resource
-        MockMvcContext getContext = TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext getContext =
+            TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isOk())
                 .andExpect(jsonPath("resourceIdentifier", is(resource.getResourceIdentifier())))
                 .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "supervisor", "it" })))
@@ -320,8 +320,8 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
                 .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
         // Delete a given resource
-        MockMvcContext deleteContext = TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac,
-                                                                                               this.testZone.getSubdomain(), thisUri);
+        MockMvcContext deleteContext =
+            TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         deleteContext.getMockMvc().perform(deleteContext.getBuilder()).andExpect(status().isNoContent());
 
     }
@@ -340,13 +340,13 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
                 .deserializeFromFile("controller-test/special-character-resource-identifier.json", BaseResource.class);
         Assert.assertNotNull(resource);
 
-        MockMvcContext putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext putContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(resource))).andExpect(status().isCreated());
 
-        MockMvcContext getContext = TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac,
-                                                                                         this.testZone.getSubdomain(), thisUri);
+        MockMvcContext getContext =
+            TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isOk())
                 .andExpect(jsonPath("resourceIdentifier", is(decoded)));
     }

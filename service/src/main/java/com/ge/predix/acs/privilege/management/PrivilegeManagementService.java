@@ -16,12 +16,12 @@
 
 package com.ge.predix.acs.privilege.management;
 
-import java.util.List;
-import java.util.Set;
-
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * CRUD interface operations for privilege management.
@@ -50,7 +50,7 @@ public interface PrivilegeManagementService {
 
     BaseSubject getBySubjectIdentifierWithInheritedAttributes(String subjectIdentifier);
 
-    BaseSubject getBySubjectIdentifierAndScopes(final String subjectIdentifier, final Set<Attribute> scopes);
+    BaseSubject getBySubjectIdentifierAndScopes(String subjectIdentifier, Set<Attribute> scopes);
 
     boolean upsertSubject(BaseSubject subject);
 

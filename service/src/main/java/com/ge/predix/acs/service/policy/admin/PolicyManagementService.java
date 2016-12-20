@@ -16,9 +16,9 @@
 
 package com.ge.predix.acs.service.policy.admin;
 
-import java.util.List;
-
 import com.ge.predix.acs.model.PolicySet;
+
+import java.util.List;
 
 /**
  *
@@ -30,12 +30,12 @@ public interface PolicyManagementService {
      * @throws IllegalArgumentException
      *             If policy format is not valid or PolicySet.name is not set.
      */
-    void upsertPolicySet(final PolicySet policySet) throws IllegalArgumentException;
+    void upsertPolicySet(PolicySet policySet) throws IllegalArgumentException;
 
     /**
      * @return PolicySet for given name, null if no such set exists.
      */
-    PolicySet getPolicySet(final String policySetName);
+    PolicySet getPolicySet(String policySetName);
 
     /**
      * Deletes a policy set.
@@ -43,7 +43,7 @@ public interface PolicyManagementService {
      * @param policySetID
      *            policy set ID
      */
-    void deletePolicySet(final String policySetID);
+    void deletePolicySet(String policySetID);
 
     /**
      * Get all policy sets.

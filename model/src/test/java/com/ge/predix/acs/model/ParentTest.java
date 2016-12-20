@@ -1,15 +1,14 @@
 package com.ge.predix.acs.model;
 
+import com.ge.predix.acs.rest.Parent;
+import org.testng.annotations.Test;
+
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.testng.annotations.Test;
-
-import com.ge.predix.acs.rest.Parent;
-
 public class ParentTest {
     
-    @Test(expectedExceptions=IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testMultipleScopesNotAllowed() {
         Attribute a1 = new Attribute("issuer", "a1");
         Attribute a2 = new Attribute("issuer", "a2");

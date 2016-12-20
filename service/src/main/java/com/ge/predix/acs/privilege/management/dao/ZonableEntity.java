@@ -1,10 +1,10 @@
 package com.ge.predix.acs.privilege.management.dao;
 
-import java.util.Set;
-
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
+
+import java.util.Set;
 
 public interface ZonableEntity {
     Long getId();
@@ -21,13 +21,13 @@ public interface ZonableEntity {
 
     Set<Attribute> getAttributes();
 
-    void setAttributes(final Set<Attribute> attributes);
+    void setAttributes(Set<Attribute> attributes);
 
     String getAttributesAsJson();
 
-    void setAttributesAsJson(final String attributesAsJson);
+    void setAttributesAsJson(String attributesAsJson);
 
     Set<Parent> getParents();
 
-    void setParents(final Set<Parent> parentIdentifiers);
+    void setParents(Set<Parent> parentIdentifiers);
 }

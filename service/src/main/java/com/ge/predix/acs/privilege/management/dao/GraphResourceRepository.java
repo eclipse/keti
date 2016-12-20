@@ -1,15 +1,14 @@
 package com.ge.predix.acs.privilege.management.dao;
 
-import java.util.Collections;
-import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
-
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.Parent;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
+import org.apache.commons.lang.StringUtils;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.Collections;
+import java.util.Set;
 
 public class GraphResourceRepository extends GraphGenericRepository<ResourceEntity>
         implements ResourceRepository, ResourceHierarchicalRepository {
@@ -69,7 +68,7 @@ public class GraphResourceRepository extends GraphGenericRepository<ResourceEnti
         ZoneEntity zoneEntity = new ZoneEntity();
         zoneEntity.setName(zoneName);
         ResourceEntity resourceEntity = new ResourceEntity(zoneEntity, resourceIdentifier);
-        resourceEntity.setId((long) vertex.id());
+        resourceEntity.setId((Long) vertex.id());
         String attributesAsJson = getPropertyOrEmptyString(vertex, ATTRIBUTES_PROPERTY_KEY);
         resourceEntity.setAttributesAsJson(attributesAsJson);
         resourceEntity.setAttributes(JSON_UTILS.deserialize(attributesAsJson, Set.class, Attribute.class));

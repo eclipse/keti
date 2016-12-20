@@ -39,7 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration("classpath:controller-tests-context.xml")
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 public class HierarchicalResourcesIT extends AbstractTestNGSpringContextTests {
-    private static Zone TEST_ZONE;
+    private static final Zone TEST_ZONE =
+        ResourcePrivilegeManagementControllerIT.TEST_UTILS.createTestZone("ResourceMgmtControllerIT");
 
     @Autowired
     private ZoneService zoneService;
@@ -56,8 +57,6 @@ public class HierarchicalResourcesIT extends AbstractTestNGSpringContextTests {
             throw new SkipException("This test only applies when using the \"titan\" profile");
         }
 
-        TEST_ZONE =
-            ResourcePrivilegeManagementControllerIT.TEST_UTILS.createTestZone("ResourceMgmtControllerIT");
         this.zoneService.upsertZone(TEST_ZONE);
         MockSecurityContext.mockSecurityContext(TEST_ZONE);
         MockAcsRequestContext.mockAcsRequestContext(TEST_ZONE);
@@ -138,7 +137,7 @@ public class HierarchicalResourcesIT extends AbstractTestNGSpringContextTests {
         deleteResource(BASEMENT_SITE_ID);
     }
 
-    private void deleteResource(String resourceIdentifier) throws Exception {
+    private void deleteResource(final String resourceIdentifier) throws Exception {
         String resourceToDeleteURI = ResourcePrivilegeManagementControllerIT.RESOURCE_BASE_URL + "/"
                                      + URLEncoder.encode(resourceIdentifier, "UTF-8");
 

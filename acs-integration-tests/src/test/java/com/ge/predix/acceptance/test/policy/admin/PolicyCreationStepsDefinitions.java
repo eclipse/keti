@@ -46,6 +46,8 @@ import cucumber.api.java.en.Then;
  *
  * @author 212338046
  */
+//CHECKSTYLE:OFF
+//Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules. 
 @SuppressWarnings({ "nls" })
 public class PolicyCreationStepsDefinitions {
 

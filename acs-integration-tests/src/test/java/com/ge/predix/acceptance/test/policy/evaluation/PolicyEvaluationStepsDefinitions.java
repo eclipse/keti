@@ -24,11 +24,9 @@ import static com.ge.predix.test.utils.PrivilegeHelper.DEFAULT_SUBJECT_ID;
 import static com.ge.predix.test.utils.PrivilegeHelper.DEFAULT_SUBJECT_IDENTIFIER;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +61,8 @@ import cucumber.api.java.en.When;
  *
  * @author 212406427
  */
+//CHECKSTYLE:OFF
+//Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules. 
 @SuppressWarnings({ "nls" })
 public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContextTests {
 

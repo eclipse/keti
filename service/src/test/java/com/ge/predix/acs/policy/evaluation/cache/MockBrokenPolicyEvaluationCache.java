@@ -1,11 +1,11 @@
 package com.ge.predix.acs.policy.evaluation.cache;
 
-import java.util.List;
-import java.util.Set;
-
 import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
 import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
+
+import java.util.List;
+import java.util.Set;
 
 public class MockBrokenPolicyEvaluationCache implements PolicyEvaluationCache {
 
@@ -66,12 +66,12 @@ public class MockBrokenPolicyEvaluationCache implements PolicyEvaluationCache {
     }
 
     @Override
-    public void resetForResourcesByIds(String zoneId, Set<String> resourceIds) {
+    public void resetForResourcesByIds(final String zoneId, final Set<String> resourceIds) {
         throw new IllegalStateException("Broken cache.");
     }
 
     @Override
-    public void resetForSubjectsByIds(String zoneId, Set<String> subjectIds) {
+    public void resetForSubjectsByIds(final String zoneId, final Set<String> subjectIds) {
         throw new IllegalStateException("Broken cache.");
     }
 }

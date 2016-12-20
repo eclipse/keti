@@ -47,10 +47,10 @@ public class ACSRestTemplateFactory {
     @Value("${zone2UaaUrl}/oauth/token")
     private String zone2TokenUrl;
 
-    @Value("${clientId}")
-    private String clientId;
-    @Value("${clientSecret}")
-    private String clientSecret;
+    @Value("${acsClientId}")
+    private String acsClientId;
+    @Value("${acsClientSecret}")
+    private String acsClientSecret;
 
     @Value("${apmClientId}")
     private String apmClientId;
@@ -141,6 +141,7 @@ public class ACSRestTemplateFactory {
 
         return this.zone2AdminACSTemplate;
     }
+
     public OAuth2RestTemplate getOAuth2ResttemplateForZAC() {
         if (this.zacTemplate == null) {
             ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
@@ -167,21 +168,20 @@ public class ACSRestTemplateFactory {
     }
 
     public OAuth2RestTemplate getOAuth2RestTemplateForAcsAdmin() {
-        return getOAuth2RestTemplateForClient(this.acsAdminClientId, this.acsAdminClientSecret, this.uaaTokenUrl);
+        return getOAuth2RestTemplateForClient(this.acsAdminClientId, this.acsAdminClientSecret);
     }
 
     public OAuth2RestTemplate getOAuth2RestTemplateForReadOnlyClient() {
-        return getOAuth2RestTemplateForClient(this.acsReadOnlyClientId, this.acsReadOnlyClientSecret, this.uaaTokenUrl);
+        return getOAuth2RestTemplateForClient(this.acsReadOnlyClientId, this.acsReadOnlyClientSecret);
     }
 
     public OAuth2RestTemplate getOAuth2RestTemplateForNoPolicyScopeClient() {
-        return getOAuth2RestTemplateForClient(this.acsNoPolicyScopeClientId, this.acsNoPolicyScopeClientSecret, this.uaaTokenUrl);
+        return getOAuth2RestTemplateForClient(this.acsNoPolicyScopeClientId, this.acsNoPolicyScopeClientSecret);
     }
 
-    public OAuth2RestTemplate getOAuth2RestTemplateForClient(final String clientId, final String clientSecret,
-            final String uaaTokenUrl) {
+    public OAuth2RestTemplate getOAuth2RestTemplateForClient(final String clientId, final String clientSecret) {
         ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
-        resource.setAccessTokenUri(uaaTokenUrl);
+        resource.setAccessTokenUri(this.uaaTokenUrl);
         resource.setClientId(clientId);
         resource.setClientSecret(clientSecret);
         OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(resource);
@@ -235,8 +235,8 @@ public class ACSRestTemplateFactory {
 
         ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
         resource.setAccessTokenUri(this.accessTokenEndpointUrl);
-        resource.setClientId(this.clientId);
-        resource.setClientSecret(this.clientSecret);
+        resource.setClientId(this.acsClientId);
+        resource.setClientSecret(this.acsClientSecret);
         resource.setUsername(this.userName);
         resource.setPassword(this.userPassword);
 
@@ -248,8 +248,8 @@ public class ACSRestTemplateFactory {
 
         ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
         resource.setAccessTokenUri(this.accessTokenEndpointUrl);
-        resource.setClientId(this.clientId);
-        resource.setClientSecret(this.clientSecret);
+        resource.setClientId(this.acsClientId);
+        resource.setClientSecret(this.acsClientSecret);
 
         resource.setUsername(this.readOnlyUserName);
         resource.setPassword(this.readOnlyUserPassword);
@@ -261,8 +261,8 @@ public class ACSRestTemplateFactory {
     private OAuth2ProtectedResourceDetails getUserWithoutAnyAcsScope() {
         ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
         resource.setAccessTokenUri(this.accessTokenEndpointUrl);
-        resource.setClientId(this.clientId);
-        resource.setClientSecret(this.clientSecret);
+        resource.setClientId(this.acsClientId);
+        resource.setClientSecret(this.acsClientSecret);
         resource.setUsername(this.noReadScopeUsername);
         resource.setPassword(this.noReadScopeUserPassword);
         return resource;

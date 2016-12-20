@@ -67,7 +67,7 @@
                         <id>validate</id>
                         <phase>validate</phase>
                         <configuration>
-                            <configLocation>file:../checkstyle-config/gog-sun-checks-eclipse.xml</configLocation>
+                            <configLocation>checkstyle-config/gog-sun-checks-eclipse.xml</configLocation>
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>

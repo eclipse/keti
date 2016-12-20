@@ -82,7 +82,7 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     private ZacTestUtil zacTestUtil;
 
     @Autowired
-    ConfigurableEnvironment env;
+    private ConfigurableEnvironment env;
 
     @Value("${ZONE1_NAME:testzone1}")
     private String acsZone1Name;

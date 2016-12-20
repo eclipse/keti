@@ -1,15 +1,15 @@
 package com.ge.predix.acs.privilege.management.dao;
 
-import java.util.Set;
-
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
+import java.util.Set;
+
 public interface SubjectHierarchicalRepository {
-    SubjectEntity getSubjectWithInheritedAttributesForScopes(final ZoneEntity zone, final String subjectIdentifier,
-                                                             final Set<Attribute> scopes);
+    SubjectEntity getSubjectWithInheritedAttributesForScopes(ZoneEntity zone, String subjectIdentifier,
+                                                             Set<Attribute> scopes);
 
-    SubjectEntity getSubjectWithInheritedAttributes(final ZoneEntity zone, final String subjectIdentifier);
+    SubjectEntity getSubjectWithInheritedAttributes(ZoneEntity zone, String subjectIdentifier);
 
-    Set<String> getSubjectEntityAndDescendantsIds(final SubjectEntity entity); 
+    Set<String> getSubjectEntityAndDescendantsIds(SubjectEntity entity); 
 }

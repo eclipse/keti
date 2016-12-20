@@ -83,7 +83,7 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
     private ZacTestUtil zacTestUtil;
 
     @Autowired
-    Environment env;
+    private Environment env;
 
     @Autowired
     private ZoneHelper zoneHelper;
@@ -177,11 +177,11 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
         this.privilegeHelper.putSubject(this.acsAdminRestTemplate, MARISSA_V1, endpoint, this.acsZone1Headers,
                 this.privilegeHelper.getDefaultAttribute());
 
-        String indeterminatePolicySet = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                indeterminatePolicyFile);
-        String denyAllPolicySet = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                denyAllPolicyFile);
-        
+        String indeterminatePolicySet = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers,
+                endpoint, indeterminatePolicyFile);
+        String denyAllPolicySet = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers,
+                endpoint, denyAllPolicyFile);
+
         // test with a valid policy set evaluation order list
         PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper.createMultiplePolicySetsEvalRequest(
                 MARISSA_V1.getSubjectIdentifier(), "sanramon", Stream.of(indeterminatePolicySet, denyAllPolicySet)
@@ -196,8 +196,8 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
         Assert.assertEquals(responseBody.getEffect(), Effect.DENY);
 
         // test with one of the policy sets changed from the evaluation order list
-        String siteBasedPolicySet = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint,
-                siteBasedPolicyFile);
+        String siteBasedPolicySet = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers,
+                endpoint, siteBasedPolicyFile);
         policyEvaluationRequest = this.policyHelper.createMultiplePolicySetsEvalRequest(
                 MARISSA_V1.getSubjectIdentifier(), "sanramon", Stream.of(indeterminatePolicySet, siteBasedPolicySet)
                         .collect(Collectors.toCollection(LinkedHashSet::new)));

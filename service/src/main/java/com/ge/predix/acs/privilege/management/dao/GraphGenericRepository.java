@@ -1,18 +1,11 @@
 package com.ge.predix.acs.privilege.management.dao;
 
-import static com.ge.predix.acs.privilege.management.dao.AttributePredicate.elementOf;
-import static org.apache.tinkerpop.gremlin.process.traversal.P.eq;
-import static org.apache.tinkerpop.gremlin.process.traversal.P.test;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.in;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.ge.predix.acs.model.Attribute;
+import com.ge.predix.acs.rest.Parent;
+import com.ge.predix.acs.utils.JsonUtils;
+import com.ge.predix.acs.zone.management.dao.ZoneEntity;
+import com.google.common.collect.Sets;
+import com.thinkaurelius.titan.core.SchemaViolationException;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Direction;
@@ -27,15 +20,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-//import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.util.Assert;
 
-import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.rest.Parent;
-import com.ge.predix.acs.utils.JsonUtils;
-import com.ge.predix.acs.zone.management.dao.ZoneEntity;
-import com.google.common.collect.Sets;
-import com.thinkaurelius.titan.core.SchemaViolationException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.ge.predix.acs.privilege.management.dao.AttributePredicate.elementOf;
+import static org.apache.tinkerpop.gremlin.process.traversal.P.eq;
+import static org.apache.tinkerpop.gremlin.process.traversal.P.test;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.in;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
+
+//import org.springframework.data.jpa.repository.JpaRepository;
 
 public abstract class GraphGenericRepository<E extends ZonableEntity> implements JpaRepository<E, Long> {
     private static final JsonUtils JSON_UTILS = new JsonUtils();
@@ -238,7 +238,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
                     entityId);
             updateVertexProperties(entity, entityVertex);
             saveParentRelationships(entity, entityVertex, false);
-            entity.setId((long) entityVertex.id());
+            entity.setId((Long) entityVertex.id());
         } else {
             verifyEntityReferencesNotCyclic(entity);
             GraphTraversal<Vertex, Vertex> traversal = this.graph.traversal().V(entity.getId());
@@ -498,9 +498,9 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
 
     abstract String getRelationshipKey();
 
-    abstract void updateVertexProperties(final E entity, final Vertex vertex);
+    abstract void updateVertexProperties(E entity, Vertex vertex);
 
-    abstract E vertexToEntity(final Vertex vertex);
+    abstract E vertexToEntity(Vertex vertex);
 
     public Graph getGraph() {
         return this.graph;

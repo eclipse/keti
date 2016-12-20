@@ -61,7 +61,7 @@ public class PolicyEvalCachingWithGraphDBIT extends AbstractTestNGSpringContextT
     private ZacTestUtil zacTestUtil;
 
     @Autowired
-    Environment env;
+    private Environment env;
 
     @Autowired
     private ZoneHelper zoneHelper;
@@ -69,14 +69,16 @@ public class PolicyEvalCachingWithGraphDBIT extends AbstractTestNGSpringContextT
     private UaaTestUtil uaaTestUtil;
     private final HttpHeaders acsZone1Headers = new HttpHeaders();
 
-    private final String ISSUER_URI = "acs.example.org";
-    private final Attribute TOP_SECRET_CLASSIFICATION = new Attribute(this.ISSUER_URI, "classification", "top secret");
-    private final Attribute SPECIAL_AGENTS_GROUP_ATTRIBUTE = new Attribute(this.ISSUER_URI, "group", "special-agents");
+    private static final String ISSUER_URI = "acs.example.org";
+    private static final Attribute TOP_SECRET_CLASSIFICATION = new Attribute(ISSUER_URI, "classification",
+            "top secret");
+    private static final Attribute SPECIAL_AGENTS_GROUP_ATTRIBUTE = new Attribute(ISSUER_URI, "group",
+            "special-agents");
 
-    private final String FBI = "fbi";
-    private final String SPECIAL_AGENTS_GROUP = "special-agents";
-    private final String AGENT_MULDER = "mulder";
-    private final String AGENT_SCULLY = "scully";
+    private static final String FBI = "fbi";
+    private static final String SPECIAL_AGENTS_GROUP = "special-agents";
+    private static final String AGENT_MULDER = "mulder";
+    private static final String AGENT_SCULLY = "scully";
     public static final String EVIDENCE_SCULLYS_TESTIMONY_ID = "/evidence/scullys-testimony";
 
     @BeforeClass

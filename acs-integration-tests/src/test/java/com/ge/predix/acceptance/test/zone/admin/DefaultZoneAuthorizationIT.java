@@ -105,8 +105,8 @@ public class DefaultZoneAuthorizationIT extends AbstractTestNGSpringContextTests
         // Try to get global resource from zone2Url. This should FAIL
         try {
             zone2AcsTemplate.getForEntity(acsZone2Url + "/v1/zone/" + this.zone2Name, Zone.class);
-            Assert.fail(
-                    "Able to access non-zone specific resource from a zone specific URL,  with a zone specific issuer token!");
+            Assert.fail("Able to access non-zone specific resource from a zone specific URL, "
+                    + "with a zone specific issuer token!");
         } catch (InvalidRequestException e) {
             // expected
         }

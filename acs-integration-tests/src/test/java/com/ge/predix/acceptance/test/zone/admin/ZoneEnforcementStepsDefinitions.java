@@ -53,6 +53,8 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
+//CHECKSTYLE:OFF
+//Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules. 
 public class ZoneEnforcementStepsDefinitions {
 
     @Value("${UAA_URL:http://localhost:8080/uaa}")

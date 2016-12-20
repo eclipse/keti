@@ -1,7 +1,5 @@
 package com.ge.predix.acs.privilege.management.dao;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -10,6 +8,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @Profile("titan")
@@ -28,8 +28,7 @@ public class SubjectMigrationManager {
             pageOfSubjects = subjectRepository.findAll(pageRequest);
             List<SubjectEntity> subjectListToSave = pageOfSubjects.getContent();
             numOfSubjectsSaved += pageOfSubjects.getNumberOfElements();
-            subjectListToSave.forEach(item -> 
-            {
+            subjectListToSave.forEach(item -> {
                 item.setId(0);
                 LOGGER.trace("doSubjectMigration Subject-Id : " + item.getSubjectIdentifier() + " Zone-name : "
                     + item.getZone().getName() + " Zone-id:" + item.getZone().getId());

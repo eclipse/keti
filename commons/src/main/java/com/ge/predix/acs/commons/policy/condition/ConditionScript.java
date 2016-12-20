@@ -31,5 +31,5 @@ public interface ConditionScript {
      *            the bound variables used at runtime.
      * @return true or false
      */
-    boolean execute(final Map<String, Object> boundVariables);
+    boolean execute(Map<String, Object> boundVariables);
 }

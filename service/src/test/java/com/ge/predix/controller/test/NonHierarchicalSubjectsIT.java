@@ -30,7 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration("classpath:controller-tests-context.xml")
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 public final class NonHierarchicalSubjectsIT extends AbstractTestNGSpringContextTests {
-    private static Zone TEST_ZONE;
+    private static final Zone TEST_ZONE =
+        SubjectPrivilegeManagementControllerIT.TEST_UTILS.createTestZone("SubjectMgmtControllerIT");
 
     @Autowired
     private ZoneService zoneService;
@@ -47,8 +48,6 @@ public final class NonHierarchicalSubjectsIT extends AbstractTestNGSpringContext
             throw new SkipException("This test only applies when NOT using the \"titan\" profile");
         }
 
-        TEST_ZONE =
-            SubjectPrivilegeManagementControllerIT.TEST_UTILS.createTestZone("SubjectMgmtControllerIT");
         this.zoneService.upsertZone(TEST_ZONE);
         MockSecurityContext.mockSecurityContext(TEST_ZONE);
         MockAcsRequestContext.mockAcsRequestContext(TEST_ZONE);
