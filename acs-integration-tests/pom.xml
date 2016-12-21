@@ -19,6 +19,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>acs-integration-tests</artifactId>
+    <name>Predix Access Control Service Integration Tests</name>
     <packaging>jar</packaging>
 
     <parent>
@@ -67,7 +68,7 @@
                         <id>validate</id>
                         <phase>validate</phase>
                         <configuration>
-                            <configLocation>checkstyle-config/gog-sun-checks-eclipse.xml</configLocation>
+                            <configLocation>../checkstyle-config/gog-sun-checks-eclipse.xml</configLocation>
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
