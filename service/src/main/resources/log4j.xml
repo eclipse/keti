@@ -25,10 +25,6 @@
         </layout>
     </appender>
 
-   <logger name="java">
-        <level value="warn" />
-    </logger>
-
     <logger name="org.springframework.security">
         <level value="info" />
     </logger>
@@ -60,7 +56,6 @@
 
     <logger name="com.ge.predix.acs">
         <level value="info" />
-        <appender-ref ref="console" />
     </logger>
 
     <root>
