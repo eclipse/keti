@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.util.Assert;
 
 import com.ge.predix.acs.privilege.management.dao.GraphGenericRepository;
@@ -39,6 +40,7 @@ import com.thinkaurelius.titan.core.schema.TitanManagement.IndexBuilder;
 import com.thinkaurelius.titan.graphdb.database.management.ManagementSystem;
 
 @Configuration
+@Profile({ "titan" })
 @EnableAutoConfiguration
 public class GraphConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphConfig.class);
