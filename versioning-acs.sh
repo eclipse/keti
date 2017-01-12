@@ -26,10 +26,10 @@ if [ -z "$1" ]; then
 fi
 
 # Update pom versions for acs and all child projects
-mvn versions:set -DnewVersion=$1
+mvn versions:set -DnewVersion=$1 -DgenerateBackupPoms=false
 mvn clean install -s ../acs-ci-config/mvn_settings.xml -DskipTests
 
 # Update parent version in acs-integration-tests
 cd acs-integration-tests
-mvn versions:update-parent -s ../../acs-ci-config/mvn_settings.xml
+mvn versions:update-parent -DparentVersion=[$1] -DgenerateBackupPoms=false
 mvn clean install -s ../../acs-ci-config/mvn_settings.xml -DskipTests
