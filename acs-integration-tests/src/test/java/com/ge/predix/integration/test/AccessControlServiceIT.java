@@ -27,6 +27,9 @@ import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -96,7 +99,8 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     @Value("${UAA_URL:http://localhost:8080/uaa}")
     private String uaaUrl;
 
-    private String acsZone1Url;
+    private String acsUrl;
+    private HttpHeaders zone1Headers;
     private OAuth2RestTemplate acsAdminRestTemplate;
     private OAuth2RestTemplate acsReadOnlyRestTemplate;
     private OAuth2RestTemplate acsNoPolicyScopeRestTemplate;
@@ -104,6 +108,9 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     @BeforeClass
     public void setup() throws JsonParseException, JsonMappingException, IOException {
         TestConfig.setupForEclipse(); // Starts ACS when running the test in eclipse.
+        this.acsUrl = this.zoneHelper.getAcsBaseURL();
+        this.zone1Headers = new HttpHeaders();
+        this.zone1Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
 
         if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
             setupPublicACS();
@@ -120,11 +127,9 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         this.acsNoPolicyScopeRestTemplate = this.acsRestTemplateFactory.getACSTemplateWithNoAcsScope();
 
         this.zoneHelper.createPrimaryTestZone();
-        this.acsZone1Url = this.zoneHelper.getZone1Url();
     }
 
     private void setupPublicACS() throws JsonParseException, JsonMappingException, IOException {
-        this.acsZone1Url = this.zoneHelper.getZone1Url();
         UaaTestUtil uaaTestUtil = new UaaTestUtil(this.acsRestTemplateFactory.getOAuth2RestTemplateForUaaAdmin(),
                 this.uaaUrl);
         uaaTestUtil.setup(Arrays.asList(new String[] { this.acsZone1Name, this.acsZone2Name, this.acsZone3Name }));
@@ -140,22 +145,23 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     public void testPolicyEvalWithFirstMatchDeny(final BaseSubject subject,
             final PolicyEvaluationRequestV1 policyEvaluationRequest, final String endpoint) throws Exception {
 
-        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, null,
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.zone1Headers,
                 this.privilegeHelper.getDefaultAttribute());
 
         String policyFile = "src/test/resources/multiple-site-based-policy-set.json";
-        String testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, endpoint, policyFile);
+        String testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, endpoint,
+                policyFile);
         ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH, policyEvaluationRequest,
-                PolicyEvaluationResult.class);
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.zone1Headers), PolicyEvaluationResult.class);
 
         Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
         PolicyEvaluationResult responseBody = postForEntity.getBody();
         Assert.assertEquals(responseBody.getEffect(), Effect.DENY);
 
-        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
-        this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                subject.getSubjectIdentifier());
+        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName, this.zone1Headers);
+        this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.acsUrl, subject.getSubjectIdentifier(),
+                this.zone1Headers);
     }
 
     @Test(dataProvider = "subjectProvider")
@@ -164,14 +170,15 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         String testPolicyName = null;
         try {
 
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, null,
+            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.zone1Headers,
                     this.privilegeHelper.getDefaultAttribute());
             String policyFile = "src/test/resources/single-site-based-policy-set.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, endpoint, policyFile);
+            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, endpoint,
+                    policyFile);
 
             ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH, policyEvaluationRequest,
-                    PolicyEvaluationResult.class);
+                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                    new HttpEntity<>(policyEvaluationRequest, this.zone1Headers), PolicyEvaluationResult.class);
 
             Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
             PolicyEvaluationResult responseBody = postForEntity.getBody();
@@ -181,7 +188,7 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
                     .createEvalRequest(subject.getSubjectIdentifier(), "ny");
 
             postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    policyEvaluationRequest2, PolicyEvaluationResult.class);
+                    new HttpEntity<>(policyEvaluationRequest2, this.zone1Headers), PolicyEvaluationResult.class);
 
             Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
             responseBody = postForEntity.getBody();
@@ -189,7 +196,8 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
 
         } finally {
             if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
+                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName,
+                        this.zone1Headers);
             }
         }
     }
@@ -208,7 +216,7 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
 
             // set policy
             String policyFile = "src/test/resources/policies/policy-set-with-attribute-uri-template.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, this.acsZone1Url,
+            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, this.acsUrl,
                     policyFile);
 
             // Policy Eval. without setting required attribute on resource. Should return DENY
@@ -218,8 +226,8 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
                     "/v1/region/report/asset/1223", null);
 
             ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    this.acsZone1Url + PolicyHelper.ACS_POLICY_EVAL_API_PATH, evalRequest,
-                    PolicyEvaluationResult.class);
+                    this.acsUrl + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                    new HttpEntity<>(evalRequest, this.zone1Headers), PolicyEvaluationResult.class);
 
             Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
             Assert.assertEquals(postForEntity.getBody().getEffect(), Effect.DENY);
@@ -227,19 +235,18 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
             // Set resource attribute and evaluate again. expect PERMIT
             // createResource adds a 'site' attribute with value 'sanramon' used by our test policy
             BaseResource testResource = this.privilegeHelper.createResource(testResourceId);
-            this.privilegeHelper.postResources(this.acsAdminRestTemplate, this.acsZone1Url, testResource);
+            this.privilegeHelper.postResources(this.acsAdminRestTemplate, this.acsUrl, this.zone1Headers, testResource);
 
-            postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    this.acsZone1Url + PolicyHelper.ACS_POLICY_EVAL_API_PATH, evalRequest,
-                    PolicyEvaluationResult.class);
+            postForEntity = this.acsAdminRestTemplate.postForEntity(this.acsUrl + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                    new HttpEntity<>(evalRequest, this.zone1Headers), PolicyEvaluationResult.class);
             Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
             Assert.assertEquals(postForEntity.getBody().getEffect(), Effect.PERMIT);
 
         } finally {
             if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
+                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName,
+                        this.zone1Headers);
             }
-            // this.privilegeHelper.deleteResource(this.acsAdminRestTemplate, this.acsZone1Url, testResourceId);
         }
 
     }
@@ -247,10 +254,12 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     @Test(dataProvider = "endpointProvider")
     public void testCreationOfValidPolicy(final String endpoint) throws Exception {
         String policyFile = "src/test/resources/single-site-based-policy-set.json";
-        String testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, endpoint, policyFile);
-        PolicySet policySetSaved = this.getPolicySet(this.acsAdminRestTemplate, testPolicyName, endpoint);
+        String testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, endpoint,
+                policyFile);
+        PolicySet policySetSaved = this.getPolicySet(this.acsAdminRestTemplate, testPolicyName, this.zone1Headers,
+                endpoint);
         Assert.assertEquals(testPolicyName, policySetSaved.getName());
-        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
+        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName, this.zone1Headers);
     }
 
     @Test(dataProvider = "endpointProvider")
@@ -258,13 +267,14 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         String testPolicyName = "";
         try {
             String policyFile = "src/test/resources/missing-policy-set-name-policy.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, endpoint, policyFile);
+            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, endpoint,
+                    policyFile);
         } catch (HttpClientErrorException e) {
             this.acsTestUtil.assertExceptionResponseBody(e, "policy set name is missing");
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
             return;
         }
-        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
+        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName, this.zone1Headers);
         Assert.fail("testPolicyCreationInValidPolicy should have failed");
     }
 
@@ -273,13 +283,14 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         String testPolicyName = "";
         try {
             String policyFile = "src/test/resources/policy-set-with-only-name-effect.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, endpoint, policyFile);
+            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, endpoint,
+                    policyFile);
         } catch (HttpClientErrorException e) {
             this.acsTestUtil.assertExceptionResponseBody(e, "is not URI friendly");
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
             return;
         }
-        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
+        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName, this.zone1Headers);
         Assert.fail("testPolicyCreationInValidPolicy should have failed");
     }
 
@@ -288,13 +299,14 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         String testPolicyName = "";
         try {
             String policyFile = "src/test/resources/invalid-json-schema-policy-set.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, endpoint, policyFile);
+            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, endpoint,
+                    policyFile);
         } catch (HttpClientErrorException e) {
             this.acsTestUtil.assertExceptionResponseBody(e, "JSON Schema validation");
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
             return;
         }
-        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
+        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName, this.zone1Headers);
         Assert.fail("testPolicyCreationInValidPolicy should have failed");
     }
 
@@ -302,17 +314,18 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     public void testPolicyEvalNotApplicable(final String endpoint) throws Exception {
         String testPolicyName = null;
         try {
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, MARISSA_V1, this.acsZone1Url, null,
+            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, MARISSA_V1, this.acsUrl, this.zone1Headers,
                     this.privilegeHelper.getDefaultAttribute());
 
             String policyFile = "src/test/resources/policy-set-with-multiple-policies-na-with-condition.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, endpoint, policyFile);
+            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, endpoint,
+                    policyFile);
 
             PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper
                     .createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanramon");
             ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH, policyEvaluationRequest,
-                    PolicyEvaluationResult.class);
+                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                    new HttpEntity<>(policyEvaluationRequest, this.zone1Headers), PolicyEvaluationResult.class);
 
             Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
             PolicyEvaluationResult responseBody = postForEntity.getBody();
@@ -320,9 +333,10 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         } catch (Exception e) {
             Assert.fail("testPolicyEvalNotApplicable should have NOT failed " + endpoint + " " + e.getMessage());
         } finally {
-            this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
-            this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zoneHelper.getZone1Url(),
-                    MARISSA_V1.getSubjectIdentifier());
+            this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName,
+                    this.zone1Headers);
+            this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.acsUrl,
+                    MARISSA_V1.getSubjectIdentifier(), this.zone1Headers);
         }
     }
 
@@ -333,7 +347,7 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         // Use vanilla rest template with no oauth token.
         try {
             String policyFile = "src/test/resources/policy-set-with-multiple-policies-na-with-condition.json";
-            this.policyHelper.setTestPolicy(acs, null, endpoint, policyFile);
+            this.policyHelper.setTestPolicy(acs, this.zone1Headers, endpoint, policyFile);
             Assert.fail("No exception thrown when making request without token.");
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNAUTHORIZED);
@@ -347,7 +361,8 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         // Use vanilla rest template with no oauth token.
         try {
             acs.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    this.policyHelper.createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanramon"),
+                    new HttpEntity<>(this.policyHelper.createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanramon"),
+                            this.zone1Headers),
                     PolicyEvaluationResult.class);
             Assert.fail("No exception thrown when making policy evaluation request without token.");
         } catch (HttpClientErrorException e) {
@@ -360,9 +375,10 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
         String testPolicyName;
         try {
             String policyFile = "src/test/resources/policy-set-with-multiple-policies-na-with-condition.json";
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsNoPolicyScopeRestTemplate, null, endpoint,
-                    policyFile);
-            this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
+            testPolicyName = this.policyHelper.setTestPolicy(this.acsNoPolicyScopeRestTemplate, this.zone1Headers,
+                    endpoint, policyFile);
+            this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName,
+                    this.zone1Headers);
             Assert.fail("No exception when trying to create policy set with no acs scope");
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.FORBIDDEN);
@@ -373,7 +389,7 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     public void testPolicyUpdateWithReadOnlyAccess(final String endpoint) throws Exception {
         try {
             String policyFile = "src/test/resources/policy-set-with-multiple-policies-na-with-condition.json";
-            this.policyHelper.setTestPolicy(this.acsReadOnlyRestTemplate, null, endpoint, policyFile);
+            this.policyHelper.setTestPolicy(this.acsReadOnlyRestTemplate, this.zone1Headers, endpoint, policyFile);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.FORBIDDEN);
         }
@@ -381,13 +397,14 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
 
     @Test(dataProvider = "endpointProvider")
     public void testPolicyReadWithReadOnlyAccess(final String endpoint) throws Exception {
-        String testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, endpoint,
+        String testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, endpoint,
                 "src/test/resources/single-site-based-policy-set.json");
 
-        ResponseEntity<PolicySet> policySetResponse = this.acsReadOnlyRestTemplate
-                .getForEntity(endpoint + PolicyHelper.ACS_POLICY_SET_API_PATH + testPolicyName, PolicySet.class);
+        ResponseEntity<PolicySet> policySetResponse = this.acsReadOnlyRestTemplate.exchange(
+                endpoint + PolicyHelper.ACS_POLICY_SET_API_PATH + testPolicyName, HttpMethod.GET,
+                new HttpEntity<>(this.zone1Headers), PolicySet.class);
         Assert.assertEquals(testPolicyName, policySetResponse.getBody().getName());
-        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
+        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName, this.zone1Headers);
     }
 
     @Test
@@ -398,34 +415,37 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
             PolicySet policySet = new ObjectMapper()
                     .readValue(new File("src/test/resources/single-site-based-policy-set.json"), PolicySet.class);
             testPolicyName = policySet.getName();
-            this.acsAdminRestTemplate.put(this.acsZone1Url + PolicyHelper.ACS_POLICY_SET_API_PATH + testPolicyName,
-                    policySet);
+            this.acsAdminRestTemplate.put(this.acsUrl + PolicyHelper.ACS_POLICY_SET_API_PATH + testPolicyName,
+                    new HttpEntity<>(policySet, this.zone1Headers));
         } finally {
-            this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
+            this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName,
+                    this.zone1Headers);
         }
     }
 
     @Test(dataProvider = "endpointProvider")
     public void testGetAllPolicySets(final String endpoint) throws Exception {
-        String testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, endpoint,
+        String testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, endpoint,
                 "src/test/resources/single-site-based-policy-set.json");
 
         String getAllPolicySetsURL = endpoint + PolicyHelper.ACS_POLICY_SET_API_PATH;
 
-        ResponseEntity<PolicySet[]> policySetsResponse = this.acsReadOnlyRestTemplate.getForEntity(getAllPolicySetsURL,
-                PolicySet[].class);
+        ResponseEntity<PolicySet[]> policySetsResponse = this.acsReadOnlyRestTemplate.exchange(getAllPolicySetsURL,
+                HttpMethod.GET, new HttpEntity<>(this.zone1Headers), PolicySet[].class);
 
         PolicySet[] policySets = policySetsResponse.getBody();
         // should expect only one policySet per issuer, clientId and policySetId
         Assert.assertEquals(1, policySets.length);
         Assert.assertEquals(testPolicyName, policySets[0].getName());
 
-        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsZone1Url, testPolicyName);
+        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName, this.zone1Headers);
     }
 
-    private PolicySet getPolicySet(final RestTemplate acs, final String policyName, final String acsEndpointParam) {
-        ResponseEntity<PolicySet> policySetResponse = acs
-                .getForEntity(acsEndpointParam + PolicyHelper.ACS_POLICY_SET_API_PATH + policyName, PolicySet.class);
+    private PolicySet getPolicySet(final RestTemplate acs, final String policyName, final HttpHeaders headers,
+            final String acsEndpointParam) {
+        ResponseEntity<PolicySet> policySetResponse = acs.exchange(
+                acsEndpointParam + PolicyHelper.ACS_POLICY_SET_API_PATH + policyName, HttpMethod.GET,
+                new HttpEntity<>(headers), PolicySet.class);
         return policySetResponse.getBody();
     }
 
@@ -433,26 +453,25 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     public Object[][] getSubject() {
         Object[][] data = new Object[][] {
                 { MARISSA_V1, this.policyHelper.createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanramon"),
-                        this.acsZone1Url },
-                { JOE_V1, this.policyHelper.createEvalRequest(JOE_V1.getSubjectIdentifier(), "sanramon"),
-                        this.acsZone1Url },
+                        this.acsUrl },
+                { JOE_V1, this.policyHelper.createEvalRequest(JOE_V1.getSubjectIdentifier(), "sanramon"), this.acsUrl },
                 { PETE_V1, this.policyHelper.createEvalRequest(PETE_V1.getSubjectIdentifier(), "sanramon"),
-                        this.acsZone1Url },
+                        this.acsUrl },
                 { JLO_V1, this.policyHelper.createEvalRequest(JLO_V1.getSubjectIdentifier(), "sanramon"),
-                        this.acsZone1Url } };
+                        this.acsUrl } };
         return data;
     }
 
     @DataProvider(name = "endpointProvider")
     public Object[][] getAcsEndpoint() {
-        Object[][] data = new Object[][] { { this.acsZone1Url } };
+        Object[][] data = new Object[][] { { this.acsUrl } };
         return data;
     }
 
     @AfterClass
     public void cleanup() throws Exception {
-        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate, this.acsZone1Url, null);
-        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.acsZone1Url, null);
-        this.policyHelper.deletePolicySets(this.acsAdminRestTemplate, this.acsZone1Url, null);
+        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate, this.acsUrl, this.zone1Headers);
+        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.acsUrl, this.zone1Headers);
+        this.policyHelper.deletePolicySets(this.acsAdminRestTemplate, this.acsUrl, this.zone1Headers);
     }
 }

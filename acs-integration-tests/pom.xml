@@ -362,9 +362,6 @@
                                     <path>${local.acs.artifact}</path>
                                     <artifact>${maven.acs.artifact}</artifact>
                                     <urls>
-                                        <url>${acs.zone.subdomain}3.${acs.cf.domain}.${cf.base.domain}</url>
-                                        <url>${acs.zone.subdomain}2.${acs.cf.domain}.${cf.base.domain}</url>
-                                        <url>${acs.zone.subdomain}.${acs.cf.domain}.${cf.base.domain}</url>
                                         <url>${acs.appname}.${cf.base.domain}</url>
                                     </urls>
                                 </configuration>
@@ -531,9 +528,6 @@
                                     <path>${local.acs.artifact}</path>
                                     <artifact>${maven.acs.artifact}</artifact>
                                     <urls>
-                                        <url>${acs.zone.subdomain}3.${acs.cf.domain}.${cf.base.domain}</url>
-                                        <url>${acs.zone.subdomain}2.${acs.cf.domain}.${cf.base.domain}</url>
-                                        <url>${acs.zone.subdomain}.${acs.cf.domain}.${cf.base.domain}</url>
                                         <url>${acs.appname}.${cf.base.domain}</url>
                                     </urls>
                                 </configuration>

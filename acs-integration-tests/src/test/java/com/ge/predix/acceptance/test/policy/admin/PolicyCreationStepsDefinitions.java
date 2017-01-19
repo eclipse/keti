@@ -24,6 +24,7 @@ import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.testng.Assert;
 
@@ -46,8 +47,8 @@ import cucumber.api.java.en.Then;
  *
  * @author 212338046
  */
-//CHECKSTYLE:OFF
-//Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules. 
+// CHECKSTYLE:OFF
+// Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules.
 @SuppressWarnings({ "nls" })
 public class PolicyCreationStepsDefinitions {
 
@@ -79,13 +80,14 @@ public class PolicyCreationStepsDefinitions {
 
     CreatePolicyStatus status;
 
-    private String zone1Url;
+    private HttpHeaders zone1Headers;
     private OAuth2RestTemplate acsAdminRestTemplate;
     private boolean registerWithZac;
 
     @Before
     public void setup() throws JsonParseException, JsonMappingException, IOException {
-        this.zone1Url = this.zoneHelper.getZone1Url();
+        this.zone1Headers = new HttpHeaders();
+        this.zone1Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
         if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
             setupPublicACS();
         } else {
@@ -115,21 +117,21 @@ public class PolicyCreationStepsDefinitions {
     public void a_policy_with_no_action_defined() throws Throwable {
         this.testPolicyName = "no-defined-action-policy-set";
         this.status = this.policyHelper.createPolicySet("src/test/resources/no-defined-action-policy-set.json",
-                this.acsAdminRestTemplate, this.zone1Url);
+                this.acsAdminRestTemplate, this.zone1Headers);
     }
 
     @Given("^A policy with single valid action defined$")
     public void a_policy_with_single_valid_action_defined() throws Throwable {
         this.testPolicyName = "single-action-defined-policy-set";
         this.status = this.policyHelper.createPolicySet("src/test/resources/single-action-defined-policy-set.json",
-                this.acsAdminRestTemplate, this.zone1Url);
+                this.acsAdminRestTemplate, this.zone1Headers);
     }
 
     @Given("^A policy with multiple valid actions defined$")
     public void a_policy_with_multiple_valid_actions_defined() throws Throwable {
         this.testPolicyName = "multiple-actions-defined-policy-set";
         this.status = this.policyHelper.createPolicySet("src/test/resources/multiple-actions-defined-policy-set.json",
-                this.acsAdminRestTemplate, this.zone1Url);
+                this.acsAdminRestTemplate, this.zone1Headers);
     }
 
     @Then("^the policy creation returns (.*)$")
@@ -142,7 +144,7 @@ public class PolicyCreationStepsDefinitions {
         this.testPolicyName = "single-invalid-action-defined-policy-set";
         this.status = this.policyHelper.createPolicySet(
                 "src/test/resources/single-invalid-action-defined-policy-set.json", this.acsAdminRestTemplate,
-                this.zone1Url);
+                this.zone1Headers);
     }
 
     @Given("^A policy with multiple actions containing one invalid action defined")
@@ -150,12 +152,15 @@ public class PolicyCreationStepsDefinitions {
         this.testPolicyName = "multiple-actions-with-single-invalid-action-defined-policy-set";
         this.status = this.policyHelper.createPolicySet(
                 "src/test/resources/multiple-actions-with-single-invalid-action-defined-policy-set.json",
-                this.acsAdminRestTemplate, this.zone1Url);
+                this.acsAdminRestTemplate, this.zone1Headers);
     }
 
     @After
     public void cleanAfterScenario() throws Exception {
-        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zone1Url, this.testPolicyName);
-        this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zone1Url, DEFAULT_SUBJECT_ID);
+        String acsBaseUrl = zoneHelper.getAcsBaseURL();
+        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, acsBaseUrl, this.testPolicyName,
+                this.zone1Headers);
+        this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, acsBaseUrl, DEFAULT_SUBJECT_ID,
+                this.zone1Headers);
     }
 }

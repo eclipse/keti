@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -60,6 +61,7 @@ import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.test.TestConfig;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
 import com.ge.predix.test.utils.UaaTestUtil;
 import com.ge.predix.test.utils.ZacTestUtil;
@@ -100,7 +102,9 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     @Value("${UAA_URL:http://localhost:8080/uaa}")
     private String uaaUrl;
 
-    private String zone1Url;
+    private String acsUrl;
+    private HttpHeaders zone1Headers;
+    private HttpHeaders zone3Headers;
     private OAuth2RestTemplate acsAdminRestTemplate;
     private boolean registerWithZac;
 
@@ -108,7 +112,11 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public void setup() throws JsonParseException, JsonMappingException, IOException {
         TestConfig.setupForEclipse(); // Starts ACS when running the test in eclipse.
 
-        this.zone1Url = this.zoneHelper.getZone1Url();
+        this.acsUrl = this.zoneHelper.getAcsBaseURL();
+        this.zone1Headers = new HttpHeaders();
+        this.zone1Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
+        this.zone3Headers = new HttpHeaders();
+        this.zone3Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.acsZone3Name);
         if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
             setupPublicACS();
         } else {
@@ -137,8 +145,8 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public void testBatchCreateSubjectsEmptyList() {
         List<BaseSubject> subjects = new ArrayList<BaseSubject>();
         try {
-            this.acsAdminRestTemplate.postForEntity(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH, subjects,
-                    BaseSubject[].class);
+            this.acsAdminRestTemplate.postForEntity(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH,
+                    new HttpEntity<>(subjects, this.zone1Headers), BaseSubject[].class);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
             return;
@@ -153,13 +161,14 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
         subjects.add(this.privilegeHelper.createSubject("marissa"));
 
         try {
-            this.acsAdminRestTemplate.postForEntity(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH, subjects,
-                    ResponseEntity.class);
+            this.acsAdminRestTemplate.postForEntity(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH,
+                    new HttpEntity<>(subjects, this.zone1Headers), ResponseEntity.class);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
             return;
         }
-        this.acsAdminRestTemplate.delete(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/marissa");
+        this.acsAdminRestTemplate.exchange(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/marissa",
+                HttpMethod.DELETE, new HttpEntity<>(this.zone1Headers), ResponseEntity.class);
         Assert.fail("Expected unprocessable entity http client error.");
     }
 
@@ -168,14 +177,16 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
             String badSubject = "{\"subject\": bad-subject-form\"}";
             MultiValueMap<String, String> headers = new HttpHeaders();
             headers.add("Content-type", "application/json");
+            headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name);
             HttpEntity<String> httpEntity = new HttpEntity<String>(badSubject, headers);
-            this.acsAdminRestTemplate.put(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/bad-subject-form",
+            this.acsAdminRestTemplate.put(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/bad-subject-form",
                     httpEntity);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.BAD_REQUEST);
             return;
         }
-        this.acsAdminRestTemplate.delete(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/bad-subject-form");
+        this.acsAdminRestTemplate.exchange(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/bad-subject-form",
+                HttpMethod.DELETE, new HttpEntity<>(this.zone1Headers), ResponseEntity.class);
         Assert.fail("testCreateSubjectWithMalformedJSON should have failed!");
     }
 
@@ -185,16 +196,19 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
                     + "{\"subject\": bad-subject-sarah\"}";
             MultiValueMap<String, String> headers = new HttpHeaders();
             headers.add("Content-type", "application/json");
+            headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name);
             HttpEntity<String> httpEntity = new HttpEntity<String>(badSubject, headers);
-            this.acsAdminRestTemplate.postForEntity(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH, httpEntity,
+            this.acsAdminRestTemplate.postForEntity(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH, httpEntity,
                     Subject[].class);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.BAD_REQUEST);
             return;
         }
-        this.acsAdminRestTemplate.delete(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/bad-subject-sarah");
-        this.acsAdminRestTemplate
-                .delete(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/good-subject-brittany");
+        this.acsAdminRestTemplate.exchange(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/bad-subject-sarah",
+                HttpMethod.DELETE, new HttpEntity<>(this.zone1Headers), ResponseEntity.class);
+        this.acsAdminRestTemplate.exchange(
+                this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/good-subject-brittany", HttpMethod.DELETE,
+                new HttpEntity<>(this.zone1Headers), ResponseEntity.class);
         Assert.fail("testCreateBatchSubjectsWithMalformedJSON should have failed!");
     }
 
@@ -203,14 +217,16 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
             String badResource = "{\"resource\": bad-resource-form\"}";
             MultiValueMap<String, String> headers = new HttpHeaders();
             headers.add("Content-type", "application/json");
+            headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name);
             HttpEntity<String> httpEntity = new HttpEntity<String>(badResource, headers);
-            this.acsAdminRestTemplate.put(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/bad-resource-form",
+            this.acsAdminRestTemplate.put(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/bad-resource-form",
                     httpEntity);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.BAD_REQUEST);
             return;
         }
-        this.acsAdminRestTemplate.delete(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/bad-resource-form");
+        this.acsAdminRestTemplate.exchange(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/bad-resource-form",
+                HttpMethod.DELETE, new HttpEntity<>(this.zone1Headers), ResponseEntity.class);
         Assert.fail("testCreateResourceWithMalformedJSON should have failed!");
     }
 
@@ -220,23 +236,26 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
                     + "\"/secured-by-value/sites/{site_id}\"},{\"resource\": bad-resource-form\"}";
             MultiValueMap<String, String> headers = new HttpHeaders();
             headers.add("Content-type", "application/json");
+            headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name);
             HttpEntity<String> httpEntity = new HttpEntity<String>(badResource, headers);
-            this.acsAdminRestTemplate.postForEntity(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH, httpEntity,
+            this.acsAdminRestTemplate.postForEntity(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH, httpEntity,
                     BaseResource[].class);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.BAD_REQUEST);
             return;
         }
-        this.acsAdminRestTemplate.delete(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/bad-resource-form");
-        this.acsAdminRestTemplate.delete(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/Site");
+        this.acsAdminRestTemplate.exchange(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/bad-resource-form",
+                HttpMethod.DELETE, new HttpEntity<>(this.zone1Headers), ResponseEntity.class);
+        this.acsAdminRestTemplate.exchange(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/Site",
+                HttpMethod.DELETE, new HttpEntity<>(this.zone1Headers), ResponseEntity.class);
         Assert.fail("testCreateBatchResourcesWithMalformedJSON should have failed!");
     }
 
     public void testBatchCreateResourcesEmptyList() {
         List<BaseResource> resources = new ArrayList<BaseResource>();
         try {
-            this.acsAdminRestTemplate.postForEntity(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH, resources,
-                    BaseResource[].class);
+            this.acsAdminRestTemplate.postForEntity(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH,
+                    new HttpEntity<>(resources, this.zone1Headers), BaseResource[].class);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
             return;
@@ -255,12 +274,16 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
         attributes.add(attribute);
         resource2.setAttributes(attributes);
 
-        this.acsAdminRestTemplate.put(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa", resource1);
-        this.acsAdminRestTemplate.put(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa", resource2);
-        ResponseEntity<BaseResource> response = this.acsAdminRestTemplate
-                .getForEntity(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa", BaseResource.class);
+        this.acsAdminRestTemplate.put(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa",
+                new HttpEntity<>(resource1, this.zone1Headers));
+        this.acsAdminRestTemplate.put(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa",
+                new HttpEntity<>(resource2, this.zone1Headers));
+        ResponseEntity<BaseResource> response = acsAdminRestTemplate.exchange(
+                this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa", HttpMethod.GET,
+                new HttpEntity<>(this.zone1Headers), BaseResource.class);
         Assert.assertEquals(response.getBody(), resource2);
-        this.acsAdminRestTemplate.delete(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa");
+        this.acsAdminRestTemplate.exchange(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa",
+                HttpMethod.DELETE, new HttpEntity<>(this.zone1Headers), ResponseEntity.class);
     }
 
     @Test
@@ -273,13 +296,14 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
             // This POST causes a data constraint violation on the service bcos
             // of duplicate
             // resource_identifiers which returns a HTTP 422 error.
-            this.acsAdminRestTemplate.postForEntity(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH, resources,
-                    ResponseEntity.class);
+            this.acsAdminRestTemplate.postForEntity(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH,
+                    new HttpEntity<>(resources, this.zone1Headers), ResponseEntity.class);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
             return;
         }
-        this.acsAdminRestTemplate.delete(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa");
+        this.acsAdminRestTemplate.exchange(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa",
+                HttpMethod.DELETE, new HttpEntity<>(this.zone1Headers), ResponseEntity.class);
         Assert.fail("Expected unprocessable entity http client error on post for 2 resources with duplicate resource"
                 + "identifiers.");
     }
@@ -288,22 +312,25 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public void testPutGetDeleteSubject(final BaseSubject subject) throws UnsupportedEncodingException {
         ResponseEntity<BaseSubject> responseEntity = null;
         try {
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, this.zone1Url, null,
+            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, this.acsUrl, this.zone1Headers,
                     this.privilegeHelper.getDefaultAttribute());
         } catch (HttpClientErrorException e) {
             Assert.fail("Unable to create subject.");
         }
         String encodedSubjectIdentifier = URLEncoder.encode(subject.getSubjectIdentifier(), "UTF-8");
-        URI uri = URI.create(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier);
+        URI uri = URI.create(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier);
         try {
-            responseEntity = this.acsAdminRestTemplate.getForEntity(uri, BaseSubject.class);
+            responseEntity = this.acsAdminRestTemplate.exchange(uri, HttpMethod.GET,
+                    new HttpEntity<>(this.zone1Headers), BaseSubject.class);
             Assert.assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
         } catch (HttpClientErrorException e) {
             Assert.fail("Unable to get subject.");
         }
         try {
-            this.acsAdminRestTemplate.delete(uri);
-            responseEntity = this.acsAdminRestTemplate.getForEntity(uri, BaseSubject.class);
+            this.acsAdminRestTemplate.exchange(uri, HttpMethod.DELETE, new HttpEntity<>(this.zone1Headers),
+                    ResponseEntity.class);
+            responseEntity = this.acsAdminRestTemplate.exchange(uri, HttpMethod.GET,
+                    new HttpEntity<>(this.zone1Headers), BaseSubject.class);
             Assert.fail("Subject " + subject.getSubjectIdentifier() + " was not properly deleted");
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.NOT_FOUND, "Subject was not deleted.");
@@ -315,30 +342,29 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     // -PCloud. Bind db to pgPhpAdmin and browse the db to ensure all entries with zone 'test-zone-dev3' as a foreign
     // key are deleted respectively.
     public void testPutSubjectDeleteZone() throws JsonParseException, JsonMappingException, IOException {
-        String zone3Url = this.zoneHelper.getZoneSpecificUrl(this.acsZone3Name);
         this.zoneHelper.createTestZone(this.acsAdminRestTemplate, this.acsZone3Name, this.registerWithZac);
 
         ResponseEntity<BaseSubject> responseEntity = null;
         try {
-            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, MARISSA_V1, zone3Url, null,
+            this.privilegeHelper.putSubject(this.acsAdminRestTemplate, MARISSA_V1, this.acsUrl, this.zone3Headers,
                     this.privilegeHelper.getDefaultAttribute());
 
         } catch (HttpClientErrorException e) {
             Assert.fail("Unable to create subject.", e);
         }
         try {
-            responseEntity = this.acsAdminRestTemplate.getForEntity(
-                    zone3Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + MARISSA_V1.getSubjectIdentifier(),
-                    BaseSubject.class);
+            responseEntity = this.acsAdminRestTemplate.exchange(
+                    this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + MARISSA_V1.getSubjectIdentifier(),
+                    HttpMethod.GET, new HttpEntity<>(this.zone3Headers), BaseSubject.class);
             Assert.assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
         } catch (HttpClientErrorException e) {
             Assert.fail("Unable to get subject.", e);
         }
         try {
             this.zoneHelper.deleteZone(this.acsAdminRestTemplate, this.acsZone3Name, this.registerWithZac);
-            this.acsAdminRestTemplate.getForEntity(
-                    zone3Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + MARISSA_V1.getSubjectIdentifier(),
-                    BaseSubject.class);
+            this.acsAdminRestTemplate.exchange(
+                    this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + MARISSA_V1.getSubjectIdentifier(),
+                    HttpMethod.GET, new HttpEntity<>(this.zone3Headers), BaseSubject.class);
             Assert.fail("Zone '" + this.acsZone3Name + "' was not properly deleted.");
         } catch (HttpServerErrorException e) {
             // This following lines to be uncommented once ZacTokenService returns the right exception instead of a
@@ -354,9 +380,9 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public void testPutSubjectMismatchURI() {
         try {
             String subjectIdentifier = "marcia";
-            URI subjectUri = URI.create(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH
-                    + URLEncoder.encode(subjectIdentifier, "UTF-8"));
-            this.acsAdminRestTemplate.put(subjectUri, BOB_V1);
+            URI subjectUri = URI.create(
+                    this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + URLEncoder.encode(subjectIdentifier, "UTF-8"));
+            this.acsAdminRestTemplate.put(subjectUri, new HttpEntity<>(BOB_V1, this.zone1Headers));
             Assert.fail("Subject " + subjectIdentifier + " was not supposed to be created");
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
@@ -371,7 +397,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public void testPostSubjectNegativeCases(final BaseSubject subject, final String endpoint) {
         try {
 
-            this.privilegeHelper.postMultipleSubjects(this.acsAdminRestTemplate, endpoint, subject);
+            this.privilegeHelper.postMultipleSubjects(this.acsAdminRestTemplate, endpoint, this.zone1Headers, subject);
 
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
@@ -386,7 +412,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public void testPostSubjectPostiveCases(final BaseSubject subject, final String endpoint) {
         try {
             ResponseEntity<Object> responseEntity = this.privilegeHelper.postMultipleSubjects(this.acsAdminRestTemplate,
-                    endpoint, subject);
+                    endpoint, this.zone1Headers, subject);
             Assert.assertEquals(responseEntity.getStatusCode(), HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             Assert.fail("Unable to create subject.");
@@ -403,32 +429,37 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
             subject.setAttributes(new HashSet<Attribute>(
                     Arrays.asList(new Attribute[] { this.privilegeHelper.getDefaultAttribute() })));
             ResponseEntity<Object> responseEntity = this.privilegeHelper.postSubjects(this.acsAdminRestTemplate,
-                    endpoint, null, subject, subject2);
+                    endpoint, this.zone1Headers, subject, subject2);
             Assert.assertEquals(responseEntity.getStatusCode(), HttpStatus.NO_CONTENT);
             subject2.setAttributes(new HashSet<Attribute>(
                     Arrays.asList(new Attribute[] { this.privilegeHelper.getAlternateAttribute() })));
             subject.setAttributes(new HashSet<Attribute>(
                     Arrays.asList(new Attribute[] { this.privilegeHelper.getAlternateAttribute() })));
-            this.privilegeHelper.postSubjects(this.acsAdminRestTemplate, endpoint, null, subject, subject2);
+            this.privilegeHelper.postSubjects(this.acsAdminRestTemplate, endpoint, this.zone1Headers, subject,
+                    subject2);
             String encodedSubjectIdentifier = URLEncoder.encode(subject.getSubjectIdentifier(), "UTF-8");
-            URI uri = URI.create(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier);
-            ResponseEntity<BaseSubject> forEntity = this.acsAdminRestTemplate.getForEntity(uri, BaseSubject.class);
+            URI uri = URI.create(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier);
+            ResponseEntity<BaseSubject> forEntity = this.acsAdminRestTemplate.exchange(uri, HttpMethod.GET,
+                    new HttpEntity<>(this.zone1Headers), BaseSubject.class);
             Assert.assertTrue(
                     forEntity.getBody().getAttributes().contains(this.privilegeHelper.getAlternateAttribute()));
             encodedSubjectIdentifier = URLEncoder.encode(subject2.getSubjectIdentifier(), "UTF-8");
-            uri = URI.create(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier);
-            forEntity = this.acsAdminRestTemplate.getForEntity(uri, BaseSubject.class);
+            uri = URI.create(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier);
+            forEntity = this.acsAdminRestTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(this.zone1Headers),
+                    BaseSubject.class);
             Assert.assertTrue(
                     forEntity.getBody().getAttributes().contains(this.privilegeHelper.getAlternateAttribute()));
 
             encodedSubjectIdentifier = URLEncoder.encode(subject.getSubjectIdentifier(), "UTF-8");
-            uri = URI.create(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier);
-            forEntity = this.acsAdminRestTemplate.getForEntity(uri, BaseSubject.class);
+            uri = URI.create(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier);
+            forEntity = this.acsAdminRestTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(this.zone1Headers),
+                    BaseSubject.class);
             Assert.assertTrue(
                     forEntity.getBody().getAttributes().contains(this.privilegeHelper.getAlternateAttribute()));
             encodedSubjectIdentifier = URLEncoder.encode(subject2.getSubjectIdentifier(), "UTF-8");
-            uri = URI.create(this.zone1Url + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier);
-            forEntity = this.acsAdminRestTemplate.getForEntity(uri, BaseSubject.class);
+            uri = URI.create(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier);
+            forEntity = this.acsAdminRestTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(this.zone1Headers),
+                    BaseSubject.class);
             Assert.assertTrue(
                     forEntity.getBody().getAttributes().contains(this.privilegeHelper.getAlternateAttribute()));
         } catch (Exception e) {
@@ -440,7 +471,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public void testPostResourcePostiveCases(final BaseResource resource, final String endpoint) {
         try {
             ResponseEntity<Object> responseEntity = this.privilegeHelper.postResources(this.acsAdminRestTemplate,
-                    endpoint, resource);
+                    endpoint, this.zone1Headers, resource);
             Assert.assertEquals(responseEntity.getStatusCode(), HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             Assert.fail("Unable to create resource.");
@@ -450,7 +481,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     @Test(dataProvider = "invalidResourcePostProvider")
     public void testPostResourceNegativeCases(final BaseResource resource, final String endpoint) {
         try {
-            this.privilegeHelper.postResources(this.acsAdminRestTemplate, endpoint, resource);
+            this.privilegeHelper.postResources(this.acsAdminRestTemplate, endpoint, this.zone1Headers, resource);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
             return;
@@ -462,27 +493,31 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
 
     public void testPutGetDeleteResource() throws Exception {
         try {
-            this.privilegeHelper.putResource(this.acsAdminRestTemplate, SANRAMON, this.zone1Url, null,
+            this.privilegeHelper.putResource(this.acsAdminRestTemplate, SANRAMON, this.acsUrl, this.zone1Headers,
                     this.privilegeHelper.getDefaultAttribute());
         } catch (Exception e) {
             Assert.fail("Unable to create resource. " + e.getMessage());
         }
-        URI resourceUri = URI.create(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH
+        URI resourceUri = URI.create(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH
                 + URLEncoder.encode(SANRAMON.getResourceIdentifier(), "UTF-8"));
         try {
-            this.acsAdminRestTemplate.getForEntity(resourceUri, BaseResource.class);
+            this.acsAdminRestTemplate.exchange(resourceUri, HttpMethod.GET, new HttpEntity<>(this.zone1Headers),
+                    BaseResource.class);
         } catch (HttpClientErrorException e) {
             Assert.fail("Unable to get resource.");
         }
         try {
-            this.acsAdminRestTemplate.delete(resourceUri);
+            this.acsAdminRestTemplate.exchange(resourceUri, HttpMethod.DELETE, new HttpEntity<>(this.zone1Headers),
+                    ResponseEntity.class);
         } catch (HttpClientErrorException e) {
             Assert.fail("Unable to delete resource.");
         }
         // properly delete
         try {
-            this.acsAdminRestTemplate.delete(resourceUri);
-            this.acsAdminRestTemplate.getForEntity(resourceUri, BaseResource.class);
+            this.acsAdminRestTemplate.exchange(resourceUri, HttpMethod.DELETE, new HttpEntity<>(this.zone1Headers),
+                    ResponseEntity.class);
+            this.acsAdminRestTemplate.exchange(resourceUri, HttpMethod.GET, new HttpEntity<>(this.zone1Headers),
+                    BaseResource.class);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.NOT_FOUND);
         }
@@ -490,11 +525,11 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
 
     public void testUpdateResourceURIMismatch() throws Exception {
         try {
-            this.privilegeHelper.putResource(this.acsAdminRestTemplate, SANRAMON, this.zone1Url, null,
+            this.privilegeHelper.putResource(this.acsAdminRestTemplate, SANRAMON, this.acsUrl, this.zone1Headers,
                     this.privilegeHelper.getDefaultAttribute());
-            URI resourceUri = URI.create(this.zone1Url + PrivilegeHelper.ACS_RESOURCE_API_PATH
+            URI resourceUri = URI.create(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH
                     + URLEncoder.encode("/different/resource", "UTF-8"));
-            this.acsAdminRestTemplate.put(resourceUri, SANRAMON);
+            this.acsAdminRestTemplate.put(resourceUri, new HttpEntity<>(SANRAMON, this.zone1Headers));
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
             return;
@@ -512,7 +547,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public Object[][] getInvalidSubjectsPost() {
         Object[][] data = new Object[][] {
                 // empty subjectIdentifier
-                { new BaseSubject(null), this.zone1Url } };
+                { new BaseSubject(null), this.acsUrl } };
         return data;
     }
 
@@ -520,7 +555,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public Object[][] getResourcesPost() {
         Object[][] data = new Object[][] {
                 // non empty resourceIdentifier
-                { new BaseResource("/sites/sanramon"), this.zone1Url }, };
+                { new BaseResource("/sites/sanramon"), this.acsUrl }, };
         return data;
     }
 
@@ -528,7 +563,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public Object[][] getInvalidResourcesPost() {
         Object[][] data = new Object[][] {
                 // empty resourceIdentifier
-                { new BaseResource(null), this.zone1Url }, };
+                { new BaseResource(null), this.acsUrl }, };
         return data;
     }
 
@@ -536,19 +571,19 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public Object[][] getSubjectsPost() {
         Object[][] data = new Object[][] {
                 // non empty subjectIdentifier
-                { MARISSA_V1, this.zone1Url } };
+                { MARISSA_V1, this.acsUrl } };
         return data;
     }
 
     @DataProvider(name = "endpointProvider")
     public Object[][] getAcsEndpoint() {
-        Object[][] data = new Object[][] { { this.zone1Url } };
+        Object[][] data = new Object[][] { { this.acsUrl } };
         return data;
     }
 
     @AfterMethod
     public void cleanup() throws Exception {
-        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate, this.zone1Url, null);
-        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.zone1Url, null);
+        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate, this.acsUrl, this.zone1Headers);
+        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.acsUrl, this.zone1Headers);
     }
 }

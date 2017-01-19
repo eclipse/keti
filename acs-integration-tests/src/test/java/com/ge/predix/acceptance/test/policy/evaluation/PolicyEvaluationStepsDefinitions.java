@@ -32,6 +32,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -61,8 +62,8 @@ import cucumber.api.java.en.When;
  *
  * @author 212406427
  */
-//CHECKSTYLE:OFF
-//Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules. 
+// CHECKSTYLE:OFF
+// Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules.
 @SuppressWarnings({ "nls" })
 public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContextTests {
 
@@ -92,13 +93,16 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
 
     private String testPolicyName;
     private ResponseEntity<PolicyEvaluationResult> policyEvaluationResponse;
-    private String zone1Url;
+    private String acsUrl;
+    private HttpHeaders zone1Headers;
     private OAuth2RestTemplate acsAdminRestTemplate;
     private boolean registerWithZac;
 
     @Before
     public void setup() throws JsonParseException, JsonMappingException, IOException {
-        this.zone1Url = this.zoneHelper.getZone1Url();
+        this.acsUrl = zoneHelper.getAcsBaseURL();
+        this.zone1Headers = new HttpHeaders();
+        this.zone1Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
         if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
             setupPublicACS();
         } else {
@@ -130,7 +134,7 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
      */
     @Given("^A policy set that allows access to all$")
     public void policyDefinitionAllowsAccessToAll() throws Throwable {
-        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, this.zone1Url,
+        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, this.acsUrl,
                 "src/test/resources/permit-all.json");
     }
 
@@ -140,14 +144,14 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
      */
     @Given("^A policy set that allows access to none$")
     public void policyDefinitionAllowsAccessToNone() throws Throwable {
-        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, this.zone1Url,
+        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, this.acsUrl,
                 "src/test/resources/deny-all.json");
     }
 
     @When("^Any evaluation request$")
     public void anyEvaluationRequest() throws Throwable {
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
-                this.policyHelper.createRandomEvalRequest());
+                this.zone1Headers, this.policyHelper.createRandomEvalRequest());
     }
 
     @Then("^policy evaluation returns (.*)$")
@@ -170,8 +174,10 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
 
     @After
     public void cleanAfterScenario() throws Exception {
-        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zone1Url, this.testPolicyName);
-        this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.zone1Url, DEFAULT_SUBJECT_ID);
+        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, this.testPolicyName,
+                this.zone1Headers);
+        this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.acsUrl, DEFAULT_SUBJECT_ID,
+                this.zone1Headers);
     }
 
     /*
@@ -181,7 +187,7 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
      */
     @Given("^A policy set that allows access only to subject with role (.*) using condition$")
     public void policyDefinitionAllowsAccessToOnlyAdminsUsingCondition(final String subjectAttribute) throws Throwable {
-        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, this.zone1Url,
+        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, this.acsUrl,
                 "src/test/resources/permit-admin-only-using-condition-policy-set.json");
     }
 
@@ -191,8 +197,8 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
         Set<Attribute> subjectAttributes = new HashSet<Attribute>();
         subjectAttributes.add(new Attribute(DEFAULT_ATTRIBUTE_ISSUER, "role", subjectAttribute));
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
-                this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID, DEFAULT_RESOURCE_IDENTIFIER,
-                        subjectAttributes));
+                this.zone1Headers, this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID,
+                        DEFAULT_RESOURCE_IDENTIFIER, subjectAttributes));
     }
 
     @When("^Evaluation request for resource (.*) which has the subject attribute (.*) with the value (.*)$")
@@ -202,8 +208,8 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
         Set<Attribute> subjectAttributes = new HashSet<Attribute>();
         subjectAttributes.add(new Attribute(DEFAULT_ATTRIBUTE_ISSUER, attributeName, attributeValue));
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
-                this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID, resourceIdentifier,
-                        subjectAttributes));
+                this.zone1Headers, this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID,
+                        resourceIdentifier, subjectAttributes));
     }
 
     /*
@@ -211,13 +217,13 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
      */
     @Given("^A policy set that allows access only to subject with role .* using matcher$")
     public void policyDefinitionAllowsAccessToOnlyAdminsUsingMatcher() throws Throwable {
-        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, this.zone1Url,
+        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, this.acsUrl,
                 "src/test/resources/permit-admin-only-using-matcher-policy-set.json");
     }
 
     @Given("^ACS has subject attribute (.*) with value (.*) for the subject$")
     public void acs_has_subject_attribute(final String attributeName, final String value) throws Throwable {
-        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, DEFAULT_SUBJECT_IDENTIFIER,
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, DEFAULT_SUBJECT_IDENTIFIER, this.zone1Headers,
                 new Attribute(DEFAULT_ATTRIBUTE_ISSUER, attributeName, value));
     }
 
@@ -225,44 +231,44 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
     public void evaluation_request_which_has_no_subject_attribute() throws Throwable {
         Set<Attribute> subjectAttributes = Collections.emptySet();
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
-                this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID, DEFAULT_RESOURCE_IDENTIFIER,
-                        subjectAttributes));
+                this.zone1Headers, this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID,
+                        DEFAULT_RESOURCE_IDENTIFIER, subjectAttributes));
     }
 
     @Given("^A policy set that allows access only to subject with role administrator and site sanramon$")
     public void a_policy_set_that_allows_access_only_to_subject_with_role_administrator_and_site_sanramon()
             throws Throwable {
-        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, this.zone1Url,
+        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, this.acsUrl,
                 "src/test/resources/permit-admin-with-site-access-matcher-and-condition.json");
     }
 
     @Given("^an existing policy with no defined action$")
     public void an_existing_policy_with_no_defined_action() throws Throwable {
-        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, this.zone1Url,
+        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, this.acsUrl,
                 "src/test/resources/no-defined-action-policy-set.json");
     }
 
     @Given("^an existing policy set stored in ACS with multiple actions$")
     public void an_existing_policy_set_stored_in_ACS_with_multiple_actions() throws Throwable {
-        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, this.zone1Url,
+        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, this.acsUrl,
                 "src/test/resources/multiple-actions-defined-policy-set.json");
     }
 
     @Given("^an existing policy set stored in ACS with a single action$")
     public void an_existing_policy_set_stored_in_ACS_with_a_single_action() throws Throwable {
-        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, this.zone1Url,
+        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, this.acsUrl,
                 "src/test/resources/single-action-defined-policy-set.json");
     }
 
     @Given("^an existing policy with empty defined action$")
     public void an_existing_policy_with_empty_defined_action() throws Throwable {
-        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, this.zone1Url,
+        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, this.acsUrl,
                 "src/test/resources/single-empty-action-defined-policy-set.json");
     }
 
     @Given("^an existing policy with null defined action$")
     public void an_existing_policy_with_null_defined_action() throws Throwable {
-        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, null, this.zone1Url,
+        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.zone1Headers, this.acsUrl,
                 "src/test/resources/single-null-action-defined-policy-set.json");
     }
 
@@ -270,30 +276,30 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
     public void a_policy_evaluation_is_requested_with_any_HTTP_action() throws Throwable {
         Set<Attribute> subjectAttributes = Collections.emptySet();
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
-                this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID, DEFAULT_RESOURCE_IDENTIFIER,
-                        subjectAttributes));
+                this.zone1Headers, this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID,
+                        DEFAULT_RESOURCE_IDENTIFIER, subjectAttributes));
     }
 
     @When("^A policy evaluation is requested with an HTTP action matching .*$")
     public void a_policy_evaluation_is_requested_with_an_HTTP_action_matching() throws Throwable {
         Set<Attribute> subjectAttributes = Collections.emptySet();
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
-                this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID, DEFAULT_RESOURCE_IDENTIFIER,
-                        subjectAttributes));
+                this.zone1Headers, this.policyHelper.createEvalRequest(DEFAULT_ACTION, DEFAULT_SUBJECT_ID,
+                        DEFAULT_RESOURCE_IDENTIFIER, subjectAttributes));
     }
 
     @When("^A policy evaluation is requested with an HTTP action not matching .*$")
     public void a_policy_evaluation_is_requested_with_an_HTTP_action_not_matching() throws Throwable {
         Set<Attribute> subjectAttributes = Collections.emptySet();
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
-                this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION, DEFAULT_SUBJECT_ID,
+                this.zone1Headers, this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION, DEFAULT_SUBJECT_ID,
                         DEFAULT_RESOURCE_IDENTIFIER, subjectAttributes));
     }
 
     @When("^Evaluation request which has subject attribute which are null$")
     public void evaluation_request_which_has_subject_attribute_which_are_null() throws Throwable {
         this.policyEvaluationResponse = this.policyHelper.sendEvaluationRequest(this.acsAdminRestTemplate,
-                this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION, DEFAULT_SUBJECT_ID,
+                this.zone1Headers, this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION, DEFAULT_SUBJECT_ID,
                         DEFAULT_RESOURCE_IDENTIFIER, null));
     }
 }

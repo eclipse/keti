@@ -76,15 +76,15 @@ public class PrivilegeHelper {
     }
 
     public void putSubject(final OAuth2RestTemplate restTemplate, final String subjectIdentifier,
-            final Attribute... attributes) throws UnsupportedEncodingException {
+            final HttpHeaders headers, final Attribute... attributes) throws UnsupportedEncodingException {
 
         BaseSubject subject = new BaseSubject(subjectIdentifier);
         // no header needed, because it uses zone specific url
-        putSubject(restTemplate, subject, this.zoneHelper.getZone1Url(), null, attributes);
+        putSubject(restTemplate, subject, this.zoneHelper.getAcsBaseURL(), headers, attributes);
     }
 
     public ResponseEntity<Object> postMultipleSubjects(final OAuth2RestTemplate acsTemplate, final String endpoint,
-            final BaseSubject... subjects) {
+            final HttpHeaders headers, final BaseSubject... subjects) {
         Attribute site = getDefaultAttribute();
         Set<Attribute> attributes = new HashSet<>();
         attributes.add(site);
@@ -96,7 +96,8 @@ public class PrivilegeHelper {
         }
         URI subjectUri = URI.create(endpoint + ACS_SUBJECT_API_PATH);
 
-        ResponseEntity<Object> responseEntity = acsTemplate.postForEntity(subjectUri, subjectsArray, Object.class);
+        ResponseEntity<Object> responseEntity = acsTemplate.postForEntity(subjectUri,
+                new HttpEntity<>(subjectsArray, headers), Object.class);
 
         return responseEntity;
     }
@@ -287,7 +288,7 @@ public class PrivilegeHelper {
             deleteResource(restTemplate, acsUrl, resource.getResourceIdentifier(), headers);
         }
     }
-    
+
     public BaseResource[] listResources(final RestTemplate restTemplate, final String acsEndpoint,
             final HttpHeaders headers) {
         URI uri = URI.create(acsEndpoint + ACS_RESOURCE_API_PATH);
