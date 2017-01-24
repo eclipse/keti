@@ -62,7 +62,7 @@ public class ZoneHelper {
     @Value("${ACS_CF_DOMAIN:}")
     private String acsCFDomain;
 
-    @Value("${acsUrl}")
+    @Value("${ACS_URL}")
     private String acsBaseUrl;
 
     @Value("${ZONE1_NAME:testzone1}")
@@ -80,7 +80,7 @@ public class ZoneHelper {
     @Autowired
     private ACSRestTemplateFactory acsRestTemplateFactory;
 
-    @Value("${ZAC_URL:http://localhost:8888}")
+    @Value("${ZAC_URL}")
     private String zacUrl;
 
     @Value("${ACS_SERVICE_ID:predix-acs}")

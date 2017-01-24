@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 #*******************************************************************************
 # Copyright 2016 General Electric Company. 
 #
@@ -15,30 +16,6 @@
 # limitations under the License.
 #*******************************************************************************
 
-export PROXY_OPTS=${PROXY_OPTS}
-export DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-export ACS_SERVICE_ID=${ACS_SERVICE_ID}
-export ACS_DEFAULT_ISSUER_ID=${ACS_DEFAULT_ISSUER_ID}
-export ACS_BASE_DOMAIN=${ACS_BASE_DOMAIN}
-
-export ZONE2_UAA_URL=${ZONE2_UAA_URL}
-
-main() {
-    while [ "$1" != "" ]; do
-        case $1 in
-            'debug')
-                JAVA_DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
-                shift
-                ;;
-            *)
-                break
-                ;;
-        esac
-    done
- 
-    cp ${DIR}/target/acs-service-*.jar ${DIR}/.acs-service-copy.jar
-    SPRING_PROFILES_ACTIVE=h2,predix,simple-cache \
-    java -Xms1g -Xmx1g $JAVA_DEBUG_OPTS $PROXY_OPTS -jar ${DIR}/.acs-service-copy.jar   
-}
-
-main "$@"
+export SPRING_PROFILES_ACTIVE='h2,predix,simple-cache'
+export DIR=$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )
+source "${DIR}/start-acs.sh"

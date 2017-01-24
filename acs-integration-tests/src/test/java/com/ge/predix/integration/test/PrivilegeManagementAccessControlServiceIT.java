@@ -72,7 +72,7 @@ import com.ge.predix.test.utils.ZoneHelper;
 @Test
 public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpringContextTests {
 
-    @Value("${zone1UaaUrl:http://localhost:8080/uaa}")
+    @Value("${zone1UaaUrl:${ACS_UAA_URL}}")
     private String zone1UaaBaseUrl;
 
     @Value("${ZONE1_NAME:testzone1}")
@@ -99,7 +99,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     @Autowired
     private Environment env;
 
-    @Value("${UAA_URL:http://localhost:8080/uaa}")
+    @Value("${ACS_UAA_URL}")
     private String uaaUrl;
 
     private String acsUrl;

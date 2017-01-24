@@ -107,7 +107,7 @@ public class ACSRestTemplateFactory {
     @Value("${zone2AdminClientSecret:zone2AdminClientSecret}")
     private String zone2AdminClientSecret;
 
-    @Value("${UAA_URL:http://localhost:8080/uaa}/oauth/token")
+    @Value("${ACS_UAA_URL}/oauth/token")
     private String uaaTokenUrl;
 
     public OAuth2RestTemplate getACSTemplateWithPolicyScope() {

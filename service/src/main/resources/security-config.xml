@@ -205,7 +205,7 @@
             <property name="storeClaims" value="true" />
             <property name="trustedIssuers">
                 <list value-type="java.lang.String">
-                    <value>${TRUSTED_ISSUER_ID:${UAA_URL:http://localhost:8080/uaa}/oauth/token}</value>
+                    <value>${TRUSTED_ISSUER_ID:${ACS_UAA_URL}/oauth/token}</value>
                 </list>
             </property>
             <property name="useHttps" value="${UAA_USE_HTTPS:false}" />
@@ -213,7 +213,7 @@
 
         <bean id="defaultZoneConfig" class="com.ge.predix.uaa.token.lib.DefaultZoneConfiguration">
             <property name="trustedIssuerId"
-                value="${TRUSTED_ISSUER_ID:${UAA_URL:http://localhost:8080/uaa}/oauth/token}" />
+                value="${TRUSTED_ISSUER_ID:${ACS_UAA_URL}/oauth/token}" />
             <property name="allowedUriPatterns">
                 <list>
                     <value>/v1/zone/**</value>

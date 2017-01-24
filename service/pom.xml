@@ -418,10 +418,10 @@
                     <reportsDirectory>${basedir}/surefire-reports/controller-tests</reportsDirectory>
                     <summaryFile>${basedir}/surefire-reports/controller-tests/failsafe-summary.xml</summaryFile>
                     <systemProperties>
-                        <ZAC_URL>http://localhost:8888</ZAC_URL>
+                        <ZAC_URL>${ZAC_URL}</ZAC_URL>
                         <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
-                        <ACS_DEFAULT_ISSUER_ID>http://acs.localhost:8080/uaa</ACS_DEFAULT_ISSUER_ID>
-                        <ZAC_UAA_URL>http://localhost:8080/uaa</ZAC_UAA_URL>
+                        <ACS_DEFAULT_ISSUER_ID>http://acs.localhost:${UAA_LOCAL_PORT}/uaa</ACS_DEFAULT_ISSUER_ID>
+                        <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
                         <ZAC_CLIENT_ID>fake-client</ZAC_CLIENT_ID>
                         <ZAC_CLIENT_SECRET>fake-client</ZAC_CLIENT_SECRET>
                     </systemProperties>
@@ -569,10 +569,10 @@
                             <reportsDirectory>${basedir}/surefire-reports-postgres/controller-tests</reportsDirectory>
                             <summaryFile>${basedir}/surefire-reports-postgres/controller-tests/failsafe-summary.xml</summaryFile>
                             <systemProperties>
-                                <ZAC_URL>http://localhost:8888</ZAC_URL>
+                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
                                 <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
-                                <ACS_DEFAULT_ISSUER_ID>http://acs.localhost:8080/uaa</ACS_DEFAULT_ISSUER_ID>
-                                <ZAC_UAA_URL>http://localhost:8080/uaa</ZAC_UAA_URL>
+                                <ACS_DEFAULT_ISSUER_ID>http://acs.localhost:${UAA_LOCAL_PORT}/uaa</ACS_DEFAULT_ISSUER_ID>
+                                <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
                                 <ZAC_CLIENT_ID>fake-client</ZAC_CLIENT_ID>
                                 <ZAC_CLIENT_SECRET>fake-client</ZAC_CLIENT_SECRET>
                             </systemProperties>

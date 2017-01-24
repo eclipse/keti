@@ -59,13 +59,13 @@ import cucumber.api.java.en.When;
 //Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules. 
 public class ZoneEnforcementStepsDefinitions {
 
-    @Value("${UAA_URL:http://localhost:8080/uaa}")
+    @Value("${ACS_UAA_URL}")
     private String uaaUrl;
 
-    @Value("${zone1UaaUrl:http://localhost:8080/uaa}")
+    @Value("${zone1UaaUrl:${ACS_UAA_URL}}")
     private String zone1UaaBaseUrl;
 
-    @Value("${zone2UaaUrl:http://localhost:8080/uaa}")
+    @Value("${zone2UaaUrl:${ACS_UAA_URL}}")
     private String zone2UaaBaseUrl;
 
     @Value("${ZONE1_NAME:testzone1}")

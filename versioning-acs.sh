@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 #*******************************************************************************
 # Copyright 2016 General Electric Company. 
 #
@@ -15,21 +16,28 @@
 # limitations under the License.
 #*******************************************************************************
 
-# Abort script on failure of any command.
-set -e -x
+# This convenience script updates POM versions for all ACS modules
 
-# This script is a convenience to update POM versions for all acs mvn projects
+# Abort the script on failure of any command
+set -ex
 
+# Abort the script if the ACS version wasn't passed in
 if [ -z "$1" ]; then
-    echo "Please provide mvn POM version to set for ACS."
-    exit 1
+    echo "Please provide the ACS version."
+    exit 2
 fi
 
-# Update pom versions for acs and all child projects
-mvn versions:set -DnewVersion=$1 -DgenerateBackupPoms=false
+# Remove older ACS artifacts from the local repository and re-install the current version of all artifacts
+# so that versions are correctly set by the Maven Versions plugin
+rm -rf ~/.m2/repository/com/ge/predix/acs*
 mvn clean install -s ../acs-ci-config/mvn_settings.xml -DskipTests
 
-# Update parent version in acs-integration-tests
+# Update the project versions in all POMs (main module and all submodules)
+mvn versions:set -DallowSnapshots=true -DgenerateBackupPoms=false -DnewVersion=$1
+mvn clean install -s ../acs-ci-config/mvn_settings.xml -DskipTests
+
+# Update the project version of the parent POM in the acs-integration-tests POM
 cd acs-integration-tests
-mvn versions:update-parent -DparentVersion=[$1] -DgenerateBackupPoms=false
-mvn clean install -s ../../acs-ci-config/mvn_settings.xml -DskipTests
+mvn versions:update-parent -DallowSnapshots=true -DgenerateBackupPoms=false -DparentVersion=$1
+mvn versions:use-latest-versions -DallowSnapshots=true -DgenerateBackupPoms=false -Dincludes=com.ge.predix:acs-service
+mvn clean install -s ../../acs-ci-config/mvn_settings.xml -Dmaven.test.skip

@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 #*******************************************************************************
 # Copyright 2016 General Electric Company. 
 #
@@ -15,24 +16,6 @@
 # limitations under the License.
 #*******************************************************************************
 
-export DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-
-main() {
-    while [ "$1" != "" ]; do
-        case $1 in
-            'debug')
-                JAVA_DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
-                shift
-                ;;
-            *)
-                break
-                ;;
-        esac
-    done
- 
-    cp ${DIR}/target/acs-service-*.jar ${DIR}/.acs-service-copy.jar
-    SPRING_PROFILES_ACTIVE=h2,public,simple-cache \
-    java -Xms1g -Xmx1g $JAVA_DEBUG_OPTS -jar ${DIR}/.acs-service-copy.jar
-}
-
-main "$@"
+export SPRING_PROFILES_ACTIVE='h2,public,simple-cache'
+export DIR=$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )
+source "${DIR}/start-acs.sh"

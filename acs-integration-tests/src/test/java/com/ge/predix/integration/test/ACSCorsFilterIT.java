@@ -42,7 +42,7 @@ public class ACSCorsFilterIT extends AbstractTestNGSpringContextTests {
 
     private static final String SWAGGER_API = "/v2/api-docs?group=acs";
 
-    @Value("${acsUrl:http://localhost:8181}")
+    @Value("${ACS_URL}")
     private String acsBaseUrl;
 
     @Autowired

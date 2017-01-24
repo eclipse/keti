@@ -19,10 +19,12 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ConfigureEnvironment {
     static {
-        setPropertyIfNotExist("ACS_DEFAULT_ISSUER_ID", "http://acs.localhost:8080/uaa");
+        setPropertyIfNotExist("ACS_DEFAULT_ISSUER_ID",
+                              "http://acs.localhost:" + System.getenv("UAA_LOCAL_PORT") + "/uaa");
         setPropertyIfNotExist("ACS_SERVICE_ID", "predix-acs");
-        setPropertyIfNotExist("ZAC_UAA_URL", "http://localhost:8080/uaa");
-        setPropertyIfNotExist("ZAC_URL", "http://localhost:8888");
+        setPropertyIfNotExist("ACS_UAA_URL", "http://localhost:" + System.getenv("UAA_LOCAL_PORT") + "/uaa");
+        setPropertyIfNotExist("ZAC_UAA_URL", "http://localhost:" + System.getenv("UAA_LOCAL_PORT") + "/uaa");
+        setPropertyIfNotExist("ZAC_URL", "http://localhost:" + System.getenv("ZAC_LOCAL_PORT"));
         setPropertyIfNotExist("ZAC_CLIENT_ID", "fake-client");
         setPropertyIfNotExist("ZAC_CLIENT_SECRET", "fake-client");
     }

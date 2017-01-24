@@ -40,10 +40,10 @@ import com.ge.predix.test.utils.ZoneHelper;
 @SuppressWarnings({ "nls" })
 public class PolicyEvalCachingWithGraphDBIT extends AbstractTestNGSpringContextTests {
 
-    @Value("${ACS_URL:http://localhost:8181}")
+    @Value("${ACS_URL}")
     private String acsUrl;
 
-    @Value("${UAA_URL:http://localhost:8080/uaa}")
+    @Value("${ACS_UAA_URL}")
     private String uaaUrl;
 
     private String acsZone1Name;

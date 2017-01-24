@@ -35,7 +35,7 @@
         <constructor-arg>
             <bean
                 class="org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails">
-                <property name="accessTokenUri" value="${ZAC_UAA_TOKEN_URL:${ZAC_UAA_URL:http://localhost:8080/uaa}/oauth/token}" />
+                <property name="accessTokenUri" value="${ZAC_UAA_TOKEN_URL:${ZAC_UAA_URL}/oauth/token}" />
                 <property name="clientId" value="${zacClientId}" />
                 <property name="clientSecret" value="${zacClientSecret}" />
             </bean>

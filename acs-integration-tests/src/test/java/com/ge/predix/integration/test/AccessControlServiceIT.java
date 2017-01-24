@@ -96,7 +96,7 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     @Value("${ZONE3_NAME:testzone3}")
     private String acsZone3Name;
 
-    @Value("${UAA_URL:http://localhost:8080/uaa}")
+    @Value("${ACS_UAA_URL}")
     private String uaaUrl;
 
     private String acsUrl;

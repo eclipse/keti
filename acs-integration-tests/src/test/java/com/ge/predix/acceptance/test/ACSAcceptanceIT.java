@@ -62,7 +62,7 @@ import com.ge.predix.test.utils.ZoneHelper;
 @ContextConfiguration("classpath:acceptance-test-spring-context.xml")
 public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
 
-    @Value("${acsUrl:http://localhost:8181}")
+    @Value("${ACS_URL}")
     private String acsBaseUrl;
 
     private String testZoneSubdomain;
@@ -96,7 +96,7 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
     @Value("${ZONE3_NAME:testzone3}")
     private String acsZone3Name;
 
-    @Value("${UAA_URL:http://localhost:8080/uaa}")
+    @Value("${ACS_UAA_URL}")
     private String uaaUrl;
 
     private OAuth2RestTemplate acsAdminRestTemplate;

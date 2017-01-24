@@ -62,10 +62,10 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
 
     static final JsonUtils JSON_UTILS = new JsonUtils();
 
-    @Value("${acsUrl:http://localhost:8181}")
+    @Value("${ACS_URL}")
     private String acsUrl;
 
-    @Value("${UAA_URL:http://localhost:8080/uaa}")
+    @Value("${ACS_UAA_URL}")
     private String uaaUrl;
 
     private String acsZone1Name;

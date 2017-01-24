@@ -70,7 +70,7 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
     @Value("${ZONE1_NAME:testzone1}")
     private String acsZone1Name;
 
-    @Value("${UAA_URL:http://localhost:8080/uaa}")
+    @Value("${ACS_UAA_URL}")
     private String uaaUrl;
 
     @Autowired
