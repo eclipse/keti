@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 #*******************************************************************************
 # Copyright 2016 General Electric Company. 
 #
@@ -22,28 +23,10 @@
 # 4. execute: 'create user postgres;'
 # 5. execute: 'grant all privileges on database acs to postgres;'
 
-export DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-
-main() {
-    while [ "$1" != "" ]; do
-        case $1 in
-            'debug')
-                JAVA_DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
-                shift
-                ;;
-            *)
-                break
-                ;;
-        esac
-    done
- 
-    cp ${DIR}/target/acs-service-*.jar ${DIR}/.acs-service-copy.jar
-    SPRING_PROFILES_ACTIVE=envDbConfig,public,simple-cache \
-    DB_DRIVER_CLASS_NAME=org.postgresql.Driver \
-    DB_URL=jdbc:postgresql:acs \
-    DB_USERNAME=postgres \
-    DB_PASSWORD=postgres \
-    java -Xms1g -Xmx1g $JAVA_DEBUG_OPTS -jar ${DIR}/.acs-service-copy.jar
-}
-
-main "$@"
+export SPRING_PROFILES_ACTIVE='envDbConfig,public,simple-cache'
+export DB_DRIVER_CLASS_NAME='org.postgresql.Driver'
+export DB_URL='jdbc:postgresql:acs'
+export DB_USERNAME='postgres'
+export DB_PASSWORD='postgres'
+export DIR=$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )
+source "${DIR}/start-acs.sh"
