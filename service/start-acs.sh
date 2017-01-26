@@ -19,7 +19,7 @@
 unset PORT_OFFSET
 source ./set-env-local.sh
 
-export DIR=$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )
+export DIR=$( dirname "$( python -c "import os; print os.path.abspath('${BASH_SOURCE[0]}')" )" )
 
 main() {
     while [ "$1" != '' ]; do

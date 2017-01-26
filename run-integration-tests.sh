@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function usage {
-    echo "Usage: source ./$( basename "$( readlink -f "${BASH_SOURCE[0]}" )" ) [-s <maven_settings_file>]"
+    echo "Usage: source ./$( basename "$( python -c "import os; print os.path.abspath('${BASH_SOURCE[0]}')" )" ) [-s <maven_settings_file>]"
 }
 
 unset MVN_SETTINGS_FILE_LOC

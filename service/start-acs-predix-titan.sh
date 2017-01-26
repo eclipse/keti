@@ -17,5 +17,5 @@
 #*******************************************************************************
 
 export SPRING_PROFILES_ACTIVE='h2,predix,simple-cache,titan'
-export DIR=$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )
+export DIR=$( dirname "$( python -c "import os; print os.path.abspath('${BASH_SOURCE[0]}')" )" )
 source "${DIR}/start-acs.sh"

@@ -11,5 +11,21 @@ export TRUSTED_ISSUER_ID="${ACS_UAA_URL}/oauth/token"
 export ACS_URL="http://localhost:${ACS_LOCAL_PORT}"
 export ZAC_URL="http://localhost:${ZAC_LOCAL_PORT}"
 
-# Assumes GNU sed
-sed -i "s/localhost:[0-9]\+\/uaa/localhost:${UAA_LOCAL_PORT}\/uaa/" ./acs-integration-tests/uaa/config/login.yml
+python <<EOF
+import re, shutil
+
+input_file = './acs-integration-tests/uaa/config/login.yml'
+output_file = input_file + '.tmp'
+
+input = open(input_file)
+output = open(output_file, 'w')
+
+regex = re.compile(r'localhost:\d+/uaa')
+for line in input.xreadlines():
+    output.write(regex.sub('localhost:${UAA_LOCAL_PORT}/uaa', line))
+
+input.close()
+output.close()
+
+shutil.move(output_file, input_file)
+EOF
