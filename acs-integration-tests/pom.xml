@@ -81,6 +81,33 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.18.1</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
+                        <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
+                        <ACS_URL>${ACS_URL}</ACS_URL>
+                        <ZAC_URL>${ZAC_URL}</ZAC_URL>
+
+                        <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
+
+                        <!-- ACS zones (a.k.a tenancies) used for the tests -->
+                        <ZONE1_NAME>${acs.zone.subdomain}</ZONE1_NAME>
+                        <ZONE1_UAA_URL>${ACS_UAA_URL}</ZONE1_UAA_URL>
+                        <ZONE2_NAME>${acs.zone.subdomain}2</ZONE2_NAME>
+                        <ZONE2_UAA_URL>${ACS_UAA_URL}</ZONE2_UAA_URL>
+                        <ZONE3_NAME>${acs.zone.subdomain}3</ZONE3_NAME>
+
+                        <!-- proxy settings -->
+                        <http.nonProxyHosts>${NON_PROXY_HOSTS}</http.nonProxyHosts>
+                        <https.proxyHost>${HTTPS_PROXY_HOST}</https.proxyHost>
+                        <https.proxyPort>${HTTPS_PROXY_PORT}</https.proxyPort>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -253,13 +280,10 @@
                             <summaryFile>${basedir}/failsafe-reports-predix-cloud/failsafe-summary.xml</summaryFile>
                             <systemPropertyVariables>
                                 <ACS_CF_DOMAIN>${acs.cf.domain}</ACS_CF_DOMAIN>
-                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
-                                <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
                                 <ACS_URL>https://${acs.appname}.${cf.base.domain}</ACS_URL>
                                 <CF_BASE_DOMAIN>${cf.base.domain}</CF_BASE_DOMAIN>
                                 <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
-                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
                                 <!-- ACS zones (a.k.a tenancies) used for the tests -->
                                 <ZONE1_NAME>${acs.zone.subdomain}</ZONE1_NAME>
                                 <ZONE1_UAA_URL>${ZONE1_UAA_URL}</ZONE1_UAA_URL>
@@ -274,9 +298,6 @@
                                 <READ_ONLY_USER_PASSWORD>${READ_ONLY_USER_PASSWORD}</READ_ONLY_USER_PASSWORD>
                                 <NO_READ_ONLY_USER_PASSWORD>${NO_READ_ONLY_USER_PASSWORD}</NO_READ_ONLY_USER_PASSWORD>
                                 <ZAC_CLIENT_SECRET>${ZAC_CLIENT_SECRET}</ZAC_CLIENT_SECRET>
-                                <!-- proxy settings -->
-                                <https.proxyHost>${HTTPS_PROXY_HOST}</https.proxyHost>
-                                <https.proxyPort>${HTTPS_PROXY_PORT}</https.proxyPort>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
@@ -418,13 +439,10 @@
                             <summaryFile>${basedir}/failsafe-reports-predix-cloud-titan/failsafe-summary.xml</summaryFile>
                             <systemPropertyVariables>
                                 <ACS_CF_DOMAIN>${acs.cf.domain}</ACS_CF_DOMAIN>
-                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
-                                <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
                                 <ACS_URL>https://${acs.appname}.${cf.base.domain}</ACS_URL>
                                 <CF_BASE_DOMAIN>${cf.base.domain}</CF_BASE_DOMAIN>
                                 <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
-                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
                                 <!-- ACS zones (a.k.a tenancies) used for the tests -->
                                 <ZONE1_NAME>${acs.zone.subdomain}</ZONE1_NAME>
                                 <ZONE1_UAA_URL>${ZONE1_UAA_URL}</ZONE1_UAA_URL>
@@ -439,9 +457,6 @@
                                 <READ_ONLY_USER_PASSWORD>${READ_ONLY_USER_PASSWORD}</READ_ONLY_USER_PASSWORD>
                                 <NO_READ_ONLY_USER_PASSWORD>${NO_READ_ONLY_USER_PASSWORD}</NO_READ_ONLY_USER_PASSWORD>
                                 <ZAC_CLIENT_SECRET>${ZAC_CLIENT_SECRET}</ZAC_CLIENT_SECRET>
-                                <!-- proxy settings -->
-                                <https.proxyHost>${HTTPS_PROXY_HOST}</https.proxyHost>
-                                <https.proxyPort>${HTTPS_PROXY_PORT}</https.proxyPort>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
@@ -580,22 +595,7 @@
                             <parallel>methods</parallel>
                             <argLine></argLine>
                             <systemPropertyVariables>
-                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
-                                <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
-                                <ACS_URL>${ACS_URL}</ACS_URL>
-                                <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
-                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
-                                <!-- ACS zones (a.k.a tenancies) used for the tests -->
-                                <ZONE1_NAME>${acs.zone.subdomain}</ZONE1_NAME>
-                                <ZONE1_UAA_URL>${ZONE1_UAA_URL}</ZONE1_UAA_URL>
-                                <ZONE2_NAME>${acs.zone.subdomain}2</ZONE2_NAME>
-                                <ZONE2_UAA_URL>${ZONE2_UAA_URL}</ZONE2_UAA_URL>
-                                <ZONE3_NAME>${acs.zone.subdomain}3</ZONE3_NAME>
-                                <!-- proxy settings -->
-                                <http.nonProxyHosts>${NON_PROXY_HOSTS}</http.nonProxyHosts>
-                                <https.proxyHost>${HTTPS_PROXY_HOST}</https.proxyHost>
-                                <https.proxyPort>${HTTPS_PROXY_PORT}</https.proxyPort>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
@@ -642,22 +642,7 @@
                             <parallel>methods</parallel>
                             <argLine></argLine>
                             <systemPropertyVariables>
-                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
-                                <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
-                                <ACS_URL>${ACS_URL}</ACS_URL>
-                                <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
-                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
-                                <!-- ACS zones (a.k.a tenancies) used for the tests -->
-                                <ZONE1_NAME>${acs.zone.subdomain}</ZONE1_NAME>
-                                <ZONE1_UAA_URL>${ZONE1_UAA_URL}</ZONE1_UAA_URL>
-                                <ZONE2_NAME>${acs.zone.subdomain}2</ZONE2_NAME>
-                                <ZONE2_UAA_URL>${ZONE2_UAA_URL}</ZONE2_UAA_URL>
-                                <ZONE3_NAME>${acs.zone.subdomain}3</ZONE3_NAME>
-                                <!-- proxy settings -->
-                                <http.nonProxyHosts>${NON_PROXY_HOSTS}</http.nonProxyHosts>
-                                <https.proxyHost>${HTTPS_PROXY_HOST}</https.proxyHost>
-                                <https.proxyPort>${HTTPS_PROXY_PORT}</https.proxyPort>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
@@ -770,13 +755,8 @@
                             <parallel>false</parallel>
                             <!-- <argLine>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</argLine> -->
                             <systemPropertyVariables>
-                                <ACS_URL>${ACS_URL}</ACS_URL>
-                                <ACS_DEFAULT_ISSUER_ID>${ACS_UAA_URL}/oauth/token</ACS_DEFAULT_ISSUER_ID>
-                                <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
                                 <ZONE1_NAME>testzone1</ZONE1_NAME>
-                                <ZONE1_UAA_URL>${ACS_UAA_URL}</ZONE1_UAA_URL>
                                 <ZONE2_NAME>testzone2</ZONE2_NAME>
-                                <ZONE2_UAA_URL>${ACS_UAA_URL}</ZONE2_UAA_URL>
                                 <ZONE3_NAME>testzone3</ZONE3_NAME>
                             </systemPropertyVariables>
                             <suiteXmlFiles>
@@ -879,13 +859,8 @@
                             <parallel>false</parallel>
                             <skipTests>false</skipTests>
                             <systemPropertyVariables>
-                                <ACS_URL>${ACS_URL}</ACS_URL>
-                                <ACS_DEFAULT_ISSUER_ID>${ACS_UAA_URL}/oauth/token</ACS_DEFAULT_ISSUER_ID>
-                                <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
                                 <ZONE1_NAME>testzone1</ZONE1_NAME>
-                                <ZONE1_UAA_URL>${ACS_UAA_URL}</ZONE1_UAA_URL>
                                 <ZONE2_NAME>testzone2</ZONE2_NAME>
-                                <ZONE2_UAA_URL>${ACS_UAA_URL}</ZONE2_UAA_URL>
                                 <ZONE3_NAME>testzone3</ZONE3_NAME>
                             </systemPropertyVariables>
                             <suiteXmlFiles>
@@ -925,7 +900,6 @@
                             <systemPropertyVariables>
                                 <ACS_DEFAULT_ISSUER_ID>https://${uaa.zone}${uaa.cf.domain}.${cf.base.domain}/oauth/token</ACS_DEFAULT_ISSUER_ID>
                                 <ACS_SERVICE_ID>${acs.service.id}</ACS_SERVICE_ID>
-                                <ACS_URL>${ACS_URL}</ACS_URL>
                                 <CF_BASE_DOMAIN>${cf.base.domain}</CF_BASE_DOMAIN>
                                 <NUREGO_API_KEY>not-used</NUREGO_API_KEY>
                                 <NUREGO_API_URL>not-used</NUREGO_API_URL>
@@ -933,11 +907,8 @@
                                 <ACS_UAA_URL>https://${uaa.cf.domain}.${cf.base.domain}</ACS_UAA_URL>
                                 <ZAC_URL>https://${zac.cf.domain}.${cf.base.domain}</ZAC_URL>
                                 <!-- ACS zones (a.k.a tenancies) used for the tests -->
-                                <ZONE1_NAME>${acs.zone.subdomain}</ZONE1_NAME>
                                 <ZONE1_UAA_URL>https://${uaa.zone}${uaa.cf.domain}.${cf.base.domain}</ZONE1_UAA_URL>
-                                <ZONE2_NAME>${acs.zone.subdomain}2</ZONE2_NAME>
                                 <ZONE2_UAA_URL>not-used</ZONE2_UAA_URL>
-                                <ZONE3_NAME>${acs.zone.subdomain}3</ZONE3_NAME>
                                 <!-- OAuth clients and users used for the tests -->
                                 <ACS_CLIENT_ID>${ACS_CLIENT_ID}</ACS_CLIENT_ID>
                                 <ACS_CLIENT_SECRET>${ACS_CLIENT_SECRET}</ACS_CLIENT_SECRET>
@@ -951,10 +922,6 @@
                                 <READ_ONLY_USER_PASSWORD>not-used</READ_ONLY_USER_PASSWORD>
                                 <NO_READ_ONLY_USER_NAME>not-used</NO_READ_ONLY_USER_NAME>
                                 <NO_READ_ONLY_USER_PASSWORD>not-used</NO_READ_ONLY_USER_PASSWORD>
-                                <!-- proxy settings -->
-                                <http.nonProxyHosts>${NON_PROXY_HOSTS}</http.nonProxyHosts>
-                                <https.proxyHost>${HTTPS_PROXY_HOST}</https.proxyHost>
-                                <https.proxyPort>${HTTPS_PROXY_PORT}</https.proxyPort>
                             </systemPropertyVariables>
                             <includes>
                                 <include>**/ACSAcceptanceIT.java</include>
