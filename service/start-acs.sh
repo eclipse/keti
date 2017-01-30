@@ -35,7 +35,7 @@ main() {
     done
 
     cp "${DIR}"/target/acs-service-*.jar "${DIR}"/.acs-service-copy.jar
-    java -Xms1g -Xmx1g $JAVA_DEBUG_OPTS -jar "${DIR}"/.acs-service-copy.jar
+    java -Xms1g -Xmx1g $JAVA_DEBUG_OPTS $PROXY_OPTS -jar "${DIR}"/.acs-service-copy.jar
 }
 
 main "$@"
