@@ -295,6 +295,13 @@
     <profiles>
         <profile>
             <id>predix-cloud</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ge.predix.audit</groupId>
+                    <artifactId>audit-sdk</artifactId>
+                    <version>${audit-sdk.version}</version>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -426,6 +433,13 @@
 
         <profile>
             <id>predix-cloud-titan</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ge.predix.audit</groupId>
+                    <artifactId>audit-sdk</artifactId>
+                    <version>${audit-sdk.version}</version>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -559,6 +573,13 @@
 
         <profile>
             <id>predix-local</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ge.predix.audit</groupId>
+                    <artifactId>audit-sdk</artifactId>
+                    <version>${audit-sdk.version}</version>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -603,6 +624,13 @@
 
         <profile>
             <id>predix-local-titan</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ge.predix.audit</groupId>
+                    <artifactId>audit-sdk</artifactId>
+                    <version>${audit-sdk.version}</version>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -868,6 +896,13 @@
 
         <profile>
             <id>acceptance</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ge.predix.audit</groupId>
+                    <artifactId>audit-sdk</artifactId>
+                    <version>${audit-sdk.version}</version>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>

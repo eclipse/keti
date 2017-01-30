@@ -485,6 +485,22 @@
 
     <profiles>
         <profile>
+            <id>public</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>predix</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ge.predix.audit</groupId>
+                    <artifactId>audit-sdk</artifactId>
+                    <version>${audit-sdk.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
             <id>postgres</id>
             <build>
                 <plugins>
