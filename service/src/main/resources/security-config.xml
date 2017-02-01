@@ -199,6 +199,7 @@
             <property name="serviceBaseDomain" value="${ACS_BASE_DOMAIN:localhost}" />
             <property name="serviceId" value="${ACS_SERVICE_ID:predix-acs}" />
             <property name="serviceZoneHeaders" value="Predix-Zone-Id,ACS-Zone-Subdomain" />
+            <property name="useSubdomainsForZones" value="false"/>
         </bean>
 
         <bean id="defaultFastTokenService" class="com.ge.predix.uaa.token.lib.FastTokenServices">
@@ -240,6 +241,7 @@
             <property name="serviceBaseDomain" value="${ACS_BASE_DOMAIN}" />
             <property name="storeClaims" value="true" />
             <property name="oauth2RestTemplate" ref="zacRestTemplate" />
+            <property name="useSubdomainsForZones" value="false"/>
         </bean>
 
         <bean id="zacRestTemplate"
