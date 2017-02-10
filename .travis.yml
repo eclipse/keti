@@ -1,5 +1,5 @@
 before_script:
-    - . ./common-build-tools/build-environments/mvn-jdk8
+    - . ./acs-ci-config/config-common/set-ci-env.sh
 script:
     - echo "Running unit and controller tests for 'h2,public,simple-cache' spring profile"
     - mvn clean verify -Ppostgres -B
