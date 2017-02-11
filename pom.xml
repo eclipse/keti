@@ -49,7 +49,7 @@
         <archaius.version>0.7.1</archaius.version>
         <hystrix.version>1.5.2</hystrix.version>
         <!-- Spring framework upgrade to 4.3.1 requires this version of Jackson -->
-        <jackson.version>2.5.0</jackson.version>
+        <jackson.version>2.6.5</jackson.version>
         <jedis.version>2.8.1</jedis.version>
         <lettuce.version>2.3.3</lettuce.version>
         <springframework.version>4.3.1.RELEASE</springframework.version>
@@ -71,6 +71,7 @@
         <openjpa.version>2.4.0</openjpa.version>
         <postgres.version>9.3-1103-jdbc4</postgres.version>
         <uaa-token-lib.version>3.2.2</uaa-token-lib.version>
+        <audit-sdk.version>0.0.3-SNAPSHOT</audit-sdk.version>
 
         <!-- Test Dependency Version -->
         <mockito.version>1.9.0</mockito.version>
@@ -144,7 +145,27 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <!-- <version>${jackson.version}</version> -->
+            <version>${jackson.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
