@@ -16,6 +16,8 @@
 package com.ge.predix.acs.service.policy.evaluation;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySetOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -35,13 +37,13 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ge.predix.acs.attribute.connectors.DefaultResourceAttributeReader;
+import com.ge.predix.acs.attribute.connectors.DefaultSubjectAttributeReader;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementServiceImpl;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
@@ -61,7 +63,10 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
     private final PolicyManagementService policyService = new PolicyManagementServiceImpl();
 
     @Mock
-    private final PrivilegeManagementService privilegeManagementService = new PrivilegeManagementServiceImpl();
+    private DefaultResourceAttributeReader defaultResourceAttributeReader;
+
+    @Mock
+    private DefaultSubjectAttributeReader defaultSubjectAttributeReader;
 
     private final PolicyMatcherImpl policyMatcher = new PolicyMatcherImpl();
 
@@ -71,11 +76,11 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
     @Mock
     private PolicyEvaluationCacheCircuitBreaker cache; 
 
-    @SuppressWarnings("unchecked")
-    @Test(enabled = true)
+    @Test
     public void testEvaluateWithURIAttributeTemplate() throws JsonParseException, JsonMappingException, IOException {
         MockitoAnnotations.initMocks(this);
-        Whitebox.setInternalState(this.policyMatcher, "privilegeManagementService", this.privilegeManagementService);
+        Whitebox.setInternalState(this.policyMatcher, "resourceAttributeReader", this.defaultResourceAttributeReader);
+        Whitebox.setInternalState(this.policyMatcher, "subjectAttributeReader", this.defaultSubjectAttributeReader);
         Whitebox.setInternalState(this.evaluationService, "policyMatcher", this.policyMatcher);
         when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
         when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
@@ -91,14 +96,13 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
         resourceAttributes.add(new Attribute("https://acs.attributes.int", "role", "admin"));
         testResource.setAttributes(resourceAttributes);
 
-        when(this.privilegeManagementService.getByResourceIdentifier("/site/1234")).thenReturn(testResource);
-        when(this.privilegeManagementService.getByResourceIdentifierWithInheritedAttributes("/site/1234"))
-                .thenReturn(testResource);
+        when(this.defaultResourceAttributeReader.getAttributes(testResource.getResourceIdentifier()))
+            .thenReturn(testResource.getAttributes());
 
         BaseSubject testSubject = new BaseSubject("test-subject");
         testSubject.setAttributes(Collections.emptySet());
-        when(this.privilegeManagementService.getBySubjectIdentifierAndScopes(any(String.class), any(Set.class)))
-                .thenReturn(testSubject);
+        when(this.defaultSubjectAttributeReader.getAttributesByScope(anyString(), anySetOf(Attribute.class)))
+                .thenReturn(testSubject.getAttributes());
 
         // resourceURI matches attributeURITemplate
         PolicyEvaluationResult evalResult = this.evaluationService
@@ -112,7 +116,7 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
         Assert.assertEquals(evalResult.getEffect(), Effect.DENY);
 
     }
-    
+
     private PolicyEvaluationRequestV1 createRequest(final String resource, final String subject, final String action) {
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
         request.setAction(action);

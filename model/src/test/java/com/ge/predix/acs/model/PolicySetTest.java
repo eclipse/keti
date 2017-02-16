@@ -37,7 +37,7 @@ public class PolicySetTest {
         this.policySet = PolicySets.loadFromFile(file);
     }
 
-    @Test(enabled = true)
+    @Test
     public void testLoadPolicySet() throws Exception {
         Assert.assertNotNull(this.policySet);
         Assert.assertEquals(this.policySet.getPolicies().size(), 7);

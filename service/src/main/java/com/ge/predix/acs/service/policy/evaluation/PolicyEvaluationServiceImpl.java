@@ -49,9 +49,7 @@ import com.ge.predix.acs.model.Target;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey.Builder;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
 import com.ge.predix.acs.privilege.management.dao.AttributeLimitExceededException;
-import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.acs.service.policy.admin.PolicyManagementService;
@@ -76,8 +74,6 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
     private PolicyMatcher policyMatcher;
     @Autowired
     private PolicySetValidator policySetValidator;
-    @Autowired
-    private PrivilegeManagementService privilegeService;
     @Autowired
     private ZoneResolver zoneResolver;
 
@@ -309,15 +305,6 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
             }
         }
         return result;
-    }
-
-    Set<Attribute> getSubjectAttributes(final String subjectIdentifier) {
-        Set<Attribute> subjectAttributes = Collections.emptySet();
-        BaseSubject subject = this.privilegeService.getBySubjectIdentifier(subjectIdentifier);
-        if (subject != null) {
-            subjectAttributes = subject.getAttributes();
-        }
-        return subjectAttributes;
     }
 
     private Map<String, Object> getAttributeBindingsMap(final Set<Attribute> subjectAttributes,

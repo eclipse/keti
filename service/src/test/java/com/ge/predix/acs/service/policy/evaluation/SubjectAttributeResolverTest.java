@@ -15,8 +15,11 @@
  *******************************************************************************/
 package com.ge.predix.acs.service.policy.evaluation;
 
+import static org.mockito.Mockito.anySetOf;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,37 +29,41 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.ge.predix.acs.attribute.connectors.DefaultSubjectAttributeReader;
 import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
 import com.ge.predix.acs.rest.BaseSubject;
 
 @Test
 public class SubjectAttributeResolverTest {
 
     @Mock
-    private PrivilegeManagementService privilegeManagementService;
+    private DefaultSubjectAttributeReader defaultSubjectAttributeReader;
+
+    private BaseSubject testSubject;
 
     @BeforeMethod
     public void beforeMethod() {
         MockitoAnnotations.initMocks(this);
+
+        this.testSubject = new BaseSubject("/test/subject");
+        when(this.defaultSubjectAttributeReader.getAttributesByScope(eq(this.testSubject.getSubjectIdentifier()),
+                anySetOf(Attribute.class))).thenReturn(Collections.emptySet());
     }
 
     @Test
     public void testGetSubjectAttributes() {
-        BaseSubject testSubject = new BaseSubject();
-        testSubject.setSubjectIdentifier("/test/subject");
         Set<Attribute> subjectAttributes = new HashSet<>();
         subjectAttributes.add(new Attribute("https://acs.attributes.int", "role", "administrator"));
-        testSubject.setAttributes(subjectAttributes);
+        this.testSubject.setAttributes(subjectAttributes);
 
         Set<Attribute> supplementalSubjectAttributes = new HashSet<>();
         supplementalSubjectAttributes.add(new Attribute("https://acs.attributes.int", "site", "sanramon"));
 
         // mock attribute service for the expected resource URI after attributeURITemplate is applied
-        when(this.privilegeManagementService.getBySubjectIdentifierAndScopes(testSubject.getSubjectIdentifier(), null))
-                .thenReturn(testSubject);
-        SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
-                testSubject.getSubjectIdentifier(), supplementalSubjectAttributes);
+        when(this.defaultSubjectAttributeReader.getAttributesByScope(eq(this.testSubject.getSubjectIdentifier()),
+                anySetOf(Attribute.class))).thenReturn(subjectAttributes);
+        SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.defaultSubjectAttributeReader,
+                this.testSubject.getSubjectIdentifier(), supplementalSubjectAttributes);
 
         Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
         Assert.assertNotNull(combinedSubjectAttributes);
@@ -66,14 +73,8 @@ public class SubjectAttributeResolverTest {
 
     @Test
     public void testGetSubjectAttributesNoSubjectFoundAndNoSupplementalAttributes() {
-        BaseSubject testSubject = new BaseSubject();
-        testSubject.setSubjectIdentifier("/test/subject");
-
-        // mock attribute service for the expected resource URI after attributeURITemplate is applied
-        when(this.privilegeManagementService.getBySubjectIdentifierAndScopes(testSubject.getSubjectIdentifier(), null))
-                .thenReturn(null);
-        SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
-                testSubject.getSubjectIdentifier(), null);
+        SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.defaultSubjectAttributeReader,
+                "NonExistingURI", null);
 
         Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
         Assert.assertTrue(combinedSubjectAttributes.isEmpty());
@@ -81,14 +82,8 @@ public class SubjectAttributeResolverTest {
 
     @Test
     public void testGetSubjectAttributesSubjectFoundWithNoAttributesAndNoSupplementalAttributes() {
-        BaseSubject testSubject = new BaseSubject();
-        testSubject.setSubjectIdentifier("/test/subject");
-
-        // mock attribute service for the expected resource URI after attributeURITemplate is applied
-        when(this.privilegeManagementService.getBySubjectIdentifierAndScopes(testSubject.getSubjectIdentifier(), null))
-                .thenReturn(testSubject);
-        SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
-                testSubject.getSubjectIdentifier(), null);
+        SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.defaultSubjectAttributeReader,
+                this.testSubject.getSubjectIdentifier(), null);
 
         Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
         Assert.assertTrue(combinedSubjectAttributes.isEmpty());
@@ -96,17 +91,14 @@ public class SubjectAttributeResolverTest {
 
     @Test
     public void testGetSubjectAttributesSubjectFoundWithAttributesAndNoSupplementalAttributes() {
-        BaseSubject testSubject = new BaseSubject();
-        testSubject.setSubjectIdentifier("/test/subject");
         Set<Attribute> subjectAttributes = new HashSet<>();
         subjectAttributes.add(new Attribute("https://acs.attributes.int", "role", "administrator"));
-        testSubject.setAttributes(subjectAttributes);
+        this.testSubject.setAttributes(subjectAttributes);
 
-        // mock attribute service for the expected resource URI after attributeURITemplate is applied
-        when(this.privilegeManagementService.getBySubjectIdentifierAndScopes(testSubject.getSubjectIdentifier(), null))
-                .thenReturn(testSubject);
-        SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
-                testSubject.getSubjectIdentifier(), null);
+        when(this.defaultSubjectAttributeReader.getAttributesByScope(eq(this.testSubject.getSubjectIdentifier()),
+                anySetOf(Attribute.class))).thenReturn(subjectAttributes);
+        SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.defaultSubjectAttributeReader,
+                this.testSubject.getSubjectIdentifier(), null);
 
         Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
         Assert.assertNotNull(combinedSubjectAttributes);
@@ -115,36 +107,11 @@ public class SubjectAttributeResolverTest {
 
     @Test
     public void testGetSubjectAttributesSupplementalAttributesOnly() {
-        BaseSubject testSubject = new BaseSubject();
-        testSubject.setSubjectIdentifier("/test/subject");
-
         Set<Attribute> supplementalSubjectAttributes = new HashSet<>();
         supplementalSubjectAttributes.add(new Attribute("https://acs.attributes.int", "site", "sanramon"));
 
-        // mock attribute service for the expected resource URI after attributeURITemplate is applied
-        when(this.privilegeManagementService.getBySubjectIdentifierAndScopes(testSubject.getSubjectIdentifier(), null))
-                .thenReturn(null);
-        SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
-                testSubject.getSubjectIdentifier(), supplementalSubjectAttributes);
-
-        Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
-        Assert.assertNotNull(combinedSubjectAttributes);
-        Assert.assertTrue(combinedSubjectAttributes.containsAll(supplementalSubjectAttributes));
-    }
-
-    @Test
-    public void testGetSubjectAttributesSubjectFoundWithNoAttributesButSupplementalAttributesProvided() {
-        BaseSubject testSubject = new BaseSubject();
-        testSubject.setSubjectIdentifier("/test/subject");
-
-        Set<Attribute> supplementalSubjectAttributes = new HashSet<>();
-        supplementalSubjectAttributes.add(new Attribute("https://acs.attributes.int", "site", "sanramon"));
-
-        // mock attribute service for the expected resource URI after attributeURITemplate is applied
-        when(this.privilegeManagementService.getBySubjectIdentifierAndScopes(testSubject.getSubjectIdentifier(), null))
-                .thenReturn(testSubject);
-        SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.privilegeManagementService,
-                testSubject.getSubjectIdentifier(), supplementalSubjectAttributes);
+        SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.defaultSubjectAttributeReader,
+                this.testSubject.getSubjectIdentifier(), supplementalSubjectAttributes);
 
         Set<Attribute> combinedSubjectAttributes = resolver.getResult(null);
         Assert.assertNotNull(combinedSubjectAttributes);
