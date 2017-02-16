@@ -16,17 +16,12 @@
 
 package com.ge.predix.acs.service.policy.evaluation;
 
-import com.ge.predix.acs.commons.policy.condition.ConditionShell;
-import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
-import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
-import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.model.Condition;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
-import com.ge.predix.acs.rest.BaseResource;
-import com.ge.predix.acs.rest.BaseSubject;
-import com.ge.predix.acs.service.policy.validation.PolicySetValidator;
-import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
-import org.mockito.Mockito;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.mockito.internal.util.reflection.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -36,14 +31,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
+import com.ge.predix.acs.commons.policy.condition.ConditionShell;
+import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
+import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
+import com.ge.predix.acs.model.Attribute;
+import com.ge.predix.acs.model.Condition;
+import com.ge.predix.acs.rest.BaseResource;
+import com.ge.predix.acs.rest.BaseSubject;
+import com.ge.predix.acs.service.policy.validation.PolicySetValidator;
+import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
 
 /**
  *
@@ -67,7 +63,6 @@ public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
             final boolean throwsException) {
         PolicyEvaluationServiceImpl evaluationService = new PolicyEvaluationServiceImpl();
         Whitebox.setInternalState(evaluationService, "policySetValidator", this.policySetValidator);
-        Whitebox.setInternalState(evaluationService, "privilegeService", mock(PrivilegeManagementService.class));
         Set<Attribute> subjectAttributes = Collections.emptySet();
         ConditionShell conditionShell = new GroovyConditionShell();
         try {
@@ -108,20 +103,14 @@ public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
             final Set<Attribute> subjectAttributes, final List<Condition> conditions, final boolean expectedResult,
             final boolean throwsException, final String resourceURI, final String resourceURITemplate) {
 
-        PrivilegeManagementService mockPrivilegeManagementService = mock(PrivilegeManagementService.class);
-
         BaseResource resource = new BaseResource();
         resource.setAttributes(resourceAttributes);
 
         BaseSubject subject = new BaseSubject();
         subject.setAttributes(subjectAttributes);
 
-        Mockito.when(mockPrivilegeManagementService.getByResourceIdentifier(anyString())).thenReturn(resource);
-        Mockito.when(mockPrivilegeManagementService.getBySubjectIdentifier(anyString())).thenReturn(subject);
-
         PolicyEvaluationServiceImpl evaluationService = new PolicyEvaluationServiceImpl();
         Whitebox.setInternalState(evaluationService, "policySetValidator", this.policySetValidator);
-        Whitebox.setInternalState(evaluationService, "privilegeService", mockPrivilegeManagementService);
 
         ConditionShell conditionShell = new GroovyConditionShell();
 

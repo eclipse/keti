@@ -6,20 +6,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.ge.predix.acs.attribute.connectors.SubjectAttributeReader;
 import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
-import com.ge.predix.acs.rest.BaseSubject;
 
 public class SubjectAttributeResolver {
 
     private final Map<String, Set<Attribute>> subjectAttributeMap = new HashMap<>();
-    private final PrivilegeManagementService privilegeService;
+    private final SubjectAttributeReader subjectAttributeReader;
     private final String subjectIdentifier;
     private final Set<Attribute> supplementalSubjectAttributes;
 
-    public SubjectAttributeResolver(final PrivilegeManagementService privilegeService, final String subjectIdentifier,
+    public SubjectAttributeResolver(final SubjectAttributeReader subjectAttributeReader, final String subjectIdentifier,
             final Set<Attribute> supplementalSubjectAttributes) {
-        this.privilegeService = privilegeService;
+        this.subjectAttributeReader = subjectAttributeReader;
         this.subjectIdentifier = subjectIdentifier;
         if (null == supplementalSubjectAttributes) {
             this.supplementalSubjectAttributes = Collections.emptySet();
@@ -31,12 +30,8 @@ public class SubjectAttributeResolver {
     public Set<Attribute> getResult(final Set<Attribute> scopes) {
         Set<Attribute> subjectAttributes = this.subjectAttributeMap.get(this.subjectIdentifier);
         if (null == subjectAttributes) {
-            subjectAttributes = new HashSet<>();
-            BaseSubject subject = this.privilegeService
-                    .getBySubjectIdentifierAndScopes(this.subjectIdentifier, scopes);
-            if (null != subject) {
-                subjectAttributes.addAll(subject.getAttributes());
-            }
+            subjectAttributes = new HashSet<>(
+                    this.subjectAttributeReader.getAttributesByScope(this.subjectIdentifier, scopes));
             subjectAttributes.addAll(this.supplementalSubjectAttributes);
             this.subjectAttributeMap.put(this.subjectIdentifier, subjectAttributes);
         }

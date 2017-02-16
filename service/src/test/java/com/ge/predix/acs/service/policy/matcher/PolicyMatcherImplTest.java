@@ -15,7 +15,8 @@
  *******************************************************************************/
 package com.ge.predix.acs.service.policy.matcher;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySetOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -32,23 +33,21 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.util.UriTemplate;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.ge.predix.acs.attribute.connectors.DefaultResourceAttributeReader;
+import com.ge.predix.acs.attribute.connectors.DefaultSubjectAttributeReader;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Condition;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.Policy;
 import com.ge.predix.acs.model.PolicySet;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.service.policy.evaluation.MatchedPolicy;
-import com.ge.predix.acs.service.policy.evaluation.ResourceAttributeResolver;
-import com.ge.predix.acs.service.policy.evaluation.SubjectAttributeResolver;
 
 /**
  * Unit tests for PolicyMatcher class.
@@ -61,34 +60,23 @@ public class PolicyMatcherImplTest {
     private static final String POLICY_DIR_PATH = "src/test/resources/policies";
 
     @Mock
-    private PrivilegeManagementService privilegeManagementService;
+    private DefaultResourceAttributeReader defaultResourceAttributeReader;
 
     @Mock
-    private ResourceAttributeResolver resourceAttributeResolver;
-
-    @Mock
-    private SubjectAttributeResolver subjectAttributeResolver;
+    private DefaultSubjectAttributeReader defaultSubjectAttributeReader;
 
     @InjectMocks
     private PolicyMatcher policyMatcher;
 
-    @SuppressWarnings("unchecked")
     @BeforeClass
     public void setup() {
         this.policyMatcher = new PolicyMatcherImpl();
         MockitoAnnotations.initMocks(this);
-        when(this.resourceAttributeResolver.getResourceAttributes(any(Policy.class)))
-                .thenReturn(new HashSet<Attribute>());
+        when(this.defaultResourceAttributeReader.getAttributes(anyString())).thenReturn(Collections.emptySet());
         BaseSubject subject = new BaseSubject("test-subject");
         subject.setAttributes(new HashSet<>());
-        when(this.privilegeManagementService.getBySubjectIdentifierAndScopes(any(String.class), any(Set.class)))
-                .thenReturn(subject);
-    }
-
-    @AfterMethod
-    public void cleanupResourceAttributes() {
-        when(this.resourceAttributeResolver.getResourceAttributes(any(Policy.class)))
-                .thenReturn(new HashSet<Attribute>());
+        when(this.defaultSubjectAttributeReader.getAttributesByScope(anyString(), anySetOf(Attribute.class)))
+            .thenReturn(subject.getAttributes());
     }
 
     /**
@@ -202,9 +190,8 @@ public class PolicyMatcherImplTest {
         testResource.setAttributes(resourceAttributes);
         testResource.setResourceIdentifier("/assets/1123");
 
-        when(this.privilegeManagementService.getByResourceIdentifier("/assets/1123")).thenReturn(testResource);
-        when(this.privilegeManagementService.getByResourceIdentifierWithInheritedAttributes("/assets/1123"))
-            .thenReturn(testResource);
+        when(this.defaultResourceAttributeReader.getAttributes(testResource.getResourceIdentifier()))
+            .thenReturn(testResource.getAttributes());
 
         List<Policy> policies = policySet.getPolicies();
         PolicyMatchCandidate candidate = new PolicyMatchCandidate();
@@ -323,10 +310,6 @@ public class PolicyMatcherImplTest {
      *            the HTTP Request URI
      * @param policyMatcherExpectedMatch
      *            Expected behavior from the Policy Matcher
-     * @param varNames
-     *            (not used)
-     * @param varValues
-     *            (not used)
      */
     @Test(dataProvider = "policySetMatcherDataProvider")
     public void testPolicySetMatcher(final String uriTemplate, final String uri,

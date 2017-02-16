@@ -24,18 +24,17 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.web.util.UriTemplate;
 
+import com.ge.predix.acs.attribute.connectors.AttributeReader;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Policy;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
-import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.service.policy.matcher.UriTemplateVariableResolver;
 
 public class ResourceAttributeResolver {
 
-    public static final String ATTRIBUTE_URI_TEMPLATE_VARIABLE = "attribute_uri";
+    private static final String ATTRIBUTE_URI_TEMPLATE_VARIABLE = "attribute_uri";
 
     private final Map<String, Set<Attribute>> resourceAttributeMap = new HashMap<>();
-    private final PrivilegeManagementService privilegeService;
+    private final AttributeReader resourceAttributeReader;
     private final Set<Attribute> supplementalResourceAttributes;
     private final String requestResourceUri;
     private final UriTemplateVariableResolver uriTemplateVariableResolver = new UriTemplateVariableResolver();
@@ -44,9 +43,9 @@ public class ResourceAttributeResolver {
      * @param requestResourceUri
      *            URI of the resource from the policy evaluation request
      */
-    public ResourceAttributeResolver(final PrivilegeManagementService privilegeService, final String requestResourceUri,
+    public ResourceAttributeResolver(final AttributeReader resourceAttributeReader, final String requestResourceUri,
             final Set<Attribute> supplementalResourceAttributes) {
-        this.privilegeService = privilegeService;
+        this.resourceAttributeReader = resourceAttributeReader;
         this.requestResourceUri = requestResourceUri;
         if (null == supplementalResourceAttributes) {
             this.supplementalResourceAttributes = Collections.emptySet();
@@ -56,34 +55,19 @@ public class ResourceAttributeResolver {
     }
 
     public ResourceAttributeResolverResult getResult(final Policy policy) {
-        Set<Attribute> resourceAttributes;
-        String resovledResourceUri = resolveResourceURI(policy);
+        String resolvedResourceUri = resolveResourceURI(policy);
         boolean uriTemplateExists = true;
-        if (null == resovledResourceUri) {
-            resovledResourceUri = this.requestResourceUri;
+        if (null == resolvedResourceUri) {
+            resolvedResourceUri = this.requestResourceUri;
             uriTemplateExists = false;
         }
-        resourceAttributes = this.resourceAttributeMap.get(resovledResourceUri);
+        Set<Attribute> resourceAttributes = this.resourceAttributeMap.get(resolvedResourceUri);
         if (null == resourceAttributes) {
-            resourceAttributes = getResourceAttributes(resovledResourceUri);
+            resourceAttributes = new HashSet<>(this.resourceAttributeReader.getAttributes(resolvedResourceUri));
             resourceAttributes.addAll(this.supplementalResourceAttributes);
-            this.resourceAttributeMap.put(resovledResourceUri, resourceAttributes);
+            this.resourceAttributeMap.put(resolvedResourceUri, resourceAttributes);
         }
-        return new ResourceAttributeResolverResult(resourceAttributes, resovledResourceUri, uriTemplateExists);
-    }
-
-    public Set<Attribute> getResourceAttributes(final Policy policy) {
-        return getResult(policy).getResourceAttributes();
-    }
-
-    private Set<Attribute> getResourceAttributes(final String resovledResourceUri) {
-        Set<Attribute> resourceAttributes = new HashSet<>();
-        BaseResource resource = this.privilegeService
-                .getByResourceIdentifierWithInheritedAttributes(resovledResourceUri);
-        if (null != resource) {
-            resourceAttributes.addAll(resource.getAttributes());
-        }
-        return resourceAttributes;
+        return new ResourceAttributeResolverResult(resourceAttributes, resolvedResourceUri, uriTemplateExists);
     }
 
     String resolveResourceURI(final Policy policy) {

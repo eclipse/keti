@@ -15,12 +15,13 @@
  *******************************************************************************/
 package com.ge.predix.acs.service.policy.evaluation;
 
-import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.model.Policy;
-import com.ge.predix.acs.model.ResourceType;
-import com.ge.predix.acs.model.Target;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
-import com.ge.predix.acs.rest.BaseResource;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
@@ -28,20 +29,27 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.mockito.Mockito.when;
+import com.ge.predix.acs.attribute.connectors.DefaultResourceAttributeReader;
+import com.ge.predix.acs.model.Attribute;
+import com.ge.predix.acs.model.Policy;
+import com.ge.predix.acs.model.ResourceType;
+import com.ge.predix.acs.model.Target;
+import com.ge.predix.acs.rest.BaseResource;
 
 @Test
 public class ResourceAttributeResolverTest {
-
     @Mock
-    private PrivilegeManagementService privilegeManagementService;
+    private DefaultResourceAttributeReader defaultResourceAttributeReader;
+
+    private BaseResource testResource;
 
     @BeforeMethod
     public void beforeMethod() {
         MockitoAnnotations.initMocks(this);
+
+        this.testResource = new BaseResource("/test/resource");
+        when(this.defaultResourceAttributeReader.getAttributes(eq(this.testResource.getResourceIdentifier())))
+                .thenReturn(Collections.emptySet());
     }
 
     /**
@@ -53,8 +61,8 @@ public class ResourceAttributeResolverTest {
     @Test(dataProvider = "resourceUriProvider")
     public void testResolveResourceUri(final String resourceURI, final String attributeUriTemplate,
             final String resolvedResourceURI) throws Exception {
-        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, resourceURI,
-                null);
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(
+            this.defaultResourceAttributeReader, resourceURI, null);
 
         Assert.assertEquals(resolver.resolveResourceURI(getPolicy(attributeUriTemplate)), resolvedResourceURI);
     }
@@ -70,44 +78,87 @@ public class ResourceAttributeResolverTest {
     }
 
     public void testResolveResourceUriNoPolicy() {
-        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, "/a/b",
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.defaultResourceAttributeReader, "/a/b",
                 null);
         Assert.assertEquals(resolver.resolveResourceURI(null), null);
     }
 
     public void testResolveResourceUriNoTarget() {
-        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, "/a/b",
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.defaultResourceAttributeReader, "/a/b",
                 null);
         Assert.assertEquals(resolver.resolveResourceURI(new Policy()), null);
     }
 
     public void testResolveResourceUriNoResource() {
-        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService, "/a/b",
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.defaultResourceAttributeReader, "/a/b",
                 null);
         Assert.assertEquals(resolver.resolveResourceURI(new Policy()), null);
     }
 
     public void testGetResourceAttributes() {
-        BaseResource testResource = new BaseResource();
-        testResource.setResourceIdentifier("/test/resource");
-        Set<Attribute> testResourceAttributes = new HashSet<>();
-        testResourceAttributes.add(new Attribute("issuer1", "test-attr"));
-        testResource.setAttributes(testResourceAttributes);
+        Set<Attribute> resourceAttributes = new HashSet<>();
+        resourceAttributes.add(new Attribute("issuer1", "test-attr"));
+        this.testResource.setAttributes(resourceAttributes);
+
+        Set<Attribute> supplementalResourceAttributes = new HashSet<>();
+        supplementalResourceAttributes.add(new Attribute("https://acs.attributes.int", "site", "sanramon"));
 
         // mock attribute service for the expected resource URI after attributeURITemplate is applied
-        when(this.privilegeManagementService.getByResourceIdentifier(testResource.getResourceIdentifier()))
-                .thenReturn(testResource);
-        when(this.privilegeManagementService.getByResourceIdentifierWithInheritedAttributes(
-                testResource.getResourceIdentifier())).thenReturn(testResource);
-        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService,
-                testResource.getResourceIdentifier(), null);
-        Assert.assertEquals(resolver.getResourceAttributes(getPolicy(null)), testResourceAttributes);
+        when(this.defaultResourceAttributeReader.getAttributes(this.testResource.getResourceIdentifier()))
+                .thenReturn(resourceAttributes);
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.defaultResourceAttributeReader,
+                this.testResource.getResourceIdentifier(), supplementalResourceAttributes);
+
+        Set<Attribute> combinedResourceAttributes = resolver.getResult(getPolicy(null)).getResourceAttributes();
+        Assert.assertNotNull(combinedResourceAttributes);
+        Assert.assertTrue(combinedResourceAttributes.containsAll(resourceAttributes));
+        Assert.assertTrue(combinedResourceAttributes.containsAll(supplementalResourceAttributes));
     }
 
-    public void testGetResourceAttributesForNonExistingURI() {
-        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.privilegeManagementService,
+    public void testGetResourceAttributesNoResourceFoundAndNoSupplementalAttributes() {
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.defaultResourceAttributeReader,
                 "NonExistingURI", null);
-        Assert.assertEquals(resolver.getResourceAttributes(getPolicy(null)).size(), 0);
+
+        Set<Attribute> combinedResourceAttributes = resolver.getResult(getPolicy(null)).getResourceAttributes();
+        Assert.assertTrue(combinedResourceAttributes.isEmpty());
+    }
+
+    @Test
+    public void testGetResourceAttributesResourceFoundWithNoAttributesAndNoSupplementalAttributes() {
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.defaultResourceAttributeReader,
+                this.testResource.getResourceIdentifier(), null);
+
+        Set<Attribute> combinedResourceAttributes = resolver.getResult(getPolicy(null)).getResourceAttributes();
+        Assert.assertTrue(combinedResourceAttributes.isEmpty());
+    }
+
+    @Test
+    public void testGetResourceAttributesResourceFoundWithAttributesAndNoSupplementalAttributes() {
+        Set<Attribute> resourceAttributes = new HashSet<>();
+        resourceAttributes.add(new Attribute("https://acs.attributes.int", "role", "administrator"));
+        this.testResource.setAttributes(resourceAttributes);
+
+        when(this.defaultResourceAttributeReader.getAttributes(eq(this.testResource.getResourceIdentifier())))
+                .thenReturn(resourceAttributes);
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.defaultResourceAttributeReader,
+                this.testResource.getResourceIdentifier(), null);
+
+        Set<Attribute> combinedResourceAttributes = resolver.getResult(getPolicy(null)).getResourceAttributes();
+        Assert.assertNotNull(combinedResourceAttributes);
+        Assert.assertTrue(combinedResourceAttributes.containsAll(resourceAttributes));
+    }
+
+    @Test
+    public void testGetResourceAttributesSupplementalAttributesOnly() {
+        Set<Attribute> supplementalResourceAttributes = new HashSet<>();
+        supplementalResourceAttributes.add(new Attribute("https://acs.attributes.int", "site", "sanramon"));
+
+        ResourceAttributeResolver resolver = new ResourceAttributeResolver(this.defaultResourceAttributeReader,
+                this.testResource.getResourceIdentifier(), supplementalResourceAttributes);
+
+        Set<Attribute> combinedResourceAttributes = resolver.getResult(getPolicy(null)).getResourceAttributes();
+        Assert.assertNotNull(combinedResourceAttributes);
+        Assert.assertTrue(combinedResourceAttributes.containsAll(supplementalResourceAttributes));
     }
 
     private Policy getPolicy(final String attributeTemplate) {
