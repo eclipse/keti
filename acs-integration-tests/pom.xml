@@ -588,6 +588,27 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.5.0</version>
+                        <executions>
+                            <execution>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>cf</executable>
+                            <arguments>
+                                <argument>logs</argument>
+                                <argument>${acs.appname}</argument>
+                            </arguments>
+                            <async>true</async>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
