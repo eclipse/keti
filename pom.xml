@@ -58,7 +58,7 @@
         <spring-cloud.version>1.0.5.RELEASE</spring-cloud.version>
         <spring-cloud-netflix.version>1.0.7.RELEASE</spring-cloud-netflix.version>
         <spring-data-redis.version>1.6.4.RELEASE</spring-data-redis.version>
-        <spring-log-filter.version>1.0.1</spring-log-filter.version>
+        <spring-log-filter.version>1.0.2</spring-log-filter.version>
         <springfox.swagger.version>2.2.2</springfox.swagger.version>
         <google.guava.version>18.0</google.guava.version>
         <swagger.annotations>1.5.0</swagger.annotations>
@@ -71,7 +71,7 @@
         <openjpa.version>2.4.0</openjpa.version>
         <postgres.version>9.3-1103-jdbc4</postgres.version>
         <uaa-token-lib.version>3.2.2</uaa-token-lib.version>
-        <audit-sdk.version>0.0.3-SNAPSHOT</audit-sdk.version>
+        <audit-sdk.version>0.0.4-SNAPSHOT</audit-sdk.version>
 
         <!-- Test Dependency Version -->
         <mockito.version>1.9.0</mockito.version>
