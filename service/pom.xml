@@ -489,6 +489,24 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>${maven.compiler.source}</source>
+                            <target>${maven.compiler.target}</target>
+                            <excludes>
+                                <exclude>com/ge/predix/acs/audit/*</exclude>
+                            </excludes>
+                            <testExcludes>
+                                <testExclude>com/ge/predix/acs/audit/*</testExclude>
+                            </testExcludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>predix</id>
@@ -497,6 +515,11 @@
                     <groupId>com.ge.predix.audit</groupId>
                     <artifactId>audit-sdk</artifactId>
                     <version>${audit-sdk.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.ge.predix.eventhub</groupId>
+                    <artifactId>predix-event-hub-sdk</artifactId>
+                    <version>1.1.6-SNAPSHOT</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -553,6 +576,12 @@
                         <configuration>
                             <source>${maven.compiler.source}</source>
                             <target>${maven.compiler.target}</target>
+                            <excludes>
+                                <exclude>com/ge/predix/acs/audit/*</exclude>
+                            </excludes>
+                            <testExcludes>
+                                <testExclude>com/ge/predix/acs/audit/*</testExclude>
+                            </testExcludes>
                         </configuration>
                     </plugin>
 
