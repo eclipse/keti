@@ -1,4 +1,4 @@
-package com.ge.predix.acs.attribute.connectors;
+package com.ge.predix.acs.attribute.readers;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,7 +12,7 @@ import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
 import com.ge.predix.acs.rest.BaseSubject;
 
 @Component
-public class DefaultSubjectAttributeReader implements SubjectAttributeReader {
+public class PrivilegeServiceSubjectAttributeReader implements SubjectAttributeReader {
     @Autowired
     private PrivilegeManagementService privilegeManagementService;
 

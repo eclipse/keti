@@ -37,8 +37,9 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ge.predix.acs.attribute.connectors.DefaultResourceAttributeReader;
-import com.ge.predix.acs.attribute.connectors.DefaultSubjectAttributeReader;
+import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
@@ -58,32 +59,30 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
 
     @InjectMocks
     private final PolicyEvaluationService evaluationService = new PolicyEvaluationServiceImpl();
-
     @Mock
     private final PolicyManagementService policyService = new PolicyManagementServiceImpl();
-
     @Mock
-    private DefaultResourceAttributeReader defaultResourceAttributeReader;
-
+    private AttributeReaderFactory attributeReaderFactory;
     @Mock
-    private DefaultSubjectAttributeReader defaultSubjectAttributeReader;
-
-    private final PolicyMatcherImpl policyMatcher = new PolicyMatcherImpl();
-
+    private PrivilegeServiceResourceAttributeReader defaultResourceAttributeReader;
+    @Mock
+    private PrivilegeServiceSubjectAttributeReader defaultSubjectAttributeReader;
     @Mock
     private ZoneResolver zoneResolver;
-
     @Mock
-    private PolicyEvaluationCacheCircuitBreaker cache; 
+    private PolicyEvaluationCacheCircuitBreaker cache;
+
+    private final PolicyMatcherImpl policyMatcher = new PolicyMatcherImpl();
 
     @Test
     public void testEvaluateWithURIAttributeTemplate() throws JsonParseException, JsonMappingException, IOException {
         MockitoAnnotations.initMocks(this);
-        Whitebox.setInternalState(this.policyMatcher, "resourceAttributeReader", this.defaultResourceAttributeReader);
-        Whitebox.setInternalState(this.policyMatcher, "subjectAttributeReader", this.defaultSubjectAttributeReader);
+        Whitebox.setInternalState(this.policyMatcher, "attributeReaderFactory", this.attributeReaderFactory);
         Whitebox.setInternalState(this.evaluationService, "policyMatcher", this.policyMatcher);
         when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
         when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
+        when(this.attributeReaderFactory.getResourceAttributeReader()).thenReturn(this.defaultResourceAttributeReader);
+        when(this.attributeReaderFactory.getSubjectAttributeReader()).thenReturn(this.defaultSubjectAttributeReader);
 
         // set policy
         PolicySet policySet = new ObjectMapper()

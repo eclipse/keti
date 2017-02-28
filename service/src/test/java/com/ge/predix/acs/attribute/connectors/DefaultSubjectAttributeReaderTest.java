@@ -16,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
 import com.ge.predix.acs.rest.BaseSubject;
@@ -27,7 +28,7 @@ public class DefaultSubjectAttributeReaderTest {
 
     @Autowired
     @InjectMocks
-    private DefaultSubjectAttributeReader defaultSubjectAttributeReader;
+    private PrivilegeServiceSubjectAttributeReader defaultSubjectAttributeReader;
 
     @BeforeMethod
     public void beforeMethod() {

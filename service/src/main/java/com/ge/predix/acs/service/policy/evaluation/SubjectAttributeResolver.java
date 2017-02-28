@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.ge.predix.acs.attribute.connectors.SubjectAttributeReader;
+import com.ge.predix.acs.attribute.readers.SubjectAttributeReader;
 import com.ge.predix.acs.model.Attribute;
 
 public class SubjectAttributeResolver {

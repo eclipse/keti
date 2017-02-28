@@ -1,4 +1,4 @@
-package com.ge.predix.acs.attribute.connectors;
+package com.ge.predix.acs.attribute.readers;
 
 import java.util.Set;
 
