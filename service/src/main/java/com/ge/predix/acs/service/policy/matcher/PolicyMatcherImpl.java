@@ -29,8 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.ge.predix.acs.attribute.connectors.DefaultResourceAttributeReader;
-import com.ge.predix.acs.attribute.connectors.DefaultSubjectAttributeReader;
+import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
 import com.ge.predix.acs.commons.web.UriTemplateUtils;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Policy;
@@ -48,10 +47,7 @@ public class PolicyMatcherImpl implements PolicyMatcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyMatcherImpl.class);
 
     @Autowired
-    private DefaultResourceAttributeReader resourceAttributeReader;
-
-    @Autowired
-    private DefaultSubjectAttributeReader subjectAttributeReader;
+    private AttributeReaderFactory attributeReaderFactory;
 
     @Override
     public List<MatchedPolicy> match(final PolicyMatchCandidate candidate, final List<Policy> policies) {
@@ -61,10 +57,11 @@ public class PolicyMatcherImpl implements PolicyMatcher {
     @Override
     public MatchResult matchForResult(final PolicyMatchCandidate candidate, final List<Policy> policies) {
         ResourceAttributeResolver resourceAttributeResolver = new ResourceAttributeResolver(
-                this.resourceAttributeReader, candidate.getResourceURI(),
+                this.attributeReaderFactory.getResourceAttributeReader(), candidate.getResourceURI(),
                 candidate.getSupplementalResourceAttributes());
-        SubjectAttributeResolver subjectAttributeResolver = new SubjectAttributeResolver(this.subjectAttributeReader,
-                candidate.getSubjectIdentifier(), candidate.getSupplementalSubjectAttributes());
+        SubjectAttributeResolver subjectAttributeResolver = new SubjectAttributeResolver(
+                this.attributeReaderFactory.getSubjectAttributeReader(), candidate.getSubjectIdentifier(),
+                candidate.getSupplementalSubjectAttributes());
 
         List<MatchedPolicy> matchedPolicies = new ArrayList<>();
         Set<String> resolvedResourceUris = new HashSet<>();

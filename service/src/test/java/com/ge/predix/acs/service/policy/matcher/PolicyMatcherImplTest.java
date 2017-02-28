@@ -37,8 +37,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.attribute.connectors.DefaultResourceAttributeReader;
-import com.ge.predix.acs.attribute.connectors.DefaultSubjectAttributeReader;
+import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Condition;
@@ -58,13 +59,12 @@ import com.ge.predix.acs.service.policy.evaluation.MatchedPolicy;
 @Test
 public class PolicyMatcherImplTest {
     private static final String POLICY_DIR_PATH = "src/test/resources/policies";
-
     @Mock
-    private DefaultResourceAttributeReader defaultResourceAttributeReader;
-
+    private AttributeReaderFactory attributeReaderFactory;
     @Mock
-    private DefaultSubjectAttributeReader defaultSubjectAttributeReader;
-
+    private PrivilegeServiceResourceAttributeReader defaultResourceAttributeReader;
+    @Mock
+    private PrivilegeServiceSubjectAttributeReader defaultSubjectAttributeReader;
     @InjectMocks
     private PolicyMatcher policyMatcher;
 
@@ -72,6 +72,8 @@ public class PolicyMatcherImplTest {
     public void setup() {
         this.policyMatcher = new PolicyMatcherImpl();
         MockitoAnnotations.initMocks(this);
+        when(this.attributeReaderFactory.getResourceAttributeReader()).thenReturn(this.defaultResourceAttributeReader);
+        when(this.attributeReaderFactory.getSubjectAttributeReader()).thenReturn(this.defaultSubjectAttributeReader);
         when(this.defaultResourceAttributeReader.getAttributes(anyString())).thenReturn(Collections.emptySet());
         BaseSubject subject = new BaseSubject("test-subject");
         subject.setAttributes(new HashSet<>());

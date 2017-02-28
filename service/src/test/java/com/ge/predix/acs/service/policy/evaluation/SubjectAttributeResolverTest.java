@@ -29,7 +29,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.attribute.connectors.DefaultSubjectAttributeReader;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.BaseSubject;
 
@@ -37,7 +37,7 @@ import com.ge.predix.acs.rest.BaseSubject;
 public class SubjectAttributeResolverTest {
 
     @Mock
-    private DefaultSubjectAttributeReader defaultSubjectAttributeReader;
+    private PrivilegeServiceSubjectAttributeReader defaultSubjectAttributeReader;
 
     private BaseSubject testSubject;
 

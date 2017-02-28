@@ -24,7 +24,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.web.util.UriTemplate;
 
-import com.ge.predix.acs.attribute.connectors.AttributeReader;
+import com.ge.predix.acs.attribute.readers.ResourceAttributeReader;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Policy;
 import com.ge.predix.acs.service.policy.matcher.UriTemplateVariableResolver;
@@ -34,7 +34,7 @@ public class ResourceAttributeResolver {
     private static final String ATTRIBUTE_URI_TEMPLATE_VARIABLE = "attribute_uri";
 
     private final Map<String, Set<Attribute>> resourceAttributeMap = new HashMap<>();
-    private final AttributeReader resourceAttributeReader;
+    private final ResourceAttributeReader resourceAttributeReader;
     private final Set<Attribute> supplementalResourceAttributes;
     private final String requestResourceUri;
     private final UriTemplateVariableResolver uriTemplateVariableResolver = new UriTemplateVariableResolver();
@@ -43,8 +43,8 @@ public class ResourceAttributeResolver {
      * @param requestResourceUri
      *            URI of the resource from the policy evaluation request
      */
-    public ResourceAttributeResolver(final AttributeReader resourceAttributeReader, final String requestResourceUri,
-            final Set<Attribute> supplementalResourceAttributes) {
+    public ResourceAttributeResolver(final ResourceAttributeReader resourceAttributeReader,
+            final String requestResourceUri, final Set<Attribute> supplementalResourceAttributes) {
         this.resourceAttributeReader = resourceAttributeReader;
         this.requestResourceUri = requestResourceUri;
         if (null == supplementalResourceAttributes) {

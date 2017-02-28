@@ -29,7 +29,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.attribute.connectors.DefaultResourceAttributeReader;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Policy;
 import com.ge.predix.acs.model.ResourceType;
@@ -39,7 +39,7 @@ import com.ge.predix.acs.rest.BaseResource;
 @Test
 public class ResourceAttributeResolverTest {
     @Mock
-    private DefaultResourceAttributeReader defaultResourceAttributeReader;
+    private PrivilegeServiceResourceAttributeReader defaultResourceAttributeReader;
 
     private BaseResource testResource;
 
