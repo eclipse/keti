@@ -24,7 +24,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -73,6 +75,20 @@ public class ZoneEntity {
             cascade = { CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE },
             fetch = FetchType.LAZY)
     private Set<PolicySetEntity> policySets;
+
+    @OneToOne(
+            optional = true, 
+            cascade = { CascadeType.ALL }, 
+            orphanRemoval = true)
+    @JoinColumn(name = "resource_attribute_connector", referencedColumnName = "id", nullable = true, updatable = true)
+    private AttributeConnectorEntity resourceAttributeConnector;
+    
+    @OneToOne(
+            optional = true, 
+            cascade = { CascadeType.ALL }, 
+            orphanRemoval = true)
+    @JoinColumn(name = "subject_attribute_connector", referencedColumnName = "id", nullable = true, updatable = true)
+    private AttributeConnectorEntity subjectAttributeConnector;
 
     public ZoneEntity() {
     }
@@ -136,5 +152,21 @@ public class ZoneEntity {
     public String toString() {
         return "ZoneEntity [id=" + this.id + ", name=" + this.name + ", description=" + this.description
                 + ", subdomain=" + this.subdomain + "]";
+    }
+
+    public void setResourceAttributeConnector(final AttributeConnectorEntity connector) {
+        this.resourceAttributeConnector = connector;
+    }
+
+    public AttributeConnectorEntity getResourceAttributeConnector() {
+        return this.resourceAttributeConnector;
+    }
+
+    public AttributeConnectorEntity getSubjectAttributeConnector() {
+        return subjectAttributeConnector;
+    }
+
+    public void setSubjectAttributeConnector(final AttributeConnectorEntity subjectAttributeConnector) {
+        this.subjectAttributeConnector = subjectAttributeConnector;
     }
 }
