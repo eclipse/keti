@@ -50,7 +50,7 @@ import com.nurego.model.Subscription;
 
 @SuppressWarnings({ "nls" })
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
-@Test
+@Test(enabled = false)
 public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(ACSMeteringIT.class);
 
