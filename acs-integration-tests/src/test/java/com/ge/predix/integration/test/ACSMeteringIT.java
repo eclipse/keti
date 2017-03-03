@@ -50,7 +50,6 @@ import com.nurego.model.Subscription;
 
 @SuppressWarnings({ "nls" })
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
-@Test(enabled = false)
 public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(ACSMeteringIT.class);
 
@@ -108,7 +107,7 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
         waitForSteadyStateEntitlementUsage(POLICY_EVAL_FEATURE_ID, this.zoneId);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testACSMetering() throws Exception {
         String testPolicyName = null;
         PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper
