@@ -53,6 +53,9 @@
         <level value ="debug" />
     </logger>
 
+    <logger name="com.ge.predix.test.TestNameLogger">
+        <level value="DEBUG"/>
+    </logger>
 
     <root>
         <level value = "INFO" />
