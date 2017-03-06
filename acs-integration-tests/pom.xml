@@ -996,6 +996,9 @@
                             <includes>
                                 <include>**/ACSAcceptanceIT.java</include>
                             </includes>
+                            <excludes>
+                                <exclude>**/NonHierarchical*IT.java</exclude>
+                            </excludes>
                         </configuration>
                         <executions>
                             <execution>
