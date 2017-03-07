@@ -35,11 +35,26 @@ public class PredixEventProcessorTest {
     @Test
     public void testPredixEventProcess() throws AuditException, EventHubClientException {
         AuditEvent mockAuditEvent = Mockito.mock(AuditEvent.class);
+        Mockito.doReturn("http://acs.com/v1/policy-evaluation/test123").when(mockAuditEvent).getRequestUri();
         AuditEventV2 mockPredixEvent = Mockito.mock(AuditEventV2.class);
-        Mockito.when(mockedMapper.map(anyObject())).thenReturn(mockPredixEvent);
+        Mockito.when(this.mockedMapper.map(anyObject())).thenReturn(mockPredixEvent);
 
         Assert.assertTrue(this.eventProcessor.process(mockAuditEvent));
-        Mockito.verify(mockedClient).audit(mockPredixEvent);
+        Mockito.verify(this.mockedClient).audit(mockPredixEvent);
+    }
+
+    @Test
+    public void testControllerExclusions() {
+        AuditEvent auditEvent = Mockito.mock(AuditEvent.class);
+        Mockito.doReturn("http://acs.com/v1/connector/test123").when(auditEvent).getRequestUri();
+        Assert.assertTrue(this.eventProcessor.isExclusion(auditEvent));
+    }
+
+    @Test
+    public void testIncludedApis() {
+        AuditEvent mockAuditEvent = Mockito.mock(AuditEvent.class);
+        Mockito.doReturn("http://acs.com/v1/policy-evaluation/test123").when(mockAuditEvent).getRequestUri();
+        Assert.assertFalse(this.eventProcessor.isExclusion(mockAuditEvent));
     }
 
 }
