@@ -24,8 +24,8 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ge.predix.acs.PolicyContextResolver;
-import com.ge.predix.acs.attribute.connectors.ResourceAttributeConnector;
-import com.ge.predix.acs.attribute.connectors.SubjectAttributeConnector;
+import com.ge.predix.acs.attribute.readers.ExternalResourceAttributeReader;
+import com.ge.predix.acs.attribute.readers.ExternalSubjectAttributeReader;
 import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import com.ge.predix.acs.model.Attribute;
@@ -45,7 +45,7 @@ import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.acs.zone.resolver.ZoneResolver;
 
 @ContextConfiguration(classes = { GroovyConditionCache.class, PolicySetValidatorImpl.class })
-public class PolicyEvaluationWithAttributeConnectorTest  extends AbstractTestNGSpringContextTests {
+public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSpringContextTests {
     @InjectMocks
     private PolicyEvaluationServiceImpl evaluationService;
     @Mock
@@ -59,9 +59,9 @@ public class PolicyEvaluationWithAttributeConnectorTest  extends AbstractTestNGS
     @Mock
     private AttributeReaderFactory attributeReaderFactory;
     @Mock
-    private ResourceAttributeConnector resourceAttributeConnector;
+    private ExternalResourceAttributeReader externalResourceAttributeReader;
     @Mock
-    private SubjectAttributeConnector subjectAttributeConnector;
+    private ExternalSubjectAttributeReader externalSubjectAttributeReader;
     @Autowired
     private PolicySetValidator policySetValidator;
 
@@ -101,10 +101,10 @@ public class PolicyEvaluationWithAttributeConnectorTest  extends AbstractTestNGS
         subjectAttributes.add(new Attribute("https://acs.attributes.int", "role", "admin"));
         BaseSubject testSubject = new BaseSubject("test-subject", subjectAttributes);
 
-        when(this.attributeReaderFactory.getResourceAttributeReader()).thenReturn(this.resourceAttributeConnector);
-        when(this.resourceAttributeConnector.getAttributes(anyString())).thenReturn(testResource.getAttributes());
-        when(this.attributeReaderFactory.getSubjectAttributeReader()).thenReturn(this.subjectAttributeConnector);
-        when(this.subjectAttributeConnector.getAttributesByScope(anyString(), anySetOf(Attribute.class)))
+        when(this.attributeReaderFactory.getResourceAttributeReader()).thenReturn(this.externalResourceAttributeReader);
+        when(this.externalResourceAttributeReader.getAttributes(anyString())).thenReturn(testResource.getAttributes());
+        when(this.attributeReaderFactory.getSubjectAttributeReader()).thenReturn(this.externalSubjectAttributeReader);
+        when(this.externalSubjectAttributeReader.getAttributesByScope(anyString(), anySetOf(Attribute.class)))
                 .thenReturn(testSubject.getAttributes());
 
         PolicyEvaluationResult evalResult = this.evaluationService.evalPolicy(

@@ -1,4 +1,4 @@
-package com.ge.predix.acs.attribute.connectors;
+package com.ge.predix.acs.attribute.readers;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
@@ -14,7 +14,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
 import com.ge.predix.acs.rest.BaseResource;

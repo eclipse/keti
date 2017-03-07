@@ -5,8 +5,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AttributeReaderFactory {
+
     @Autowired
     private ResourceAttributeReader resourceAttributeReader;
+
     @Autowired
     private SubjectAttributeReader subjectAttributeReader;
 
