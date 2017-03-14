@@ -41,7 +41,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 @EnableAutoConfiguration
 @EnableJpaRepositories({ "com.ge.predix.acs.service.policy.admin.dao",
     "com.ge.predix.acs.privilege.management.dao",
-    "com.ge.predix.acs.zone.management.dao" })
+    "com.ge.predix.acs.zone.management.dao",
+    "com.ge.predix.acs.attribute.connector.management.dao"})
 public class InMemoryDataSourceConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryDataSourceConfig.class);
 

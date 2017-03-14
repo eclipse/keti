@@ -4,6 +4,7 @@
     <test name="public">
         <classes>
           <class name="com.ge.predix.test.TestConfig"/>
+          <class name="com.ge.predix.integration.test.AttributeConnectorConfigurationIT" />
           <class name="com.ge.predix.acceptance.test.ACSAcceptanceIT"/>
           <class name="com.ge.predix.integration.test.AccessControlServiceIT"/>
           <class name="com.ge.predix.integration.test.PrivilegeManagementAccessControlServiceIT"/>

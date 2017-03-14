@@ -1,5 +1,6 @@
 CREATE TABLE attribute_connector (
   id bigserial NOT NULL primary key,
+  active boolean DEFAULT false,
   cached_interval_minutes integer DEFAULT 0
 );
 

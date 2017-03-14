@@ -12,12 +12,12 @@ import org.springframework.test.context.testng.AbstractTransactionalTestNGSpring
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.ge.predix.acs.attribute.connector.management.dao.AttributeAdapterConnectionEntity;
+import com.ge.predix.acs.attribute.connector.management.dao.AttributeAdapterConnectionRepository;
+import com.ge.predix.acs.attribute.connector.management.dao.AttributeConnectorEntity;
+import com.ge.predix.acs.attribute.connector.management.dao.AttributeConnectorRepository;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
 import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
-import com.ge.predix.acs.zone.management.dao.AttributeAdapterConnectionEntity;
-import com.ge.predix.acs.zone.management.dao.AttributeAdapterConnectionRepository;
-import com.ge.predix.acs.zone.management.dao.AttributeConnectorEntity;
-import com.ge.predix.acs.zone.management.dao.AttributeConnectorRepository;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.acs.zone.management.dao.ZoneRepository;
 
@@ -49,6 +49,7 @@ public class ZoneRepositoryTest extends AbstractTransactionalTestNGSpringContext
         long adapterIdBeforeUpdate = zone.getResourceAttributeConnector().getAttributeAdapterConnections().iterator()
                 .next().getId();
         AttributeConnectorEntity expectedConnector = new AttributeConnectorEntity();
+        expectedConnector.setActive(true);
         expectedConnector.setAttributeAdapterConnections(Collections.singleton(new AttributeAdapterConnectionEntity(
                 expectedConnector, "http://some-adapter.com", "http://some-uaa.com", "some-client", "some-secret")));
         zone.setResourceAttributeConnector(expectedConnector);

@@ -33,6 +33,7 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import com.ge.predix.acs.attribute.connector.management.dao.AttributeConnectorEntity;
 import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
 import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
 import com.ge.predix.acs.service.policy.admin.dao.PolicySetEntity;

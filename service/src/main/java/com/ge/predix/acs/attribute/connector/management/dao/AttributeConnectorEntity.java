@@ -1,10 +1,11 @@
-package com.ge.predix.acs.zone.management.dao;
+package com.ge.predix.acs.attribute.connector.management.dao;
 
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,7 +23,10 @@ public class AttributeConnectorEntity {
     @Column(name = "cached_interval_minutes", nullable = true)
     private int cachedIntervalMinutes;
 
-    @OneToMany(mappedBy = "connector", cascade = { CascadeType.ALL }, orphanRemoval = true)
+    @Column(name = "active", nullable = true)
+    private boolean isActive = false;
+
+    @OneToMany(mappedBy = "connector", cascade = { CascadeType.ALL }, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<AttributeAdapterConnectionEntity> attributeAdapterConnections;
 
     public long getId() {
@@ -35,6 +39,14 @@ public class AttributeConnectorEntity {
 
     public int getCachedIntervalMinutes() {
         return this.cachedIntervalMinutes;
+    }
+
+    public boolean isActive() {
+        return this.isActive;
+    }
+
+    public void setActive(final boolean active) {
+        this.isActive = active;
     }
 
     public Set<AttributeAdapterConnectionEntity> getAttributeAdapterConnections() {

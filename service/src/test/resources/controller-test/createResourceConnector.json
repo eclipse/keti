@@ -1,0 +1,12 @@
+{
+     "isActive":"true",
+     "maxCachedIntervalMinutes":"60",
+     "adapters": [
+        {
+        "adapterEndpoint":"https://my-adapter.com",
+        "uaaTokenUrl":"https://my-uaa.com",
+        "uaaClientId":"adapter-client",
+        "uaaClientSecret":"adapter-secret"
+        }
+    ]
+}

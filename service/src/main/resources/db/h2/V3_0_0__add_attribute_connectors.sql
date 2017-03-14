@@ -1,5 +1,6 @@
 CREATE TABLE `attribute_connector` (
   `id` int(18) NOT NULL AUTO_INCREMENT,
+  `active` boolean DEFAULT false,
   `cached_interval_minutes` int DEFAULT 0,
   PRIMARY KEY(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8;
