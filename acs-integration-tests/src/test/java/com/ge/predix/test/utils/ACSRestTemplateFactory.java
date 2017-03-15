@@ -113,8 +113,8 @@ public class ACSRestTemplateFactory {
     public OAuth2RestTemplate getACSTemplateWithPolicyScope() {
         if (this.authorizedACSTemplate == null) {
             this.authorizedACSTemplate = new OAuth2RestTemplate(getUserWithPolicyScope());
+            this.authorizedACSTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
         }
-
         return this.authorizedACSTemplate;
     }
 
@@ -168,20 +168,22 @@ public class ACSRestTemplateFactory {
     }
 
     public OAuth2RestTemplate getOAuth2RestTemplateForAcsAdmin() {
-        return getOAuth2RestTemplateForClient(this.acsAdminClientId, this.acsAdminClientSecret);
+        return getOAuth2RestTemplateForClient(this.uaaTokenUrl, this.acsAdminClientId, this.acsAdminClientSecret);
     }
 
     public OAuth2RestTemplate getOAuth2RestTemplateForReadOnlyClient() {
-        return getOAuth2RestTemplateForClient(this.acsReadOnlyClientId, this.acsReadOnlyClientSecret);
+        return getOAuth2RestTemplateForClient(this.uaaTokenUrl, this.acsReadOnlyClientId, this.acsReadOnlyClientSecret);
     }
 
     public OAuth2RestTemplate getOAuth2RestTemplateForNoPolicyScopeClient() {
-        return getOAuth2RestTemplateForClient(this.acsNoPolicyScopeClientId, this.acsNoPolicyScopeClientSecret);
+        return getOAuth2RestTemplateForClient(this.uaaTokenUrl, this.acsNoPolicyScopeClientId,
+                this.acsNoPolicyScopeClientSecret);
     }
 
-    public OAuth2RestTemplate getOAuth2RestTemplateForClient(final String clientId, final String clientSecret) {
+    public OAuth2RestTemplate getOAuth2RestTemplateForClient(final String tokenUrl, final String clientId,
+            final String clientSecret) {
         ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
-        resource.setAccessTokenUri(this.uaaTokenUrl);
+        resource.setAccessTokenUri(tokenUrl);
         resource.setClientId(clientId);
         resource.setClientSecret(clientSecret);
         OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(resource);

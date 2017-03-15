@@ -1,4 +1,4 @@
-package com.ge.predix.acs.zone.management.dao;
+package com.ge.predix.acs.attribute.connector.management.dao;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

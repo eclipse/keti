@@ -63,6 +63,8 @@ public class UaaTestUtil {
         createAcsAdminClient(acsZones, "acs_admin", "acs_admin_secret");
         createNoPolicyScopeClient(acsZones);
         createReadOnlyPolicyScopeClient(acsZones);
+        createReadOnlyConnectorScopeClient(acsZones);
+        createAdminConnectorScopeClient(acsZones);
     }
 
     public void setupAcsZoneClient(final String acsZone, final String clientId, final String clientSecret) {
@@ -108,29 +110,42 @@ public class UaaTestUtil {
     }
 
     private void createReadOnlyPolicyScopeClient(final List<String> acsZones) {
-        BaseClientDetails readOnlyPolicyScopeClient = new BaseClientDetails();
-        Collection<? extends GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority[] {
-                new SimpleGrantedAuthority("predix-acs.zones." + acsZones.get(0) + ".user"),
-                new SimpleGrantedAuthority("acs.policies.read") });
-        readOnlyPolicyScopeClient.setAuthorities(authorities);
-        readOnlyPolicyScopeClient.setAuthorizedGrantTypes(Arrays.asList(new String[] { "client_credentials" }));
-        readOnlyPolicyScopeClient.setClientId("acs_read_only_client");
-        readOnlyPolicyScopeClient.setClientSecret("acs_read_only_secret");
-        readOnlyPolicyScopeClient.setResourceIds(Arrays.asList(new String[] { "uaa.none" }));
-        createOrUpdateClient(readOnlyPolicyScopeClient);
-
+        this.createClientWithAuthorities("acs_read_only_client", "acs_read_only_secret",
+                Arrays.asList(new SimpleGrantedAuthority[] {
+                        new SimpleGrantedAuthority("predix-acs.zones." + acsZones.get(0) + ".user"),
+                        new SimpleGrantedAuthority("acs.policies.read") }));
     }
 
     private void createNoPolicyScopeClient(final List<String> acsZones) {
-        BaseClientDetails noPolicyScopeClient = new BaseClientDetails();
-        Collection<? extends GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority[] {
-                new SimpleGrantedAuthority("predix-acs.zones." + acsZones.get(0) + ".user") });
-        noPolicyScopeClient.setAuthorities(authorities);
-        noPolicyScopeClient.setAuthorizedGrantTypes(Arrays.asList(new String[] { "client_credentials" }));
-        noPolicyScopeClient.setClientId("acs_no_policy_client");
-        noPolicyScopeClient.setClientSecret("acs_no_policy_secret");
-        noPolicyScopeClient.setResourceIds(Arrays.asList(new String[] { "uaa.none" }));
-        createOrUpdateClient(noPolicyScopeClient);
+        this.createClientWithAuthorities("acs_no_policy_client", "acs_no_policy_secret",
+                Arrays.asList(new SimpleGrantedAuthority[] {
+                        new SimpleGrantedAuthority("predix-acs.zones." + acsZones.get(0) + ".user") }));
+    }
+
+    private void createReadOnlyConnectorScopeClient(final List<String> acsZones) {
+        this.createClientWithAuthorities("acs_connector_read_only_client", "s3cr3t",
+                Arrays.asList(new SimpleGrantedAuthority[] {
+                        new SimpleGrantedAuthority("predix-acs.zones." + acsZones.get(0) + ".user"),
+                        new SimpleGrantedAuthority("acs.connectors.read") }));
+    }
+
+    private void createAdminConnectorScopeClient(final List<String> acsZones) {
+        this.createClientWithAuthorities("acs_connector_admin_client", "s3cr3t",
+                Arrays.asList(new SimpleGrantedAuthority[] {
+                        new SimpleGrantedAuthority("predix-acs.zones." + acsZones.get(0) + ".user"),
+                        new SimpleGrantedAuthority("acs.connectors.read"), 
+                        new SimpleGrantedAuthority("acs.connectors.write") }));
+    }
+
+    private void createClientWithAuthorities(final String clientId, final String clientSecret,
+            final Collection<? extends GrantedAuthority> authorities) {
+        BaseClientDetails client = new BaseClientDetails();
+        client.setAuthorities(authorities);
+        client.setAuthorizedGrantTypes(Arrays.asList(new String[] { "client_credentials" }));
+        client.setClientId(clientId);
+        client.setClientSecret(clientSecret);
+        client.setResourceIds(Arrays.asList(new String[] { "uaa.none" }));
+        createOrUpdateClient(client);
     }
 
     private BaseClientDetails createOrUpdateClient(final BaseClientDetails client) {

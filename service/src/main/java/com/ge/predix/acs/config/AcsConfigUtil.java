@@ -38,7 +38,8 @@ public class AcsConfigUtil {
         em.setDataSource(dataSource);
         em.setPackagesToScan(new String[] { "com.ge.predix.acs.service.policy.admin.dao",
                 "com.ge.predix.acs.privilege.management.dao",
-                "com.ge.predix.acs.zone.management.dao"
+                "com.ge.predix.acs.zone.management.dao",
+                "com.ge.predix.acs.attribute.connector.management.dao"
         });
 
         JpaVendorAdapter vendorAdapter = new OpenJpaVendorAdapter();

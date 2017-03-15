@@ -173,6 +173,35 @@
                 after="BASIC_AUTH_FILTER" />
     </http>
         
+    <!-- Authorization Configuration For V1 connector APIS -->
+    <http pattern="/v1/connector/*" request-matcher="ant" create-session="stateless"
+        xmlns="http://www.springframework.org/schema/security"
+        disable-url-rewriting="true" use-expressions="true"
+        entry-point-ref="preAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
+        <intercept-url pattern="/v1/connector/*" method="GET"
+            access="hasAnyAuthority('acs.connectors.read') " />
+        <intercept-url pattern="/v1/connector/*" method="HEAD"
+            access="hasAnyAuthority('acs.connectors.read') " />
+        <intercept-url pattern="/v1/connector/*" method="OPTIONS"
+            access="hasAnyAuthority('acs.connectors.read') " />
+
+        <intercept-url pattern="/v1/connector/*" method="PUT"
+            access="hasAnyAuthority('acs.connectors.write') " />
+        <intercept-url pattern="/v1/connector/*" method="POST"
+            access="hasAnyAuthority('acs.connectors.write') " />
+        <intercept-url pattern="/v1/connector/*" method="DELETE"
+            access="hasAnyAuthority('acs.connectors.write') " />
+        <intercept-url pattern="/v1/connector/*" method="PATCH"
+            access="hasAnyAuthority('acs.connectors.write') "/>
+
+        <custom-filter ref="oauth2remoteTokenFilter"
+            position="PRE_AUTH_FILTER" />
+        <custom-filter ref="acsRequestEnrichingFilter"
+                after="BASIC_AUTH_FILTER" />
+    </http>
+
     <!-- Authorization Configuration For V1 APIS -->
     <http pattern="/v1/**" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
