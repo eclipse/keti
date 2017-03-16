@@ -11,9 +11,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.attribute.connector.management.dao.AttributeAdapterConnectionEntity;
-import com.ge.predix.acs.attribute.connector.management.dao.AttributeConnectorEntity;
-import com.ge.predix.acs.attribute.connector.management.dao.ConnectorConverter;
 import com.ge.predix.acs.rest.AttributeAdapterConnection;
 import com.ge.predix.acs.rest.AttributeConnector;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
@@ -28,8 +25,6 @@ public class AttributeConnectorServiceTest {
     private ZoneResolver zoneResolver;
     @Mock
     private ZoneRepository zoneRepository;
-
-    private final ConnectorConverter connectorConverter = new ConnectorConverter();
 
     @BeforeMethod
     public void setUp() {
@@ -50,9 +45,9 @@ public class AttributeConnectorServiceTest {
     }
 
     @Test
-     public void testUpdateResourceConnector() {
+     public void testUpdateResourceConnector() throws Exception {
         ZoneEntity zoneEntity = new ZoneEntity();
-        zoneEntity.setResourceAttributeConnector(new AttributeConnectorEntity());
+        zoneEntity.setResourceAttributeConnector(new AttributeConnector());
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();
 
         AttributeConnector expectedConnector = new AttributeConnector();
@@ -95,16 +90,15 @@ public class AttributeConnectorServiceTest {
     }
 
     @Test
-    public void testGetResouceConnector() {
+    public void testGetResouceConnector() throws Exception {
         ZoneEntity zoneEntity = new ZoneEntity();
-        AttributeConnectorEntity connectorEntity = new AttributeConnectorEntity();
-        connectorEntity.setCachedIntervalMinutes(100);
-        connectorEntity.setAttributeAdapterConnections(Collections.singleton(new AttributeAdapterConnectionEntity(
-                connectorEntity, "http://my-endpoint", "http://my-uaa", "my-client", "my-secret")));
-        zoneEntity.setResourceAttributeConnector(connectorEntity);
+        AttributeConnector expectedConnector = new AttributeConnector();
+        expectedConnector.setMaxCachedIntervalMinutes(100);
+        expectedConnector.setAdapters(Collections.singleton(new AttributeAdapterConnection(
+                "http://my-endpoint", "http://my-uaa", "my-client", "my-secret")));
+        zoneEntity.setResourceAttributeConnector(expectedConnector);
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();
 
-        AttributeConnector expectedConnector = this.connectorConverter.toConnector(connectorEntity);
         Assert.assertEquals(this.connectorService.retrieveResourceConnector(), expectedConnector);
     }
 
@@ -115,11 +109,11 @@ public class AttributeConnectorServiceTest {
     }
 
     @Test
-    public void testDeleteResourceConnector() {
+    public void testDeleteResourceConnector() throws Exception {
         ZoneEntity zoneEntity = new ZoneEntity();
-        AttributeConnectorEntity connectorEntity = new AttributeConnectorEntity();
-        connectorEntity.setCachedIntervalMinutes(100);
-        zoneEntity.setResourceAttributeConnector(connectorEntity);
+        AttributeConnector expectedConnector = new AttributeConnector();
+        expectedConnector.setMaxCachedIntervalMinutes(100);
+        zoneEntity.setResourceAttributeConnector(expectedConnector);
 
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();
         Assert.assertTrue(this.connectorService.deleteResourceConnector());
@@ -134,10 +128,10 @@ public class AttributeConnectorServiceTest {
     }
 
     @Test(expectedExceptions = { AttributeConnectorException.class })
-    public void testDeleteResourceConnectorWhenSaveFails() {
+    public void testDeleteResourceConnectorWhenSaveFails() throws Exception {
         ZoneEntity zoneEntity = new ZoneEntity();
-        AttributeConnectorEntity connectorEntity = new AttributeConnectorEntity();
-        zoneEntity.setResourceAttributeConnector(connectorEntity);
+        AttributeConnector expectedConnector = new AttributeConnector();
+        zoneEntity.setResourceAttributeConnector(expectedConnector);
 
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();
         Mockito.doThrow(Exception.class).when(this.zoneRepository).save(Mockito.any(ZoneEntity.class));

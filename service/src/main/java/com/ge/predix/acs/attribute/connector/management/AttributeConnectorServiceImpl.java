@@ -3,8 +3,6 @@ package com.ge.predix.acs.attribute.connector.management;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.ge.predix.acs.attribute.connector.management.dao.AttributeConnectorEntity;
-import com.ge.predix.acs.attribute.connector.management.dao.ConnectorConverter;
 import com.ge.predix.acs.rest.AttributeAdapterConnection;
 import com.ge.predix.acs.rest.AttributeConnector;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
@@ -20,19 +18,17 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
     @Autowired
     private ZoneResolver zoneResolver;
 
-    private final ConnectorConverter connectorConverter = new ConnectorConverter();
-
     @Override
     public boolean upsertResourceConnector(final AttributeConnector connector) {
         ZoneEntity zoneEntity = this.zoneResolver.getZoneEntityOrFail();
         validateConnectorConfigOrFail(connector);
 
-        AttributeConnectorEntity connectorEntity = zoneEntity.getResourceAttributeConnector();
-        boolean isCreated = null == connectorEntity;
-        
-        connectorEntity = connectorConverter.toConnectorEntity(connector);
-        zoneEntity.setResourceAttributeConnector(connectorEntity);
+        boolean isCreated = false;
         try {
+            AttributeConnector existingConnector = zoneEntity.getResourceAttributeConnector();
+            isCreated = (null == existingConnector);
+
+            zoneEntity.setResourceAttributeConnector(connector);
             this.zoneRepository.save(zoneEntity);
         } catch (Exception e) {
             String message = String.format(
@@ -46,18 +42,25 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
     @Override
     public AttributeConnector retrieveResourceConnector() {
         ZoneEntity zoneEntity = this.zoneResolver.getZoneEntityOrFail();
-        return this.connectorConverter.toConnector(zoneEntity.getResourceAttributeConnector());
+        try {
+            return zoneEntity.getResourceAttributeConnector();
+        } catch (Exception e) {
+            String message = String.format(
+                    "Unable to retrieve connector configuration for resource attributes for zone '%s'",
+                    zoneEntity.getName());
+            throw new AttributeConnectorException(message, e);
+        }
     }
 
     @Override
     public Boolean deleteResourceConnector() {
         ZoneEntity zoneEntity = this.zoneResolver.getZoneEntityOrFail();
         boolean isDeleted = false;
-        if (null == zoneEntity.getResourceAttributeConnector()) {
-            return isDeleted;
-        }
-        zoneEntity.setResourceAttributeConnector(null);
         try {
+            if (null == zoneEntity.getResourceAttributeConnector()) {
+                return isDeleted;
+            }
+            zoneEntity.setResourceAttributeConnector(null);
             this.zoneRepository.save(zoneEntity);
             isDeleted = true;
         } catch (Exception e) {

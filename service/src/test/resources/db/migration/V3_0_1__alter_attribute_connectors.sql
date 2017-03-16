@@ -1,0 +1,2 @@
+ALTER TABLE authorization_zone ADD resource_attribute_connector_json MEDIUMTEXT NULL;
+ALTER TABLE authorization_zone ADD subject_attribute_connector_json MEDIUMTEXT NULL;
