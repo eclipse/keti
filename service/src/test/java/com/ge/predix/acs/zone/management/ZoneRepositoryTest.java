@@ -12,11 +12,9 @@ import org.springframework.test.context.testng.AbstractTransactionalTestNGSpring
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.attribute.connector.management.dao.AttributeAdapterConnectionEntity;
-import com.ge.predix.acs.attribute.connector.management.dao.AttributeAdapterConnectionRepository;
-import com.ge.predix.acs.attribute.connector.management.dao.AttributeConnectorEntity;
-import com.ge.predix.acs.attribute.connector.management.dao.AttributeConnectorRepository;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
+import com.ge.predix.acs.rest.AttributeAdapterConnection;
+import com.ge.predix.acs.rest.AttributeConnector;
 import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.acs.zone.management.dao.ZoneRepository;
@@ -31,84 +29,46 @@ public class ZoneRepositoryTest extends AbstractTransactionalTestNGSpringContext
 
     @Autowired
     private ZoneRepository zoneRepository;
-    @Autowired
-    private AttributeConnectorRepository connectorRepository;
-    @Autowired
-    private AttributeAdapterConnectionRepository adapterRepository;
 
     @Test
-    public void testAddConnector() {
+    public void testAddConnector() throws Exception {
         createZoneWithConnectorAndAssert();
     }
 
     @Test
-    public void testUpdateConnector() {
+    public void testUpdateConnector() throws Exception {
         ZoneEntity zone = createZoneWithConnectorAndAssert();
 
-        long connectorIdBeforeUpdate = zone.getResourceAttributeConnector().getId();
-        long adapterIdBeforeUpdate = zone.getResourceAttributeConnector().getAttributeAdapterConnections().iterator()
-                .next().getId();
-        AttributeConnectorEntity expectedConnector = new AttributeConnectorEntity();
-        expectedConnector.setActive(true);
-        expectedConnector.setAttributeAdapterConnections(Collections.singleton(new AttributeAdapterConnectionEntity(
-                expectedConnector, "http://some-adapter.com", "http://some-uaa.com", "some-client", "some-secret")));
+        AttributeConnector expectedConnector = new AttributeConnector();
+        expectedConnector.setIsActive(true);
+        expectedConnector.setAdapters(Collections.singleton(new AttributeAdapterConnection("http://some-adapter.com",
+                "http://some-uaa.com", "some-client", "some-secret")));
         zone.setResourceAttributeConnector(expectedConnector);
 
         this.zoneRepository.save(zone);
 
         // Assert that zone connectors and adapters are updated
-        AttributeConnectorEntity actualConnector = this.zoneRepository.getByName(zone.getName())
+        AttributeConnector actualConnector = this.zoneRepository.getByName(zone.getName())
                 .getResourceAttributeConnector();
         Assert.assertEquals(actualConnector, expectedConnector);
-        Assert.assertEquals(actualConnector.getAttributeAdapterConnections(),
-                expectedConnector.getAttributeAdapterConnections());
-        // Assert that previous connectors and adapters are deleted
-        Assert.assertNull(this.connectorRepository.findOne(connectorIdBeforeUpdate));
-        Assert.assertNull(this.adapterRepository.findOne(adapterIdBeforeUpdate));
+        Assert.assertEquals(actualConnector.getAdapters(), expectedConnector.getAdapters());
     }
 
     @Test
-    public void testDeleteConnector() {
+    public void testDeleteConnector() throws Exception {
         ZoneEntity zone = createZoneWithConnectorAndAssert();
 
-        long adapterId = zone.getResourceAttributeConnector().getAttributeAdapterConnections().iterator().next()
-                .getId();
-        long connectorId = zone.getResourceAttributeConnector().getId();
         zone.setResourceAttributeConnector(null);
         this.zoneRepository.save(zone);
         Assert.assertNull(this.zoneRepository.getByName(zone.getName()).getResourceAttributeConnector());
-        Assert.assertNull(this.connectorRepository.findOne(connectorId));
-        Assert.assertNull(this.adapterRepository.findOne(adapterId));
     }
 
-    @Test
-    public void testDeleteConnectorWithCascade() {
-        ZoneEntity zone = createZoneWithConnectorAndAssert();
-
-        long adapterId = zone.getResourceAttributeConnector().getAttributeAdapterConnections().iterator().next()
-                .getId();
-        long connectorId = zone.getResourceAttributeConnector().getId();
-        this.zoneRepository.delete(zone);
-        Assert.assertNull(this.zoneRepository.getByName(zone.getName()));
-        Assert.assertNull(this.connectorRepository.findOne(connectorId));
-        Assert.assertNull(this.adapterRepository.findOne(adapterId));
-    }
-
-    @Test
-    public void testEnvClientSecret() {
-        ZoneEntity zone = createZoneWithConnectorAndAssert();
-
-        Assert.assertEquals(zone.getResourceAttributeConnector().getAttributeAdapterConnections().iterator().next()
-                .getUaaClientSecret(), null);
-    }
-
-    private ZoneEntity createZoneWithConnectorAndAssert() {
-        AttributeConnectorEntity expectedConnector = new AttributeConnectorEntity();
-        Set<AttributeAdapterConnectionEntity> expectedAdapters = Collections
-                .singleton(new AttributeAdapterConnectionEntity(expectedConnector, "http://my-adapter.com",
-                        "http://my-uaa", "my-client", "my-secret"));
-        expectedConnector.setAttributeAdapterConnections(expectedAdapters);
-        expectedConnector.setCachedIntervalMinutes(24);
+    private ZoneEntity createZoneWithConnectorAndAssert() throws Exception {
+        AttributeConnector expectedConnector = new AttributeConnector();
+        Set<AttributeAdapterConnection> expectedAdapters = Collections.singleton(
+                new AttributeAdapterConnection("http://my-adapter.com", "http://my-uaa", "my-client", "my-secret"));
+        expectedConnector.setAdapters(expectedAdapters);
+        expectedConnector.setMaxCachedIntervalMinutes(24);
         ZoneEntity zone = new ZoneEntity();
         zone.setName("azone");
         zone.setSubdomain("asubdomain");
@@ -118,8 +78,7 @@ public class ZoneRepositoryTest extends AbstractTransactionalTestNGSpringContext
         ZoneEntity acutalZone = this.zoneRepository.getByName("azone");
         Assert.assertEquals(acutalZone.getSubjectAttributeConnector(), null);
         Assert.assertEquals(acutalZone.getResourceAttributeConnector(), expectedConnector);
-        Assert.assertEquals(acutalZone.getResourceAttributeConnector().getAttributeAdapterConnections(),
-                expectedAdapters);
+        Assert.assertEquals(acutalZone.getResourceAttributeConnector().getAdapters(), expectedAdapters);
         return zone;
     }
 }

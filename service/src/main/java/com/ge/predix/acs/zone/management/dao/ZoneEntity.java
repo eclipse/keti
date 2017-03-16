@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.ge.predix.acs.zone.management.dao;
 
+import java.io.IOException;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -24,18 +25,20 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import com.ge.predix.acs.attribute.connector.management.dao.AttributeConnectorEntity;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
 import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
+import com.ge.predix.acs.rest.AttributeConnector;
 import com.ge.predix.acs.service.policy.admin.dao.PolicySetEntity;
 
 @Entity
@@ -44,6 +47,8 @@ import com.ge.predix.acs.service.policy.admin.dao.PolicySetEntity;
         uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }),
                 @UniqueConstraint(columnNames = { "subdomain" }) })
 public class ZoneEntity {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Id
     @Column(name = "id")
@@ -77,19 +82,11 @@ public class ZoneEntity {
             fetch = FetchType.LAZY)
     private Set<PolicySetEntity> policySets;
 
-    @OneToOne(
-            optional = true, 
-            cascade = { CascadeType.ALL }, 
-            orphanRemoval = true)
-    @JoinColumn(name = "resource_attribute_connector", referencedColumnName = "id", nullable = true, updatable = true)
-    private AttributeConnectorEntity resourceAttributeConnector;
-    
-    @OneToOne(
-            optional = true, 
-            cascade = { CascadeType.ALL }, 
-            orphanRemoval = true)
-    @JoinColumn(name = "subject_attribute_connector", referencedColumnName = "id", nullable = true, updatable = true)
-    private AttributeConnectorEntity subjectAttributeConnector;
+    @Column(name = "resource_attribute_connector_json", nullable = true)
+    private String resourceAttributeConnector;
+
+    @Column(name = "subject_attribute_connector_json", nullable = true)
+    private String subjectAttributeConnector;
 
     public ZoneEntity() {
     }
@@ -155,19 +152,27 @@ public class ZoneEntity {
                 + ", subdomain=" + this.subdomain + "]";
     }
 
-    public void setResourceAttributeConnector(final AttributeConnectorEntity connector) {
-        this.resourceAttributeConnector = connector;
+    public void setResourceAttributeConnector(final AttributeConnector connector) throws JsonProcessingException {
+        this.resourceAttributeConnector = OBJECT_MAPPER.writeValueAsString(connector);
     }
 
-    public AttributeConnectorEntity getResourceAttributeConnector() {
-        return this.resourceAttributeConnector;
+    public AttributeConnector getResourceAttributeConnector()
+            throws JsonParseException, JsonMappingException, IOException {
+        if (null == this.resourceAttributeConnector) {
+            return null;
+        }
+        return OBJECT_MAPPER.readValue(this.resourceAttributeConnector, AttributeConnector.class);
     }
 
-    public AttributeConnectorEntity getSubjectAttributeConnector() {
-        return subjectAttributeConnector;
+    public AttributeConnector getSubjectAttributeConnector()
+            throws JsonParseException, JsonMappingException, IOException {
+        if (null == this.subjectAttributeConnector) {
+            return null;
+        }
+        return OBJECT_MAPPER.readValue(this.subjectAttributeConnector, AttributeConnector.class);
     }
 
-    public void setSubjectAttributeConnector(final AttributeConnectorEntity subjectAttributeConnector) {
-        this.subjectAttributeConnector = subjectAttributeConnector;
+    public void setSubjectAttributeConnector(final AttributeConnector connector) throws JsonProcessingException {
+        this.subjectAttributeConnector = OBJECT_MAPPER.writeValueAsString(connector);
     }
 }
