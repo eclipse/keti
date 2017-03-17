@@ -62,8 +62,9 @@ public class AttributeConnectorControllerIT extends AbstractTestNGSpringContextT
                 .deserializeFromFile("controller-test/createResourceConnector.json", AttributeConnector.class);
         Assert.assertNotNull(resourceConfig, "createResourceConnector.json file not found or invalid");
         String resourceConfigContent = this.objectWriter.writeValueAsString(resourceConfig);
-        this.mockMvc.perform(put(V1_RESOURCE_CONNECTOR_URL).contentType(MediaType.APPLICATION_JSON)
-                .content(resourceConfigContent)).andExpect(status().isCreated());
+        this.mockMvc.perform(
+                put(V1_RESOURCE_CONNECTOR_URL).contentType(MediaType.APPLICATION_JSON).content(resourceConfigContent))
+                .andExpect(status().isCreated());
 
         this.mockMvc.perform(get(V1_RESOURCE_CONNECTOR_URL))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
@@ -98,8 +99,23 @@ public class AttributeConnectorControllerIT extends AbstractTestNGSpringContextT
         Assert.assertNotNull(connector, "createResourceConnectorWithEmptyAdapters.json file not found or invalid");
         String connectorContent = this.objectWriter.writeValueAsString(connector);
 
-        this.mockMvc.perform(put(V1_RESOURCE_CONNECTOR_URL).contentType(MediaType.APPLICATION_JSON)
-                .content(connectorContent)).andExpect(status().isUnprocessableEntity());
+        this.mockMvc.perform(
+                put(V1_RESOURCE_CONNECTOR_URL).contentType(MediaType.APPLICATION_JSON).content(connectorContent))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void testCreateResourceConnectorWithTwoAdapters() throws Exception {
+        createZone1AndAssert();
+        AttributeConnector connector = this.jsonUtils.deserializeFromFile(
+                "controller-test/createResourceConnectorWithTwoAdapters.json", AttributeConnector.class);
+        Assert.assertNotNull(connector, "createResourceConnectorWithTwoAdapters.json file not found or invalid");
+        String connectorContent = this.objectWriter.writeValueAsString(connector);
+
+        this.mockMvc.perform(
+                put(V1_RESOURCE_CONNECTOR_URL).contentType(MediaType.APPLICATION_JSON).content(connectorContent))
+                .andExpect(status().isUnprocessableEntity());
+
     }
 
     @Test
@@ -108,12 +124,12 @@ public class AttributeConnectorControllerIT extends AbstractTestNGSpringContextT
         AttributeConnector connector = this.jsonUtils.deserializeFromFile(
                 "controller-test/createResourceConnectorWithLowValueForCache.json", AttributeConnector.class);
         System.out.println(connector);
-        Assert.assertNotNull(connector,
-                "createResourceConnectorWithLowValueForCache.json file not found or invalid");
+        Assert.assertNotNull(connector, "createResourceConnectorWithLowValueForCache.json file not found or invalid");
         String connectorContent = this.objectWriter.writeValueAsString(connector);
 
-        this.mockMvc.perform(put(V1_RESOURCE_CONNECTOR_URL).contentType(MediaType.APPLICATION_JSON)
-                .content(connectorContent)).andExpect(status().isUnprocessableEntity());
+        this.mockMvc.perform(
+                put(V1_RESOURCE_CONNECTOR_URL).contentType(MediaType.APPLICATION_JSON).content(connectorContent))
+                .andExpect(status().isUnprocessableEntity());
     }
 
     private void createZone1AndAssert() throws JsonProcessingException, Exception {

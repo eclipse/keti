@@ -123,8 +123,9 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
         if (connector == null) {
             throw new AttributeConnectorException("Attribute connector configuration requires a valid connector");
         }
-        if (connector.getAdapters() == null || connector.getAdapters().isEmpty()) {
-            throw new AttributeConnectorException("Attribute connector configuration requires at least one adapter");
+        if (connector.getAdapters() == null || connector.getAdapters().isEmpty()
+                || connector.getAdapters().size() > 1) {
+            throw new AttributeConnectorException("Attribute connector configuration requires one adapter");
         }
         if (connector.getMaxCachedIntervalMinutes() < CACHED_INTERVAL_THRESHOLD_MINUTES) {
             throw new AttributeConnectorException(
