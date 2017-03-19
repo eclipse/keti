@@ -18,4 +18,5 @@ service/pom.xml.versionsBackup
 pom.xml.versionsBackup
 model/pom.xml.versionsBackup
 commons/pom.xml.versionsBackup
-*~
+*
+**/surefire~

@@ -1,8 +1,14 @@
 package com.ge.predix.acs.attribute.connector.management;
 
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.ge.predix.acs.encryption.Encryptor;
 import com.ge.predix.acs.rest.AttributeAdapterConnection;
 import com.ge.predix.acs.rest.AttributeConnector;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
@@ -11,12 +17,28 @@ import com.ge.predix.acs.zone.resolver.ZoneResolver;
 
 @Component
 public class AttributeConnectorServiceImpl implements AttributeConnectorService {
+
     private static final int CACHED_INTERVAL_THRESHOLD_MINUTES = 30;
 
     @Autowired
     private ZoneRepository zoneRepository;
     @Autowired
     private ZoneResolver zoneResolver;
+
+    @Value("${ENCRYPTION_KEY}")
+    private String encryptionKey;
+
+    private Encryptor encryptor;
+
+    @PostConstruct
+    public void postConstruct() {
+        setEncryptionKey(this.encryptionKey);
+    }
+
+    public void setEncryptionKey(final String encryptionKey) {
+        this.encryptor = new Encryptor();
+        this.encryptor.setEncryptionKey(encryptionKey);
+    }
 
     @Override
     public boolean upsertResourceConnector(final AttributeConnector connector) {
@@ -27,7 +49,9 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
         try {
             AttributeConnector existingConnector = zoneEntity.getResourceAttributeConnector();
             isCreated = (null == existingConnector);
-
+            if (null != connector) {
+                connector.setAdapters(encryptAdapterClientSecrets(connector.getAdapters()));
+            }
             zoneEntity.setResourceAttributeConnector(connector);
             this.zoneRepository.save(zoneEntity);
         } catch (Exception e) {
@@ -43,7 +67,11 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
     public AttributeConnector retrieveResourceConnector() {
         ZoneEntity zoneEntity = this.zoneResolver.getZoneEntityOrFail();
         try {
-            return zoneEntity.getResourceAttributeConnector();
+            AttributeConnector connector = zoneEntity.getResourceAttributeConnector();
+            if (null != connector) {
+                connector.setAdapters(decryptAdapterClientSecrets(connector.getAdapters()));
+            }
+            return connector;
         } catch (Exception e) {
             String message = String.format(
                     "Unable to retrieve connector configuration for resource attributes for zone '%s'",
@@ -102,8 +130,24 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
             throw new AttributeConnectorException(
                     "Minimum value for maxCachedIntervalMinutes is " + CACHED_INTERVAL_THRESHOLD_MINUTES);
         }
-        connector.getAdapters().parallelStream().forEach(adapter -> {
-            validateAdapterEntityOrFail(adapter);
-        });
+        connector.getAdapters().parallelStream().forEach(this::validateAdapterEntityOrFail);
+    }
+
+    private Set<AttributeAdapterConnection> encryptAdapterClientSecrets(
+            final Set<AttributeAdapterConnection> adapters) {
+        if (null == adapters) {
+            return null;
+        }
+        adapters.forEach(adapter -> adapter.setUaaClientSecret(this.encryptor.encrypt(adapter.getUaaClientSecret())));
+        return adapters;
+    }
+
+    private Set<AttributeAdapterConnection> decryptAdapterClientSecrets(
+            final Set<AttributeAdapterConnection> adapters) {
+        if (null == adapters) {
+            return null;
+        }
+        adapters.forEach(adapter -> adapter.setUaaClientSecret(this.encryptor.encrypt(adapter.getUaaClientSecret())));
+        return adapters;
     }
 }
