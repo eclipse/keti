@@ -104,6 +104,7 @@
                         <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
                         <ACS_URL>${ACS_URL}</ACS_URL>
                         <ZAC_URL>${ZAC_URL}</ZAC_URL>
+                        <ENCRYPTION_KEY>${ENCRYPTION_KEY}</ENCRYPTION_KEY>
 
                         <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
 
@@ -148,6 +149,7 @@
                         <CONFIG_CLIENT_SECRET>${CONFIG_CLIENT_SECRET}</CONFIG_CLIENT_SECRET>
                         <CONFIG_SERVER_URI>${CONFIG_SERVER_URI}</CONFIG_SERVER_URI>
                         <CONFIG_OAUTH_TOKEN_URI>${CONFIG_OAUTH_TOKEN_URI}</CONFIG_OAUTH_TOKEN_URI>
+                        <ENCRYPTION_KEY>${ENCRYPTION_KEY}</ENCRYPTION_KEY>
                     </env>
                 </configuration>
             </plugin>

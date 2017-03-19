@@ -4,15 +4,16 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
+import com.ge.predix.acs.encryption.Encryptor;
 import com.ge.predix.acs.rest.AttributeAdapterConnection;
 import com.ge.predix.acs.rest.AttributeConnector;
 import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
@@ -20,12 +21,10 @@ import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.acs.zone.management.dao.ZoneRepository;
 
 @EnableAutoConfiguration
-@ContextConfiguration(classes = { InMemoryDataSourceConfig.class })
+@ContextConfiguration(classes = { InMemoryDataSourceConfig.class, Encryptor.class })
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
+@TestPropertySource("/application.properties")
 public class ZoneRepositoryTest extends AbstractTransactionalTestNGSpringContextTests {
-
-    @Value("ADAPTER_CLIENT_SECRET")
-    private String assetAdapterClientSecret;
 
     @Autowired
     private ZoneRepository zoneRepository;

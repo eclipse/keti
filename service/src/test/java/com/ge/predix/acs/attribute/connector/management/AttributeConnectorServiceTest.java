@@ -29,6 +29,7 @@ public class AttributeConnectorServiceTest {
     @BeforeMethod
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        this.connectorService.setEncryptionKey("1234567890123456");
     }
 
     @Test
@@ -113,6 +114,8 @@ public class AttributeConnectorServiceTest {
         ZoneEntity zoneEntity = new ZoneEntity();
         AttributeConnector expectedConnector = new AttributeConnector();
         expectedConnector.setMaxCachedIntervalMinutes(100);
+        expectedConnector.setAdapters(Collections.singleton(new AttributeAdapterConnection(
+                "http://my-endpoint", "http://my-uaa", "my-client", "my-secret")));
         zoneEntity.setResourceAttributeConnector(expectedConnector);
 
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();

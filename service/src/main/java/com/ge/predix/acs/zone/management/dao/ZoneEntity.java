@@ -32,9 +32,6 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
 import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
@@ -83,10 +80,14 @@ public class ZoneEntity {
     private Set<PolicySetEntity> policySets;
 
     @Column(name = "resource_attribute_connector_json", nullable = true)
-    private String resourceAttributeConnector;
+    private String resourceConnectorJson;
 
     @Column(name = "subject_attribute_connector_json", nullable = true)
-    private String subjectAttributeConnector;
+    private String subjectConnectorJson;
+
+    private AttributeConnector cachedResourceConnector;
+
+    private AttributeConnector cachedSubjectConnector;
 
     public ZoneEntity() {
     }
@@ -152,27 +153,56 @@ public class ZoneEntity {
                 + ", subdomain=" + this.subdomain + "]";
     }
 
-    public void setResourceAttributeConnector(final AttributeConnector connector) throws JsonProcessingException {
-        this.resourceAttributeConnector = OBJECT_MAPPER.writeValueAsString(connector);
+    public AttributeConnector getResourceAttributeConnector() {
+        if (null == this.cachedResourceConnector) {
+            this.cachedResourceConnector = connectorFromJson(this.resourceConnectorJson);
+        }
+        return this.cachedResourceConnector;
     }
 
-    public AttributeConnector getResourceAttributeConnector()
-            throws JsonParseException, JsonMappingException, IOException {
-        if (null == this.resourceAttributeConnector) {
+    public void setResourceAttributeConnector(final AttributeConnector connector) {
+        this.resourceConnectorJson = jsonFromConnector(connector);
+        this.cachedResourceConnector = connector;
+    }
+
+    public AttributeConnector getSubjectAttributeConnector() {
+        if (null == this.cachedSubjectConnector) {
+            this.cachedSubjectConnector = connectorFromJson(this.subjectConnectorJson);
+        }
+        return this.cachedSubjectConnector;
+    }
+
+    public void setSubjectAttributeConnector(final AttributeConnector connector) {
+        this.subjectConnectorJson = jsonFromConnector(connector);
+        this.cachedSubjectConnector = connector;
+    }
+    
+    private String jsonFromConnector(final AttributeConnector connector) {
+        if (null == connector) {
             return null;
         }
-        return OBJECT_MAPPER.readValue(this.resourceAttributeConnector, AttributeConnector.class);
+
+        String connectorJson;
+        try {
+            connectorJson = OBJECT_MAPPER.writeValueAsString(connector);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+        return connectorJson;
     }
 
-    public AttributeConnector getSubjectAttributeConnector()
-            throws JsonParseException, JsonMappingException, IOException {
-        if (null == this.subjectAttributeConnector) {
+    private AttributeConnector connectorFromJson(final String connectorJson) {
+        if (null == connectorJson) {
             return null;
         }
-        return OBJECT_MAPPER.readValue(this.subjectAttributeConnector, AttributeConnector.class);
+
+        AttributeConnector connector;
+        try {
+            connector = OBJECT_MAPPER.readValue(connectorJson, AttributeConnector.class);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+        return connector;
     }
 
-    public void setSubjectAttributeConnector(final AttributeConnector connector) throws JsonProcessingException {
-        this.subjectAttributeConnector = OBJECT_MAPPER.writeValueAsString(connector);
-    }
 }
