@@ -1,6 +1,8 @@
 package com.ge.predix.acs.attribute.connector.management;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -46,7 +48,7 @@ public class AttributeConnectorServiceTest {
     }
 
     @Test
-     public void testUpdateResourceConnector() throws Exception {
+    public void testUpdateResourceConnector() throws Exception {
         ZoneEntity zoneEntity = new ZoneEntity();
         zoneEntity.setResourceAttributeConnector(new AttributeConnector());
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();
@@ -57,7 +59,7 @@ public class AttributeConnectorServiceTest {
                 "http://my-uaa.com", "my-client", "my-secret")));
         Assert.assertFalse(this.connectorService.upsertResourceConnector(expectedConnector));
         Assert.assertEquals(this.connectorService.retrieveResourceConnector(), expectedConnector);
-     }
+    }
 
     @Test(expectedExceptions = { AttributeConnectorException.class })
     public void testUpsertResourceConnectorWhenSaveFails() {
@@ -84,6 +86,21 @@ public class AttributeConnectorServiceTest {
         this.connectorService.upsertResourceConnector(connector);
     }
 
+    @Test(expectedExceptions = { AttributeConnectorException.class })
+    public void testUpsertResourceConnectorWithTwoAdapter() {
+        Mockito.doReturn(new ZoneEntity()).when(this.zoneResolver).getZoneEntityOrFail();
+
+        AttributeConnector connector = new AttributeConnector();
+        connector.setMaxCachedIntervalMinutes(100);
+        Set<AttributeAdapterConnection> adapters = new HashSet<>();
+        adapters.add(new AttributeAdapterConnection("http://my-endpoint", "http://my-uaa", "my-client", "my-secret"));
+        adapters.add(
+                new AttributeAdapterConnection("http://my-endpoint2", "http://my-uaa2", "my-client2", "my-secret2"));
+        connector.setAdapters(adapters);
+
+        this.connectorService.upsertResourceConnector(connector);
+    }
+
     @Test(dataProvider = "badConnectorProvider", expectedExceptions = { AttributeConnectorException.class })
     public void testUpsertResourceConnectorWhenConnectorValidationFails(final AttributeConnector connector) {
         Mockito.doReturn(new ZoneEntity()).when(this.zoneResolver).getZoneEntityOrFail();
@@ -95,8 +112,8 @@ public class AttributeConnectorServiceTest {
         ZoneEntity zoneEntity = new ZoneEntity();
         AttributeConnector expectedConnector = new AttributeConnector();
         expectedConnector.setMaxCachedIntervalMinutes(100);
-        expectedConnector.setAdapters(Collections.singleton(new AttributeAdapterConnection(
-                "http://my-endpoint", "http://my-uaa", "my-client", "my-secret")));
+        expectedConnector.setAdapters(Collections.singleton(
+                new AttributeAdapterConnection("http://my-endpoint", "http://my-uaa", "my-client", "my-secret")));
         zoneEntity.setResourceAttributeConnector(expectedConnector);
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();
 
