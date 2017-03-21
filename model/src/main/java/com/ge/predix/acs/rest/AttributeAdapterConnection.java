@@ -1,5 +1,8 @@
 package com.ge.predix.acs.rest;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 public class AttributeAdapterConnection {
 
     private String adapterEndpoint;
@@ -63,55 +66,17 @@ public class AttributeAdapterConnection {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.adapterEndpoint == null) ? 0 : this.adapterEndpoint.hashCode());
-        result = prime * result + ((this.uaaClientId == null) ? 0 : this.uaaClientId.hashCode());
-//        result = prime * result + ((this.uaaClientSecret == null) ? 0 : this.uaaClientSecret.hashCode());
-        result = prime * result + ((this.uaaTokenUrl == null) ? 0 : this.uaaTokenUrl.hashCode());
-        return result;
+        return new HashCodeBuilder().append(this.adapterEndpoint).append(this.uaaTokenUrl).append(this.uaaClientId)
+                .toHashCode();
     }
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
+        if (obj instanceof AttributeAdapterConnection) {
+            AttributeAdapterConnection other = (AttributeAdapterConnection) obj;
+            return new EqualsBuilder().append(this.adapterEndpoint, other.adapterEndpoint)
+                    .append(this.uaaTokenUrl, other.uaaTokenUrl).append(this.uaaClientId, other.uaaClientId).isEquals();
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        AttributeAdapterConnection other = (AttributeAdapterConnection) obj;
-        if (this.adapterEndpoint == null) {
-            if (other.adapterEndpoint != null) {
-                return false;
-            }
-        } else if (!this.adapterEndpoint.equals(other.adapterEndpoint)) {
-            return false;
-        }
-        if (this.uaaClientId == null) {
-            if (other.uaaClientId != null) {
-                return false;
-            }
-        } else if (!this.uaaClientId.equals(other.uaaClientId)) {
-            return false;
-        }
-//        if (this.uaaClientSecret == null) {
-//            if (other.uaaClientSecret != null) {
-//                return false;
-//            }
-//        } else if (!this.uaaClientSecret.equals(other.uaaClientSecret)) {
-//            return false;
-//        }
-        if (this.uaaTokenUrl == null) {
-            if (other.uaaTokenUrl != null) {
-                return false;
-            }
-        } else if (!this.uaaTokenUrl.equals(other.uaaTokenUrl)) {
-            return false;
-        }
-        return true;
+        return false;
     }
 }

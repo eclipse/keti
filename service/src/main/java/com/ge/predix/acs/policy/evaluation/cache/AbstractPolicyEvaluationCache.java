@@ -268,7 +268,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         }
     }
 
-    private boolean havePrivilegeServiceAttributesChanged(final List<String> values,
+    boolean havePrivilegeServiceAttributesChanged(final List<String> values,
             final DateTime policyEvalTimestampUTC) {
         for (int i = 0; i < values.size() - 1; i++) {
             if (null == values.get(i)) {

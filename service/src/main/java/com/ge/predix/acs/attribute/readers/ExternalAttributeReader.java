@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +26,8 @@ public abstract class ExternalAttributeReader implements AttributeReader {
     private final int adapterTimeoutMillis;
     private final AttributeConnectorService connectorService;
     private final AttributeCache attributeCache;
-    private final Map<Integer, OAuth2RestTemplate> adapterRestTemplateCache = new ConcurrentReferenceHashMap<>();
+    private final Map<AttributeAdapterConnection, OAuth2RestTemplate> adapterRestTemplateCache =
+            new ConcurrentReferenceHashMap<>();
 
     public ExternalAttributeReader(final AttributeConnectorService connectorService,
             final AttributeCache attributeCache, final int adapterTimeoutMillis) {
@@ -64,9 +64,7 @@ public abstract class ExternalAttributeReader implements AttributeReader {
         String uaaClientId = adapterConnection.getUaaClientId();
         String uaaClientSecret = adapterConnection.getUaaClientSecret();
 
-        Integer key = new HashCodeBuilder().append(uaaTokenUrl).append(uaaClientId).append(uaaClientSecret)
-                .toHashCode();
-        OAuth2RestTemplate oAuth2RestTemplate = this.adapterRestTemplateCache.get(key);
+        OAuth2RestTemplate oAuth2RestTemplate = this.adapterRestTemplateCache.get(adapterConnection);
         if (oAuth2RestTemplate != null) {
             return oAuth2RestTemplate;
         }
@@ -77,7 +75,7 @@ public abstract class ExternalAttributeReader implements AttributeReader {
         clientCredentials.setClientSecret(uaaClientSecret);
         oAuth2RestTemplate = new OAuth2RestTemplate(clientCredentials);
         this.setRequestFactory(oAuth2RestTemplate);
-        this.adapterRestTemplateCache.put(key, oAuth2RestTemplate);
+        this.adapterRestTemplateCache.put(adapterConnection, oAuth2RestTemplate);
         return oAuth2RestTemplate;
     }
 

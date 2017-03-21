@@ -343,18 +343,37 @@ public class AbstractPolicyEvaluationCacheTest {
 
     @Test(dataProvider = "intervalProvider")
     public void testHaveConnectorIntervalsLapsed(final AttributeConnector resourceConnector,
-            final AttributeConnector subjectConnector, final boolean isResourceConnectorConfigured,
-            final boolean isSubjectConnectorConfigured, final DateTime currentTime, final boolean expectedBoolean) {
+            final AttributeConnector subjectConnector, final DateTime currentTime,
+            final boolean haveConnectorCacheIntervalsLapsed) {
         AttributeConnectorService connectorService = Mockito.mock(AttributeConnectorServiceImpl.class);
 
         Mockito.doReturn(resourceConnector).when(connectorService).getResourceAttributeConnector();
         Mockito.doReturn(subjectConnector).when(connectorService).getSubjectAttributeConnector();
 
+        boolean isResourceConnectorConfigured = resourceConnector != null;
+        boolean isSubjectConnectorConfigured = subjectConnector != null;
         Mockito.doReturn(isResourceConnectorConfigured).when(connectorService).isResourceAttributeConnectorConfigured();
         Mockito.doReturn(isSubjectConnectorConfigured).when(connectorService).isSubjectAttributeConnectorConfigured();
 
+        InMemoryPolicyEvaluationCache spiedCache = Mockito.spy(this.cache);
+        ReflectionTestUtils.setField(spiedCache, "connectorService", connectorService);
+
+        PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
+        request.setAction(ACTION_GET);
+        request.setSubjectIdentifier(AGENT_MULDER);
+        request.setResourceIdentifier(XFILES_ID);
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
+                .request(request).build();
+
+        PolicyEvaluationResult result = mockPermitResult();
+        spiedCache.set(key, result);
+        spiedCache.get(key);
+        Mockito.verify(spiedCache, Mockito.times(isResourceConnectorConfigured || isSubjectConnectorConfigured ? 0 : 1))
+                .havePrivilegeServiceAttributesChanged(Mockito.any(), Mockito.any());
+        Mockito.verify(spiedCache, Mockito.times(isResourceConnectorConfigured || isSubjectConnectorConfigured ? 1 : 0))
+                .haveConnectorCacheIntervalsLapsed(Mockito.any(), Mockito.any());
         Assert.assertEquals(this.cache.haveConnectorCacheIntervalsLapsed(connectorService, currentTime),
-                expectedBoolean);
+                haveConnectorCacheIntervalsLapsed);
 
     }
 
@@ -366,58 +385,57 @@ public class AbstractPolicyEvaluationCacheTest {
 
     @DataProvider
     private Object[][] intervalProvider() {
-        return new Object[][] { connectorsConfiguredNotElapsed(), connectorsConfiguredResourceElapsed(),
-                connectorsConfiguredSubjectElapsed(), connectorsNotConfigured(),
-                resourceConnectorOnlyConfiguredAndElapsed(), subjectConnectorOnlyConfiguredAndElapsed() };
+        return new Object[][] { allConnectorsConfiguredNoneElapsed(), allConnectorsConfiguredOnlyResourceElapsed(),
+                allConnectorsConfiguredOnlySubjectElapsed(), connectorsNotConfigured(),
+                onlyResourceConnectorConfiguredAndElapsed(), onlySubjectConnectorConfiguredAndElapsed() };
     }
 
-    private Object[] connectorsConfiguredNotElapsed() {
+    private Object[] allConnectorsConfiguredNoneElapsed() {
         AttributeConnector resourceConnector = new AttributeConnector();
         AttributeConnector subjectConnector = new AttributeConnector();
         resourceConnector.setMaxCachedIntervalMinutes(1);
         subjectConnector.setMaxCachedIntervalMinutes(1);
 
-        return new Object[] { resourceConnector, subjectConnector, true, true, DateTime.now(), false };
+        return new Object[] { resourceConnector, subjectConnector, DateTime.now(), false };
     }
 
-    private Object[] connectorsConfiguredResourceElapsed() {
+    private Object[] allConnectorsConfiguredOnlyResourceElapsed() {
         AttributeConnector resourceConnector = new AttributeConnector();
         AttributeConnector subjectConnector = new AttributeConnector();
         resourceConnector.setMaxCachedIntervalMinutes(1);
         subjectConnector.setMaxCachedIntervalMinutes(4);
 
-        return new Object[] { resourceConnector, subjectConnector, true, true, DateTime.now().minusMinutes(3), true };
+        return new Object[] { resourceConnector, subjectConnector, DateTime.now().minusMinutes(3), true };
     }
 
-    private Object[] connectorsConfiguredSubjectElapsed() {
+    private Object[] allConnectorsConfiguredOnlySubjectElapsed() {
         AttributeConnector resourceConnector = new AttributeConnector();
         AttributeConnector subjectConnector = new AttributeConnector();
         resourceConnector.setMaxCachedIntervalMinutes(4);
         subjectConnector.setMaxCachedIntervalMinutes(1);
 
-        return new Object[] { resourceConnector, subjectConnector, true, true, DateTime.now().minusMinutes(3), true };
+        return new Object[] { resourceConnector, subjectConnector, DateTime.now().minusMinutes(3), true };
     }
 
-    private Object[] resourceConnectorOnlyConfiguredAndElapsed() {
+    private Object[] onlyResourceConnectorConfiguredAndElapsed() {
         AttributeConnector resourceConnector = new AttributeConnector();
         resourceConnector.setMaxCachedIntervalMinutes(1);
 
-        return new Object[] { resourceConnector, null, true, false, DateTime.now().minusMinutes(3), true };
+        return new Object[] { resourceConnector, null, DateTime.now().minusMinutes(3), true };
     }
 
-    private Object[] subjectConnectorOnlyConfiguredAndElapsed() {
+    private Object[] onlySubjectConnectorConfiguredAndElapsed() {
         AttributeConnector subjectConnector = new AttributeConnector();
         subjectConnector.setMaxCachedIntervalMinutes(1);
 
-        return new Object[] { null, subjectConnector, false, true, DateTime.now().minusMinutes(3), true };
+        return new Object[] { null, subjectConnector, DateTime.now().minusMinutes(3), true };
     }
 
     private Object[] connectorsNotConfigured() {
         AttributeConnector resourceConnector = new AttributeConnector();
         AttributeConnector subjectConnector = new AttributeConnector();
 
-        return new Object[] { resourceConnector, subjectConnector, false, false, DateTime.now().minusMinutes(3),
-                false };
+        return new Object[] { resourceConnector, subjectConnector, DateTime.now().minusMinutes(3), false };
     }
 
 }
