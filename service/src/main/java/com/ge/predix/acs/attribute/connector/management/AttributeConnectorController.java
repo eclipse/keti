@@ -75,4 +75,52 @@ public class AttributeConnectorController extends BaseRestApi {
             throw new RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
         }
     }
+
+    @RequestMapping(
+            method = PUT,
+            value = V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<AttributeConnector> putSubjectConnector(@RequestBody final AttributeConnector connector) {
+        try {
+            boolean connectorCreated = this.service.upsertSubjectConnector(connector);
+
+            if (connectorCreated) {
+                // return 201 with empty response body
+                return created(V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL, false);
+            }
+            // return 200 with empty response body
+            return ok();
+        } catch (AttributeConnectorException e) {
+            throw new RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+        }
+    }
+
+    @RequestMapping(
+            method = GET,
+            value = V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<AttributeConnector> getSubjectConnector() {
+        try {
+            AttributeConnector connector = this.service.retrieveSubjectConnector();
+            if (connector != null) {
+                return ok(connector);
+            }
+            return notFound();
+        } catch (AttributeConnectorException e) {
+            throw new RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e);
+        }
+    }
+
+    @RequestMapping(method = DELETE, value = V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL)
+    public ResponseEntity<?> deleteSubjectConnector() {
+        try {
+            Boolean deleted = this.service.deleteSubjectConnector();
+            if (deleted) {
+                return noContent();
+            }
+            return notFound();
+        } catch (AttributeConnectorException e) {
+            throw new RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+        }
+    }
 }

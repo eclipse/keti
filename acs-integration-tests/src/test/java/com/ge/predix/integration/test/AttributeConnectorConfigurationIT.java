@@ -1,6 +1,7 @@
 package com.ge.predix.integration.test;
 
 import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.RESOURCE_CONNECTOR_URL;
+import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.SUBJECT_CONNECTOR_URL;
 import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.V1;
 import static com.ge.predix.test.utils.PolicyHelper.PREDIX_ZONE_ID;
 
@@ -23,6 +24,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.rest.AttributeAdapterConnection;
@@ -110,13 +112,14 @@ public class AttributeConnectorConfigurationIT extends AbstractTestNGSpringConte
         this.zoneHelper.createTestZone(this.acsAdmin, this.acsZone1Name, false);
     }
 
-    public void testPutGetDeleteConnector() throws Exception {
+    @Test(dataProvider = "requestUrlProvider")
+    public void testPutGetDeleteConnector(final String endpointUrl) throws Exception {
         AttributeConnector expectedConnector = new AttributeConnector();
         expectedConnector.setMaxCachedIntervalMinutes(100);
         expectedConnector.setAdapters(Collections.singleton(new AttributeAdapterConnection("http://my-endpoint.com",
                 "http://my-uaa.com", "my-client", "my-secret")));
         try {
-            this.zone1ConnectorAdmin.put(this.acsUrl + V1 + RESOURCE_CONNECTOR_URL,
+            this.zone1ConnectorAdmin.put(this.acsUrl + V1 + endpointUrl,
                     new HttpEntity<>(expectedConnector, this.zone1Headers));
         } catch (Exception e) {
             Assert.fail("Unable to create attribute connector. " + e.getMessage());
@@ -124,21 +127,22 @@ public class AttributeConnectorConfigurationIT extends AbstractTestNGSpringConte
 
         try {
             ResponseEntity<AttributeConnector> response = this.zone1ConnectorReadClient.exchange(
-                    this.acsUrl + V1 + RESOURCE_CONNECTOR_URL, HttpMethod.GET, new HttpEntity<>(this.zone1Headers),
+                    this.acsUrl + V1 + endpointUrl, HttpMethod.GET, new HttpEntity<>(this.zone1Headers),
                     AttributeConnector.class);
             Assert.assertEquals(response.getBody(), expectedConnector);
         } catch (Exception e) {
             Assert.fail("Unable to retrieve attribute connector." + e.getMessage());
         } finally {
-            this.zone1ConnectorAdmin.exchange(this.acsUrl + V1 + RESOURCE_CONNECTOR_URL, HttpMethod.DELETE,
+            this.zone1ConnectorAdmin.exchange(this.acsUrl + V1 + endpointUrl, HttpMethod.DELETE,
                     new HttpEntity<>(this.zone1Headers), String.class);
         }
     }
 
-    public void testCreateConnectorDeniedWithoutOauthToken() throws Exception {
+    @Test(dataProvider = "requestUrlProvider")
+    public void testCreateConnectorDeniedWithoutOauthToken(final String endpointUrl) throws Exception {
         RestTemplate acs = new RestTemplate();
         try {
-            acs.put(this.acsUrl + V1 + RESOURCE_CONNECTOR_URL,
+            acs.put(this.acsUrl + V1 + endpointUrl,
                     new HttpEntity<>(new AttributeConnector(), this.zone1Headers));
             Assert.fail("No exception thrown when configuring connector without a token.");
         } catch (HttpClientErrorException e) {
@@ -146,9 +150,10 @@ public class AttributeConnectorConfigurationIT extends AbstractTestNGSpringConte
         }
     }
 
-    public void testCreateConnectorDeniedWithoutSufficientScope() throws Exception {
+    @Test(dataProvider = "requestUrlProvider")
+    public void testCreateConnectorDeniedWithoutSufficientScope(final String endpointUrl) throws Exception {
         try {
-            this.zone1ConnectorReadClient.put(this.acsUrl + V1 + RESOURCE_CONNECTOR_URL,
+            this.zone1ConnectorReadClient.put(this.acsUrl + V1 + endpointUrl,
                     new HttpEntity<>(new AttributeConnector(), this.zone1Headers));
             Assert.fail("No exception thrown when creating connector without sufficient scope.");
         } catch (HttpClientErrorException e) {
@@ -159,10 +164,10 @@ public class AttributeConnectorConfigurationIT extends AbstractTestNGSpringConte
     // Due to the issue in spring security, 403 Forbidden response from the server, is received as a 400 Bad Request
     // error code because error is not correctly translated by the JSON deserializer
     //https://github.com/spring-projects/spring-security-oauth/issues/191
-    public void testGetConnectorDeniedWithoutSufficientScope() throws Exception {
+    @Test(dataProvider = "requestUrlProvider")
+    public void testGetConnectorDeniedWithoutSufficientScope(final String endpointUrl) throws Exception {
         try {
-            this.zone1Admin.exchange(
-                    this.acsUrl + V1 + RESOURCE_CONNECTOR_URL, HttpMethod.GET,
+            this.zone1Admin.exchange(this.acsUrl + V1 + endpointUrl, HttpMethod.GET,
                     new HttpEntity<>(this.zone1Headers), AttributeConnector.class);
             Assert.fail("No exception thrown when retrieving connector without sufficient scope.");
         } catch (HttpClientErrorException e) {
@@ -174,14 +179,19 @@ public class AttributeConnectorConfigurationIT extends AbstractTestNGSpringConte
         }
     }
 
-    public void testDeleteConnectorDeniedWithoutSufficientScope() throws Exception {
+    @Test(dataProvider = "requestUrlProvider")
+    public void testDeleteConnectorDeniedWithoutSufficientScope(final String endpointUrl) throws Exception {
         try {
-            this.zone1ConnectorReadClient.exchange(
-                    this.acsUrl + V1 + RESOURCE_CONNECTOR_URL, HttpMethod.DELETE,
+            this.zone1ConnectorReadClient.exchange(this.acsUrl + V1 + endpointUrl, HttpMethod.DELETE,
                     new HttpEntity<>(this.zone1Headers), String.class);
             Assert.fail("No exception thrown when deleting connector without sufficient scope.");
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode(), HttpStatus.FORBIDDEN);
         }
+    }
+
+    @DataProvider(name = "requestUrlProvider")
+    private Object[][] requestUrlProvider() {
+        return new String[][] { { RESOURCE_CONNECTOR_URL }, { SUBJECT_CONNECTOR_URL } };
     }
 }

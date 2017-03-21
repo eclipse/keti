@@ -432,6 +432,9 @@
                             </execution>
                             <execution>
                                 <id>delete</id>
+                                <configuration>
+                                    <appname>${acs.appname}</appname>
+                                </configuration>
                                 <phase>post-integration-test</phase>
                                 <goals>
                                     <goal>delete</goal>

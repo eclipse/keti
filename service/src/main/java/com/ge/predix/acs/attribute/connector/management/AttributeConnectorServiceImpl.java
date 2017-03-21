@@ -107,6 +107,68 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
         return true;
     }
 
+    @Override
+    public boolean upsertSubjectConnector(final AttributeConnector connector) {
+        ZoneEntity zoneEntity = this.zoneResolver.getZoneEntityOrFail();
+        validateConnectorConfigOrFail(connector);
+
+        boolean isCreated = false;
+        try {
+            AttributeConnector existingConnector = zoneEntity.getSubjectAttributeConnector();
+            isCreated = (null == existingConnector);
+            connector.setAdapters(encryptAdapterClientSecrets(connector.getAdapters()));
+            zoneEntity.setSubjectAttributeConnector(connector);
+            this.zoneRepository.save(zoneEntity);
+            if (!isCreated) {
+                this.attributeReaderFactory.removeSubjectReader(zoneEntity.getName());
+            }
+        } catch (Exception e) {
+            String message = String.format(
+                    "Unable to persist connector configuration for subject attributes for zone '%s'",
+                    zoneEntity.getName());
+            throw new AttributeConnectorException(message, e);
+        }
+        return isCreated;
+    }
+
+    @Override
+    public AttributeConnector retrieveSubjectConnector() {
+        ZoneEntity zoneEntity = this.zoneResolver.getZoneEntityOrFail();
+        try {
+            AttributeConnector connector = zoneEntity.getSubjectAttributeConnector();
+            if (null != connector) {
+                // Deep copy the connector to prevent double-decryption of secrets
+                connector = AttributeConnector.newInstance(connector);
+                connector.setAdapters(decryptAdapterClientSecrets(connector.getAdapters()));
+            }
+            return connector;
+        } catch (Exception e) {
+            String message = String.format(
+                    "Unable to retrieve connector configuration for subject attributes for zone '%s'",
+                    zoneEntity.getName());
+            throw new AttributeConnectorException(message, e);
+        }
+    }
+
+    @Override
+    public boolean deleteSubjectConnector() {
+        ZoneEntity zoneEntity = this.zoneResolver.getZoneEntityOrFail();
+        try {
+            if (null == zoneEntity.getSubjectAttributeConnector()) {
+                return false;
+            }
+            zoneEntity.setSubjectAttributeConnector(null);
+            this.zoneRepository.save(zoneEntity);
+            this.attributeReaderFactory.removeSubjectReader(zoneEntity.getName());
+        } catch (Exception e) {
+            String message = String.format(
+                    "Unable to delete connector configuration for subject attributes for zone '%s'",
+                    zoneEntity.getName());
+            throw new AttributeConnectorException(message, e);
+        }
+        return true;
+    }
+
     private void validateAdapterEntityOrFail(final AttributeAdapterConnection adapter) {
         if (adapter == null) {
             throw new AttributeConnectorException("Attribute connector configuration requires at least one adapter");
@@ -165,19 +227,7 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
 
     @Override
     public AttributeConnector getSubjectAttributeConnector() {
-        ZoneEntity zoneEntity = this.zoneResolver.getZoneEntityOrFail();
-        try {
-            AttributeConnector connector = zoneEntity.getSubjectAttributeConnector();
-            if (null != connector) {
-                connector.setAdapters(decryptAdapterClientSecrets(connector.getAdapters()));
-            }
-            return connector;
-        } catch (Exception e) {
-            String message = String.format(
-                    "Unable to retrieve connector configuration for subject attributes for zone '%s'",
-                    zoneEntity.getName());
-            throw new AttributeConnectorException(message, e);
-        }
+        return retrieveSubjectConnector();
     }
 
     @Override

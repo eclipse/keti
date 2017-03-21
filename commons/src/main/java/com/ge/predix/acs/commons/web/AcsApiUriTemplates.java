@@ -55,6 +55,10 @@ public final class AcsApiUriTemplates {
     public static final String ZONE_URL = "/zone/{zoneName}";
 
     public static final String ZONECLIENT_URL = "/client";
-    
-    public static final String RESOURCE_CONNECTOR_URL = "/connector/resource";
+
+    public static final String CONNECTOR_URL = "/connector";
+
+    public static final String RESOURCE_CONNECTOR_URL = CONNECTOR_URL + "/resource";
+
+    public static final String SUBJECT_CONNECTOR_URL = CONNECTOR_URL + "/subject";
 }
