@@ -16,40 +16,7 @@
 
 package com.ge.predix.acs.policy.evaluation.cache;
 
-import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
-import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
-import com.ge.predix.acs.rest.PolicyEvaluationResult;
-
-import java.util.List;
-import java.util.Set;
-
-public interface PolicyEvaluationCacheCircuitBreaker {
-
-    PolicyEvaluationResult get(PolicyEvaluationRequestCacheKey key);
-
-    void set(PolicyEvaluationRequestCacheKey key, PolicyEvaluationResult value);
-
-    void setResourceTranslation(String zoneId, String fromResourceId, String toResourceId);
-
-    void setResourceTranslations(String zoneId, Set<String> fromResourceIds, String toResourceId);
-
-    void reset();
-
-    void reset(PolicyEvaluationRequestCacheKey key);
-
-    void resetForPolicySet(String zoneId, String policySetId);
-
-    void resetForResource(String zoneId, String resourceId);
-
-    void resetForResources(String zoneId, List<ResourceEntity> entities);
-
-    void resetForResourcesByIds(String zoneId, Set<String> resourceIds);
-
-    void resetForSubject(String zoneId, String subjectId);
-
-    void resetForSubjects(String zoneId, List<SubjectEntity> subjectEntities);
-
-    void resetForSubjectsByIds(String zoneId, Set<String> subjectIds);
+public interface PolicyEvaluationCacheCircuitBreaker extends PolicyEvaluationCache {
 
     void setCacheImpl(PolicyEvaluationCache cacheImpl);
 

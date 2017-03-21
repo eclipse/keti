@@ -6,12 +6,13 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +25,10 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ge.predix.acs.PolicyContextResolver;
+import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
+import com.ge.predix.acs.attribute.readers.AttributeRetrievalException;
 import com.ge.predix.acs.attribute.readers.ExternalResourceAttributeReader;
 import com.ge.predix.acs.attribute.readers.ExternalSubjectAttributeReader;
-import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
@@ -46,6 +48,7 @@ import com.ge.predix.acs.zone.resolver.ZoneResolver;
 
 @ContextConfiguration(classes = { GroovyConditionCache.class, PolicySetValidatorImpl.class })
 public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSpringContextTests {
+
     @InjectMocks
     private PolicyEvaluationServiceImpl evaluationService;
     @Mock
@@ -65,6 +68,10 @@ public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSprin
     @Autowired
     private PolicySetValidator policySetValidator;
 
+    private static final String RESOURCE_IDENTIFIER = "/sites/1234";
+    private static final String SUBJECT_IDENTIFIER = "test-subject";
+    private static final String ACTION = "GET";
+
     private final PolicyMatcherImpl policyMatcher = new PolicyMatcherImpl();
 
     @BeforeClass
@@ -83,33 +90,45 @@ public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSprin
         Whitebox.setInternalState(this.evaluationService, "policySetValidator", this.policySetValidator);
         when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
         when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
+        when(this.attributeReaderFactory.getResourceAttributeReader()).thenReturn(this.externalResourceAttributeReader);
+        when(this.attributeReaderFactory.getSubjectAttributeReader()).thenReturn(this.externalSubjectAttributeReader);
+        PolicySet policySet = new ObjectMapper().readValue(
+                new File("src/test/resources/policy-set-with-one-policy-one-condition-using-res-attributes.json"),
+                PolicySet.class);
+        when(this.policyService.getAllPolicySets()).thenReturn(Collections.singletonList(policySet));
     }
 
     @Test
     public void testPolicyEvaluation() throws Exception {
-        PolicySet policySet = new ObjectMapper().readValue(
-                new File("src/test/resources/policy-set-with-one-policy-one-condition-using-res-attributes.json"),
-                PolicySet.class);
-        when(this.policyService.getAllPolicySets()).thenReturn(Arrays.asList(policySet));
-
         Set<Attribute> resourceAttributes = new HashSet<>();
         resourceAttributes.add(new Attribute("https://acs.attributes.int", "location", "sanramon"));
         resourceAttributes.add(new Attribute("https://acs.attributes.int", "role_required", "admin"));
-        BaseResource testResource = new BaseResource("/sites/1234", resourceAttributes);
+        BaseResource testResource = new BaseResource(RESOURCE_IDENTIFIER, resourceAttributes);
 
         Set<Attribute> subjectAttributes = new HashSet<>();
         subjectAttributes.add(new Attribute("https://acs.attributes.int", "role", "admin"));
-        BaseSubject testSubject = new BaseSubject("test-subject", subjectAttributes);
+        BaseSubject testSubject = new BaseSubject(SUBJECT_IDENTIFIER, subjectAttributes);
 
-        when(this.attributeReaderFactory.getResourceAttributeReader()).thenReturn(this.externalResourceAttributeReader);
         when(this.externalResourceAttributeReader.getAttributes(anyString())).thenReturn(testResource.getAttributes());
-        when(this.attributeReaderFactory.getSubjectAttributeReader()).thenReturn(this.externalSubjectAttributeReader);
         when(this.externalSubjectAttributeReader.getAttributesByScope(anyString(), anySetOf(Attribute.class)))
                 .thenReturn(testSubject.getAttributes());
 
-        PolicyEvaluationResult evalResult = this.evaluationService.evalPolicy(
-                createRequest(testResource.getResourceIdentifier(), testSubject.getSubjectIdentifier(), "GET"));
+        PolicyEvaluationResult evalResult = this.evaluationService
+                .evalPolicy(createRequest(RESOURCE_IDENTIFIER, SUBJECT_IDENTIFIER, ACTION));
         Assert.assertEquals(evalResult.getEffect(), Effect.PERMIT);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testPolicyEvaluationWhenAdaptersTimeOut() throws Exception {
+        String attributeRetrievalExceptionMessage = "attribute retrieval exception";
+        when(this.externalResourceAttributeReader.getAttributes(Mockito.anyString())).thenThrow(
+                new AttributeRetrievalException(attributeRetrievalExceptionMessage, new Exception()));
+
+        PolicyEvaluationResult evalResult = this.evaluationService
+                .evalPolicy(createRequest(RESOURCE_IDENTIFIER, SUBJECT_IDENTIFIER, ACTION));
+        Assert.assertEquals(evalResult.getEffect(), Effect.INDETERMINATE);
+        Assert.assertEquals(evalResult.getMessage(), attributeRetrievalExceptionMessage);
     }
 
     private PolicyEvaluationRequestV1 createRequest(final String resource, final String subject, final String action) {

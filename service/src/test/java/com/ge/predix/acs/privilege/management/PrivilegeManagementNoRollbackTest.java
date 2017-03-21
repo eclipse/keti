@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -30,6 +31,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
+import com.ge.predix.acs.attribute.connector.management.AttributeConnectorServiceImpl;
+import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader;
 import com.ge.predix.acs.config.GraphBeanDefinitionRegistryPostProcessor;
 import com.ge.predix.acs.config.GraphConfig;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
@@ -53,8 +58,11 @@ import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
                 InMemoryDataSourceConfig.class, InMemoryPolicyEvaluationCache.class,
                 PrivilegeManagementServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class,
                 ZoneServiceImpl.class, SpringSecurityPolicyContextResolver.class, SpringSecurityZoneResolver.class,
-                SubjectRepositoryProxy.class, ResourceRepositoryProxy.class })
+                SubjectRepositoryProxy.class, ResourceRepositoryProxy.class, AttributeConnectorServiceImpl.class,
+                AttributeReaderFactory.class, PrivilegeServiceResourceAttributeReader.class,
+                PrivilegeServiceSubjectAttributeReader.class })
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
+@TestPropertySource("classpath:application.properties")
 @Test
 public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringContextTests {
 

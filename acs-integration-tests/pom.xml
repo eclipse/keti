@@ -379,32 +379,29 @@
                             <appStartupTimeout>120</appStartupTimeout>
                             <org>${cf.org}</org>
                             <space>${cf.space}</space>
-                            <appname>${acs.appname}</appname>
                             <memory>1024</memory>
                             <buildpack>java-buildpack</buildpack>
                             <env>
                                 <SPRING_PROFILES_ACTIVE>integration,predix,cloud-redis,cloudDbConfig</SPRING_PROFILES_ACTIVE>
                             </env>
-                            <services>
-                                <service>
-                                    <name>${acs.db}</name>
-                                    <label>postgres</label>
-                                    <plan>shared-nr</plan>
-                                </service>
-                                <service>
-                                    <name>${acs.redis}</name>
-                                    <label>redis</label>
-                                    <plan>shared-vm</plan>
-                                </service>
-<!--                                 <service> -->
-<!--                                     <name>acs-logstash</name> -->
-<!--                                 </service> -->
-                            </services>
                         </configuration>
                         <executions>
                             <execution>
                                 <id>push</id>
                                 <configuration>
+                                    <appname>${acs.appname}</appname>
+                                    <services>
+                                        <service>
+                                            <name>${acs.db}</name>
+                                            <label>postgres</label>
+                                            <plan>shared-nr</plan>
+                                        </service>
+                                        <service>
+                                            <name>${acs.redis}</name>
+                                            <label>redis</label>
+                                            <plan>shared-vm</plan>
+                                        </service>
+                                    </services>
                                     <path>${local.acs.artifact}</path>
                                     <artifact>${maven.acs.artifact}</artifact>
                                     <urls>

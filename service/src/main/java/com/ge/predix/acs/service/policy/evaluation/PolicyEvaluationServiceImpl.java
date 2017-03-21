@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.ge.predix.acs.attribute.readers.AttributeRetrievalException;
 import com.ge.predix.acs.commons.policy.condition.ConditionAssertionFailedException;
 import com.ge.predix.acs.commons.policy.condition.ConditionScript;
 import com.ge.predix.acs.commons.policy.condition.ConditionShell;
@@ -249,8 +250,6 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
             }
             result = new PolicyEvaluationResult(effect, subjectAttributes,
                     new ArrayList<>(resourceAttributes), resolvedResourceUris);
-        } catch (AttributeLimitExceededException ae) {
-            result = handlePolicyEvaluationException(policySet, subjectIdentifier, resourceURI, ae);
         } catch (Throwable e) {
             result = handlePolicyEvaluationException(policySet, subjectIdentifier, resourceURI, e);
         }
@@ -264,7 +263,7 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
         logMessage.append("Exception occured while evaluating the policy set. Policy Set ID:'")
                 .append(policySet.getName()).append("' subject:'").append(subjectIdentifier)
                 .append("', Resource URI: '").append(resourceURI).append("'");
-        if (e instanceof AttributeLimitExceededException) {
+        if (e instanceof AttributeLimitExceededException || e instanceof AttributeRetrievalException) {
             result.setMessage(e.getMessage());
         }
         LOGGER.error(logMessage.toString(), e);

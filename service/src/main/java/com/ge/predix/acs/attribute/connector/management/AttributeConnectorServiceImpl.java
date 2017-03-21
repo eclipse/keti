@@ -1,13 +1,16 @@
 package com.ge.predix.acs.attribute.connector.management;
 
+import java.util.Collections;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
 import com.ge.predix.acs.encryption.Encryptor;
 import com.ge.predix.acs.rest.AttributeAdapterConnection;
 import com.ge.predix.acs.rest.AttributeConnector;
@@ -24,6 +27,8 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
     private ZoneRepository zoneRepository;
     @Autowired
     private ZoneResolver zoneResolver;
+    @Autowired
+    private AttributeReaderFactory attributeReaderFactory;
 
     @Value("${ENCRYPTION_KEY}")
     private String encryptionKey;
@@ -35,7 +40,7 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
         setEncryptionKey(this.encryptionKey);
     }
 
-    public void setEncryptionKey(final String encryptionKey) {
+    void setEncryptionKey(final String encryptionKey) {
         this.encryptor = new Encryptor();
         this.encryptor.setEncryptionKey(encryptionKey);
     }
@@ -49,11 +54,12 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
         try {
             AttributeConnector existingConnector = zoneEntity.getResourceAttributeConnector();
             isCreated = (null == existingConnector);
-            if (null != connector) {
-                connector.setAdapters(encryptAdapterClientSecrets(connector.getAdapters()));
-            }
+            connector.setAdapters(encryptAdapterClientSecrets(connector.getAdapters()));
             zoneEntity.setResourceAttributeConnector(connector);
             this.zoneRepository.save(zoneEntity);
+            if (!isCreated) {
+                this.attributeReaderFactory.removeResourceReader(zoneEntity.getName());
+            }
         } catch (Exception e) {
             String message = String.format(
                     "Unable to persist connector configuration for resource attributes for zone '%s'",
@@ -69,6 +75,8 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
         try {
             AttributeConnector connector = zoneEntity.getResourceAttributeConnector();
             if (null != connector) {
+                // Deep copy the connector to prevent double-decryption of secrets
+                connector = AttributeConnector.newInstance(connector);
                 connector.setAdapters(decryptAdapterClientSecrets(connector.getAdapters()));
             }
             return connector;
@@ -81,24 +89,22 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
     }
 
     @Override
-    public Boolean deleteResourceConnector() {
+    public boolean deleteResourceConnector() {
         ZoneEntity zoneEntity = this.zoneResolver.getZoneEntityOrFail();
-        boolean isDeleted = false;
         try {
             if (null == zoneEntity.getResourceAttributeConnector()) {
-                return isDeleted;
+                return false;
             }
             zoneEntity.setResourceAttributeConnector(null);
             this.zoneRepository.save(zoneEntity);
-            isDeleted = true;
+            this.attributeReaderFactory.removeResourceReader(zoneEntity.getName());
         } catch (Exception e) {
             String message = String.format(
                     "Unable to delete connector configuration for resource attributes for zone '%s'",
                     zoneEntity.getName());
             throw new AttributeConnectorException(message, e);
         }
-        return isDeleted;
-
+        return true;
     }
 
     private void validateAdapterEntityOrFail(final AttributeAdapterConnection adapter) {
@@ -136,8 +142,8 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
 
     private Set<AttributeAdapterConnection> encryptAdapterClientSecrets(
             final Set<AttributeAdapterConnection> adapters) {
-        if (null == adapters) {
-            return null;
+        if (CollectionUtils.isEmpty(adapters)) {
+            return Collections.emptySet();
         }
         adapters.forEach(adapter -> adapter.setUaaClientSecret(this.encryptor.encrypt(adapter.getUaaClientSecret())));
         return adapters;
@@ -145,10 +151,43 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
 
     private Set<AttributeAdapterConnection> decryptAdapterClientSecrets(
             final Set<AttributeAdapterConnection> adapters) {
-        if (null == adapters) {
-            return null;
+        if (CollectionUtils.isEmpty(adapters)) {
+            return Collections.emptySet();
         }
-        adapters.forEach(adapter -> adapter.setUaaClientSecret(this.encryptor.encrypt(adapter.getUaaClientSecret())));
+        adapters.forEach(adapter -> adapter.setUaaClientSecret(this.encryptor.decrypt(adapter.getUaaClientSecret())));
         return adapters;
     }
+
+    @Override
+    public AttributeConnector getResourceAttributeConnector() {
+        return retrieveResourceConnector();
+    }
+
+    @Override
+    public AttributeConnector getSubjectAttributeConnector() {
+        ZoneEntity zoneEntity = this.zoneResolver.getZoneEntityOrFail();
+        try {
+            AttributeConnector connector = zoneEntity.getSubjectAttributeConnector();
+            if (null != connector) {
+                connector.setAdapters(decryptAdapterClientSecrets(connector.getAdapters()));
+            }
+            return connector;
+        } catch (Exception e) {
+            String message = String.format(
+                    "Unable to retrieve connector configuration for subject attributes for zone '%s'",
+                    zoneEntity.getName());
+            throw new AttributeConnectorException(message, e);
+        }
+    }
+
+    @Override
+    public boolean isResourceAttributeConnectorConfigured() {
+        return this.getResourceAttributeConnector() != null && this.getResourceAttributeConnector().getIsActive();
+    }
+
+    @Override
+    public boolean isSubjectAttributeConnectorConfigured() {
+        return this.getSubjectAttributeConnector() != null && this.getSubjectAttributeConnector().getIsActive();
+    }
+
 }

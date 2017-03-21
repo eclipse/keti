@@ -15,7 +15,31 @@
  *******************************************************************************/
 package com.ge.predix.acs.privilege.management;
 
+import static java.util.Arrays.asList;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
+import com.ge.predix.acs.attribute.connector.management.AttributeConnectorServiceImpl;
+import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader;
 import com.ge.predix.acs.config.GraphBeanDefinitionRegistryPostProcessor;
 import com.ge.predix.acs.config.GraphConfig;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
@@ -35,32 +59,17 @@ import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.zone.management.ZoneService;
 import com.ge.predix.acs.zone.management.ZoneServiceImpl;
 import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
 
 @ContextConfiguration(
         classes = { AcsRequestContextHolder.class, HystrixPolicyEvaluationCacheCircuitBreaker.class,
                 InMemoryDataSourceConfig.class, InMemoryPolicyEvaluationCache.class,
                 PrivilegeManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
                 SpringSecurityZoneResolver.class, ZoneServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class,
-                GraphConfig.class, SubjectRepositoryProxy.class, ResourceRepositoryProxy.class })
+                GraphConfig.class, SubjectRepositoryProxy.class, ResourceRepositoryProxy.class,
+                AttributeConnectorServiceImpl.class, AttributeReaderFactory.class,
+                PrivilegeServiceResourceAttributeReader.class, PrivilegeServiceSubjectAttributeReader.class })
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
+@TestPropertySource("classpath:application.properties")
 public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTestNGSpringContextTests {
 
     @Autowired

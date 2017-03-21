@@ -16,16 +16,6 @@
 
 package com.ge.predix.acs.policy.evaluation.cache;
 
-import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
-import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
-import com.ge.predix.acs.rest.PolicyEvaluationResult;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,8 +27,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Minutes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.ge.predix.acs.attribute.connector.management.AttributeConnectorService;
+import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
+import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
+import com.ge.predix.acs.rest.PolicyEvaluationResult;
+
 @Component
 public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationCache {
+
+    @Autowired
+    private AttributeConnectorService connectorService;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPolicyEvaluationCache.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -220,8 +228,8 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
     @Override
     public void resetForSubjects(final String zoneId, final List<SubjectEntity> subjectEntities) {
-        multisetForSubjects(zoneId, subjectEntities.stream().map(subject -> subject.getSubjectIdentifier())
-                .collect(Collectors.toList()));
+        multisetForSubjects(zoneId,
+                subjectEntities.stream().map(subject -> subject.getSubjectIdentifier()).collect(Collectors.toList()));
     }
 
     private void multisetForSubjects(final String zoneId, final List<String> subjectIds) {
@@ -234,7 +242,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         });
         multiSet(map);
     }
-    
+
     private void logSetSubjectTimestampDebugMessage(final String key, final String timestamp, final String subjectId) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format("Setting timestamp for subject '%s'; key: '%s', value: '%s' ", subjectId, key,
@@ -250,6 +258,18 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     }
 
     private boolean isCachedRequestInvalid(final List<String> values, final DateTime policyEvalTimestamp) {
+        DateTime policyEvalTimestampUTC = policyEvalTimestamp.withZone(DateTimeZone.UTC);
+
+        if (connectorService.isResourceAttributeConnectorConfigured()
+                || connectorService.isSubjectAttributeConnectorConfigured()) {
+            return haveConnectorCacheIntervalsLapsed(connectorService, policyEvalTimestampUTC);
+        } else {
+            return havePrivilegeServiceAttributesChanged(values, policyEvalTimestampUTC);
+        }
+    }
+
+    private boolean havePrivilegeServiceAttributesChanged(final List<String> values,
+            final DateTime policyEvalTimestampUTC) {
         for (int i = 0; i < values.size() - 1; i++) {
             if (null == values.get(i)) {
                 continue;
@@ -262,12 +282,28 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
                 throw new IllegalStateException("Failed to read timestamp from JSON.", e);
             }
 
-            DateTime policyEvalTimestampUTC = policyEvalTimestamp.withZone(DateTimeZone.UTC);
             if (invalidationTimestampUTC.isAfter(policyEvalTimestampUTC)) {
                 return true;
             }
         }
         return false;
+    }
+
+    boolean haveConnectorCacheIntervalsLapsed(final AttributeConnectorService localConnectorService,
+            final DateTime policyEvalTimestampUTC) {
+        DateTime nowUTC = new DateTime().withZone(DateTimeZone.UTC);
+
+        int decisionAgeMinutes = Minutes.minutesBetween(policyEvalTimestampUTC, nowUTC).getMinutes();
+
+        boolean hasResourceConnectorIntervalLapsed = localConnectorService.isResourceAttributeConnectorConfigured()
+                && decisionAgeMinutes >= localConnectorService.getResourceAttributeConnector()
+                        .getMaxCachedIntervalMinutes();
+
+        boolean hasSubjectConnectorIntervalLapsed = localConnectorService.isSubjectAttributeConnectorConfigured()
+                && decisionAgeMinutes >= localConnectorService.getSubjectAttributeConnector()
+                        .getMaxCachedIntervalMinutes();
+
+        return hasResourceConnectorIntervalLapsed || hasSubjectConnectorIntervalLapsed;
     }
 
     static String policySetKey(final String zoneId, final String policySetId) {

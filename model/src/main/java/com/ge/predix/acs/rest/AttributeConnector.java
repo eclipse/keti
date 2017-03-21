@@ -1,12 +1,19 @@
 package com.ge.predix.acs.rest;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AttributeConnector {
     private boolean isActive;
-    
-    private int maxCachedIntervalMinutes;
-    
+
+    @JsonProperty(required = false)
+    private int maxCachedIntervalMinutes = 480; //default value
+
     private Set<AttributeAdapterConnection> adapters;
 
     public boolean getIsActive() {
@@ -35,39 +42,28 @@ public class AttributeConnector {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.adapters == null) ? 0 : this.adapters.hashCode());
-        result = prime * result + (this.isActive ? 1231 : 1237);
-        result = prime * result + this.maxCachedIntervalMinutes;
-        return result;
+        return new HashCodeBuilder().append(this.isActive).append(this.maxCachedIntervalMinutes).append(this.adapters)
+                .toHashCode();
+
     }
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
+        if (obj instanceof AttributeConnector) {
+            AttributeConnector other = (AttributeConnector) obj;
+            return new EqualsBuilder().append(this.isActive, other.isActive)
+                    .append(this.maxCachedIntervalMinutes, other.maxCachedIntervalMinutes)
+                    .append(this.adapters, other.adapters).isEquals();
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        AttributeConnector other = (AttributeConnector) obj;
-        if (this.adapters == null) {
-            if (other.adapters != null) {
-                return false;
-            }
-        } else if (!this.adapters.equals(other.adapters)) {
-            return false;
-        }
-        if (this.isActive != other.isActive) {
-            return false;
-        }
-        if (this.maxCachedIntervalMinutes != other.maxCachedIntervalMinutes) {
-            return false;
-        }
-        return true;
+        return false;
+    }
+
+    public static AttributeConnector newInstance(final AttributeConnector other) {
+        AttributeConnector attributeConnector = new AttributeConnector();
+        attributeConnector.isActive = other.isActive;
+        attributeConnector.maxCachedIntervalMinutes = other.maxCachedIntervalMinutes;
+        attributeConnector.adapters = other.adapters.stream().map(AttributeAdapterConnection::new)
+                .collect(Collectors.toSet());
+        return attributeConnector;
     }
 }

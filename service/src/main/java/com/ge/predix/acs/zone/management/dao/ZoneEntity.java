@@ -204,5 +204,4 @@ public class ZoneEntity {
         }
         return connector;
     }
-
 }

@@ -13,6 +13,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
 import com.ge.predix.acs.rest.AttributeAdapterConnection;
 import com.ge.predix.acs.rest.AttributeConnector;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
@@ -27,6 +28,8 @@ public class AttributeConnectorServiceTest {
     private ZoneResolver zoneResolver;
     @Mock
     private ZoneRepository zoneRepository;
+    @Mock
+    private AttributeReaderFactory attributeReaderFactory;
 
     @BeforeMethod
     public void setUp() {
@@ -108,7 +111,7 @@ public class AttributeConnectorServiceTest {
     }
 
     @Test
-    public void testGetResouceConnector() throws Exception {
+    public void testGetResourceConnector() throws Exception {
         ZoneEntity zoneEntity = new ZoneEntity();
         AttributeConnector expectedConnector = new AttributeConnector();
         expectedConnector.setMaxCachedIntervalMinutes(100);
@@ -117,11 +120,12 @@ public class AttributeConnectorServiceTest {
         zoneEntity.setResourceAttributeConnector(expectedConnector);
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();
 
+        this.connectorService.upsertResourceConnector(expectedConnector);
         Assert.assertEquals(this.connectorService.retrieveResourceConnector(), expectedConnector);
     }
 
     @Test
-    public void testGetResouceConnectorWhichDoesNotExist() {
+    public void testGetResourceConnectorWhichDoesNotExist() {
         Mockito.doReturn(new ZoneEntity()).when(this.zoneResolver).getZoneEntityOrFail();
         Assert.assertNull(this.connectorService.retrieveResourceConnector());
     }

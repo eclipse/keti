@@ -1,6 +1,18 @@
 package com.ge.predix.acs.attribute.cache;
 
-public interface AttributeCacheFactory {
-    AttributeCache createResourceAttributeCache(String zoneId, long maxStorageInMegabytes);
-    AttributeCache createSubjectAttributeCache(String zoneId, long maxStorageInMegabytes);
+// CHECKSTYLE:OFF: FinalClass
+public class AttributeCacheFactory {
+
+    private AttributeCacheFactory() {
+        throw new AssertionError();
+    }
+
+    public static AttributeCache createResourceAttributeCache(final long maxStorageInMegabytes) {
+        return new NonCachingAttributeCache();
+    }
+
+    public static AttributeCache createSubjectAttributeCache(final long maxStorageInMegabytes) {
+        return new NonCachingAttributeCache();
+    }
 }
+// CHECKSTYLE:ON: FinalClass
