@@ -26,6 +26,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -34,6 +35,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
+import com.ge.predix.acs.attribute.connector.management.AttributeConnectorServiceImpl;
+import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
+import com.ge.predix.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
@@ -41,6 +46,9 @@ import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
 import com.ge.predix.acs.policy.evaluation.cache.HystrixPolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.policy.evaluation.cache.InMemoryPolicyEvaluationCache;
+import com.ge.predix.acs.privilege.management.PrivilegeManagementServiceImpl;
+import com.ge.predix.acs.privilege.management.dao.ResourceRepositoryProxy;
+import com.ge.predix.acs.privilege.management.dao.SubjectRepositoryProxy;
 import com.ge.predix.acs.service.InvalidACSRequestException;
 import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
 import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
@@ -51,12 +59,16 @@ import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
 import com.ge.predix.acs.zone.resolver.ZoneResolver;
 
 @Test
+@TestPropertySource("classpath:application.properties")
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 @ContextConfiguration(
         classes = { HystrixPolicyEvaluationCacheCircuitBreaker.class, InMemoryPolicyEvaluationCache.class,
                 InMemoryDataSourceConfig.class, PolicyManagementServiceImpl.class,
                 SpringSecurityPolicyContextResolver.class, PolicySetValidatorImpl.class, GroovyConditionShell.class,
-                SpringSecurityZoneResolver.class, GroovyConditionCache.class })
+                SpringSecurityZoneResolver.class, GroovyConditionCache.class, AttributeConnectorServiceImpl.class,
+                AttributeReaderFactory.class, PrivilegeServiceResourceAttributeReader.class,
+                PrivilegeServiceSubjectAttributeReader.class, PrivilegeManagementServiceImpl.class,
+                SubjectRepositoryProxy.class, ResourceRepositoryProxy.class })
 public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpringContextTests {
 
     private static final String SUBDOMAIN1 = "tenant1";
@@ -186,7 +198,7 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
             Assert.assertEquals(this.policyService.getAllPolicySets().size(), 0);
         }
     }
-    
+
     @Test(expectedExceptions = { PolicyManagementException.class })
     public void testCreatePolicySetWithInvalidConditions() {
         PolicySet policySet = this.jsonUtils.deserializeFromFile("policy-set-with-one-policy-invalid-condition.json",

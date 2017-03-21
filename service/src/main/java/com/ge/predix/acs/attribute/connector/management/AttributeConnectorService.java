@@ -7,5 +7,13 @@ public interface AttributeConnectorService {
 
     AttributeConnector retrieveResourceConnector();
 
-    Boolean deleteResourceConnector();
+    boolean deleteResourceConnector();
+
+    AttributeConnector getResourceAttributeConnector();
+
+    AttributeConnector getSubjectAttributeConnector();
+
+    boolean isResourceAttributeConnectorConfigured();
+
+    boolean isSubjectAttributeConnectorConfigured();
 }

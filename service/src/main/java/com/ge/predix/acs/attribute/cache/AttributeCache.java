@@ -14,7 +14,9 @@ public interface AttributeCache {
         return this.get(identifier);
     }
 
+    @SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
     void set(String key, Set<Attribute> value) throws StorageLimitExceededException;
+
     Set<Attribute> get(String key);
     void flushAll();
     int getTtlInSeconds();

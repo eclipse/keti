@@ -22,6 +22,13 @@ public class AttributeAdapterConnection {
         this.uaaClientSecret = uaaClientSecret;
     }
 
+    public AttributeAdapterConnection(final AttributeAdapterConnection other) {
+        this.adapterEndpoint = other.adapterEndpoint;
+        this.uaaTokenUrl = other.uaaTokenUrl;
+        this.uaaClientId = other.uaaClientId;
+        this.uaaClientSecret = other.uaaClientSecret;
+    }
+
     public String getAdapterEndpoint() {
         return adapterEndpoint;
     }

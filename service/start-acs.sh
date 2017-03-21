@@ -21,6 +21,10 @@ source ./set-env-local.sh
 
 export DIR=$( dirname "$( python -c "import os; print os.path.abspath('${BASH_SOURCE[0]}')" )" )
 
+if [ "$#" -eq 0 ]; then
+    unset JAVA_DEBUG_OPTS
+fi
+
 main() {
     while [ "$1" != '' ]; do
         case $1 in

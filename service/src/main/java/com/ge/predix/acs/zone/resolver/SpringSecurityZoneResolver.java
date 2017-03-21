@@ -28,8 +28,7 @@ import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
 @Component
 public class SpringSecurityZoneResolver implements ZoneResolver {
 
-    @Override
-    public ZoneEntity getZoneEntityOrFail() {
+    public static ZoneEntity getZoneEntity() {
         AcsRequestContext acsRequestContext = AcsRequestContextHolder.getAcsRequestContext();
         ZoneEntity result = (ZoneEntity) acsRequestContext.get(ACSRequestContextAttribute.ZONE_ENTITY);
 
@@ -41,5 +40,14 @@ public class SpringSecurityZoneResolver implements ZoneResolver {
         }
 
         return result;
+    }
+    
+    @Override
+    public ZoneEntity getZoneEntityOrFail() {
+        return getZoneEntity();
+    }
+    
+    public static String getZoneName() {
+        return getZoneEntity().getName();
     }
 }
