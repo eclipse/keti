@@ -41,6 +41,7 @@
         <acs.appname>acs-ci-${jenkins.build.number}</acs.appname>
         <acs.db>acs-db-ci-${jenkins.build.number}</acs.db>
         <acs.redis>acs-redis-ci-${jenkins.build.number}</acs.redis>
+        <acs.audit>acs-audit-service</acs.audit>
         <acs.cf.domain>predix-acs-integration</acs.cf.domain>
         <acs.zone.subdomain>test-zone-${zone.var}</acs.zone.subdomain>
         <cf.base.domain>${CF_BASE_DOMAIN}</cf.base.domain>
@@ -343,10 +344,13 @@
                                 <READ_ONLY_USER_PASSWORD>${READ_ONLY_USER_PASSWORD}</READ_ONLY_USER_PASSWORD>
                                 <NO_READ_ONLY_USER_PASSWORD>${NO_READ_ONLY_USER_PASSWORD}</NO_READ_ONLY_USER_PASSWORD>
                                 <ZAC_CLIENT_SECRET>${ZAC_CLIENT_SECRET}</ZAC_CLIENT_SECRET>
+                                <AUDIT_QUERY_URL>${AUDIT_QUERY_URL}</AUDIT_QUERY_URL>
+                                <AUDIT_ZONE_ID>${AUDIT_ZONE_ID}</AUDIT_ZONE_ID>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
                                 <exclude>**/PolicyEvalCachingWithGraphDBIT.java</exclude>
+                                <exclude>**/PredixAuditIT.java</exclude>
                             </excludes>
                             <includes>
                                 <include>**/*IT.java</include>
@@ -383,6 +387,10 @@
                             <buildpack>java-buildpack</buildpack>
                             <env>
                                 <SPRING_PROFILES_ACTIVE>integration,predix,cloud-redis,cloudDbConfig</SPRING_PROFILES_ACTIVE>
+                                <AUDIT_SERVICE_NAME>${AUDIT_SERVICE_NAME}</AUDIT_SERVICE_NAME>
+                                <AUDIT_UAA_URL>${AUDIT_UAA_URL}</AUDIT_UAA_URL>
+                                <AUDIT_UAA_CLIENT_ID>${AUDIT_UAA_CLIENT_ID}</AUDIT_UAA_CLIENT_ID>
+                                <AUDIT_UAA_CLIENT_SECRET>${AUDIT_UAA_CLIENT_SECRET}</AUDIT_UAA_CLIENT_SECRET>
                             </env>
                         </configuration>
                         <executions>
@@ -401,6 +409,12 @@
                                             <label>redis</label>
                                             <plan>shared-vm</plan>
                                         </service>
+<!--                                   Commented out until audit works in cf3
+                                        <service>
+                                            <name>${acs.audit}</name>
+                                            <label>predix-audit</label>
+                                            <plan>beta</plan>
+                                        </service> -->
                                     </services>
                                     <path>${local.acs.artifact}</path>
                                     <artifact>${maven.acs.artifact}</artifact>
@@ -502,9 +516,13 @@
                                 <READ_ONLY_USER_PASSWORD>${READ_ONLY_USER_PASSWORD}</READ_ONLY_USER_PASSWORD>
                                 <NO_READ_ONLY_USER_PASSWORD>${NO_READ_ONLY_USER_PASSWORD}</NO_READ_ONLY_USER_PASSWORD>
                                 <ZAC_CLIENT_SECRET>${ZAC_CLIENT_SECRET}</ZAC_CLIENT_SECRET>
+                                <AUDIT_QUERY_URL>${AUDIT_QUERY_URL}</AUDIT_QUERY_URL>
+                                <AUDIT_ZONE_ID>${AUDIT_ZONE_ID}</AUDIT_ZONE_ID>
+                                <JAVA_OPTS>${JAVA_OPTS}</JAVA_OPTS>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
+                                <exclude>**/PredixAuditIT.java</exclude>
                             </excludes>
                             <includes>
                                 <include>**/*IT.java</include>
@@ -548,6 +566,11 @@
                                 <TITAN_STORAGE_PORT>${TITAN_STORAGE_PORT}</TITAN_STORAGE_PORT>
                                 <TITAN_STORAGE_USERNAME>${TITAN_STORAGE_USERNAME}</TITAN_STORAGE_USERNAME>
                                 <TITAN_STORAGE_PASSWORD>${TITAN_STORAGE_PASSWORD}</TITAN_STORAGE_PASSWORD>
+                                <AUDIT_SERVICE_NAME>${AUDIT_SERVICE_NAME}</AUDIT_SERVICE_NAME>
+                                <AUDIT_UAA_URL>${AUDIT_UAA_URL}</AUDIT_UAA_URL>
+                                <AUDIT_UAA_CLIENT_ID>${AUDIT_UAA_CLIENT_ID}</AUDIT_UAA_CLIENT_ID>
+                                <AUDIT_UAA_CLIENT_SECRET>${AUDIT_UAA_CLIENT_SECRET}</AUDIT_UAA_CLIENT_SECRET>
+                                <JAVA_OPTS>${JAVA_OPTS}</JAVA_OPTS>
                             </env>
                             <services>
                                 <service>
@@ -560,6 +583,11 @@
                                     <label>redis</label>
                                     <plan>shared-vm</plan>
                                 </service>
+<!--                                 <service>
+                                    <name>${acs.audit}</name>
+                                    <label>predix-audit</label>
+                                    <plan>beta</plan>
+                                </service> -->
                             </services>
                         </configuration>
                         <executions>
@@ -652,6 +680,7 @@
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
                                 <exclude>**/PolicyEvalCachingWithGraphDBIT.java</exclude>
+                                <exclude>**/PredixAuditIT.java</exclude>
                             </excludes>
                             <includes>
                                 <include>**/*IT.java</include>
@@ -705,6 +734,7 @@
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
+                                <exclude>**/PredixAuditIT.java</exclude>
                             </excludes>
                             <includes>
                                 <include>**/*IT.java</include>
