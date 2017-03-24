@@ -9,6 +9,6 @@ public class AttributeRetrievalException extends RuntimeException {
     }
 
     static String getAdapterErrorMessage(final String adapterEndpoint) {
-        return MessageFormat.format("Couldn't get attributes from the adapter with endpoint \"{}\"", adapterEndpoint);
+        return MessageFormat.format("Couldn''t get attributes from the adapter with endpoint ''{0}''", adapterEndpoint);
     }
 }
