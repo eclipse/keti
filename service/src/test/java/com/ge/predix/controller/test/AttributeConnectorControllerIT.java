@@ -76,7 +76,7 @@ public class AttributeConnectorControllerIT extends AbstractTestNGSpringContextT
                 .andExpect(jsonPath("adapters[0].adapterEndpoint", equalTo("https://my-adapter.com")))
                 .andExpect(jsonPath("adapters[0].uaaTokenUrl", equalTo("https://my-uaa.com")))
                 .andExpect(jsonPath("adapters[0].uaaClientId", equalTo("adapter-client")))
-                .andExpect(jsonPath("adapters[0].uaaClientSecret", equalTo("adapter-secret")))
+                .andExpect(jsonPath("adapters[0].uaaClientSecret", equalTo("**********")))
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(delete(endpointUrl)).andExpect(status().isNoContent());
