@@ -8,14 +8,19 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel(description = "Connector configuration for external resource or subject attributes.")
 public class AttributeConnector {
-    private boolean isActive;
+    private boolean isActive = false;
 
     @JsonProperty(required = false)
     private int maxCachedIntervalMinutes = 480; //default value
 
     private Set<AttributeAdapterConnection> adapters;
 
+    @ApiModelProperty(value = "A flag to enable or disable the retrieval of remote attributes. Disabled by default.")
     public boolean getIsActive() {
         return this.isActive;
     }
@@ -24,6 +29,8 @@ public class AttributeConnector {
         this.isActive = isActive;
     }
 
+    @ApiModelProperty(
+            value = "Maximum time in minutes before remote attributes are refreshed. Set to 480 minutes by default")
     public int getMaxCachedIntervalMinutes() {
         return this.maxCachedIntervalMinutes;
     }
@@ -32,6 +39,9 @@ public class AttributeConnector {
         this.maxCachedIntervalMinutes = maxCachedIntervalMinutes;
     }
 
+    @ApiModelProperty(
+            value = "A set of adapters used to retrieve attributes from. Only one adapter is currently supported",
+            required = true)
     public Set<AttributeAdapterConnection> getAdapters() {
         return this.adapters;
     }

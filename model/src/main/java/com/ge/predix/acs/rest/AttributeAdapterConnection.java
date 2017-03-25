@@ -3,6 +3,10 @@ package com.ge.predix.acs.rest;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel(description = "Connection configuration for an adapter to retrieve external resource or subject attributes.")
 public class AttributeAdapterConnection {
 
     private String adapterEndpoint;
@@ -12,7 +16,7 @@ public class AttributeAdapterConnection {
     private String uaaClientId;
 
     private String uaaClientSecret;
-    
+
     public AttributeAdapterConnection() {
         
     }
@@ -32,6 +36,7 @@ public class AttributeAdapterConnection {
         this.uaaClientSecret = other.uaaClientSecret;
     }
 
+    @ApiModelProperty(value = "Adapter URL to retrieve attributes from", required = true)
     public String getAdapterEndpoint() {
         return adapterEndpoint;
     }
@@ -40,6 +45,7 @@ public class AttributeAdapterConnection {
         this.adapterEndpoint = adapterEndpoint;
     }
 
+    @ApiModelProperty(value = "UAA URL to request an access token for this adapter", required = true)
     public String getUaaTokenUrl() {
         return uaaTokenUrl;
     }
@@ -48,6 +54,9 @@ public class AttributeAdapterConnection {
         this.uaaTokenUrl = uaaTokenUrl;
     }
 
+    @ApiModelProperty(
+            value = "OAuth client used to obtain an access token for this adapter",
+            required = true)
     public String getUaaClientId() {
         return uaaClientId;
     }
@@ -56,6 +65,7 @@ public class AttributeAdapterConnection {
         this.uaaClientId = uaaClientId;
     }
 
+    @ApiModelProperty(value = "OAuth client secret used to obtain an access token for this adapter", required = true)
     public String getUaaClientSecret() {
         return uaaClientSecret;
     }
