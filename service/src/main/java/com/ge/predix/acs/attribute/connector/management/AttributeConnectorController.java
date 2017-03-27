@@ -55,7 +55,7 @@ public class AttributeConnectorController extends BaseRestApi {
         try {
             AttributeConnector connector = this.service.retrieveResourceConnector();
             if (connector != null) {
-                return ok(connector);
+                return ok(obfuscateAdapterSecret(connector));
             }
             return notFound();
         } catch (AttributeConnectorException e) {
@@ -103,7 +103,7 @@ public class AttributeConnectorController extends BaseRestApi {
         try {
             AttributeConnector connector = this.service.retrieveSubjectConnector();
             if (connector != null) {
-                return ok(connector);
+                return ok(obfuscateAdapterSecret(connector));
             }
             return notFound();
         } catch (AttributeConnectorException e) {
@@ -122,5 +122,12 @@ public class AttributeConnectorController extends BaseRestApi {
         } catch (AttributeConnectorException e) {
             throw new RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
         }
+    }
+
+    private AttributeConnector obfuscateAdapterSecret(final AttributeConnector connector) {
+        connector.getAdapters().stream().forEach(adapter -> {
+            adapter.setUaaClientSecret("**********");
+        });
+        return connector;
     }
 }
