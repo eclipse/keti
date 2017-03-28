@@ -85,11 +85,11 @@ public class AccessControlService {
     @SuppressWarnings("unchecked")
     private Predicate<String> attributeManagementPaths() {
         return or(regex("/v1/subject.*"), regex("/v1/resource.*"), regex("/v1/policy-set.*"),
-                regex("/v1/policy-evaluation.*"), regex("/monitoring/heartbeat.*"));
+                regex("/v1/policy-evaluation.*"), regex("/monitoring/heartbeat.*"), regex("/v1/connector.*"));
     }
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder().title("Access Control").description("Access Control Services (ACS). ").version("v1")
-                .build();
+                .license("Apache 2.0").licenseUrl("https://github.com/predix/acs/blob/develop/LICENSE").build();
     }
 }

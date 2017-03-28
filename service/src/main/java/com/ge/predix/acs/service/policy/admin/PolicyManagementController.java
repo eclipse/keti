@@ -61,7 +61,7 @@ public class PolicyManagementController extends BaseRestApi {
     private PolicyManagementService service;
 
     @ApiOperation(
-            value = "Creates/Updates a policy set. Only one policy set can be created per ACS zone.",
+            value = "Creates/Updates a policy set for the given zone.",
             tags = { "Policy Set Management" })
     @ApiResponses(
             value = { @ApiResponse(
