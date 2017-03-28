@@ -1,56 +1,65 @@
 package com.ge.predix.acs.encryption;
 
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.primitives.Bytes;
 
 public final class Encryptor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Encryptor.class);
     private static final String ALGO_WITH_PADDING = "AES/CBC/PKCS5PADDING";
     private static final String ALGO = "AES";
-    private static final String ENCODING = "UTF-8";
     private static final int IV_LENGTH_IN_BYTES = 16;
     private static final int KEY_LENGTH_IN_BYTES = 16;
 
-    private Cipher cipher;
-    private String encryptionKey;
-
-    public Encryptor() {
+    private static final ThreadLocal<Cipher> CIPHER_THREAD_LOCAL = ThreadLocal.withInitial(() -> {
         try {
-            this.cipher = Cipher.getInstance(ALGO_WITH_PADDING);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            LOGGER.error("Can not created instance of cipher with algorithm" + ALGO_WITH_PADDING);
+            return Cipher.getInstance(ALGO_WITH_PADDING);
+        } catch (Throwable e) {
+            throw new CipherInitializationFailureException(
+                    "Could not create instance of cipher with algorithm: " + ALGO_WITH_PADDING, e);
+        }
+    });
+
+    private SecretKeySpec secretKeySpec;
+
+    private static final class CipherInitializationFailureException extends RuntimeException {
+
+        CipherInitializationFailureException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    // Modified version of Cassandra's CipherFactory#buildCipher
+    // (https://github.com/apache/cassandra/blob/trunk/src/java/org/apache/cassandra/security/CipherFactory.java)
+    private Cipher buildCipher(final byte[] iv, final int cipherMode) {
+        try {
+            Cipher cipher = CIPHER_THREAD_LOCAL.get();
+            cipher.init(cipherMode, this.secretKeySpec, new IvParameterSpec(iv));
+            return cipher;
+        } catch (Throwable e) {
+            throw new CipherInitializationFailureException(
+                    "Could not initialize instance of cipher with algorithm: " + ALGO_WITH_PADDING, e);
         }
     }
 
     public String encrypt(final String value) {
         try {
             byte[] ivBytes = new byte[IV_LENGTH_IN_BYTES];
-            SecureRandom.getInstanceStrong().nextBytes(ivBytes);
-            IvParameterSpec iv = new IvParameterSpec(ivBytes);
-            SecretKeySpec skeySpec = new SecretKeySpec(this.encryptionKey.getBytes(ENCODING), ALGO);
+            new SecureRandom().nextBytes(ivBytes);
 
-            this.cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
-
-            byte[] encrypted = this.cipher.doFinal(value.getBytes());
+            byte[] encrypted = this.buildCipher(ivBytes, Cipher.ENCRYPT_MODE).doFinal(value.getBytes());
             byte[] result = Bytes.concat(ivBytes, encrypted);
 
             return Base64.encodeBase64String(result);
-        } catch (Throwable ex) {
-            LOGGER.error("Unable to encrypt");
-            throw new EncryptionFailureException(ex);
+        } catch (Throwable e) {
+            throw new EncryptionFailureException("Unable to encrypt", e);
         }
     }
 
@@ -60,23 +69,20 @@ public final class Encryptor {
             byte[] ivBytes = Arrays.copyOfRange(encryptedBytes, 0, IV_LENGTH_IN_BYTES);
             byte[] encryptedSecretBytes = Arrays.copyOfRange(encryptedBytes, IV_LENGTH_IN_BYTES, encryptedBytes.length);
 
-            IvParameterSpec iv = new IvParameterSpec(ivBytes);
-            SecretKeySpec skeySpec = new SecretKeySpec(this.encryptionKey.getBytes(ENCODING), ALGO);
-
-            this.cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
-            byte[] original = this.cipher.doFinal(encryptedSecretBytes);
+            byte[] original = this.buildCipher(ivBytes, Cipher.DECRYPT_MODE).doFinal(encryptedSecretBytes);
 
             return new String(original);
-        } catch (Throwable ex) {
-            LOGGER.error("Unable to decrypt");
-            throw new DecryptionFailureException(ex);
+        } catch (Throwable e) {
+            throw new DecryptionFailureException("Unable to decrypt", e);
         }
     }
 
     public void setEncryptionKey(final String encryptionKey) {
-        if (null == encryptionKey || encryptionKey.length() != KEY_LENGTH_IN_BYTES) {
-            throw new SymmetricKeyValidationException("Encryption key must be string of length " + KEY_LENGTH_IN_BYTES);
+        try {
+            this.secretKeySpec = new SecretKeySpec(encryptionKey.getBytes(), 0, KEY_LENGTH_IN_BYTES, ALGO);
+        } catch (Throwable e) {
+            throw new SymmetricKeyValidationException(
+                    "Encryption key must be string of length: " + KEY_LENGTH_IN_BYTES, e);
         }
-        this.encryptionKey = encryptionKey;
     }
 }

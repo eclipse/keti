@@ -16,9 +16,19 @@ public class EncryptorTest {
     }
 
     @Test(expectedExceptions = { SymmetricKeyValidationException.class })
-    public void testCreateEncryptionWithWrongKeySize() {
+    public void testCreateEncryptionWithTooShortOfAKey() {
         Encryptor encryption = new Encryptor();
-        encryption.setEncryptionKey("Key_With_Wrong_Size");
+        encryption.setEncryptionKey("Too_short");
+    }
+
+    @Test
+    public void testCreateEncryptionWithTooLongOfAKey() {
+        try {
+            Encryptor encryption = new Encryptor();
+            encryption.setEncryptionKey("Toooooooooo_loooooooooong");
+        } catch (Throwable e) {
+            Assert.fail();
+        }
     }
 
 }
