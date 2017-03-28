@@ -116,8 +116,8 @@ public class AttributeConnectorConfigurationIT extends AbstractTestNGSpringConte
     public void testPutGetDeleteConnector(final String endpointUrl) throws Exception {
         AttributeConnector expectedConnector = new AttributeConnector();
         expectedConnector.setMaxCachedIntervalMinutes(100);
-        expectedConnector.setAdapters(Collections.singleton(new AttributeAdapterConnection("http://my-endpoint.com",
-                "http://my-uaa.com", "my-client", "my-secret")));
+        expectedConnector.setAdapters(Collections.singleton(new AttributeAdapterConnection("https://my-endpoint.com",
+                "https://my-uaa.com", "my-client", "my-secret")));
         try {
             this.zone1ConnectorAdmin.put(this.acsUrl + V1 + endpointUrl,
                     new HttpEntity<>(expectedConnector, this.zone1Headers));
