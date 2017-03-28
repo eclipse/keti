@@ -1,5 +1,7 @@
 package com.ge.predix.acs.attribute.connector.management;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
 
@@ -20,6 +22,8 @@ import com.ge.predix.acs.zone.resolver.ZoneResolver;
 
 @Component
 public class AttributeConnectorServiceImpl implements AttributeConnectorService {
+
+    private static final String HTTPS = "https";
 
     private static final int CACHED_INTERVAL_THRESHOLD_MINUTES = 30;
 
@@ -173,11 +177,21 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
         if (adapter == null) {
             throw new AttributeConnectorException("Attribute connector configuration requires at least one adapter");
         }
-        if (adapter.getAdapterEndpoint() == null || adapter.getAdapterEndpoint().isEmpty()) {
-            throw new AttributeConnectorException("Attribute adapter configuration requires a nonempty endpoint URL");
+        try {
+            if (!new URL(adapter.getAdapterEndpoint()).getProtocol().equalsIgnoreCase(HTTPS)) {
+                throw new AttributeConnectorException("Attribute adapter endpoint must use the HTTPS protocol");
+            }
+        } catch (MalformedURLException e) {
+            throw new AttributeConnectorException(
+                    "Attribute adapter endpoint either has no protocol or is not a valid URL", e);
         }
-        if (adapter.getUaaTokenUrl() == null || adapter.getUaaTokenUrl().isEmpty()) {
-            throw new AttributeConnectorException("Attribute adapter configuration requires a nonempty UAA token URL");
+        try {
+            if (!new URL(adapter.getUaaTokenUrl()).getProtocol().equalsIgnoreCase(HTTPS)) {
+                throw new AttributeConnectorException("Attribute adapter UAA token URL must use the HTTPS protocol");
+            }
+        } catch (MalformedURLException e) {
+            throw new AttributeConnectorException(
+                    "Attribute adapter UAA token URL either has no protocol or is not a valid URL", e);
         }
         if (adapter.getUaaClientId() == null || adapter.getUaaClientId().isEmpty()) {
             throw new AttributeConnectorException("Attribute adapter configuration requires a nonempty client ID");
