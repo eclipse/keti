@@ -24,4 +24,7 @@
 
     <!-- <context:component-scan base-package="com.ge.predix.integration.test"/> -->
 
+    <beans profile="integration">
+        <context:component-scan base-package="com.ge.predix.cloudfoundry,com.ge.predix.acs.cloudfoundry"/>
+    </beans>
 </beans>

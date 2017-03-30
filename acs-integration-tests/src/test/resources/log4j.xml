@@ -57,6 +57,11 @@
         <level value="DEBUG"/>
     </logger>
 
+    <!-- Uncomment to debug Cloud-Foundry-related operations -->
+    <!--<logger name="cloudfoundry-client">-->
+        <!--<level value="DEBUG"/>-->
+    <!--</logger>-->
+
     <root>
         <level value = "INFO" />
         <appender-ref ref="console" />
