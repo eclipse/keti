@@ -15,7 +15,7 @@ public class PredixAuditRequest {
     }
 
     public int getPage() {
-        return page;
+        return this.page;
     }
 
     public void setPage(final int page) {
@@ -23,7 +23,7 @@ public class PredixAuditRequest {
     }
 
     public int getPageSize() {
-        return pageSize;
+        return this.pageSize;
     }
 
     public void setPageSize(final int pageSize) {
@@ -31,7 +31,7 @@ public class PredixAuditRequest {
     }
 
     public long getStartDate() {
-        return startDate;
+        return this.startDate;
     }
 
     public void setStartDate(final long startDate) {
@@ -39,7 +39,7 @@ public class PredixAuditRequest {
     }
 
     public long getEndDate() {
-        return endDate;
+        return this.endDate;
     }
 
     public void setEndDate(final long endDate) {
