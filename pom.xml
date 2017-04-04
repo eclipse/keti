@@ -71,7 +71,7 @@
         <openjpa.version>2.4.0</openjpa.version>
         <postgres.version>9.3-1103-jdbc4</postgres.version>
         <uaa-token-lib.version>3.2.2</uaa-token-lib.version>
-        <audit-sdk.version>0.0.4-SNAPSHOT</audit-sdk.version>
+        <audit-sdk.version>0.0.6-SNAPSHOT</audit-sdk.version>
 
         <!-- Test Dependency Version -->
         <mockito.version>1.9.0</mockito.version>

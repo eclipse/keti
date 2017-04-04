@@ -7,7 +7,7 @@ public class PredixAuditResponse {
     private Set<PredixAuditRecord> content;
 
     public Set<PredixAuditRecord> getContent() {
-        return content;
+        return this.content;
     }
 
     public void setContent(final Set<PredixAuditRecord> content) {

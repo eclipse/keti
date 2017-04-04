@@ -67,20 +67,6 @@
     <context:annotation-config />
     <context:component-scan base-package="com.ge.predix.test" />
 
-    <beans profile="predix">
-        <bean id="auditRestTemplate"
-            class="org.springframework.security.oauth2.client.OAuth2RestTemplate">
-            <constructor-arg>
-                <bean
-                    class="org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails">
-                    <property name="accessTokenUri" value="${AUDIT_UAA_URL}" />
-                    <property name="clientId" value="${AUDIT_UAA_CLIENT_ID}" />
-                    <property name="clientSecret" value="${AUDIT_UAA_CLIENT_SECRET}" />
-                </bean>
-            </constructor-arg>
-            <property name="requestFactory" ref="httpRequestFactory"/>
-        </bean>
-    </beans>
 </beans>
 
     <!-- End constructing Apache HttpClient request factory for REST template. -->

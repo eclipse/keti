@@ -65,14 +65,14 @@ public class ACSAuditConfiguration {
 
             @Override
             public void onSuccees(final AuditEvent arg0) {
-                LOGGER.info("AUDIT EVENT SUCCESS: " + arg0.toString());
+                LOGGER.debug("AUDIT EVENT SUCCESS: " + arg0.toString());
             }
 
             @Override
             public void onValidate(final AuditEvent arg0, final List<ValidatorReport> arg1) {
-                LOGGER.info("AUDIT EVENT VALIDATE: " + arg0.toString());
+                LOGGER.debug("AUDIT EVENT VALIDATE: " + arg0.toString());
                 for (ValidatorReport report : arg1) {
-                    LOGGER.info("AUDIT ValidatorReport: " + report.toString());
+                    LOGGER.debug("AUDIT ValidatorReport: " + report.toString());
                 }
             }
 

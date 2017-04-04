@@ -41,7 +41,7 @@
         <acs.appname>acs-ci-${jenkins.build.number}</acs.appname>
         <acs.db>acs-db-ci-${jenkins.build.number}</acs.db>
         <acs.redis>acs-redis-ci-${jenkins.build.number}</acs.redis>
-        <acs.audit>acs-audit-service</acs.audit>
+        <acs.audit>acs-audit-service-int-tests</acs.audit>
         <acs.cf.domain>predix-acs-integration</acs.cf.domain>
         <acs.zone.subdomain>test-zone-${zone.var}</acs.zone.subdomain>
         <cf.base.domain>${CF_BASE_DOMAIN}</cf.base.domain>
@@ -151,6 +151,11 @@
                         <CONFIG_SERVER_URI>${CONFIG_SERVER_URI}</CONFIG_SERVER_URI>
                         <CONFIG_OAUTH_TOKEN_URI>${CONFIG_OAUTH_TOKEN_URI}</CONFIG_OAUTH_TOKEN_URI>
                         <ENCRYPTION_KEY>${ENCRYPTION_KEY}</ENCRYPTION_KEY>
+                        <JAVA_OPTS>${JAVA_OPTS}</JAVA_OPTS>
+                        <AUDIT_SERVICE_NAME>${AUDIT_SERVICE_NAME}</AUDIT_SERVICE_NAME>
+                        <AUDIT_UAA_URL>${AUDIT_UAA_URL}</AUDIT_UAA_URL>
+                        <AUDIT_UAA_CLIENT_ID>${AUDIT_UAA_CLIENT_ID}</AUDIT_UAA_CLIENT_ID>
+                        <AUDIT_UAA_CLIENT_SECRET>${AUDIT_UAA_CLIENT_SECRET}</AUDIT_UAA_CLIENT_SECRET>
                     </env>
                 </configuration>
             </plugin>
@@ -311,13 +316,6 @@
     <profiles>
         <profile>
             <id>predix-cloud</id>
-            <dependencies>
-                <dependency>
-                    <groupId>com.ge.predix.audit</groupId>
-                    <artifactId>audit-sdk</artifactId>
-                    <version>${audit-sdk.version}</version>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -346,11 +344,13 @@
                                 <ZAC_CLIENT_SECRET>${ZAC_CLIENT_SECRET}</ZAC_CLIENT_SECRET>
                                 <AUDIT_QUERY_URL>${AUDIT_QUERY_URL}</AUDIT_QUERY_URL>
                                 <AUDIT_ZONE_ID>${AUDIT_ZONE_ID}</AUDIT_ZONE_ID>
+                                <AUDIT_UAA_URL>${AUDIT_UAA_URL}</AUDIT_UAA_URL>
+                                <AUDIT_UAA_CLIENT_ID>${AUDIT_UAA_CLIENT_ID}</AUDIT_UAA_CLIENT_ID>
+                                <AUDIT_UAA_CLIENT_SECRET>${AUDIT_UAA_CLIENT_SECRET}</AUDIT_UAA_CLIENT_SECRET>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
                                 <exclude>**/PolicyEvalCachingWithGraphDBIT.java</exclude>
-                                <exclude>**/PredixAuditIT.java</exclude>
                             </excludes>
                             <includes>
                                 <include>**/*IT.java</include>
@@ -383,18 +383,14 @@
                             <appStartupTimeout>120</appStartupTimeout>
                             <org>${cf.org}</org>
                             <space>${cf.space}</space>
-                            <memory>1024</memory>
+                            <memory>2048</memory>
                             <buildpack>java-buildpack</buildpack>
                             <env>
-                                <SPRING_PROFILES_ACTIVE>integration,predix,cloud-redis,cloudDbConfig</SPRING_PROFILES_ACTIVE>
-                                <AUDIT_SERVICE_NAME>${AUDIT_SERVICE_NAME}</AUDIT_SERVICE_NAME>
-                                <AUDIT_UAA_URL>${AUDIT_UAA_URL}</AUDIT_UAA_URL>
-                                <AUDIT_UAA_CLIENT_ID>${AUDIT_UAA_CLIENT_ID}</AUDIT_UAA_CLIENT_ID>
-                                <AUDIT_UAA_CLIENT_SECRET>${AUDIT_UAA_CLIENT_SECRET}</AUDIT_UAA_CLIENT_SECRET>
+                                <SPRING_PROFILES_ACTIVE>integration,predix,cloud-redis,cloudDbConfig,predixAudit</SPRING_PROFILES_ACTIVE>
                             </env>
                         </configuration>
                         <executions>
-                            <execution>
+                             <execution>
                                 <id>push</id>
                                 <configuration>
                                     <appname>${acs.appname}</appname>
@@ -409,12 +405,11 @@
                                             <label>redis</label>
                                             <plan>shared-vm</plan>
                                         </service>
-<!--                                   Commented out until audit works in cf3
                                         <service>
                                             <name>${acs.audit}</name>
                                             <label>predix-audit</label>
                                             <plan>beta</plan>
-                                        </service> -->
+                                        </service>
                                     </services>
                                     <path>${local.acs.artifact}</path>
                                     <artifact>${maven.acs.artifact}</artifact>
@@ -483,13 +478,6 @@
 
         <profile>
             <id>predix-cloud-titan</id>
-            <dependencies>
-                <dependency>
-                    <groupId>com.ge.predix.audit</groupId>
-                    <artifactId>audit-sdk</artifactId>
-                    <version>${audit-sdk.version}</version>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -518,11 +506,12 @@
                                 <ZAC_CLIENT_SECRET>${ZAC_CLIENT_SECRET}</ZAC_CLIENT_SECRET>
                                 <AUDIT_QUERY_URL>${AUDIT_QUERY_URL}</AUDIT_QUERY_URL>
                                 <AUDIT_ZONE_ID>${AUDIT_ZONE_ID}</AUDIT_ZONE_ID>
-                                <JAVA_OPTS>${JAVA_OPTS}</JAVA_OPTS>
+                                <AUDIT_UAA_URL>${AUDIT_UAA_URL}</AUDIT_UAA_URL>
+                                <AUDIT_UAA_CLIENT_ID>${AUDIT_UAA_CLIENT_ID}</AUDIT_UAA_CLIENT_ID>
+                                <AUDIT_UAA_CLIENT_SECRET>${AUDIT_UAA_CLIENT_SECRET}</AUDIT_UAA_CLIENT_SECRET>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
-                                <exclude>**/PredixAuditIT.java</exclude>
                             </excludes>
                             <includes>
                                 <include>**/*IT.java</include>
@@ -556,21 +545,16 @@
                             <org>${cf.org}</org>
                             <space>${cf.space}</space>
                             <appname>${acs.appname}</appname>
-                            <memory>1024</memory>
+                            <memory>2048</memory>
                             <buildpack>java-buildpack</buildpack>
                             <env>
-                                <SPRING_PROFILES_ACTIVE>integration,predix,cloud-redis,titan,cloudDbConfig</SPRING_PROFILES_ACTIVE>
+                                <SPRING_PROFILES_ACTIVE>integration,predix,cloud-redis,titan,cloudDbConfig,predixAudit</SPRING_PROFILES_ACTIVE>
                                 <TITAN_ENABLE_CASSANDRA>${TITAN_ENABLE_CASSANDRA}</TITAN_ENABLE_CASSANDRA>
                                 <TITAN_STORAGE_CASSANDRA_KEYSPACE>${TITAN_STORAGE_CASSANDRA_KEYSPACE}</TITAN_STORAGE_CASSANDRA_KEYSPACE>
                                 <TITAN_STORAGE_HOSTNAME>${TITAN_STORAGE_HOSTNAME}</TITAN_STORAGE_HOSTNAME>
                                 <TITAN_STORAGE_PORT>${TITAN_STORAGE_PORT}</TITAN_STORAGE_PORT>
                                 <TITAN_STORAGE_USERNAME>${TITAN_STORAGE_USERNAME}</TITAN_STORAGE_USERNAME>
                                 <TITAN_STORAGE_PASSWORD>${TITAN_STORAGE_PASSWORD}</TITAN_STORAGE_PASSWORD>
-                                <AUDIT_SERVICE_NAME>${AUDIT_SERVICE_NAME}</AUDIT_SERVICE_NAME>
-                                <AUDIT_UAA_URL>${AUDIT_UAA_URL}</AUDIT_UAA_URL>
-                                <AUDIT_UAA_CLIENT_ID>${AUDIT_UAA_CLIENT_ID}</AUDIT_UAA_CLIENT_ID>
-                                <AUDIT_UAA_CLIENT_SECRET>${AUDIT_UAA_CLIENT_SECRET}</AUDIT_UAA_CLIENT_SECRET>
-                                <JAVA_OPTS>${JAVA_OPTS}</JAVA_OPTS>
                             </env>
                             <services>
                                 <service>
@@ -583,11 +567,11 @@
                                     <label>redis</label>
                                     <plan>shared-vm</plan>
                                 </service>
-<!--                                 <service>
+                                <service>
                                     <name>${acs.audit}</name>
                                     <label>predix-audit</label>
                                     <plan>beta</plan>
-                                </service> -->
+                                </service>
                             </services>
                         </configuration>
                         <executions>
