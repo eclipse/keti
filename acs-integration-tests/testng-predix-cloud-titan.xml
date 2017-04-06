@@ -1,0 +1,31 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="testAll">
+    <test name="predix-cloud-titan-setup">
+        <classes>
+            <class name="com.ge.predix.acs.cloudfoundry.PushPredixCloudTitanApplication"/>
+        </classes>
+    </test>
+    <test name="predix-cloud-titan-tests">
+        <classes>
+            <class name="com.ge.predix.integration.test.PredixAuditIT"/>
+            <class name="com.ge.predix.integration.test.AccessControlServiceIT"/>
+            <class name="com.ge.predix.integration.test.ACSCorsFilterIT"/>
+            <class name="com.ge.predix.integration.test.ACSMeteringIT"/>
+            <class name="com.ge.predix.integration.test.AttributeConnectorConfigurationIT"/>
+            <class name="com.ge.predix.integration.test.PolicyEvaluationCachingIT"/>
+            <class name="com.ge.predix.integration.test.PrivilegeManagementAccessControlServiceIT"/>
+            <class name="com.ge.predix.integration.test.PolicyEvalCachingWithGraphDBIT"/>
+            <class name="com.ge.predix.acceptance.test.ACSAcceptanceIT"/>
+            <class name="com.ge.predix.acceptance.test.zone.admin.DefaultZoneAuthorizationIT"/>
+            <class name="com.ge.predix.acceptance.test.zone.admin.ZoneEnforcementCucumberTest"/>
+            <class name="com.ge.predix.acceptance.test.policy.admin.PolicyCreationCucumberTest"/>
+            <class name="com.ge.predix.acceptance.test.policy.evaluation.PolicyEvaluationCucumberTest"/>
+        </classes>
+    </test>
+    <test name="predix-cloud-titan-teardown">
+        <classes>
+            <class name="com.ge.predix.acs.cloudfoundry.DeleteApplications"/>
+        </classes>
+    </test>
+</suite>
