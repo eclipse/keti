@@ -14,7 +14,8 @@ public final class PushPredixCloudTitanApplication extends AbstractTestNGSpringC
     @Autowired
     private PushAcsApplication pushAcsApplication;
 
-    @Test
+    @Test(groups = { AcsCloudFoundryUtilities.PUSH_ACS_APP_TEST_GROUP },
+          dependsOnGroups = { AcsCloudFoundryUtilities.Adapter.PUSH_ASSET_ADAPTER_APP_TEST_GROUP })
     public void pushAcsApplication() throws Exception {
         Map<String, String> additionalEnvironmentVariables = new HashMap<>();
         additionalEnvironmentVariables.put("TITAN_ENABLE_CASSANDRA", System.getenv("TITAN_ENABLE_CASSANDRA"));

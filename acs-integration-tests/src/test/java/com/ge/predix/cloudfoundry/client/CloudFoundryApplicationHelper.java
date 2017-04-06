@@ -6,12 +6,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.operations.CloudFoundryOperations;
+import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.ApplicationEnvironments;
 import org.cloudfoundry.operations.applications.ApplicationHealthCheck;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsRequest;
+import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.applications.LogsRequest;
 import org.cloudfoundry.operations.applications.PushApplicationRequest;
 import org.cloudfoundry.operations.applications.SetEnvironmentVariableApplicationRequest;
@@ -325,5 +328,25 @@ public final class CloudFoundryApplicationHelper {
                 .otherwise(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage()
                                 .contains(String.format("Application %s does not exist", applicationName)),
                         fallback -> Mono.empty()));
+    }
+
+    public boolean applicationStarted(final String applicationName) {
+        String applicationState = getApplication(this.cloudFoundryOperations, applicationName)
+                .block()
+                .getRequestedState();
+        LOGGER.info("Requested state of application '{}': {}", applicationName, applicationState);
+        return StringUtils.containsIgnoreCase(applicationState, "started");
+    }
+
+    private static Mono<ApplicationDetail> getApplication(final CloudFoundryOperations cloudFoundryOperations,
+            final String applicationName) {
+
+        String messageEnding = String.format("get application '%s'", applicationName);
+
+        return addCommonCallbacks(messageEnding,
+                cloudFoundryOperations.applications()
+                .get(GetApplicationRequest.builder()
+                        .name(applicationName)
+                        .build()));
     }
 }
