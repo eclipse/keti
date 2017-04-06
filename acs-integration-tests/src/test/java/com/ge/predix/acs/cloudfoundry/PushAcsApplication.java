@@ -72,6 +72,29 @@ final class PushAcsApplication {
 
     void pushApplication(final Map<String, String> additionalEnvironmentVariables) throws Exception {
 
+        Map<String, Object> userProvidedAssetAdapterEnv = this.cloudFoundryApplicationHelper.getApplicationEnvironments(
+                AcsCloudFoundryUtilities.Adapter.ACS_ASSET_ADAPTER_APP_NAME).getUserProvided();
+
+        String assetAdapterUrl = (String) userProvidedAssetAdapterEnv.get("ASSET_ADAPTER_URL");
+        String assetTokenUrl = (String) userProvidedAssetAdapterEnv.get("ASSET_TOKEN_URL");
+        String assetZoneId = (String) userProvidedAssetAdapterEnv.get("ASSET_ZONE_ID");
+        String assetUrl = (String) userProvidedAssetAdapterEnv.get("ASSET_URL");
+
+        COMMON_ENVIRONMENT_VARIABLES.put("ADAPTER_ENDPOINT", assetAdapterUrl);
+        COMMON_ENVIRONMENT_VARIABLES.put("ADAPTER_UAA_TOKEN_URL",
+                (String) userProvidedAssetAdapterEnv.get("ASSET_ADAPTER_TOKEN_URL"));
+        COMMON_ENVIRONMENT_VARIABLES.put("ADAPTER_UAA_CLIENT_ID",
+                (String) userProvidedAssetAdapterEnv.get("ASSET_ADAPTER_CLIENT_ID"));
+        COMMON_ENVIRONMENT_VARIABLES.put("ADAPTER_UAA_CLIENT_SECRET",
+                (String) userProvidedAssetAdapterEnv.get("ASSET_ADAPTER_CLIENT_SECRET"));
+        COMMON_ENVIRONMENT_VARIABLES.put("ASSET_TOKEN_URL", assetTokenUrl);
+        COMMON_ENVIRONMENT_VARIABLES.put("ASSET_CLIENT_ID",
+                (String) userProvidedAssetAdapterEnv.get("ASSET_CLIENT_ID"));
+        COMMON_ENVIRONMENT_VARIABLES.put("ASSET_CLIENT_SECRET",
+                (String) userProvidedAssetAdapterEnv.get("ASSET_CLIENT_SECRET"));
+        COMMON_ENVIRONMENT_VARIABLES.put("ASSET_ZONE_ID", assetZoneId);
+        COMMON_ENVIRONMENT_VARIABLES.put("ASSET_URL", assetUrl);
+
         Map<String, String> environmentVariables = new HashMap<>(COMMON_ENVIRONMENT_VARIABLES);
         environmentVariables.putAll(additionalEnvironmentVariables);
         environmentVariables.values().removeIf(Objects::isNull);
@@ -95,5 +118,10 @@ final class PushAcsApplication {
                 Collections.singletonList(AcsCloudFoundryUtilities.ACS_AUDIT_SERVICE_INSTANCE_NAME));
 
         this.cloudFoundryApplicationHelper.startApplication(AcsCloudFoundryUtilities.ACS_APP_NAME);
+
+        System.setProperty("ASSET_ADAPTER_URL", assetAdapterUrl);
+        System.setProperty("ASSET_TOKEN_URL", assetTokenUrl);
+        System.setProperty("ASSET_ZONE_ID", assetZoneId);
+        System.setProperty("ASSET_URL", assetUrl);
     }
 }

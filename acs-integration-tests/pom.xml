@@ -303,6 +303,12 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.18.1</version>
                         <configuration>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>com.ge.predix.test.TestNameLogger,com.ge.predix.test.TestAnnotationTransformer</value>
+                                </property>
+                            </properties>
                             <forkCount>0</forkCount>
                             <parallel>false</parallel>
                             <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
@@ -313,6 +319,10 @@
                                 <jenkins.build.number>${jenkins.build.number}</jenkins.build.number>
                                 <cf.org>${cf.org}</cf.org>
                                 <cf.space>${cf.space}</cf.space>
+                                <ASSET_ADAPTER_URL>set-dynamically</ASSET_ADAPTER_URL>
+                                <ASSET_TOKEN_URL>set-dynamically</ASSET_TOKEN_URL>
+                                <ASSET_ZONE_ID>set-dynamically</ASSET_ZONE_ID>
+                                <ASSET_URL>set-dynamically</ASSET_URL>
                                 <ACS_CF_DOMAIN>${acs.cf.domain}</ACS_CF_DOMAIN>
                                 <ACS_URL>https://${acs.appname}.${cf.base.domain}</ACS_URL>
                             </systemPropertyVariables>
@@ -348,6 +358,12 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.18.1</version>
                         <configuration>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>com.ge.predix.test.TestNameLogger,com.ge.predix.test.TestAnnotationTransformer</value>
+                                </property>
+                            </properties>
                             <forkCount>0</forkCount>
                             <parallel>false</parallel>
                             <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
@@ -358,6 +374,10 @@
                                 <jenkins.build.number>${jenkins.build.number}</jenkins.build.number>
                                 <cf.org>${cf.org}</cf.org>
                                 <cf.space>${cf.space}</cf.space>
+                                <ASSET_ADAPTER_URL>set-dynamically</ASSET_ADAPTER_URL>
+                                <ASSET_TOKEN_URL>set-dynamically</ASSET_TOKEN_URL>
+                                <ASSET_ZONE_ID>set-dynamically</ASSET_ZONE_ID>
+                                <ASSET_URL>set-dynamically</ASSET_URL>
                                 <ACS_CF_DOMAIN>${acs.cf.domain}</ACS_CF_DOMAIN>
                                 <ACS_URL>https://${acs.appname}.${cf.base.domain}</ACS_URL>
                             </systemPropertyVariables>

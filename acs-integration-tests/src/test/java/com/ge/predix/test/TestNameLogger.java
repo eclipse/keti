@@ -39,7 +39,7 @@ public class TestNameLogger implements IInvokedMethodListener {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestNameLogger.class);
-    private static final String ACS_CLOUD_FOUNDRY_PACKAGE = "com.ge.predix.acs.cloudfoundry";
+    static final String ACS_CLOUD_FOUNDRY_PACKAGE = "com.ge.predix.acs.cloudfoundry";
 
     private static volatile boolean suiteFailed = false;
 

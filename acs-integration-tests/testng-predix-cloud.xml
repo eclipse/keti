@@ -1,13 +1,13 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="testAll">
-    <test name="predix-cloud-setup">
+    <test name="predix-cloud">
         <classes>
+            <class name="com.ge.predix.acs.cloudfoundry.PushAdapterApplication"/>
             <class name="com.ge.predix.acs.cloudfoundry.PushPredixCloudApplication"/>
-        </classes>
-    </test>
-    <test name="predix-cloud-tests">
-        <classes>
+
+            <class name="com.ge.predix.acs.cloudfoundry.ApplicationHealthChecks"/>
+
             <class name="com.ge.predix.integration.test.PredixAuditIT"/>
             <class name="com.ge.predix.integration.test.AccessControlServiceIT"/>
             <class name="com.ge.predix.integration.test.ACSCorsFilterIT"/>
@@ -20,10 +20,7 @@
             <class name="com.ge.predix.acceptance.test.zone.admin.ZoneEnforcementCucumberTest"/>
             <class name="com.ge.predix.acceptance.test.policy.admin.PolicyCreationCucumberTest"/>
             <class name="com.ge.predix.acceptance.test.policy.evaluation.PolicyEvaluationCucumberTest"/>
-        </classes>
-    </test>
-    <test name="predix-cloud-teardown">
-        <classes>
+
             <class name="com.ge.predix.acs.cloudfoundry.DeleteApplications"/>
         </classes>
     </test>

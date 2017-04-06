@@ -46,9 +46,6 @@ import com.google.gson.JsonObject;
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpringContextTests {
 
-    @Value("${ADAPTER_ENDPOINT}")
-    private String adapterEndpoint;
-
     @Value("${ZONE1_NAME:testzone1}")
     private String acsZone1Name;
 
@@ -69,6 +66,9 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
 
     @Value("${ASSET_URL}")
     private String assetUrl;
+
+    @Value("${ADAPTER_ENDPOINT:${ASSET_ADAPTER_URL}}")
+    private String adapterEndpoint;
 
     @Value("${ADAPTER_UAA_TOKEN_URL:${ASSET_TOKEN_URL}}")
     private String adapterUaaTokenUrl;
