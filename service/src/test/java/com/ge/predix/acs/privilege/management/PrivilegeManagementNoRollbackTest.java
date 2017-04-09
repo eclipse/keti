@@ -39,7 +39,6 @@ import com.ge.predix.acs.config.GraphBeanDefinitionRegistryPostProcessor;
 import com.ge.predix.acs.config.GraphConfig;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
 import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.policy.evaluation.cache.HystrixPolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.policy.evaluation.cache.InMemoryPolicyEvaluationCache;
 import com.ge.predix.acs.privilege.management.dao.ResourceRepositoryProxy;
 import com.ge.predix.acs.privilege.management.dao.SubjectRepositoryProxy;
@@ -54,8 +53,7 @@ import com.ge.predix.acs.zone.management.ZoneServiceImpl;
 import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
 
 @ContextConfiguration(
-        classes = { AcsRequestContextHolder.class, HystrixPolicyEvaluationCacheCircuitBreaker.class,
-                InMemoryDataSourceConfig.class, InMemoryPolicyEvaluationCache.class,
+        classes = { AcsRequestContextHolder.class, InMemoryDataSourceConfig.class, InMemoryPolicyEvaluationCache.class,
                 PrivilegeManagementServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class,
                 ZoneServiceImpl.class, SpringSecurityPolicyContextResolver.class, SpringSecurityZoneResolver.class,
                 SubjectRepositoryProxy.class, ResourceRepositoryProxy.class, AttributeConnectorServiceImpl.class,

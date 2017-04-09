@@ -16,31 +16,23 @@
 
 package com.ge.predix.acs.service.policy.evaluation;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ge.predix.acs.PolicyContextResolver;
-import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
-import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.model.Effect;
-import com.ge.predix.acs.model.Policy;
-import com.ge.predix.acs.model.PolicySet;
-import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
-import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
-import com.ge.predix.acs.rest.BaseResource;
-import com.ge.predix.acs.rest.BaseSubject;
-import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
-import com.ge.predix.acs.rest.PolicyEvaluationResult;
-import com.ge.predix.acs.service.policy.admin.PolicyManagementService;
-import com.ge.predix.acs.service.policy.matcher.MatchResult;
-import com.ge.predix.acs.service.policy.matcher.PolicyMatchCandidate;
-import com.ge.predix.acs.service.policy.matcher.PolicyMatcher;
-import com.ge.predix.acs.service.policy.validation.PolicySetValidator;
-import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
-import com.ge.predix.acs.utils.JsonUtils;
-import com.ge.predix.acs.zone.management.dao.ZoneEntity;
-import com.ge.predix.acs.zone.resolver.ZoneResolver;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -56,22 +48,31 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ge.predix.acs.PolicyContextResolver;
+import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
+import com.ge.predix.acs.model.Attribute;
+import com.ge.predix.acs.model.Effect;
+import com.ge.predix.acs.model.Policy;
+import com.ge.predix.acs.model.PolicySet;
+import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCache;
+import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey;
+import com.ge.predix.acs.privilege.management.PrivilegeManagementService;
+import com.ge.predix.acs.rest.BaseResource;
+import com.ge.predix.acs.rest.BaseSubject;
+import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
+import com.ge.predix.acs.rest.PolicyEvaluationResult;
+import com.ge.predix.acs.service.policy.admin.PolicyManagementService;
+import com.ge.predix.acs.service.policy.matcher.MatchResult;
+import com.ge.predix.acs.service.policy.matcher.PolicyMatchCandidate;
+import com.ge.predix.acs.service.policy.matcher.PolicyMatcher;
+import com.ge.predix.acs.service.policy.validation.PolicySetValidator;
+import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
+import com.ge.predix.acs.utils.JsonUtils;
+import com.ge.predix.acs.zone.management.dao.ZoneEntity;
+import com.ge.predix.acs.zone.resolver.ZoneResolver;
 
 /**
  * Unit tests for PolicyEvaluationService. Uses mocks, no external dependencies.
@@ -105,7 +106,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     @Mock
     private ZoneResolver zoneResolver;
     @Mock
-    private PolicyEvaluationCacheCircuitBreaker cache;
+    private PolicyEvaluationCache cache;
     @Autowired
     private PolicySetValidator policySetValidator;
 

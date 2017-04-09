@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ge.predix.acs.commons.exception.UntrustedIssuerException;
 import com.ge.predix.acs.model.PolicySet;
-import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
+import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCache;
 import com.ge.predix.acs.service.policy.admin.dao.PolicySetEntity;
 import com.ge.predix.acs.service.policy.admin.dao.PolicySetRepository;
 import com.ge.predix.acs.service.policy.validation.PolicySetValidationException;
@@ -48,7 +48,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyManagementServiceImpl.class);
 
     @Autowired
-    private PolicyEvaluationCacheCircuitBreaker cache;
+    private PolicyEvaluationCache cache;
     @Autowired
     private PolicySetRepository policySetRepository;
     @Autowired

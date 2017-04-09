@@ -47,7 +47,7 @@ import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.Policy;
 import com.ge.predix.acs.model.PolicySet;
 import com.ge.predix.acs.model.Target;
-import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
+import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCache;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey.Builder;
 import com.ge.predix.acs.privilege.management.dao.AttributeLimitExceededException;
@@ -68,7 +68,7 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyEvaluationServiceImpl.class);
 
     @Autowired
-    private PolicyEvaluationCacheCircuitBreaker cache;
+    private PolicyEvaluationCache cache;
     @Autowired
     private PolicyManagementService policyService;
     @Autowired

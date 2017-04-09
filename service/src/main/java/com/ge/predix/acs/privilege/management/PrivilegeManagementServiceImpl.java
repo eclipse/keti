@@ -16,8 +16,19 @@
 
 package com.ge.predix.acs.privilege.management;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
+import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCache;
 import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
 import com.ge.predix.acs.privilege.management.dao.ResourceRepositoryProxy;
 import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
@@ -26,16 +37,6 @@ import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.acs.zone.resolver.ZoneResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * The implementation of privilege management.
@@ -49,7 +50,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
     private static final Logger LOGGER = LoggerFactory.getLogger(PrivilegeManagementServiceImpl.class);
 
     @Autowired
-    private PolicyEvaluationCacheCircuitBreaker cache;
+    private PolicyEvaluationCache cache;
 
     @Autowired
     private SubjectRepositoryProxy subjectRepository;
@@ -428,7 +429,7 @@ public class PrivilegeManagementServiceImpl implements PrivilegeManagementServic
         }
     }
 
-    public void setCache(final PolicyEvaluationCacheCircuitBreaker cache) {
+    public void setCache(final PolicyEvaluationCache cache) {
         this.cache = cache;
     }
 }
