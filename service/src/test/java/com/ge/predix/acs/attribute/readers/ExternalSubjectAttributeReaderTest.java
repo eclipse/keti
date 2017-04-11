@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -27,7 +28,7 @@ public class ExternalSubjectAttributeReaderTest {
 
     private static final String IDENTIFIER = "part/03f95db1-4255-4265-a509-f7bca3e1fee4";
 
-    private Set<Attribute> expectedAdapterAttributes;
+    private CachedAttributes expectedAdapterAttributes;
 
     private static String generateRandomString() {
         return RandomStringUtils.randomAlphanumeric(20);
@@ -35,8 +36,8 @@ public class ExternalSubjectAttributeReaderTest {
 
     @BeforeClass
     void beforeClass() throws Exception {
-        this.expectedAdapterAttributes = Collections
-                .singleton(new Attribute(generateRandomString(), generateRandomString(), generateRandomString()));
+        this.expectedAdapterAttributes = new CachedAttributes(Collections
+                .singleton(new Attribute(generateRandomString(), generateRandomString(), generateRandomString())));
     }
 
     @BeforeMethod
@@ -49,7 +50,7 @@ public class ExternalSubjectAttributeReaderTest {
 
     @Test
     public void testGetAttributesWithCacheMiss() throws Exception {
-        Mockito.when(this.attributeCache.getAttributes(IDENTIFIER)).thenReturn(Collections.emptySet());
+        Mockito.when(this.attributeCache.getAttributes(IDENTIFIER)).thenReturn(null);
 
         Mockito.doReturn(this.expectedAdapterAttributes).when(this.externalSubjectAttributeReader)
                 .getAttributesFromAdapters(IDENTIFIER);
@@ -58,8 +59,9 @@ public class ExternalSubjectAttributeReaderTest {
 
         Mockito.verify(this.attributeCache).setAttributes(IDENTIFIER, this.expectedAdapterAttributes);
 
-        Assert.assertEquals(this.expectedAdapterAttributes, actualAdapterAttributes);
+        Assert.assertEquals(this.expectedAdapterAttributes.getAttributes(), actualAdapterAttributes);
     }
+
 
     @Test
     public void testGetAttributesWithCacheHit() throws Exception {
@@ -70,7 +72,7 @@ public class ExternalSubjectAttributeReaderTest {
         Mockito.verify(this.externalSubjectAttributeReader, Mockito.times(0)).getAttributesFromAdapters(IDENTIFIER);
         Mockito.verify(this.attributeCache, Mockito.times(0)).setAttributes(IDENTIFIER, this.expectedAdapterAttributes);
 
-        Assert.assertEquals(this.expectedAdapterAttributes, actualAdapterAttributes);
+        Assert.assertEquals(this.expectedAdapterAttributes.getAttributes(), actualAdapterAttributes);
     }
 
     @Test
@@ -80,11 +82,26 @@ public class ExternalSubjectAttributeReaderTest {
 
         Set<Attribute> actualAttributes = this.externalSubjectAttributeReader.getAttributes(IDENTIFIER);
 
-        Assert.assertEquals(this.expectedAdapterAttributes, actualAttributes);
+        Assert.assertEquals(this.expectedAdapterAttributes.getAttributes(), actualAttributes);
 
         actualAttributes = this.externalSubjectAttributeReader.getAttributesByScope(IDENTIFIER,
                 Collections.singleton(new Attribute("test-issuer", "test-scope", "test-value")));
 
-        Assert.assertEquals(this.expectedAdapterAttributes, actualAttributes);
+        Assert.assertEquals(this.expectedAdapterAttributes.getAttributes(), actualAttributes);
+    }
+
+    @Test(dataProviderClass = ExternalAttributeReaderHelper.class, dataProvider =
+            "attributeSizeConstraintDataProvider", expectedExceptions = {
+            AttributeRetrievalException.class }, expectedExceptionsMessageRegExp = "Total size of attributes or "
+            + "number of attributes too large for id: '" + IDENTIFIER + "'.*")
+    public void testGetAttributesThatAreToLarge(final int maxNumberOfAttributes, final int maxSizeOfAttributesInBytes)
+            throws Exception {
+        ExternalAttributeReaderHelper.setupMockedAdapterResponse(this.externalSubjectAttributeReader, this
+                .attributeCache, IDENTIFIER);
+        ReflectionTestUtils
+                .setField(this.externalSubjectAttributeReader, "maxNumberOfAttributes", maxNumberOfAttributes);
+        ReflectionTestUtils.setField(this.externalSubjectAttributeReader, "maxSizeOfAttributesInBytes",
+                maxSizeOfAttributesInBytes);
+        this.externalSubjectAttributeReader.getAttributes(IDENTIFIER);
     }
 }
