@@ -39,7 +39,6 @@ import org.testng.annotations.Test;
 
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
-import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.ZacTestUtil;
@@ -62,10 +61,10 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
     @Autowired
     private PolicyHelper policyHelper;
 
-    @Value("${ORG_ID:ff85feb9-be02-4a73-9b13-9e1970abf09c}")
+    @Value("${ORG_ID:050e3f85-4706-4d88-8e87-7488cc84089c}")
     private String organizationId;
 
-    @Value("${PLAN_ID:pla_1ba8-5fe8-474f-8211-163649417d8e}")
+    @Value("${PLAN_ID:pla_b70d-6248-4a0b-8018-9fc6b9de29e6}")
     private String planId;
 
     @Value("${NUREGO_API_URL}")
@@ -87,8 +86,6 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
 
     private String acsUrl;
 
-    private Zone createPrimaryTestZone;
-
     @Autowired
     private ZacTestUtil zacTestUtil;
 
@@ -96,8 +93,9 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
     public void setup() throws Exception {
         this.zacTestUtil.assumeZacServerAvailable();
 
-        this.createPrimaryTestZone = this.zoneHelper.createPrimaryTestZone();
-        this.zoneId = this.createPrimaryTestZone.getSubdomain();
+        this.zoneId = this.zoneHelper
+                .createTestZone(this.acsRestTemplateFactory.getACSTemplateWithPolicyScope(), "test-zone-pipe3", true)
+                .getSubdomain();
         this.acsUrl = this.zoneHelper.getAcsBaseURL();
         Nurego.setApiBase(this.nuregoApiBase);
         Nurego.apiKey = this.nuregoApiKey;
@@ -107,7 +105,7 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
         waitForSteadyStateEntitlementUsage(POLICY_EVAL_FEATURE_ID, this.zoneId);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void testACSMetering() throws Exception {
         String testPolicyName = null;
         PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper
@@ -163,7 +161,7 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
 
     private HttpHeaders getZoneHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Predix-Zone-Id", this.createPrimaryTestZone.getSubdomain());
+        headers.set("Predix-Zone-Id", this.zoneId);
         return headers;
     }
 
@@ -227,7 +225,7 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
 
     @AfterClass
     public void cleanUp() {
-        this.zoneHelper.deleteZone(this.createPrimaryTestZone.getSubdomain());
+        this.zoneHelper.deleteZone(this.zoneId);
         // cancelNuregoSubscription();
     }
 
