@@ -43,7 +43,7 @@ import com.ge.predix.acs.attribute.readers.PrivilegeServiceSubjectAttributeReade
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
-import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCacheCircuitBreaker;
+import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationCache;
 import com.ge.predix.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
@@ -70,7 +70,7 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
     @Mock
     private ZoneResolver zoneResolver;
     @Mock
-    private PolicyEvaluationCacheCircuitBreaker cache;
+    private PolicyEvaluationCache cache;
 
     private final PolicyMatcherImpl policyMatcher = new PolicyMatcherImpl();
 

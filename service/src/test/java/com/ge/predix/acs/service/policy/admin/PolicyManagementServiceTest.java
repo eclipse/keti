@@ -44,7 +44,6 @@ import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.config.InMemoryDataSourceConfig;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
-import com.ge.predix.acs.policy.evaluation.cache.HystrixPolicyEvaluationCacheCircuitBreaker;
 import com.ge.predix.acs.policy.evaluation.cache.InMemoryPolicyEvaluationCache;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementServiceImpl;
 import com.ge.predix.acs.privilege.management.dao.ResourceRepositoryProxy;
@@ -62,13 +61,12 @@ import com.ge.predix.acs.zone.resolver.ZoneResolver;
 @TestPropertySource("classpath:application.properties")
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 @ContextConfiguration(
-        classes = { HystrixPolicyEvaluationCacheCircuitBreaker.class, InMemoryPolicyEvaluationCache.class,
-                InMemoryDataSourceConfig.class, PolicyManagementServiceImpl.class,
-                SpringSecurityPolicyContextResolver.class, PolicySetValidatorImpl.class, GroovyConditionShell.class,
-                SpringSecurityZoneResolver.class, GroovyConditionCache.class, AttributeConnectorServiceImpl.class,
-                AttributeReaderFactory.class, PrivilegeServiceResourceAttributeReader.class,
-                PrivilegeServiceSubjectAttributeReader.class, PrivilegeManagementServiceImpl.class,
-                SubjectRepositoryProxy.class, ResourceRepositoryProxy.class })
+        classes = { InMemoryPolicyEvaluationCache.class, InMemoryDataSourceConfig.class,
+                PolicyManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
+                PolicySetValidatorImpl.class, GroovyConditionShell.class, SpringSecurityZoneResolver.class,
+                GroovyConditionCache.class, AttributeConnectorServiceImpl.class, AttributeReaderFactory.class,
+                PrivilegeServiceResourceAttributeReader.class, PrivilegeServiceSubjectAttributeReader.class,
+                PrivilegeManagementServiceImpl.class, SubjectRepositoryProxy.class, ResourceRepositoryProxy.class })
 public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpringContextTests {
 
     private static final String SUBDOMAIN1 = "tenant1";
