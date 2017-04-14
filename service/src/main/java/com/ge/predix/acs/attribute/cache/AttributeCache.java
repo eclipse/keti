@@ -1,23 +1,22 @@
 package com.ge.predix.acs.attribute.cache;
 
-import java.util.Set;
-
-import com.ge.predix.acs.model.Attribute;
+import com.ge.predix.acs.attribute.readers.CachedAttributes;
 
 public interface AttributeCache {
 
-    default void setAttributes(final String identifier, final Set<Attribute> value) {
+    default void setAttributes(final String identifier, final CachedAttributes value) {
         this.set(identifier, value);
     }
 
-    default Set<Attribute> getAttributes(final String identifier) {
+    default CachedAttributes getAttributes(final String identifier) {
         return this.get(identifier);
     }
 
     @SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
-    void set(String key, Set<Attribute> value) throws StorageLimitExceededException;
+    void set(String key, CachedAttributes value) throws StorageLimitExceededException;
 
-    Set<Attribute> get(String key);
+    // get should return null if value is not found in the cache
+    CachedAttributes get(String key);
     void flushAll();
     int getTtlInSeconds();
 }
