@@ -19,12 +19,13 @@ package com.ge.predix.acs.policy.evaluation.cache;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -41,6 +42,27 @@ import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
 import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 
+enum EntityType {
+    RESOURCE {
+        @Override
+        public String toString() {
+            return "resource";
+        }
+    },
+    SUBJECT {
+        @Override
+        public String toString() {
+            return "subject";
+        }
+    },
+    POLICY_SET {
+        @Override
+        public String toString() {
+            return "policy set";
+        }
+    }
+}
+
 @Component
 public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationCache {
 
@@ -50,6 +72,16 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPolicyEvaluationCache.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    /**
+     * This method will get the Policy Evaluation Result in the cache. It will check if any of the subject, policy
+     * sets or resolved resource URI's have a timestamp in the cache after the timestamp of the Policy Evaluation
+     * Result. If the key is not in the cache or the result is invalidated, it will return null. Also it will remove
+     * the Policy EvaluationResult so that subsequent evaluations won't find the key in the cache.
+     *
+     * @param key
+     *            The Policy Evaluation key to retrieve.
+     * @return The Policy Evaluation Result if the key is the the cache and the result isn't invalidated, or null
+     */
     @Override
     public PolicyEvaluationResult get(final PolicyEvaluationRequestCacheKey key) {
         String redisKey = key.toRedisKey();
@@ -67,6 +99,19 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read policy evaluation result as JSON.", e);
         }
+        // Remove the Policy Evaluation Result out of values because we deserialized it
+        values.remove(values.size() - 1);
+
+        String zone = key.getZoneId();
+        // Add the resolved resource URI's stored in the decision to values only if the resource in the request
+        // does not match the resource stored in the cached decision so that we can check timestamps of all entities
+        // involved in the request.
+        Set<String> cachedResolvedResourceUris = cachedResult.getResolvedResourceUris();
+        if (!cachedResolvedResourceUris.equals(Collections.singleton(values.get(values.size() - 1)))) {
+            values.remove(values.size() - 1);
+            values.addAll(multiGet(cachedResolvedResourceUris.stream()
+                    .map(resourceUri -> resourceKey(zone, resourceUri)).collect(Collectors.toList())));
+        }
 
         if (isCachedRequestInvalid(values, new DateTime(cachedResult.getTimestamp()))) {
             delete(keys.get(keys.size() - 1));
@@ -77,11 +122,14 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     }
 
     private List<String> assembleKeys(final PolicyEvaluationRequestCacheKey key) {
+        // Only need to assemble keys for policy sets, the subject, and the policy evaluation result.
+        // Resource-related information will be captured in the resolved resource URIs from the cached
+        // policy evaluation result.
         List<String> keys = new ArrayList<>();
         LinkedHashSet<String> policySetIds = key.getPolicySetIds();
         policySetIds.forEach(policySetId -> keys.add(policySetKey(key.getZoneId(), policySetId)));
-        keys.add(resourceKey(key.getZoneId(), key.getResourceId()));
         keys.add(subjectKey(key.getZoneId(), key.getSubjectId()));
+        keys.add(resourceKey(key.getZoneId(), key.getResourceId()));
         keys.add(key.toRedisKey());
         return keys;
     }
@@ -90,9 +138,9 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
             final List<String> keys, final List<String> values) {
         if (LOGGER.isDebugEnabled()) {
             LinkedHashSet<String> policySetIds = key.getPolicySetIds();
-            policySetIds.forEach(policySetId -> LOGGER.debug(String
-                    .format("Getting timestamp for policy set: '%s', key: '%s', timestamp:'%s'.", policySetId,
-                            keys.get(0), values.get(0))));
+            policySetIds.forEach(policySetId -> LOGGER
+                    .debug(String.format("Getting timestamp for policy set: '%s', key: '%s', timestamp:'%s'.",
+                            policySetId, keys.get(0), values.get(0))));
             LOGGER.debug("Getting timestamp for resource: '{}', key: '{}', timestamp:'{}'.", key.getResourceId(),
                     keys.get(1), values.get(1));
             LOGGER.debug("Getting timestamp for subject: '{}', key: '{}', timestamp:'{}'.", key.getSubjectId(),
@@ -101,36 +149,38 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         }
     }
 
+    // Set's the policy evaluation key to the policy evaluation result in the cache
     @Override
     public void set(final PolicyEvaluationRequestCacheKey key, final PolicyEvaluationResult result) {
         try {
-            DateTime now = new DateTime();
-            result.setTimestamp(now.getMillis());
+            setEntityTimestamps(key, result);
+            result.setTimestamp(new DateTime().getMillis());
             String value = OBJECT_MAPPER.writeValueAsString(result);
             set(key.toRedisKey(), value);
-            setResourceTranslations(key.getZoneId(), result.getResolvedResourceUris(), key.getResourceId());
             LOGGER.debug("Setting policy evaluation to cache; key: '{}', value: '{}'.", key.toRedisKey(), value);
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to write policy evaluation result as JSON.", e);
         }
     }
 
-    @Override
-    public void setResourceTranslation(final String zoneId, final String fromResourceId, final String toResourceId) {
-        String fromKey = resourceTranslationKey(zoneId, fromResourceId);
-        String toKey = resourceKey(zoneId, toResourceId);
-        setResourceTranslation(fromKey, toKey);
-    }
+    private void setEntityTimestamps(final PolicyEvaluationRequestCacheKey key, final PolicyEvaluationResult result) {
+        // This ensures that if the timestamp for any entity involved in this decision is not in the cache at the time
+        // of this evaluation, it will be put there so that in subsequent evaluations, we will use the cached
+        // decision.
+        // We reset the timestamp to now for entities only if they do not exist in the cache so that we don't
+        // invalidate previous cached decisions.
+        String zoneId = key.getZoneId();
+        setSubjectIfNotExists(zoneId, key.getSubjectId());
 
-    @Override
-    public void setResourceTranslations(final String zoneId, final Set<String> fromResourceIds,
-            final String toResourceId) {
-        Set<String> fromKeys = new HashSet<>();
-        for (String fromResourceId : fromResourceIds) {
-            fromKeys.add(resourceTranslationKey(zoneId, fromResourceId));
+        Set<String> resolvedResourceUris = result.getResolvedResourceUris();
+        for (String resolvedResourceUri : resolvedResourceUris) {
+            setResourceIfNotExists(zoneId, resolvedResourceUri);
         }
-        String toKey = resourceKey(zoneId, toResourceId);
-        setResourceTranslations(fromKeys, toKey);
+
+        Set<String> policySetIds = key.getPolicySetIds();
+        for (String policySetId : policySetIds) {
+            setPolicySetIfNotExists(zoneId, policySetId);
+        }
     }
 
     @Override
@@ -144,95 +194,99 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         delete(keys);
     }
 
+    // Method which resets the timestamp for the given entity in the policy evaluation cache.
+    private void resetForEntity(final String zoneId, final String entityId, final EntityType entityType,
+            final BiFunction<String, String, String> getKey) {
+        String key = getKey.apply(zoneId, entityId);
+        String timestamp = timestampValue();
+        logSetEntityTimestampsDebugMessage(timestamp, key, entityId, entityType);
+        set(key, timestamp);
+    }
+
+    private void setEntityIfNotExists(final String zoneId, final String entityId,
+            final BiFunction<String, String, String> getKey) {
+        String key = getKey.apply(zoneId, entityId);
+        setIfNotExists(key, timestampValue());
+    }
+
+    private void logSetEntityTimestampsDebugMessage(final String timestamp, final String key, final String entityId,
+            final EntityType entityType) {
+        LOGGER.debug("Setting timestamp for {} '{}'; key: '{}', value: '{}'", entityType, entityId, key, timestamp);
+    }
+
     @Override
     public void resetForPolicySet(final String zoneId, final String policySetId) {
-        String key = policySetKey(zoneId, policySetId);
-        String timestamp = timestampValue();
-        LOGGER.debug("Setting timestamp for poliy set '%s'; key: '{}', value: '{}' ", policySetId, key, timestamp);
-        set(key, timestamp);
+        resetForEntity(zoneId, policySetId, EntityType.POLICY_SET, AbstractPolicyEvaluationCache::policySetKey);
+    }
+
+    public void setPolicySetIfNotExists(final String zoneId, final String policySetId) {
+        setEntityIfNotExists(zoneId, policySetId, AbstractPolicyEvaluationCache::policySetKey);
     }
 
     @Override
     public void resetForResource(final String zoneId, final String resourceId) {
-        String timestamp = timestampValue();
-        Set<String> toKeys = getResourceTranslations(resourceTranslationKey(zoneId, resourceId));
-        Map<String, String> map = new HashMap<>();
-        for (String toKey : toKeys) {
-            map.put(toKey, timestamp);
-            logSetResourceTimestampsDebugMessage(timestamp, toKey, resourceId);
-        }
-        multiSet(map);
+        resetForEntity(zoneId, resourceId, EntityType.RESOURCE, AbstractPolicyEvaluationCache::resourceKey);
+    }
+
+    public void setResourceIfNotExists(final String zoneId, final String resourceId) {
+        setEntityIfNotExists(zoneId, resourceId, AbstractPolicyEvaluationCache::resourceKey);
     }
 
     @Override
     public void resetForResourcesByIds(final String zoneId, final Set<String> resourceIds) {
-        multisetForResources(zoneId, new ArrayList<>(resourceIds));
-    }
-
-    @Override
-    public void resetForResources(final String zoneId, final List<ResourceEntity> resourceEntities) {
-        multisetForResources(zoneId,
-                resourceEntities.stream().map(ResourceEntity::getResourceIdentifier).collect(Collectors.toList()));
-    }
-
-    private void multisetForResources(final String zoneId, final List<String> resourceIds) {
-        String timestamp = timestampValue();
-
-        List<String> fromKeys = resourceIds.stream().map(resource -> resourceTranslationKey(zoneId, resource))
-                .collect(Collectors.toList());
-
-        List<Object> toKeys = multiGetResourceTranslations(fromKeys);
-
         Map<String, String> map = new HashMap<>();
-        for (int i = 0; i < toKeys.size(); i++) {
-            @SuppressWarnings("unchecked")
-            Set<String> toKeySet = (Set<String>) toKeys.get(i);
-            for (String toKey : toKeySet) {
-                map.put(toKey, timestamp);
-                String resourceId = resourceIds.get(i);
-                logSetResourceTimestampsDebugMessage(timestamp, toKey, resourceId);
-            }
+        for (String resourceId : resourceIds) {
+            createMutliSetEntityMap(zoneId, map, resourceId, EntityType.RESOURCE,
+                    AbstractPolicyEvaluationCache::resourceKey);
         }
         multiSet(map);
     }
 
-    private void logSetResourceTimestampsDebugMessage(final String timestamp, final String toKey,
-            final String resourceId) {
-        LOGGER.debug("Setting timestamp for resource '{}'; key: '{}', value: '{}' ", resourceId, toKey, timestamp);
+    @Override
+    public void resetForResources(final String zoneId, final List<ResourceEntity> resourceEntities) {
+        Map<String, String> map = new HashMap<>();
+        for (ResourceEntity resourceEntity : resourceEntities) {
+            createMutliSetEntityMap(zoneId, map, resourceEntity.getResourceIdentifier(), EntityType.RESOURCE,
+                    AbstractPolicyEvaluationCache::resourceKey);
+        }
+        multiSet(map);
     }
 
     @Override
     public void resetForSubject(final String zoneId, final String subjectId) {
-        String key = subjectKey(zoneId, subjectId);
-        String timestamp = timestampValue();
-        logSetSubjectTimestampDebugMessage(key, timestamp, subjectId);
-        set(key, timestamp);
+        resetForEntity(zoneId, subjectId, EntityType.SUBJECT, AbstractPolicyEvaluationCache::subjectKey);
+    }
+
+    public void setSubjectIfNotExists(final String zoneId, final String subjectId) {
+        setEntityIfNotExists(zoneId, subjectId, AbstractPolicyEvaluationCache::subjectKey);
     }
 
     @Override
     public void resetForSubjectsByIds(final String zoneId, final Set<String> subjectIds) {
-        multisetForSubjects(zoneId, new ArrayList<>(subjectIds));
+        Map<String, String> map = new HashMap<>();
+        for (String subjectId : subjectIds) {
+            createMutliSetEntityMap(zoneId, map, subjectId, EntityType.SUBJECT,
+                    AbstractPolicyEvaluationCache::subjectKey);
+        }
+        multiSet(map);
     }
 
     @Override
     public void resetForSubjects(final String zoneId, final List<SubjectEntity> subjectEntities) {
-        multisetForSubjects(zoneId,
-                subjectEntities.stream().map(SubjectEntity::getSubjectIdentifier).collect(Collectors.toList()));
-    }
-
-    private void multisetForSubjects(final String zoneId, final List<String> subjectIds) {
         Map<String, String> map = new HashMap<>();
-        subjectIds.forEach(subjectId -> {
-            String key = subjectKey(zoneId, subjectId);
-            String timestamp = timestampValue();
-            logSetSubjectTimestampDebugMessage(key, timestamp, subjectId);
-            map.put(key, timestamp);
-        });
+        for (SubjectEntity subjectEntity : subjectEntities) {
+            createMutliSetEntityMap(zoneId, map, subjectEntity.getSubjectIdentifier(), EntityType.SUBJECT,
+                    AbstractPolicyEvaluationCache::subjectKey);
+        }
         multiSet(map);
     }
 
-    private void logSetSubjectTimestampDebugMessage(final String key, final String timestamp, final String subjectId) {
-        LOGGER.debug("Setting timestamp for subject '{}'; key: '{}', value: '{}' ", subjectId, key, timestamp);
+    private void createMutliSetEntityMap(final String zoneId, final Map<String, String> map, final String subjectId,
+            final EntityType entityType, final BiFunction<String, String, String> getKey) {
+        String key = getKey.apply(zoneId, subjectId);
+        String timestamp = timestampValue();
+        logSetEntityTimestampsDebugMessage(key, timestamp, subjectId, entityType);
+        map.put(key, timestamp);
     }
 
     private boolean isRequestCached(final List<String> values) {
@@ -241,29 +295,37 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
     private boolean isCachedRequestInvalid(final List<String> values, final DateTime policyEvalTimestamp) {
         DateTime policyEvalTimestampUTC = policyEvalTimestamp.withZone(DateTimeZone.UTC);
-
-        if (connectorService.isResourceAttributeConnectorConfigured() || connectorService
+        if (this.connectorService.isResourceAttributeConnectorConfigured() || this.connectorService
                 .isSubjectAttributeConnectorConfigured()) {
-            return haveConnectorCacheIntervalsLapsed(connectorService, policyEvalTimestampUTC);
+            return haveConnectorCacheIntervalsLapsed(this.connectorService, policyEvalTimestampUTC);
         } else {
             return havePrivilegeServiceAttributesChanged(values, policyEvalTimestampUTC);
         }
     }
 
+    /**
+     * This method checks to see if any objects related to the policy evaluation have been changed since the Policy
+     * Evaluation Result was cached.
+     *
+     * @param values                 List of values which contain subject, policy sets and resolved resource URI's.
+     * @param policyEvalTimestampUTC The timestamp to compare against.
+     * @return true or false depending on whether any of the objects in values has a timestamp after
+     * policyEvalTimestampUTC.
+     */
     boolean havePrivilegeServiceAttributesChanged(final List<String> values, final DateTime policyEvalTimestampUTC) {
-        for (int i = 0; i < values.size() - 1; i++) {
-            if (null == values.get(i)) {
-                continue;
+        for (String value : values) {
+            if (null == value) {
+                return true;
             }
             DateTime invalidationTimestampUTC;
             try {
-                invalidationTimestampUTC = (OBJECT_MAPPER.readValue(values.get(i), DateTime.class))
-                        .withZone(DateTimeZone.UTC);
+                invalidationTimestampUTC = (OBJECT_MAPPER.readValue(value, DateTime.class)).withZone(DateTimeZone.UTC);
             } catch (IOException e) {
                 throw new IllegalStateException("Failed to read timestamp from JSON.", e);
             }
-
             if (invalidationTimestampUTC.isAfter(policyEvalTimestampUTC)) {
+                LOGGER.debug("Privilege service attributes have timestamp '{}' which is after "
+                        + "policy evaluation timestamp '{}'", invalidationTimestampUTC, policyEvalTimestampUTC);
                 return true;
             }
         }
@@ -278,11 +340,11 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
         boolean hasResourceConnectorIntervalLapsed = localConnectorService.isResourceAttributeConnectorConfigured()
                 && decisionAgeMinutes >= localConnectorService.getResourceAttributeConnector()
-                .getMaxCachedIntervalMinutes();
+                        .getMaxCachedIntervalMinutes();
 
         boolean hasSubjectConnectorIntervalLapsed = localConnectorService.isSubjectAttributeConnectorConfigured()
                 && decisionAgeMinutes >= localConnectorService.getSubjectAttributeConnector()
-                .getMaxCachedIntervalMinutes();
+                        .getMaxCachedIntervalMinutes();
 
         return hasResourceConnectorIntervalLapsed || hasSubjectConnectorIntervalLapsed;
     }
@@ -293,10 +355,6 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
     static String resourceKey(final String zoneId, final String resourceId) {
         return zoneId + ":res-id:" + Integer.toHexString(resourceId.hashCode());
-    }
-
-    static String resourceTranslationKey(final String zoneId, final String resourceId) {
-        return zoneId + ":rtr-id:" + Integer.toHexString(resourceId.hashCode());
     }
 
     static String subjectKey(final String zoneId, final String subjectId) {
@@ -333,19 +391,13 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
     abstract void flushAll();
 
-    abstract Set<String> getResourceTranslations(String fromKey);
-
     abstract Set<String> keys(String key);
 
     abstract List<String> multiGet(List<String> keys);
 
     abstract void multiSet(Map<String, String> map);
 
-    abstract List<Object> multiGetResourceTranslations(List<String> fromKeys);
-
     abstract void set(String key, String value);
 
-    abstract void setResourceTranslation(String fromKey, String toKey);
-
-    abstract void setResourceTranslations(Set<String> fromKeys, String toKey);
+    abstract void setIfNotExists(String key, String value);
 }

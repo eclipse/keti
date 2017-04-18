@@ -29,10 +29,6 @@ public interface PolicyEvaluationCache {
 
     void set(PolicyEvaluationRequestCacheKey key, PolicyEvaluationResult value);
 
-    void setResourceTranslation(String zoneId, String fromResourceId, String toResourceId);
-
-    void setResourceTranslations(String zoneId, Set<String> fromResourceIds, String toResourceId);
-
     void reset();
 
     void reset(PolicyEvaluationRequestCacheKey key);

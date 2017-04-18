@@ -122,8 +122,8 @@ public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSprin
     @Test
     public void testPolicyEvaluationWhenAdaptersTimeOut() throws Exception {
         String attributeRetrievalExceptionMessage = "attribute retrieval exception";
-        when(this.externalResourceAttributeReader.getAttributes(Mockito.anyString())).thenThrow(
-                new AttributeRetrievalException(attributeRetrievalExceptionMessage, new Exception()));
+        when(this.externalResourceAttributeReader.getAttributes(Mockito.anyString()))
+                .thenThrow(new AttributeRetrievalException(attributeRetrievalExceptionMessage, new Exception()));
 
         PolicyEvaluationResult evalResult = this.evaluationService
                 .evalPolicy(createRequest(RESOURCE_IDENTIFIER, SUBJECT_IDENTIFIER, ACTION));

@@ -18,7 +18,6 @@ package com.ge.predix.acs.policy.evaluation.cache;
 
 import static com.ge.predix.acs.testutils.XFiles.AGENT_MULDER;
 import static com.ge.predix.acs.testutils.XFiles.XFILES_ID;
-
 import static org.mockito.internal.util.reflection.Whitebox.getInternalState;
 import static org.testng.Assert.assertEquals;
 
@@ -61,21 +60,17 @@ public class InMemoryPolicyEvaluationCacheTest {
 
         Map<String, String> evalCache = (Map<String, String>) getInternalState(this.cache, "evalCache");
         assertEquals(evalCache.size(), 1);
-        Map<String, String> timestampCache = (Map<String, String>) getInternalState(this.cache, "timestampCache");
-        assertEquals(timestampCache.size(), 0);
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testSetPolicyPolicySetChangedTimestamp() throws Exception {
+    public void testSetPolicySetChangedTimestamp() throws Exception {
         String key = AbstractPolicyEvaluationCache.policySetKey(ZONE_NAME, "testSetPolicyPolicySetChangedTimestamp");
         String value = OBJECT_MAPPER.writeValueAsString(new DateTime());
         this.cache.set(key, value);
 
         Map<String, String> evalCache = (Map<String, String>) getInternalState(this.cache, "evalCache");
-        assertEquals(evalCache.size(), 0);
-        Map<String, String> timestampCache = (Map<String, String>) getInternalState(this.cache, "timestampCache");
-        assertEquals(timestampCache.size(), 1);
+        assertEquals(evalCache.size(), 1);
     }
 
     @SuppressWarnings("unchecked")
@@ -86,9 +81,7 @@ public class InMemoryPolicyEvaluationCacheTest {
         this.cache.set(key, value);
 
         Map<String, String> evalCache = (Map<String, String>) getInternalState(this.cache, "evalCache");
-        assertEquals(evalCache.size(), 0);
-        Map<String, String> timestampCache = (Map<String, String>) getInternalState(this.cache, "timestampCache");
-        assertEquals(timestampCache.size(), 1);
+        assertEquals(evalCache.size(), 1);
     }
 
     @SuppressWarnings("unchecked")
@@ -99,9 +92,7 @@ public class InMemoryPolicyEvaluationCacheTest {
         this.cache.set(key, value);
 
         Map<String, String> evalCache = (Map<String, String>) getInternalState(this.cache, "evalCache");
-        assertEquals(evalCache.size(), 0);
-        Map<String, String> timestampCache = (Map<String, String>) getInternalState(this.cache, "timestampCache");
-        assertEquals(timestampCache.size(), 1);
+        assertEquals(evalCache.size(), 1);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

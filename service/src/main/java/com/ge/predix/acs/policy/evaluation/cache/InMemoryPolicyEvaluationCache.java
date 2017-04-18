@@ -18,9 +18,6 @@ package com.ge.predix.acs.policy.evaluation.cache;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,21 +25,17 @@ import java.util.Set;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 @Component
 @Profile({ "simple-cache" })
 public class InMemoryPolicyEvaluationCache extends AbstractPolicyEvaluationCache {
 
-    private final Map<String, String> evalCache = Collections.synchronizedMap(new HashMap<String, String>());
-    private final Map<String, Set<String>> resourceTranslations = Collections
-            .synchronizedMap(new HashMap<String, Set<String>>());
-    // For security reasons we can't evict time stamps used to invalidate cached evaluation results.
-    private final Map<String, String> timestampCache = Collections.synchronizedMap(new HashMap<String, String>());
+    private final Map<String, String> evalCache = new ConcurrentReferenceHashMap<String, String>();
 
     @Override
     void delete(final String key) {
         this.evalCache.remove(key);
-        this.timestampCache.remove(key);
     }
 
     @Override
@@ -55,16 +48,6 @@ public class InMemoryPolicyEvaluationCache extends AbstractPolicyEvaluationCache
     @Override
     void flushAll() {
         this.evalCache.clear();
-        this.timestampCache.clear();
-    }
-
-    @Override
-    Set<String> getResourceTranslations(final String fromKey) {
-        Set<String> results = this.resourceTranslations.get(fromKey);
-        if (null == results) {
-            return Collections.emptySet();
-        }
-        return results;
     }
 
     @Override
@@ -76,26 +59,9 @@ public class InMemoryPolicyEvaluationCache extends AbstractPolicyEvaluationCache
     List<String> multiGet(final List<String> keys) {
         List<String> results = new ArrayList<>();
         for (String key : keys) {
-            String value = this.timestampCache.get(key);
-            if (null == value) {
-                value = this.evalCache.get(key);
-            }
-            results.add(value);
+            results.add(this.evalCache.get(key));
         }
         return results;
-    }
-
-    @Override
-    List<Object> multiGetResourceTranslations(final List<String> fromKeys) {
-        List<Object> result = new ArrayList<>();
-        for (String fromKey : fromKeys) {
-            Set<String> toKeys = this.resourceTranslations.get(fromKey);
-            if (null == toKeys) {
-                toKeys = Collections.emptySet();
-            }
-            result.add(toKeys);
-        }
-        return result;
     }
 
     @Override
@@ -107,9 +73,8 @@ public class InMemoryPolicyEvaluationCache extends AbstractPolicyEvaluationCache
 
     @Override
     void set(final String key, final String value) {
-        if (isPolicySetChangedKey(key) || isResourceChangedKey(key) || isSubjectChangedKey(key)) {
-            this.timestampCache.put(key, value);
-        } else if (isPolicyEvalResultKey(key)) {
+        if (isPolicySetChangedKey(key) || isResourceChangedKey(key) || isSubjectChangedKey(key)
+                || isPolicyEvalResultKey(key)) {
             this.evalCache.put(key, value);
         } else {
             throw new IllegalArgumentException("Unsupported key format.");
@@ -117,24 +82,9 @@ public class InMemoryPolicyEvaluationCache extends AbstractPolicyEvaluationCache
     }
 
     @Override
-    void setResourceTranslation(final String fromKey, final String toKey) {
-        Set<String> toKeys = this.resourceTranslations.get(fromKey);
-        if (null == toKeys) {
-            toKeys = new HashSet<>();
-        }
-        toKeys.add(toKey);
-        this.resourceTranslations.put(fromKey, toKeys);
-    }
-
-    @Override
-    void setResourceTranslations(final Set<String> fromKeys, final String toKey) {
-        for (String fromKey : fromKeys) {
-            Set<String> toKeysLocal = this.resourceTranslations.get(fromKey);
-            if (null == toKeysLocal) {
-                toKeysLocal = new HashSet<>();
-            }
-            toKeysLocal.add(toKey);
-            this.resourceTranslations.put(fromKey, toKeysLocal);
+    void setIfNotExists(final String key, final String value) {
+        if (!this.evalCache.containsKey(key)) {
+            this.evalCache.put(key, value);
         }
     }
 }

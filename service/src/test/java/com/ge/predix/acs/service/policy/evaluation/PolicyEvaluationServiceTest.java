@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.invocation.InvocationOnMock;
@@ -128,7 +129,8 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
         when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
     }
 
-    @Test(dataProvider = "policyRequestParameterProvider", expectedExceptions = IllegalArgumentException.class)
+    @Test(dataProvider = "policyRequestParameterProvider",
+            expectedExceptions = IllegalArgumentException.class)
     public void testEvaluateWithNullParameters(final String resource, final String subject, final String action) {
         this.evaluationService.evalPolicy(createRequest(resource, subject, action));
     }
@@ -188,15 +190,14 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
             Assert.assertTrue(evalPolicyResponse.getSubjectAttributes()
                     .contains(new Attribute(ISSUER, SUBJECT_ATTRIB_NAME_ROLE, acsSubjectAttributeValue)));
         }
-        
+
         for (Attribute attribute : subjectAttributes) {
             Assert.assertTrue(evalPolicyResponse.getSubjectAttributes().contains(attribute));
         }
-        
+
     }
 
-    @Test(
-            dataProvider = "filterPolicySetsInvalidRequestDataProvider",
+    @Test(dataProvider = "filterPolicySetsInvalidRequestDataProvider",
             expectedExceptions = IllegalArgumentException.class)
     public void testFilterPolicySetsByPriorityForInvalidRequest(final List<PolicySet> allPolicySets,
             final LinkedHashSet<String> policySetsPriority) {
@@ -241,11 +242,27 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
         when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
                 .thenThrow(new RuntimeException("This policy matcher is designed to throw an exception."));
 
-        PolicyEvaluationResult result = this.evaluationService.evalPolicy(createRequest("anyresource", "anysubject",
-                "GET", Stream.of(twoPolicySets.get(0).getName(), twoPolicySets.get(1).getName())
-                        .collect(Collectors.toCollection(LinkedHashSet::new))));
+        PolicyEvaluationResult result = this.evaluationService.evalPolicy(
+                createRequest("anyresource", "anysubject", "GET",
+                        Stream.of(twoPolicySets.get(0).getName(), twoPolicySets.get(1).getName())
+                                .collect(Collectors.toCollection(LinkedHashSet::new))));
 
         Assert.assertEquals(result.getEffect(), Effect.INDETERMINATE);
+    }
+
+    @Test(dataProvider = "policyDataProvider")
+    public void testEvaluateWithPolicyWithCacheGetException(final File inputPolicy, final Effect effect)
+            throws JsonParseException, JsonMappingException, IOException {
+        when(this.cache.get(Mockito.any(PolicyEvaluationRequestCacheKey.class))).thenThrow(new RuntimeException());
+        testEvaluateWithPolicy(inputPolicy, effect);
+    }
+
+    @Test(dataProvider = "policyDataProvider")
+    public void testEvaluateWithPolicyWithCacheSetException(final File inputPolicy, final Effect effect)
+            throws JsonParseException, JsonMappingException, IOException {
+        Mockito.doThrow(new RuntimeException()).when(this.cache)
+                .set(Mockito.any(PolicyEvaluationRequestCacheKey.class), Mockito.any(PolicyEvaluationResult.class));
+        testEvaluateWithPolicy(inputPolicy, effect);
     }
 
     /**
@@ -309,18 +326,15 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
 
     @DataProvider(name = "policyDataProviderForTestWithAttributes")
     private Object[][] policyDataProviderForTestWithAttributes() {
-        return new Object[][] {
-                { SUBJECT_ATTRIB_VALUE_ANALYST,
-                        new File("src/test/resources/policy-set-with-one-policy-one-condition-using-attributes.json"),
-                        Effect.NOT_APPLICABLE, EMPTY_ATTRS },
-                { SUBJECT_ATTRIB_VALUE_ANALYST,
-                        new File("src/test/resources/policy-set-with-one-policy-one-condition-using-attributes.json"),
-                        Effect.PERMIT, getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN) },
+        return new Object[][] { { SUBJECT_ATTRIB_VALUE_ANALYST,
+                new File("src/test/resources/policy-set-with-one-policy-one-condition-using-attributes.json"),
+                Effect.NOT_APPLICABLE, EMPTY_ATTRS }, { SUBJECT_ATTRIB_VALUE_ANALYST,
+                new File("src/test/resources/policy-set-with-one-policy-one-condition-using-attributes.json"),
+                Effect.PERMIT, getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN) },
                 { null, new File("src/test/resources/policy-set-with-one-policy-one-condition-using-attributes.json"),
-                        Effect.NOT_APPLICABLE, getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN) },
-                { null, new File(
-                        "src/test/resources/" + "policy-set-with-one-policy-one-condition-using-res-attributes.json"),
-                        Effect.PERMIT, getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN) } };
+                        Effect.NOT_APPLICABLE, getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN) }, { null,
+                new File("src/test/resources/" + "policy-set-with-one-policy-one-condition-using-res-attributes.json"),
+                Effect.PERMIT, getSubjectAttributes(SUBJECT_ATTRIB_VALUE_ADMIN) } };
     }
 
     @DataProvider(name = "policyDataProvider")
@@ -368,8 +382,8 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     }
 
     private Object[] filterTwoPolicySetsByByNonexistentPolicySet(final List<PolicySet> twoPolicySets) {
-        return new Object[] { twoPolicySets, Stream.of(twoPolicySets.get(0).getName(), "noexistent-policy-set")
-                .collect(Collectors.toCollection(LinkedHashSet::new)) };
+        return new Object[] { twoPolicySets, Stream.of(twoPolicySets.get(0).getName(), "noexistent-policy-set").collect(
+                Collectors.toCollection(LinkedHashSet::new)) };
     }
 
     @DataProvider(name = "filterPolicySetsDataProvider")
@@ -377,16 +391,16 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
         List<PolicySet> denyPolicySet = createDenyPolicySet();
         List<PolicySet> notApplicableAndDenyPolicySets = createNotApplicableAndDenyPolicySets();
         return new Object[][] { filterOnePolicySetByEmptyEvaluationOrder(denyPolicySet),
-                                filterOnePolicySetByItself(denyPolicySet),
-                                filterTwoPolicySetsByFirstSet(notApplicableAndDenyPolicySets),
-                                filterTwoPolicySetsBySecondPolicySet(notApplicableAndDenyPolicySets),
-                                filterTwoPolicySetsByItself(notApplicableAndDenyPolicySets) };
+                filterOnePolicySetByItself(denyPolicySet),
+                filterTwoPolicySetsByFirstSet(notApplicableAndDenyPolicySets),
+                filterTwoPolicySetsBySecondPolicySet(notApplicableAndDenyPolicySets),
+                filterTwoPolicySetsByItself(notApplicableAndDenyPolicySets) };
     }
 
     private Object[] filterTwoPolicySetsByItself(final List<PolicySet> twoPolicySets) {
         return new Object[] { twoPolicySets,
-                Stream.of(twoPolicySets.get(0).getName(), twoPolicySets.get(1).getName())
-                        .collect(Collectors.toCollection(LinkedHashSet::new)),
+                Stream.of(twoPolicySets.get(0).getName(), twoPolicySets.get(1).getName()).collect(
+                        Collectors.toCollection(LinkedHashSet::new)),
                 twoPolicySets.stream().collect(Collectors.toCollection(LinkedHashSet::new)) };
     }
 
@@ -427,8 +441,9 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     }
 
     private Object[] requestEvaluationWithAllOfTwoPolicySets(final List<PolicySet> twoPolicySets) {
-        return new Object[] { twoPolicySets, Stream.of(twoPolicySets.get(0).getName(), twoPolicySets.get(1).getName())
-                .collect(Collectors.toCollection(LinkedHashSet::new)), Effect.DENY };
+        return new Object[] { twoPolicySets,
+                Stream.of(twoPolicySets.get(0).getName(), twoPolicySets.get(1).getName()).collect(
+                        Collectors.toCollection(LinkedHashSet::new)), Effect.DENY };
     }
 
     private Object[] requestEvaluationWithSecondOfTwoPolicySets(final List<PolicySet> twoPolicySets) {
@@ -484,7 +499,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     }
 
     private PolicyEvaluationRequestV1 createRequest(final String resource, final String subject, final String action,
-                                                    final LinkedHashSet<String> policySetsEvaluationOrder) {
+            final LinkedHashSet<String> policySetsEvaluationOrder) {
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
         request.setAction(action);
         request.setSubjectIdentifier(subject);

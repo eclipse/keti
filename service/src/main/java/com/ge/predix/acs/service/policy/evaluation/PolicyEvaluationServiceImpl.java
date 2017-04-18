@@ -107,14 +107,21 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
         // Fixing policy evaluation order so we could build a cache key.
         PolicyEvaluationRequestCacheKey key;
         if (policySetsEvaluationOrder.isEmpty()) {
-            key = new Builder().zoneId(zone.getName()).policySetIds(
-                    Stream.of(filteredPolicySets.iterator().next().getName())
-                            .collect(Collectors.toCollection(LinkedHashSet::new))).request(request).build();
+            key = new Builder().zoneId(zone.getName())
+                    .policySetIds(Stream.of(filteredPolicySets.iterator().next().getName())
+                            .collect(Collectors.toCollection(LinkedHashSet::new)))
+                    .request(request).build();
         } else {
             key = new Builder().zoneId(zone.getName()).request(request).build();
         }
 
-        PolicyEvaluationResult result = this.cache.get(key);
+        PolicyEvaluationResult result = null;
+        try {
+            result = this.cache.get(key);
+        } catch (Exception e) {
+            LOGGER.error(String.format("Unable to get cache key '%s'", key), e);
+        }
+
         if (null == result) {
             result = new PolicyEvaluationResult(Effect.NOT_APPLICABLE);
 
@@ -141,7 +148,12 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
             LOGGER.info("Processed Policy Evaluation for: " + "resourceUri='{}', subjectIdentifier='{}', action='{}',"
                     + " result='{}'", uri, subjectIdentifier, action, result.getEffect());
-            this.cache.set(key, result);
+            try {
+                this.cache.set(key, result);
+            } catch (Exception e) {
+                LOGGER.error(String.format("Unable to set cache key '%s' to value '%s' due to exception", key, result),
+                        e);
+            }
         }
         return result;
     }
@@ -152,7 +164,8 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
         if (policySetsEvaluationOrder.isEmpty()) {
             if (allPolicySets.size() > 1) {
-                LOGGER.error("Found more than one policy set during policy evaluation and "
+                LOGGER.error(
+                        "Found more than one policy set during policy evaluation and "
                                 + "no evaluation order is provided. subjectIdentifier='{}', resourceURI='{}'",
                         subjectIdentifier, uri);
                 throw new IllegalArgumentException("More than one policy set exists for this zone. "
@@ -192,9 +205,6 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
             Effect effect = Effect.NOT_APPLICABLE;
             Set<String> resolvedResourceUris = matchResult.getResolvedResourceUris();
-            if (null == resolvedResourceUris) {
-                resolvedResourceUris = new HashSet<>();
-            }
             resolvedResourceUris.add(resourceURI);
 
             Set<Attribute> resourceAttributes = Collections.emptySet();
@@ -264,8 +274,8 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
         debugAttributes(subjectAttributes, resourceAttributes);
 
-        Map<String, Object> attributeBindingsMap = this
-                .getAttributeBindingsMap(subjectAttributes, resourceAttributes, resourceURI, resourceURITemplate);
+        Map<String, Object> attributeBindingsMap = this.getAttributeBindingsMap(subjectAttributes, resourceAttributes,
+                resourceURI, resourceURITemplate);
 
         boolean result = true;
         for (int i = 0; i < validatedConditionScripts.size(); i++) {
