@@ -15,10 +15,13 @@
  *******************************************************************************/
 package db.postgres;
 
-import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
-import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
-import com.ge.predix.acs.service.policy.admin.dao.PolicySetEntity;
-import com.ge.predix.acs.zone.management.dao.ZoneClientEntity;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -26,12 +29,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
+import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
+import com.ge.predix.acs.service.policy.admin.dao.PolicySetEntity;
+import com.ge.predix.acs.zone.management.dao.ZoneClientEntity;
 
 //CHECKSTYLE:OFF
 //Naming convention for the class name is being enforced by spring
@@ -53,8 +54,8 @@ public class V2_0_1__InitializeIdentityZones implements SpringJdbcMigration {
     }
 
     private Long createDefaultAuthzZone(final JdbcTemplate jdbcTemplate) {
-        final String insertZoneSql = "INSERT INTO authorization_zone (name, description, subdomain) "
-                + "VALUES (?,?,?)";
+        final String insertZoneSql =
+                "INSERT INTO authorization_zone (name, description, subdomain) " + "VALUES (?,?,?)";
         KeyHolder holder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(new PreparedStatementCreator() {
@@ -69,8 +70,7 @@ public class V2_0_1__InitializeIdentityZones implements SpringJdbcMigration {
             }
         }, holder);
 
-        Long acsAuthorizationZoneId = holder.getKey().longValue();
-        return acsAuthorizationZoneId;
+        return holder.getKey().longValue();
     }
 
     private Set<ZoneClientEntity> findExistingOAuthClients(final JdbcTemplate jdbcTemplate) {
@@ -93,11 +93,10 @@ public class V2_0_1__InitializeIdentityZones implements SpringJdbcMigration {
             final Set<ZoneClientEntity> existingOAuthClients) {
 
         for (ZoneClientEntity oauthClient : existingOAuthClients) {
-            jdbcTemplate.update(
-                    "INSERT INTO authorization_zone_client (issuer_id, client_id,"
-                            + " authorization_zone_id) VALUES (?,?,?)",
-                    Long.valueOf(oauthClient.getIssuer().getIssuerId()), oauthClient.getClientId(),
-                    acsAuthorizationZoneId);
+            jdbcTemplate.update("INSERT INTO authorization_zone_client (issuer_id, client_id,"
+                            + " authorization_zone_id) VALUES (?,?,?)", Long.valueOf(oauthClient.getIssuer()
+                            .getIssuerId()),
+                    oauthClient.getClientId(), acsAuthorizationZoneId);
         }
     }
 
@@ -118,34 +117,33 @@ public class V2_0_1__InitializeIdentityZones implements SpringJdbcMigration {
                 .query("SELECT DISTINCT subject_identifier, attributes FROM subject", new SubjectRowMapper());
         jdbcTemplate.update("DELETE FROM subject *");
         for (SubjectEntity s : subjects) {
-            jdbcTemplate.update(
-                    "INSERT INTO subject (subject_identifier, attributes, " + " authorization_zone_id) VALUES (?,?,?)",
-                    s.getSubjectIdentifier(), s.getAttributesAsJson(), zone);
+            jdbcTemplate.update("INSERT INTO subject (subject_identifier, attributes, "
+                            + " authorization_zone_id) VALUES (?,?,?)", s.getSubjectIdentifier(), s
+                            .getAttributesAsJson(),
+                    zone);
         }
         final List<ResourceEntity> resources = jdbcTemplate
                 .query("SELECT DISTINCT resource_identifier, attributes FROM resource", new ResourceRowMapper());
         jdbcTemplate.update("DELETE FROM resource *");
         for (ResourceEntity r : resources) {
-            jdbcTemplate.update(
-                    "INSERT INTO resource (resource_identifier, attributes, "
-                            + " authorization_zone_id) VALUES (?,?,?)",
-                    r.getResourceIdentifier(), r.getAttributesAsJson(), zone);
+            jdbcTemplate.update("INSERT INTO resource (resource_identifier, attributes, "
+                            + " authorization_zone_id) VALUES (?,?,?)", r.getResourceIdentifier(), r
+                            .getAttributesAsJson(),
+                    zone);
         }
 
         final List<PolicySetEntity> policysets = jdbcTemplate
                 .query("SELECT DISTINCT policy_set_id, policy_set_json FROM policy_set", new PolicySetRowMapper());
         jdbcTemplate.update("DELETE FROM policy_set *");
         for (PolicySetEntity ps : policysets) {
-            SqlRowSet row = jdbcTemplate.queryForRowSet("SELECT * FROM policy_set WHERE policy_set_id =?",
-                    ps.getPolicySetID());
+            SqlRowSet row = jdbcTemplate
+                    .queryForRowSet("SELECT * FROM policy_set WHERE policy_set_id =?", ps.getPolicySetID());
             if (row.next()) {
                 jdbcTemplate.update("UPDATE policy_set SET policy_set_json = ? WHERE policy_set_id = ?",
                         ps.getPolicySetJson(), ps.getPolicySetID());
             } else {
-                jdbcTemplate.update(
-                        "INSERT INTO policy_set (policy_set_id, policy_set_json, "
-                                + " authorization_zone_id) VALUES (?,?,?)",
-                        ps.getPolicySetID(), ps.getPolicySetJson(), zone);
+                jdbcTemplate.update("INSERT INTO policy_set (policy_set_id, policy_set_json, "
+                        + " authorization_zone_id) VALUES (?,?,?)", ps.getPolicySetID(), ps.getPolicySetJson(), zone);
             }
         }
     }

@@ -46,7 +46,6 @@ import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 
 /**
- *
  * @author 212406427
  */
 @Component
@@ -80,9 +79,6 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
         }
     }
 
-    /**
-     * @param action
-     */
     private void validatePolicyActions(final Policy p) {
 
         if (p.getTarget() != null && p.getTarget().getAction() != null) {
@@ -96,10 +92,9 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
             }
             for (String action : policyActions.split("\\s*,\\s*")) {
                 if (!this.validAcsPolicyHttpActionsSet.contains(action)) {
-                    throw new PolicySetValidationException(String.format(
-                            "Policy Action validation failed: "
-                                    + "the action: [%s] is not contained in the allowed set of actions: [%s]",
-                            action, this.validAcsPolicyHttpActions));
+                    throw new PolicySetValidationException(String.format("Policy Action validation failed: "
+                                    + "the action: [%s] is not contained in the allowed set of actions: [%s]", action,
+                            this.validAcsPolicyHttpActions));
                 }
             }
         }
@@ -117,10 +112,9 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
             if (!valid) {
                 while (iterator.hasNext()) {
                     ProcessingMessage processingMessage = iterator.next();
-                    sb.append(" " + processingMessage);
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug(processingMessage.toString());
-                    }
+                    sb.append(" ");
+                    sb.append(processingMessage);
+                    LOGGER.debug("{}", processingMessage);
                 }
                 throw new PolicySetValidationException("JSON Schema validation " + sb.toString());
             }
@@ -154,13 +148,11 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
                 }
 
                 try {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Adding condition: " + conditionScript.toString());
-                    }
+                    LOGGER.debug("Adding condition: {}", conditionScript);
                     compiledScript = conditionShell.parse(conditionScript);
                     conditionScripts.add(compiledScript);
                     this.conditionCache.put(conditionScript, compiledScript);
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     throw new PolicySetValidationException(
                             "Condition : [" + conditionScript + "] validation failed with error : " + e.getMessage(),
                             e);
@@ -182,7 +174,7 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
     @PostConstruct
     public void init() {
         String[] actions = this.validAcsPolicyHttpActions.split("\\s*,\\s*");
-        LOGGER.debug("ACS Server configured with validAcsPolicyHttpActions :" + this.validAcsPolicyHttpActions);
+        LOGGER.debug("ACS Server configured with validAcsPolicyHttpActions : {}", this.validAcsPolicyHttpActions);
         this.validAcsPolicyHttpActionsSet = new HashSet<>(Arrays.asList(actions));
     }
 

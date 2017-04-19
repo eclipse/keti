@@ -1,6 +1,5 @@
 package com.ge.predix.acs.config;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -17,12 +16,12 @@ import com.ge.predix.acs.privilege.management.dao.GraphSubjectRepository;
 public class GraphBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
     @Override
-    public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) {
         // Do nothing.
     }
 
     @Override
-    public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) throws BeansException {
+    public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) {
         BeanDefinition resourceRepositoryBeanDefinition = new RootBeanDefinition(GraphResourceRepository.class);
         registry.registerBeanDefinition("resourceHierarchicalRepository", resourceRepositoryBeanDefinition);
 

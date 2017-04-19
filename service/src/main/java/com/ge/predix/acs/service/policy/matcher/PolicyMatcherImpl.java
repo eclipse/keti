@@ -39,7 +39,6 @@ import com.ge.predix.acs.service.policy.evaluation.ResourceAttributeResolver.Res
 import com.ge.predix.acs.service.policy.evaluation.SubjectAttributeResolver;
 
 /**
- *
  * @author 212314537
  */
 @Component
@@ -80,10 +79,8 @@ public class PolicyMatcherImpl implements PolicyMatcher {
     }
 
     /**
-     * @param candidate
-     *            policy match candidate
-     * @param policy
-     *            to match
+     * @param candidate policy match candidate
+     * @param policy    to match
      * @return true if the policy meets the criteria
      */
     @SuppressWarnings("nls")
@@ -99,11 +96,8 @@ public class PolicyMatcherImpl implements PolicyMatcher {
 
         boolean resourceMatch = isResourceMatch(candidate.getResourceURI(), resourceAttributes, policy);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format(
-                    "Checking policy [%s]: Action match ? -> %s, Subject match ? -> %s, Resource match ? -> %s, ",
-                    policy.getName(), actionMatch, subjectMatch, resourceMatch));
-        }
+        LOGGER.debug("Checking policy [{}]: Action match ? -> {}, Subject match ? -> {}, Resource match ? -> {}, ",
+                policy.getName(), actionMatch, subjectMatch, resourceMatch);
 
         return actionMatch && subjectMatch && resourceMatch;
     }
@@ -114,8 +108,8 @@ public class PolicyMatcherImpl implements PolicyMatcher {
             return true;
         }
 
-        boolean uriTemplateMatch = UriTemplateUtils.isCanonicalMatch(policy.getTarget().getResource().getUriTemplate(),
-                resourceURI);
+        boolean uriTemplateMatch = UriTemplateUtils
+                .isCanonicalMatch(policy.getTarget().getResource().getUriTemplate(), resourceURI);
 
         if (!uriTemplateMatch) {
             return false;
@@ -156,8 +150,8 @@ public class PolicyMatcherImpl implements PolicyMatcher {
             String policyActions = policy.getTarget().getAction();
             policyActionList = Arrays.asList(policyActions.split("\\s*,\\s*"));
         }
-        return (policyActionDefined && (requestAction != null) && policyActionList.contains(requestAction))
-                || (policy.getTarget().getAction() == null);
+        return (policyActionDefined && (requestAction != null) && policyActionList.contains(requestAction)) || (
+                policy.getTarget().getAction() == null);
     }
 
     private boolean containsAttributeType(final String issuer, final String name,

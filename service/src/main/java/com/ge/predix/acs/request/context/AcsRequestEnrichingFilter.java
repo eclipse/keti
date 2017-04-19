@@ -15,7 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class AcsRequestEnrichingFilter extends OncePerRequestFilter {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(AcsRequestEnrichingFilter.class);
 
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
@@ -23,17 +23,16 @@ public class AcsRequestEnrichingFilter extends OncePerRequestFilter {
         try {
             try {
                 AcsRequestContextHolder.initialize();
-                this.logger.trace("Initialized the Acs Request Context");
+                LOGGER.trace("Initialized the Acs Request Context");
 
             } catch (RuntimeException e) { // Ensure that the filter chain is not aborted.
-                this.logger.error(
-                        "AcsRequestContext Initialization failed:Let the request go on irrespective." + e.getMessage());
+                LOGGER.error("AcsRequestContext Initialization failed:Let the request go on irrespective.", e);
             }
             filterChain.doFilter(request, response);
         } finally {
             // Very Critical...to recycle the Thread to the pool safely
             AcsRequestContextHolder.clear();
-            this.logger.trace("Cleared the Acs Request Context");
+            LOGGER.trace("Cleared the Acs Request Context");
         }
     }
 }

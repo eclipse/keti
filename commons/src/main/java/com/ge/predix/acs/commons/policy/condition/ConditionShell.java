@@ -21,6 +21,7 @@ package com.ge.predix.acs.commons.policy.condition;
  *
  * @author 212314537
  */
+@FunctionalInterface
 public interface ConditionShell {
 
     /**

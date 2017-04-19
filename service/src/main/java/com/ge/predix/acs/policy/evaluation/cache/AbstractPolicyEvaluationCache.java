@@ -70,9 +70,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
         if (isCachedRequestInvalid(values, new DateTime(cachedResult.getTimestamp()))) {
             delete(keys.get(keys.size() - 1));
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(String.format("Cached decision for key '%s' is not valid.", redisKey));
-            }
+            LOGGER.debug("Cached decision for key '{}' is not valid.", redisKey);
             return null;
         }
         return cachedResult;
@@ -92,15 +90,14 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
             final List<String> keys, final List<String> values) {
         if (LOGGER.isDebugEnabled()) {
             LinkedHashSet<String> policySetIds = key.getPolicySetIds();
-            policySetIds.forEach(policySetId -> LOGGER
-                    .debug(String.format("Getting timestamp for policy set: '%s', key: '%s', timestamp:'%s'.",
-                            policySetId, keys.get(0), values.get(0))));
-            LOGGER.debug(String.format("Getting timestamp for resource: '%s', key: '%s', timestamp:'%s'.",
-                    key.getResourceId(), keys.get(1), values.get(1)));
-            LOGGER.debug(String.format("Getting timestamp for subject: '%s', key: '%s', timestamp:'%s'.",
-                    key.getSubjectId(), keys.get(2), values.get(2)));
-            LOGGER.debug(String.format("Getting policy evaluation from cache; key: '%s', value: '%s'.", redisKey,
-                    values.get(3)));
+            policySetIds.forEach(policySetId -> LOGGER.debug(String
+                    .format("Getting timestamp for policy set: '%s', key: '%s', timestamp:'%s'.", policySetId,
+                            keys.get(0), values.get(0))));
+            LOGGER.debug("Getting timestamp for resource: '{}', key: '{}', timestamp:'{}'.", key.getResourceId(),
+                    keys.get(1), values.get(1));
+            LOGGER.debug("Getting timestamp for subject: '{}', key: '{}', timestamp:'{}'.", key.getSubjectId(),
+                    keys.get(2), values.get(2));
+            LOGGER.debug("Getting policy evaluation from cache; key: '{}', value: '{}'.", redisKey, values.get(3));
         }
     }
 
@@ -112,10 +109,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
             String value = OBJECT_MAPPER.writeValueAsString(result);
             set(key.toRedisKey(), value);
             setResourceTranslations(key.getZoneId(), result.getResolvedResourceUris(), key.getResourceId());
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(String.format("Setting policy evaluation to cache; key: '%s', value: '%s'.",
-                        key.toRedisKey(), value));
-            }
+            LOGGER.debug("Setting policy evaluation to cache; key: '{}', value: '{}'.", key.toRedisKey(), value);
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to write policy evaluation result as JSON.", e);
         }
@@ -154,10 +148,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     public void resetForPolicySet(final String zoneId, final String policySetId) {
         String key = policySetKey(zoneId, policySetId);
         String timestamp = timestampValue();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("Setting timestamp for poliy set '%s'; key: '%s', value: '%s' ", policySetId,
-                    key, timestamp));
-        }
+        LOGGER.debug("Setting timestamp for poliy set '%s'; key: '{}', value: '{}' ", policySetId, key, timestamp);
         set(key, timestamp);
     }
 
@@ -175,13 +166,13 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
     @Override
     public void resetForResourcesByIds(final String zoneId, final Set<String> resourceIds) {
-        multisetForResources(zoneId, resourceIds.stream().collect(Collectors.toList()));
+        multisetForResources(zoneId, new ArrayList<>(resourceIds));
     }
 
     @Override
     public void resetForResources(final String zoneId, final List<ResourceEntity> resourceEntities) {
-        multisetForResources(zoneId, resourceEntities.stream().map(resource -> resource.getResourceIdentifier())
-                .collect(Collectors.toList()));
+        multisetForResources(zoneId,
+                resourceEntities.stream().map(ResourceEntity::getResourceIdentifier).collect(Collectors.toList()));
     }
 
     private void multisetForResources(final String zoneId, final List<String> resourceIds) {
@@ -207,10 +198,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
     private void logSetResourceTimestampsDebugMessage(final String timestamp, final String toKey,
             final String resourceId) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("Setting timestamp for resource '%s'; key: '%s', value: '%s' ", resourceId,
-                    toKey, timestamp));
-        }
+        LOGGER.debug("Setting timestamp for resource '{}'; key: '{}', value: '{}' ", resourceId, toKey, timestamp);
     }
 
     @Override
@@ -223,13 +211,13 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
     @Override
     public void resetForSubjectsByIds(final String zoneId, final Set<String> subjectIds) {
-        multisetForSubjects(zoneId, subjectIds.stream().collect(Collectors.toList()));
+        multisetForSubjects(zoneId, new ArrayList<>(subjectIds));
     }
 
     @Override
     public void resetForSubjects(final String zoneId, final List<SubjectEntity> subjectEntities) {
         multisetForSubjects(zoneId,
-                subjectEntities.stream().map(subject -> subject.getSubjectIdentifier()).collect(Collectors.toList()));
+                subjectEntities.stream().map(SubjectEntity::getSubjectIdentifier).collect(Collectors.toList()));
     }
 
     private void multisetForSubjects(final String zoneId, final List<String> subjectIds) {
@@ -244,32 +232,25 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     }
 
     private void logSetSubjectTimestampDebugMessage(final String key, final String timestamp, final String subjectId) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("Setting timestamp for subject '%s'; key: '%s', value: '%s' ", subjectId, key,
-                    timestamp));
-        }
+        LOGGER.debug("Setting timestamp for subject '{}'; key: '{}', value: '{}' ", subjectId, key, timestamp);
     }
 
     private boolean isRequestCached(final List<String> values) {
-        if (null != values.get(values.size() - 1)) {
-            return true;
-        }
-        return false;
+        return null != values.get(values.size() - 1);
     }
 
     private boolean isCachedRequestInvalid(final List<String> values, final DateTime policyEvalTimestamp) {
         DateTime policyEvalTimestampUTC = policyEvalTimestamp.withZone(DateTimeZone.UTC);
 
-        if (connectorService.isResourceAttributeConnectorConfigured()
-                || connectorService.isSubjectAttributeConnectorConfigured()) {
+        if (connectorService.isResourceAttributeConnectorConfigured() || connectorService
+                .isSubjectAttributeConnectorConfigured()) {
             return haveConnectorCacheIntervalsLapsed(connectorService, policyEvalTimestampUTC);
         } else {
             return havePrivilegeServiceAttributesChanged(values, policyEvalTimestampUTC);
         }
     }
 
-    boolean havePrivilegeServiceAttributesChanged(final List<String> values,
-            final DateTime policyEvalTimestampUTC) {
+    boolean havePrivilegeServiceAttributesChanged(final List<String> values, final DateTime policyEvalTimestampUTC) {
         for (int i = 0; i < values.size() - 1; i++) {
             if (null == values.get(i)) {
                 continue;
@@ -297,11 +278,11 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
         boolean hasResourceConnectorIntervalLapsed = localConnectorService.isResourceAttributeConnectorConfigured()
                 && decisionAgeMinutes >= localConnectorService.getResourceAttributeConnector()
-                        .getMaxCachedIntervalMinutes();
+                .getMaxCachedIntervalMinutes();
 
         boolean hasSubjectConnectorIntervalLapsed = localConnectorService.isSubjectAttributeConnectorConfigured()
                 && decisionAgeMinutes >= localConnectorService.getSubjectAttributeConnector()
-                        .getMaxCachedIntervalMinutes();
+                .getMaxCachedIntervalMinutes();
 
         return hasResourceConnectorIntervalLapsed || hasSubjectConnectorIntervalLapsed;
     }

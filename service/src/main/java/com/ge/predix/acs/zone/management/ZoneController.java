@@ -73,7 +73,7 @@ public class ZoneController extends BaseRestApi {
             throw new RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e);
         } catch (Exception e) {
             String message = String.format(
-                    "Unexpected Exception " + "while upserting Zone with name %s and subdomain %s", zone.getName(),
+                    "Unexpected Exception while upserting Zone with name %s and subdomain %s", zone.getName(),
                     zone.getSubdomain());
             throw new RestApiException(HttpStatus.INTERNAL_SERVER_ERROR, message, e);
         }
@@ -101,7 +101,7 @@ public class ZoneController extends BaseRestApi {
 
     @RequestMapping(method = DELETE, value = V1 + AcsApiUriTemplates.ZONE_URL)
     @ApiOperation(value = "Deletes the zone.", hidden = true)
-    public ResponseEntity<?> deleteZone(@PathVariable("zoneName") final String zoneName) {
+    public ResponseEntity<Void> deleteZone(@PathVariable("zoneName") final String zoneName) {
 
         try {
 

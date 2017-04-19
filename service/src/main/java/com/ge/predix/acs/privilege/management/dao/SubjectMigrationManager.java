@@ -1,5 +1,7 @@
 package com.ge.predix.acs.privilege.management.dao;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -8,8 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @Profile("titan")
@@ -30,16 +30,16 @@ public class SubjectMigrationManager {
             numOfSubjectsSaved += pageOfSubjects.getNumberOfElements();
             subjectListToSave.forEach(item -> {
                 item.setId(0);
-                LOGGER.trace("doSubjectMigration Subject-Id : " + item.getSubjectIdentifier() + " Zone-name : "
-                    + item.getZone().getName() + " Zone-id:" + item.getZone().getId());
+                LOGGER.trace("doSubjectMigration Subject-Id: {} Zone-name: {} Zone-id: {}", item.getSubjectIdentifier(),
+                        item.getZone().getName(), item.getZone().getId());
             });
-            
+
             subjectHierarchicalRepository.save(subjectListToSave);
-            LOGGER.info("Total subjects migrated so far: " + numOfSubjectsSaved + "/" + numOfSubjectEntitiesToMigrate);
+            LOGGER.info("Total subjects migrated so far: {}/{}", numOfSubjectsSaved, numOfSubjectEntitiesToMigrate);
             pageRequest = pageOfSubjects.nextPageable();
         } while (pageOfSubjects.hasNext());
 
-        LOGGER.info("Number of subject entities migrated: " + numOfSubjectsSaved);
+        LOGGER.info("Number of subject entities migrated: {}", numOfSubjectsSaved);
         LOGGER.info("Subject migration to Titan completed.");
     }
 

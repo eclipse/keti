@@ -87,11 +87,8 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
         LinkedHashSet<String> policySetsEvaluationOrder = request.getPolicySetsEvaluationOrder();
 
         if (uri == null || subjectIdentifier == null || action == null) {
-            LOGGER.error(
-                    String.format(
-                            "Policy evaluation request is missing required input parameters: "
-                                    + "resourceURI='%s' subjectIdentifier='%s' action='%s'",
-                            uri, subjectIdentifier, action));
+            LOGGER.error("Policy evaluation request is missing required input parameters: "
+                    + "resourceURI='{}' subjectIdentifier='{}' action='{}'", uri, subjectIdentifier, action);
 
             throw new IllegalArgumentException("Policy evaluation request is missing required input parameters. "
                     + "Please review and resubmit the request.");
@@ -110,10 +107,9 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
         // Fixing policy evaluation order so we could build a cache key.
         PolicyEvaluationRequestCacheKey key;
         if (policySetsEvaluationOrder.isEmpty()) {
-            key = new Builder().zoneId(zone.getName())
-                    .policySetIds(Stream.of(filteredPolicySets.iterator().next().getName())
-                            .collect(Collectors.toCollection(LinkedHashSet::new)))
-                    .request(request).build();
+            key = new Builder().zoneId(zone.getName()).policySetIds(
+                    Stream.of(filteredPolicySets.iterator().next().getName())
+                            .collect(Collectors.toCollection(LinkedHashSet::new))).request(request).build();
         } else {
             key = new Builder().zoneId(zone.getName()).request(request).build();
         }
@@ -138,18 +134,13 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
             for (PolicySet policySet : filteredPolicySets) {
                 result = evalPolicySet(policySet, subjectIdentifier, uri, action, supplementalResourceAttributes,
                         supplementalSubjectAttributes);
-                if (result.getEffect() == Effect.NOT_APPLICABLE) {
-                    continue;
-                } else {
+                if (result.getEffect() != Effect.NOT_APPLICABLE) {
                     break;
                 }
             }
 
-            LOGGER.info(
-                    String.format(
-                            "Processed Policy Evaluation for: "
-                                    + "resourceUri='%s', subjectIdentifier='%s', action='%s'," + " result='%s'",
-                            uri, subjectIdentifier, action, result.getEffect()));
+            LOGGER.info("Processed Policy Evaluation for: " + "resourceUri='{}', subjectIdentifier='{}', action='{}',"
+                    + " result='{}'", uri, subjectIdentifier, action, result.getEffect());
             this.cache.set(key, result);
         }
         return result;
@@ -161,26 +152,25 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
         if (policySetsEvaluationOrder.isEmpty()) {
             if (allPolicySets.size() > 1) {
-                LOGGER.error(String
-                        .format("Found more than one policy set during policy evaluation and "
-                                + "no evaluation order is provided. subjectIdentifier='%s', resourceURI='%s'",
-                                subjectIdentifier, uri));
+                LOGGER.error("Found more than one policy set during policy evaluation and "
+                                + "no evaluation order is provided. subjectIdentifier='{}', resourceURI='{}'",
+                        subjectIdentifier, uri);
                 throw new IllegalArgumentException("More than one policy set exists for this zone. "
                         + "Please provide an ordered list of policy set names to consider for this evaluation and "
                         + "resubmit the request.");
             } else {
-                return allPolicySets.stream().collect(Collectors.toCollection(LinkedHashSet::new));
+                return new LinkedHashSet<>(allPolicySets);
             }
         }
 
         Map<String, PolicySet> allPolicySetsMap = allPolicySets.stream()
                 .collect(Collectors.toMap(PolicySet::getName, Function.identity()));
-        LinkedHashSet<PolicySet> filteredPolicySets = new LinkedHashSet<PolicySet>();
+        LinkedHashSet<PolicySet> filteredPolicySets = new LinkedHashSet<>();
         for (String policySetId : policySetsEvaluationOrder) {
             PolicySet policySet = allPolicySetsMap.get(policySetId);
             if (policySet == null) {
                 LOGGER.error("No existing policy set matches policy set in the evaluation order of the request. "
-                        + "Subject: " + subjectIdentifier + ", Resource: " + uri);
+                        + "Subject: {}, Resource: {}", subjectIdentifier, uri);
                 throw new IllegalArgumentException(
                         "No existing policy set matches policy set in the evaluaion order of the request. "
                                 + "Please review the policy evauation order and resubmit the request.");
@@ -197,7 +187,6 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
         PolicyEvaluationResult result;
         try {
-            // Set<Attribute> resourceAttributes = getResourceAttributes(resourceURI);
             MatchResult matchResult = matchPolicies(subjectIdentifier, resourceURI, action, policySet.getPolicies(),
                     supplementalResourceAttributes, supplementalSubjectAttributes);
 
@@ -223,34 +212,27 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
                 }
 
                 boolean conditionEvaluationResult = true;
-                if (0 < policy.getConditions().size()) {
+                if (!policy.getConditions().isEmpty()) {
                     if (null == groovyShell) {
                         groovyShell = new GroovyConditionShell();
                     }
                     conditionEvaluationResult = evaluateConditions(subjectAttributes, resourceAttributes, resourceURI,
-                            policy.getConditions(), resourceURITemplate, groovyShell);
+                            policy.getConditions(), resourceURITemplate);
                 }
+                LOGGER.debug("Checking condition of policy '{}': Condition evaluated to ? -> {}, policy effect {}",
+                        policy.getName(), conditionEvaluationResult, policy.getEffect());
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug(String.format(
-                            "Checking condition of policy '%s': Condition evaluated to ? -> %s, policy effect %s",
-                            policy.getName(), conditionEvaluationResult, policy.getEffect()));
-                }
-
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Condition Eval: " + policy.getConditions() + " Result: " + conditionEvaluationResult);
-                }
+                LOGGER.debug("Condition Eval: {} Result: {}", policy.getConditions(), conditionEvaluationResult);
                 if (conditionEvaluationResult) {
                     effect = policy.getEffect();
-                    LOGGER.info(String.format(
-                            "Condition Evaluation success: policy set name='%s', policy name='%s', effect='%s'",
-                            policySet.getName(), policy.getName(), policy.getEffect()));
+                    LOGGER.info("Condition Evaluation success: policy set name='{}', policy name='{}', effect='{}'",
+                            policySet.getName(), policy.getName(), policy.getEffect());
                     break;
                 }
             }
-            result = new PolicyEvaluationResult(effect, subjectAttributes,
-                    new ArrayList<>(resourceAttributes), resolvedResourceUris);
-        } catch (Throwable e) {
+            result = new PolicyEvaluationResult(effect, subjectAttributes, new ArrayList<>(resourceAttributes),
+                    resolvedResourceUris);
+        } catch (Exception e) {
             result = handlePolicyEvaluationException(policySet, subjectIdentifier, resourceURI, e);
         }
         return result;
@@ -266,30 +248,24 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
         if (e instanceof AttributeLimitExceededException || e instanceof AttributeRetrievalException) {
             result.setMessage(e.getMessage());
         }
-        LOGGER.error(logMessage.toString(), e);
+        LOGGER.error("{}", logMessage, e);
         return result;
     }
 
-    /**
-     * @param subjectHandler
-     * @param resourceHandler
-     * @param conditions
-     */
     boolean evaluateConditions(final Set<Attribute> subjectAttributes, final Set<Attribute> resourceAttributes,
-            final String resourceURI, final List<Condition> conditions, final String resourceURITemplate,
-            final ConditionShell groovyShell) {
+            final String resourceURI, final List<Condition> conditions, final String resourceURITemplate) {
         List<ConditionScript> validatedConditionScripts;
         try {
             validatedConditionScripts = this.policySetValidator.validatePolicyConditions(conditions);
         } catch (PolicySetValidationException e) {
-            LOGGER.error("Unable to validate conditions: " + e.getMessage());
+            LOGGER.error("Unable to validate conditions: {}", e.getMessage());
             throw new PolicyEvaluationException("Condition Validation failed", e);
         }
 
         debugAttributes(subjectAttributes, resourceAttributes);
 
-        Map<String, Object> attributeBindingsMap = this.getAttributeBindingsMap(subjectAttributes, resourceAttributes,
-                resourceURI, resourceURITemplate);
+        Map<String, Object> attributeBindingsMap = this
+                .getAttributeBindingsMap(subjectAttributes, resourceAttributes, resourceURI, resourceURITemplate);
 
         boolean result = true;
         for (int i = 0; i < validatedConditionScripts.size(); i++) {
@@ -297,9 +273,10 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
             try {
                 result = result && conditionScript.execute(attributeBindingsMap);
             } catch (ConditionAssertionFailedException e) {
+                LOGGER.debug("Condition Assertion Failed", e);
                 result = false;
-            } catch (Throwable e) {
-                LOGGER.error("Unable to evualate condition: " + conditions.get(i).toString(), e);
+            } catch (Exception e) {
+                LOGGER.error("Unable to evualate condition: {}", conditions.get(i), e);
                 throw new PolicyEvaluationException("Condition Evaluation failed", e);
             }
         }

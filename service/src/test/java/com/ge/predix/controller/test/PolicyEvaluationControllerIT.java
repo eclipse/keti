@@ -1,5 +1,30 @@
 package com.ge.predix.controller.test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.context.WebApplicationContext;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
@@ -17,30 +42,6 @@ import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.ZoneService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.context.WebApplicationContext;
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
@@ -49,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTests {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String POLICY_EVAL_URL = "v1/policy-evaluation";
+    private static final LinkedHashSet<String> EMPTY_POLICY_EVALUATION_ORDER = new LinkedHashSet<>();
 
     private final JsonUtils jsonUtils = new JsonUtils();
     private final TestUtils testUtils = new TestUtils();
@@ -100,12 +102,12 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
             upsertMultiplePolicySets(policySets);
         }
 
-        MockMvcContext postPolicyEvalContext = this.testUtils.createWACWithCustomPOSTRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), POLICY_EVAL_URL);
-        MvcResult mvcResult = postPolicyEvalContext.getMockMvc()
-                .perform(postPolicyEvalContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
-                        .content(OBJECT_MAPPER.writeValueAsString(policyEvalRequest)))
-                .andExpect(status().isOk()).andReturn();
+        MockMvcContext postPolicyEvalContext = this.testUtils
+                .createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), POLICY_EVAL_URL);
+        MvcResult mvcResult = postPolicyEvalContext.getMockMvc().perform(
+                postPolicyEvalContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsString(policyEvalRequest))).andExpect(status().isOk())
+                .andReturn();
         PolicyEvaluationResult policyEvalResult = OBJECT_MAPPER
                 .readValue(mvcResult.getResponse().getContentAsByteArray(), PolicyEvaluationResult.class);
 
@@ -118,10 +120,10 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
 
         upsertMultiplePolicySets(policySets);
 
-        MockMvcContext postPolicyEvalContext = this.testUtils.createWACWithCustomPOSTRequestBuilder(this.wac,
-                this.testZone.getSubdomain(), POLICY_EVAL_URL);
-        postPolicyEvalContext.getMockMvc()
-                .perform(postPolicyEvalContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
+        MockMvcContext postPolicyEvalContext = this.testUtils
+                .createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), POLICY_EVAL_URL);
+        postPolicyEvalContext.getMockMvc().perform(
+                postPolicyEvalContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(policyEvalRequest)))
                 .andExpect(status().isBadRequest());
     }
@@ -135,56 +137,44 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
     }
 
     private Object[] requestEvaluationWithEmptyPolicySet() {
-        return new Object[] {
-                createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
-                                        this.testSubject.getSubjectIdentifier(),
-                                        PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER),
-                Collections.emptyList(), Effect.NOT_APPLICABLE };
+        return new Object[] { createPolicyEvalRequest(this.testResource.getResourceIdentifier(),
+                this.testSubject.getSubjectIdentifier(), EMPTY_POLICY_EVALUATION_ORDER), Collections.emptyList(),
+                Effect.NOT_APPLICABLE };
     }
 
     private Object[] requestEvaluationWithSecondOfTwoPolicySets() {
-        return new Object[] {
-                createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
-                        this.testSubject.getSubjectIdentifier(),
-                        Stream.of(this.notApplicableAndDenyPolicySets.get(1).getName())
-                                .collect(Collectors.toCollection(LinkedHashSet::new))),
-                this.notApplicableAndDenyPolicySets, Effect.DENY };
+        return new Object[] { createPolicyEvalRequest(this.testResource.getResourceIdentifier(),
+                this.testSubject.getSubjectIdentifier(), Stream.of(this.notApplicableAndDenyPolicySets.get(1).getName())
+                        .collect(Collectors.toCollection(LinkedHashSet::new))), this.notApplicableAndDenyPolicySets,
+                Effect.DENY };
     }
 
     private Object[] requestEvaluationWithFirstOfTwoPolicySets() {
-        return new Object[] {
-                createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
-                        this.testSubject.getSubjectIdentifier(),
-                        Stream.of(this.notApplicableAndDenyPolicySets.get(0).getName())
-                                .collect(Collectors.toCollection(LinkedHashSet::new))),
-                this.notApplicableAndDenyPolicySets, Effect.NOT_APPLICABLE };
+        return new Object[] { createPolicyEvalRequest(this.testResource.getResourceIdentifier(),
+                this.testSubject.getSubjectIdentifier(), Stream.of(this.notApplicableAndDenyPolicySets.get(0).getName())
+                        .collect(Collectors.toCollection(LinkedHashSet::new))), this.notApplicableAndDenyPolicySets,
+                Effect.NOT_APPLICABLE };
     }
 
     private Object[] requestEvaluationWithOnePolicySetAndPriorityList() {
-        return new Object[] {
-                createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
-                        this.testSubject.getSubjectIdentifier(),
-                        Stream.of(this.denyPolicySet.get(0).getName())
-                                .collect(Collectors.toCollection(LinkedHashSet::new))),
+        return new Object[] { createPolicyEvalRequest(this.testResource.getResourceIdentifier(),
+                this.testSubject.getSubjectIdentifier(),
+                Stream.of(this.denyPolicySet.get(0).getName()).collect(Collectors.toCollection(LinkedHashSet::new))),
                 this.denyPolicySet, Effect.DENY };
     }
 
     private Object[] requestEvaluationWithOnePolicySetAndEmptyPriorityList() {
-        return new Object[] {
-                createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
-                                        this.testSubject.getSubjectIdentifier(),
-                                        PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER),
+        return new Object[] { createPolicyEvalRequest(this.testResource.getResourceIdentifier(),
+                this.testSubject.getSubjectIdentifier(), EMPTY_POLICY_EVALUATION_ORDER),
                 this.denyPolicySet, Effect.DENY };
     }
 
     private Object[] requestEvaluationWithAllOfTwoPolicySets() {
-        return new Object[] {
-                createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
-                        this.testSubject.getSubjectIdentifier(),
-                        Stream.of(this.notApplicableAndDenyPolicySets.get(0).getName(),
-                                this.notApplicableAndDenyPolicySets.get(1).getName())
-                                .collect(Collectors.toCollection(LinkedHashSet::new))),
-                this.notApplicableAndDenyPolicySets, Effect.DENY };
+        return new Object[] { createPolicyEvalRequest(this.testResource.getResourceIdentifier(),
+                this.testSubject.getSubjectIdentifier(), Stream.of(this.notApplicableAndDenyPolicySets.get(0).getName(),
+                        this.notApplicableAndDenyPolicySets.get(1).getName())
+                        .collect(Collectors.toCollection(LinkedHashSet::new))), this.notApplicableAndDenyPolicySets,
+                Effect.DENY };
 
     }
 
@@ -196,30 +186,26 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
     }
 
     private Object[] requestEvaluationWithExistentAndNonExistentPolicySets() {
-        return new Object[] {
-                createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
-                        this.testSubject.getSubjectIdentifier(),
-                        Stream.of(this.notApplicableAndDenyPolicySets.get(0).getName(), "noexistent-policy-set")
-                                .collect(Collectors.toCollection(LinkedHashSet::new))),
-                this.notApplicableAndDenyPolicySets };
+        return new Object[] { createPolicyEvalRequest(this.testResource.getResourceIdentifier(),
+                this.testSubject.getSubjectIdentifier(),
+                Stream.of(this.notApplicableAndDenyPolicySets.get(0).getName(), "noexistent-policy-set")
+                        .collect(Collectors.toCollection(LinkedHashSet::new))), this.notApplicableAndDenyPolicySets };
     }
 
     private Object[] requestEvaluationWithTwoPolicySetsAndNoPriorityList() {
-        return new Object[] {
-                createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
-                                        this.testSubject.getSubjectIdentifier(),
-                                        PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER),
+        return new Object[] { createPolicyEvalRequest(this.testResource.getResourceIdentifier(),
+                this.testSubject.getSubjectIdentifier(), EMPTY_POLICY_EVALUATION_ORDER),
                 this.notApplicableAndDenyPolicySets };
     }
 
     private Object[] requestEvaluationWithNonExistentPolicySet() {
-        return new Object[] { createPolicyEvalRequest("GET", this.testResource.getResourceIdentifier(),
+        return new Object[] { createPolicyEvalRequest(this.testResource.getResourceIdentifier(),
                 this.testSubject.getSubjectIdentifier(),
                 Stream.of("nonexistent-policy-set").collect(Collectors.toCollection(LinkedHashSet::new))),
                 this.denyPolicySet };
     }
 
-    private PolicyEvaluationRequestV1 createPolicyEvalRequest(final String action, final String resourceIdentifier,
+    private PolicyEvaluationRequestV1 createPolicyEvalRequest(final String resourceIdentifier,
             final String subjectIdentifier, final LinkedHashSet<String> policySetsPriority) {
         PolicyEvaluationRequestV1 policyEvalRequest = new PolicyEvaluationRequestV1();
         policyEvalRequest.setAction("GET");
@@ -230,14 +216,14 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
     }
 
     private List<PolicySet> createDenyPolicySet() {
-        List<PolicySet> policySets = new ArrayList<PolicySet>();
+        List<PolicySet> policySets = new ArrayList<>();
         policySets.add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalDeny.json", PolicySet.class));
         Assert.assertNotNull(policySets, "Policy set file is not found or invalid");
         return policySets;
     }
 
     private List<PolicySet> createNotApplicableAndDenyPolicySets() {
-        List<PolicySet> policySets = new ArrayList<PolicySet>();
+        List<PolicySet> policySets = new ArrayList<>();
         policySets
                 .add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalNotApplicable.json", PolicySet.class));
         policySets.add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalDeny.json", PolicySet.class));
@@ -252,7 +238,6 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
     }
 
     private void upsertMultiplePolicySets(final List<PolicySet> policySets) {
-        policySets.forEach(policySet -> upsertPolicySet(policySet));
-        return;
+        policySets.forEach(this::upsertPolicySet);
     }
 }

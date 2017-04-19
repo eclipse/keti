@@ -28,7 +28,6 @@ import com.ge.predix.acs.commons.attribute.AttributeType;
 import com.ge.predix.acs.model.Attribute;
 
 /**
- *
  * @author 212314537
  */
 @SuppressWarnings({ "nls", "javadoc" })
@@ -52,7 +51,7 @@ public abstract class AbstractHandler {
         if (null != attributes) {
             this.attributes.addAll(attributes);
         }
-        this.attributes.forEach(attribute -> indexAttributeByType(attribute));
+        this.attributes.forEach(this::indexAttributeByType);
     }
 
     private void indexAttributeByType(final Attribute attribute) {
@@ -67,7 +66,7 @@ public abstract class AbstractHandler {
 
     public Set<String> attributes(final String attributeIssuer, final String attributeName) {
         Set<Attribute> attributeSet = attributes(new AttributeType(attributeIssuer, attributeName));
-        return attributeSet.stream().map(attribute -> attribute.getValue()).collect(Collectors.toSet());
+        return attributeSet.stream().map(Attribute::getValue).collect(Collectors.toSet());
     }
 
     protected Set<Attribute> attributes(final AttributeType attributeType) {

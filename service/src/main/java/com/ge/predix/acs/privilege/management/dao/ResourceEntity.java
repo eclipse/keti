@@ -78,6 +78,7 @@ public class ResourceEntity implements ZonableEntity {
     }
 
     public ResourceEntity() {
+        // required for jackson serialization
     }
 
     @Override

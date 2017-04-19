@@ -71,7 +71,7 @@ public final class TitanMigrationManager {
 
                         LOGGER.info("Titan attribute migration complete. Created version: "
                                 + INITIAL_ATTRIBUTE_GRAPH_VERSION);
-                    } catch (Throwable e) {
+                    } catch (Exception e) {
                         LOGGER.error("Exception during attribute migration: ", e);
                     }
                 }

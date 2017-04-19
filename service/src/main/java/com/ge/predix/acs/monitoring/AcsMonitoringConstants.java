@@ -17,13 +17,9 @@
 package com.ge.predix.acs.monitoring;
 
 /**
- *
  * @author 212360328
  */
 public final class AcsMonitoringConstants {
-
-    private AcsMonitoringConstants() {
-    }
 
     public static final int SUCCESS_CHECK = 0;
     public static final int FAILED_CHECK = -1;
@@ -40,5 +36,8 @@ public final class AcsMonitoringConstants {
     public static final String ACS_DB_OUT_OF_SERVICE = "ACS_DB_OUT_OF_SERVICE";
     public static final String ACS_DB_MIGRATION_INCOMPLETE = "ACS_DB_MIGRATION_INCOMPLETE";
     public static final String UAA_OUT_OF_SERVICE = "UAA_OUT_OF_SERVICE";
+
+    private AcsMonitoringConstants() {
+    }
 
 }

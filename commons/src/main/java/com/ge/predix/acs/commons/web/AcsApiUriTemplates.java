@@ -23,9 +23,6 @@ package com.ge.predix.acs.commons.web;
 @SuppressWarnings({ "nls" })
 public final class AcsApiUriTemplates {
 
-    private AcsApiUriTemplates() {
-    }
-
     public static final String V1 = "/v1";
 
     public static final String TENANT_URL_BASE = "/tenant/{tenantId}";
@@ -61,4 +58,8 @@ public final class AcsApiUriTemplates {
     public static final String RESOURCE_CONNECTOR_URL = CONNECTOR_URL + "/resource";
 
     public static final String SUBJECT_CONNECTOR_URL = CONNECTOR_URL + "/subject";
+
+    private AcsApiUriTemplates() {
+    }
+
 }

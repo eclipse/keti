@@ -18,6 +18,7 @@ package com.ge.predix.acs.jmx;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.tomcat.jdbc.pool.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
@@ -26,13 +27,13 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.stereotype.Component;
 
 @Profile({ "performance" })
-@ManagedResource(objectName = DataSourceMBean.OBJECTNAME, description = "Connection pool propteries")
+@ManagedResource(objectName = DataSourceMBean.OBJECTNAME,
+        description = "Connection pool propteries")
 @Component
 public class DataSourceMBean {
     public static final String OBJECTNAME = "com.ge.predix.acs.jmx:name=DataSourceMBean";
     private static final String DELIMITER = ";|,";
     private static final String PROP_DELIMITER = "=|:";
-    private static final String TOMCAT_POOL_DATASOURCE = "org.apache.tomcat.jdbc.pool.DataSource";
 
     @Autowired
     private LocalContainerEntityManagerFactoryBean entityManagerFactory;
@@ -52,9 +53,10 @@ public class DataSourceMBean {
             return connectionPool;
         }
         // For TOMCAT_POOL_DATASOURCE
-        if (this.entityManagerFactory.getDataSource().getClass().getName().equals(TOMCAT_POOL_DATASOURCE)) {
-            org.apache.tomcat.jdbc.pool.DataSource tomcatDs =
-                    (org.apache.tomcat.jdbc.pool.DataSource) this.entityManagerFactory.getDataSource();
+        if (this.entityManagerFactory.getDataSource().getClass().isAssignableFrom(DataSource.class)) {
+            org.apache.tomcat.jdbc.pool.DataSource tomcatDs = (org.apache.tomcat.jdbc.pool.DataSource) this
+                    .entityManagerFactory
+                    .getDataSource();
             connectionPool.put("driverClassName", tomcatDs.getDriverClassName());
             connectionPool.put("numActive", tomcatDs.getNumActive());
             connectionPool.put("maxActive", tomcatDs.getMaxActive());
@@ -67,9 +69,9 @@ public class DataSourceMBean {
 
         // in case it is not TOMCAT_POOL_DATASOURCE
         String str = this.entityManagerFactory.getDataSource().toString();
-        int start = str.indexOf("[");
+        int start = str.indexOf('[');
         if (start == -1) {
-            start = str.indexOf("=") - 16;
+            start = str.indexOf('=') - 16;
             if (start <= 0) {
                 return connectionPool;
             }

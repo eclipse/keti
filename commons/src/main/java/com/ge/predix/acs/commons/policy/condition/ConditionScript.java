@@ -23,6 +23,7 @@ import java.util.Map;
  *
  * @author 212314537
  */
+@FunctionalInterface
 public interface ConditionScript {
     /**
      * Executes the policy condition script.

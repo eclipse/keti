@@ -75,9 +75,7 @@ public class CloudRedisConfig extends AbstractCloudConfig {
 
     private RedisConnectionFactory createSpringCloudConnectionFactory() {
         PoolConfig poolConfig = new PoolConfig(this.minActive, this.maxActive, this.maxWaitTime);
-        RedisConnectionFactory connFactory = connectionFactory().redisConnectionFactory(this.acsRedis,
-                new PooledServiceConnectorConfig(poolConfig));
-        return connFactory;
+        return connectionFactory().redisConnectionFactory(this.acsRedis, new PooledServiceConnectorConfig(poolConfig));
     }
 
     public RedisConnectionFactory createJedisConnectionFactory() {

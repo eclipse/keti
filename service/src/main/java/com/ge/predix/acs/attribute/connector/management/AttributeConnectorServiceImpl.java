@@ -57,7 +57,7 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
         boolean isCreated = false;
         try {
             AttributeConnector existingConnector = zoneEntity.getResourceAttributeConnector();
-            isCreated = (null == existingConnector);
+            isCreated = null == existingConnector;
             connector.setAdapters(encryptAdapterClientSecrets(connector.getAdapters()));
             zoneEntity.setResourceAttributeConnector(connector);
             this.zoneRepository.save(zoneEntity);
@@ -119,7 +119,7 @@ public class AttributeConnectorServiceImpl implements AttributeConnectorService 
         boolean isCreated = false;
         try {
             AttributeConnector existingConnector = zoneEntity.getSubjectAttributeConnector();
-            isCreated = (null == existingConnector);
+            isCreated = null == existingConnector;
             connector.setAdapters(encryptAdapterClientSecrets(connector.getAdapters()));
             zoneEntity.setSubjectAttributeConnector(connector);
             this.zoneRepository.save(zoneEntity);

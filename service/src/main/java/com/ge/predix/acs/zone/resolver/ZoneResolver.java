@@ -17,6 +17,7 @@ package com.ge.predix.acs.zone.resolver;
 
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
+@FunctionalInterface
 public interface ZoneResolver {
     ZoneEntity getZoneEntityOrFail();
 }

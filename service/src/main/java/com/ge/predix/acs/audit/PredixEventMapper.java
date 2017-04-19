@@ -22,7 +22,7 @@ import com.ge.predix.audit.sdk.message.AuditEventV2.AuditEventV2Builder;
 @Profile("predixAudit")
 public class PredixEventMapper {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PredixEventProcessor.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PredixEventMapper.class);
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -36,7 +36,7 @@ public class PredixEventMapper {
         try {
             payload = OBJECT_MAPPER.writeValueAsString(auditPayload);
         } catch (JsonProcessingException e) {
-            LOGGER.warn("Unable to convert audit payload to json: " + auditPayload.toString());
+            LOGGER.warn("Unable to convert audit payload to json: {}" + auditPayload, e);
         }
 
         AuditEventV2Builder auditEventBuilder = AuditEventV2.builder().timestamp(auditEvent.getTime().toEpochMilli())
