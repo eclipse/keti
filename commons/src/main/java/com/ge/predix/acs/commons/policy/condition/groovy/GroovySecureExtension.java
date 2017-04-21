@@ -34,39 +34,39 @@ public class GroovySecureExtension extends AbstractTypeCheckingExtension {
     @Override
     public void onMethodSelection(final Expression expression, final MethodNode target) {
         // First the white list.
-        if ((!target.getDeclaringClass().getName().equals("com.ge.predix.acs.commons.policy.condition.AbstractHandler"))
-                && (!target.getDeclaringClass().getName()
-                        .equals("com.ge.predix.acs.commons.policy.condition.AbstractHandlers"))
-                && (!target.getDeclaringClass().getName()
-                        .equals("com.ge.predix.acs.commons.policy.condition.ResourceHandler"))
-                && (!target.getDeclaringClass().getName()
-                        .equals("com.ge.predix.acs.commons.policy.condition.SubjectHandler"))
-                && (!target.getDeclaringClass().getName()
-                        .equals("com.ge.predix.acs.commons.policy.condition.groovy.AttributeMatcher"))
-                && (!target.getDeclaringClass().getName().equals("java.lang.Boolean"))
-                && (!target.getDeclaringClass().getName().equals("java.lang.Integer"))
-                && (!target.getDeclaringClass().getName().equals("java.lang.Iterable"))
-                && (!target.getDeclaringClass().getName().equals("java.lang.Object"))
+        if ((!"com.ge.predix.acs.commons.policy.condition.AbstractHandler".equals(target.getDeclaringClass().getName()))
+                && (!"com.ge.predix.acs.commons.policy.condition.AbstractHandlers"
+                .equals(target.getDeclaringClass().getName()))
+                && (!"com.ge.predix.acs.commons.policy.condition.ResourceHandler"
+                .equals(target.getDeclaringClass().getName()))
+                && (!"com.ge.predix.acs.commons.policy.condition.SubjectHandler"
+                .equals(target.getDeclaringClass().getName()))
+                && (!"com.ge.predix.acs.commons.policy.condition.groovy.AttributeMatcher"
+                .equals(target.getDeclaringClass().getName())) && (!"java.lang.Boolean"
+                .equals(target.getDeclaringClass().getName())) && (!"java.lang.Integer"
+                .equals(target.getDeclaringClass().getName())) && (!"java.lang.Iterable"
+                .equals(target.getDeclaringClass().getName())) && (!"java.lang.Object"
+                .equals(target.getDeclaringClass().getName()))
                 // This means we allow collections of type Object.
-                && (!target.getDeclaringClass().getName().equals("[Ljava.lang.Object;"))
-                && (!target.getDeclaringClass().getName().equals("java.lang.String"))
-                && (!target.getDeclaringClass().getName().equals("java.util.Collection"))
-                && (!target.getDeclaringClass().getName().equals("java.util.Set"))) {
+                && (!"[Ljava.lang.Object;".equals(target.getDeclaringClass().getName())) && (!"java.lang.String"
+                .equals(target.getDeclaringClass().getName())) && (!"java.util.Collection"
+                .equals(target.getDeclaringClass().getName())) && (!"java.util.Set"
+                .equals(target.getDeclaringClass().getName()))) {
             addStaticTypeError("Method call for '" + target.getDeclaringClass().getName() + "' class is not allowed!",
                     expression);
         }
 
         // Then the black list.
-        if (target.getDeclaringClass().getName().equals("java.lang.System")) {
+        if ("java.lang.System".equals(target.getDeclaringClass().getName())) {
             addStaticTypeError("Method call for 'java.lang.System' class is not allowed!", expression);
         }
-        if (target.getDeclaringClass().getName().equals("groovy.util.Eval")) {
+        if ("groovy.util.Eval".equals(target.getDeclaringClass().getName())) {
             addStaticTypeError("Method call for 'groovy.util.Eval' class is not allowed!", expression);
         }
-        if (target.getDeclaringClass().getName().equals("java.io")) {
+        if ("java.io".equals(target.getDeclaringClass().getName())) {
             addStaticTypeError("Method call for 'java.io' package is not allowed!", expression);
         }
-        if (target.getName().equals("execute")) {
+        if ("execute".equals(target.getName())) {
             addStaticTypeError("Method call 'execute' is not allowed!", expression);
         }
     }
@@ -74,17 +74,17 @@ public class GroovySecureExtension extends AbstractTypeCheckingExtension {
     @Override
     public boolean handleUnresolvedVariableExpression(final VariableExpression vexp) {
 
-        if (vexp.getName().equals("resource")) {
+        if ("resource".equals(vexp.getName())) {
             makeDynamic(vexp, ClassHelper.makeCached(ResourceHandler.class));
             setHandled(true);
             return true;
         }
-        if (vexp.getName().equals("subject")) {
+        if ("subject".equals(vexp.getName())) {
             makeDynamic(vexp, ClassHelper.makeCached(SubjectHandler.class));
             setHandled(true);
             return true;
         }
-        if (vexp.getName().equals("match")) {
+        if ("match".equals(vexp.getName())) {
             makeDynamic(vexp, ClassHelper.makeCached(AttributeMatcher.class));
             setHandled(true);
             return true;

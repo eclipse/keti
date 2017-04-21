@@ -125,7 +125,6 @@ public class AttributeConnectorControllerIT extends AbstractTestNGSpringContextT
         createZone1AndAssert();
         AttributeConnector connector = this.jsonUtils.deserializeFromFile(
                 "controller-test/createAttributeConnectorWithLowValueForCache.json", AttributeConnector.class);
-        System.out.println(connector);
         Assert.assertNotNull(connector, "createAttributeConnectorWithLowValueForCache.json file not found or invalid");
         String connectorContent = this.objectWriter.writeValueAsString(connector);
 

@@ -63,7 +63,7 @@ public class ZoneServiceImpl implements ZoneService {
 
     @Override
     public boolean upsertZone(final Zone zone) {
-        LOGGER.debug("upsertZone Request for: " + zone.toString());
+        LOGGER.debug("upsertZone Request for: {}", zone);
         validateAndSanitizeInputOrFail(zone);
         boolean isEntityUpdate = false;
         ZoneEntity zoneEntity = this.zoneRepository.getByName(zone.getName());
@@ -81,7 +81,7 @@ public class ZoneServiceImpl implements ZoneService {
                 zoneEntity = this.zoneConverter.toZoneEntity(zone);
             } else {
                 isEntityUpdate = true;
-                LOGGER.debug("Updating existing Zone " + zoneEntity.getName() + " " + zoneEntity.getSubdomain());
+                LOGGER.debug("Updating existing Zone {} {}", zoneEntity.getName(), zoneEntity.getSubdomain());
                 zoneEntity.setName(zone.getName());
                 zoneEntity.setDescription(zone.getDescription());
                 zoneEntity.setSubdomain(zone.getSubdomain());

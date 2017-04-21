@@ -28,33 +28,46 @@ import org.springframework.http.HttpStatus;
 public class RestApiException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
+    private static final String FAILURE = "FAILURE";
 
-    private HttpStatus httpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-    private String appErrorCode = "FAILURE";
+    private final HttpStatus httpStatusCode;
+    private final String appErrorCode;
 
     public RestApiException() {
+        super();
+        this.httpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+        this.appErrorCode = FAILURE;
     }
 
     public RestApiException(final String message) {
         super(message);
+        this.httpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+        this.appErrorCode = FAILURE;
     }
 
     public RestApiException(final Throwable cause) {
         super(cause);
+        this.httpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+        this.appErrorCode = FAILURE;
     }
 
     public RestApiException(final String message, final Throwable cause) {
         super(message, cause);
+        this.httpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+        this.appErrorCode = FAILURE;
     }
 
     public RestApiException(final String message, final Throwable cause, final boolean enableSuppression,
             final boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
+        this.httpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+        this.appErrorCode = FAILURE;
     }
 
     public RestApiException(final HttpStatus httpStatusCode, final String message) {
         super(message);
         this.httpStatusCode = httpStatusCode;
+        this.appErrorCode = FAILURE;
     }
 
     public RestApiException(final HttpStatus httpStatusCode, final String appErrorCode, final String message) {
@@ -66,19 +79,24 @@ public class RestApiException extends RuntimeException {
     public RestApiException(final HttpStatus httpStatusCode, final Throwable cause) {
         super(cause);
         this.httpStatusCode = httpStatusCode;
+        this.appErrorCode = FAILURE;
     }
 
     public RestApiException(final HttpStatus httpStatusCode, final String message, final Throwable cause) {
         super(message, cause);
         this.httpStatusCode = httpStatusCode;
+        this.appErrorCode = FAILURE;
+    }
+
+    public RestApiException(final HttpStatus httpStatusCode, final String appErrorCode, final String message,
+            final Throwable cause) {
+        super(message, cause);
+        this.httpStatusCode = httpStatusCode;
+        this.appErrorCode = appErrorCode;
     }
 
     public HttpStatus getHttpStatusCode() {
         return this.httpStatusCode;
-    }
-
-    public void setHttpStatusCode(final HttpStatus httpStatusCode) {
-        this.httpStatusCode = httpStatusCode;
     }
 
     /**
@@ -86,14 +104,6 @@ public class RestApiException extends RuntimeException {
      */
     public String getAppErrorCode() {
         return this.appErrorCode;
-    }
-
-    /**
-     * @param appErrorCode
-     *            the appErrorCode to set
-     */
-    public void setAppErrorCode(final String appErrorCode) {
-        this.appErrorCode = appErrorCode;
     }
 
 }

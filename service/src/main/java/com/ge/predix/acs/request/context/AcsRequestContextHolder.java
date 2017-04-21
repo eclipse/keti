@@ -1,7 +1,7 @@
 package com.ge.predix.acs.request.context;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -19,20 +19,17 @@ import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
 /**
  * A ThreadLocal store for the ACS Request Context.
  *
- *
  * @author 212408019
- *
  */
 @Component
 public final class AcsRequestContextHolder implements ApplicationContextAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(AcsRequestContextHolder.class);
+    private static final InheritableThreadLocal<AcsRequestContext> ACS_REQUEST_CONTEXT_STORE = new
+            InheritableThreadLocal<>();
 
     // Hide Constructor
     private AcsRequestContextHolder() {
     }
-
-    private static final InheritableThreadLocal<AcsRequestContext> ACS_REQUEST_CONTEXT_STORE =
-            new InheritableThreadLocal<>();
 
     // Can only be called by the filter...
     // Filter calls it to create the ACSRequestContext for a request
@@ -58,32 +55,29 @@ public final class AcsRequestContextHolder implements ApplicationContextAware {
     }
 
     /**
-     *
      * The Fluent implementation to create the {@link AcsRequestContext} for the current AcsRequest...
      *
      * @author 212408019
-     *
      */
     private static final class AcsRequestContextBuilder {
         private static ZoneRepository zoneRepository;
         private static final Logger LOGGER = LoggerFactory.getLogger(AcsRequestContextBuilder.class);
+        private final Map<ACSRequestContextAttribute, Object> requestContextMap;
+
+        AcsRequestContextBuilder() {
+            this.requestContextMap = new EnumMap<>(ACSRequestContextAttribute.class);
+        }
 
         static void initAcsRequestContextBuilderRepos(final ApplicationContext applicationContext) {
             zoneRepository = applicationContext.getBean(ZoneRepository.class);
             LOGGER.info("AcsRequestContextBuilder JPA Repositories Initialized");
         }
 
-        private final Map<ACSRequestContextAttribute, Object> requestContextMap;
-
-        AcsRequestContextBuilder() {
-            this.requestContextMap = new HashMap<>();
-        }
-
         AcsRequestContextBuilder zoneEntityOrFail() {
             ZoneOAuth2Authentication zoneAuth = (ZoneOAuth2Authentication) SecurityContextHolder.getContext()
                     .getAuthentication();
-            this.requestContextMap.put(ACSRequestContextAttribute.ZONE_ENTITY,
-                    zoneRepository.getBySubdomain(zoneAuth.getZoneId()));
+            this.requestContextMap
+                    .put(ACSRequestContextAttribute.ZONE_ENTITY, zoneRepository.getBySubdomain(zoneAuth.getZoneId()));
             return this;
         }
 

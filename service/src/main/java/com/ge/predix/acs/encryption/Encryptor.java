@@ -17,11 +17,12 @@ public final class Encryptor {
     private static final String ALGO = "AES";
     private static final int IV_LENGTH_IN_BYTES = 16;
     private static final int KEY_LENGTH_IN_BYTES = 16;
+    private static final String CHARSET_NAME = "UTF-8";
 
     private static final ThreadLocal<Cipher> CIPHER_THREAD_LOCAL = ThreadLocal.withInitial(() -> {
         try {
             return Cipher.getInstance(ALGO_WITH_PADDING);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             throw new CipherInitializationFailureException(
                     "Could not create instance of cipher with algorithm: " + ALGO_WITH_PADDING, e);
         }
@@ -43,7 +44,7 @@ public final class Encryptor {
             Cipher cipher = CIPHER_THREAD_LOCAL.get();
             cipher.init(cipherMode, this.secretKeySpec, new IvParameterSpec(iv));
             return cipher;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             throw new CipherInitializationFailureException(
                     "Could not initialize instance of cipher with algorithm: " + ALGO_WITH_PADDING, e);
         }
@@ -54,11 +55,11 @@ public final class Encryptor {
             byte[] ivBytes = new byte[IV_LENGTH_IN_BYTES];
             new SecureRandom().nextBytes(ivBytes);
 
-            byte[] encrypted = this.buildCipher(ivBytes, Cipher.ENCRYPT_MODE).doFinal(value.getBytes());
+            byte[] encrypted = this.buildCipher(ivBytes, Cipher.ENCRYPT_MODE).doFinal(value.getBytes(CHARSET_NAME));
             byte[] result = Bytes.concat(ivBytes, encrypted);
 
             return Base64.encodeBase64String(result);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             throw new EncryptionFailureException("Unable to encrypt", e);
         }
     }
@@ -71,18 +72,18 @@ public final class Encryptor {
 
             byte[] original = this.buildCipher(ivBytes, Cipher.DECRYPT_MODE).doFinal(encryptedSecretBytes);
 
-            return new String(original);
-        } catch (Throwable e) {
+            return new String(original, CHARSET_NAME);
+        } catch (Exception e) {
             throw new DecryptionFailureException("Unable to decrypt", e);
         }
     }
 
     public void setEncryptionKey(final String encryptionKey) {
         try {
-            this.secretKeySpec = new SecretKeySpec(encryptionKey.getBytes(), 0, KEY_LENGTH_IN_BYTES, ALGO);
-        } catch (Throwable e) {
-            throw new SymmetricKeyValidationException(
-                    "Encryption key must be string of length: " + KEY_LENGTH_IN_BYTES, e);
+            this.secretKeySpec = new SecretKeySpec(encryptionKey.getBytes(CHARSET_NAME), 0, KEY_LENGTH_IN_BYTES, ALGO);
+        } catch (Exception e) {
+            throw new SymmetricKeyValidationException("Encryption key must be string of length: " + KEY_LENGTH_IN_BYTES,
+                    e);
         }
     }
 }

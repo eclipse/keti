@@ -26,7 +26,7 @@ import com.ge.predix.acs.model.Attribute;
 
 public class AbstractHandlers {
 
-    private final List<AbstractHandler> handlers = new ArrayList<AbstractHandler>();
+    private final List<AbstractHandler> handlers = new ArrayList<>();
 
     public AbstractHandlers(final AbstractHandler... handlers) {
         for (AbstractHandler handler : handlers) {
@@ -39,8 +39,7 @@ public class AbstractHandlers {
         return this;
     }
 
-    public AbstractHandlers haveSame(final String criteriaAttributeIssuer, final String criteriaAttributeName)
-            throws ConditionAssertionFailedException {
+    public AbstractHandlers haveSame(final String criteriaAttributeIssuer, final String criteriaAttributeName) {
 
         if (this.handlers.isEmpty()) {
             return this;
@@ -57,11 +56,12 @@ public class AbstractHandlers {
         while (iter.hasNext()) {
             AbstractHandler next = iter.next();
             handlerNames.append(" and " + next.getName());
-            Set<Attribute> intersection = new HashSet<Attribute>(current.attributes(criteriaAttributeType));
+            Set<Attribute> intersection = new HashSet<>(current.attributes(criteriaAttributeType));
             intersection.retainAll(next.attributes(criteriaAttributeType));
             if (intersection.isEmpty()) {
-                throw new ConditionAssertionFailedException("No intersection exists between " + handlerNames.toString()
-                        + " on " + criteriaAttributeType + ".");
+                throw new ConditionAssertionFailedException(
+                        "No intersection exists between " + handlerNames.toString() + " on " + criteriaAttributeType
+                                + ".");
             }
             current = next;
         }

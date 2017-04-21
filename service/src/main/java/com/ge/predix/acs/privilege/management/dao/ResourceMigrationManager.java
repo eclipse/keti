@@ -28,18 +28,17 @@ public class ResourceMigrationManager {
             resourceListToSave.forEach(item -> {
                 // Clear the auto-generated id field prior to migrating to graphDB
                 item.setId((long) 0);
-                LOGGER.trace("doResourceMigration Resource-Id : " + item.getResourceIdentifier() + " Zone-name : "
-                        + item.getZone().getName() + " Zone-id:" + item.getZone().getId());
+                LOGGER.trace("doResourceMigration Resource-Id: {} Zone-name: {} Zone-id: {}",
+                        item.getResourceIdentifier(), item.getZone().getName(), item.getZone().getId());
             });
 
             resourceHierarchicalRepository.save(resourceListToSave);
 
-            LOGGER.info(
-                    "Total resources migrated so far: " + numOfResourcesSaved + "/" + numOfResourceEntitiesToMigrate);
+            LOGGER.info("Total resources migrated so far: {}/{}", numOfResourcesSaved, numOfResourceEntitiesToMigrate);
             pageRequest = pageOfResources.nextPageable();
         } while (pageOfResources.hasNext());
 
-        LOGGER.info("Number of resource entities migrated: " + numOfResourcesSaved);
+        LOGGER.info("Number of resource entities migrated: {}", numOfResourcesSaved);
         LOGGER.info("Resource migration to Titan completed.");
     }
 

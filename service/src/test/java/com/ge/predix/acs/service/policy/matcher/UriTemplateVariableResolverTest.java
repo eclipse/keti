@@ -26,7 +26,7 @@ public class UriTemplateVariableResolverTest {
     private final UriTemplateVariableResolver attributeUriResolver = new UriTemplateVariableResolver();
 
     @Test(dataProvider = "uriDataProvider")
-    void testMatch(final String uri, final UriTemplate attributeUriTemplate, final Object matchedURI) {
+    public void testMatch(final String uri, final UriTemplate attributeUriTemplate, final Object matchedURI) {
         Assert.assertEquals(this.attributeUriResolver.resolve(uri, attributeUriTemplate, "attribute_uri"), matchedURI);
     }
 

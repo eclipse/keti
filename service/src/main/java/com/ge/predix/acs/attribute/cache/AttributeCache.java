@@ -12,11 +12,12 @@ public interface AttributeCache {
         return this.get(identifier);
     }
 
-    @SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
-    void set(String key, CachedAttributes value) throws StorageLimitExceededException;
+    void set(String key, CachedAttributes value);
 
     // get should return null if value is not found in the cache
     CachedAttributes get(String key);
+
     void flushAll();
+
     int getTtlInSeconds();
 }

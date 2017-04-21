@@ -63,7 +63,7 @@ public class EnvDataSourceConfig {
 
     @Bean
     public DataSource dataSource() {
-        LOGGER.info("Starting ACS with the database connection: '" + this.url + "'."); //$NON-NLS-1$
+        LOGGER.info("Starting ACS with the database connection: '{}'.", this.url); //$NON-NLS-1$
         PoolProperties poolProperties = new PoolProperties();
         poolProperties.setDriverClassName(this.driverClassName);
         poolProperties.setUrl(this.url);

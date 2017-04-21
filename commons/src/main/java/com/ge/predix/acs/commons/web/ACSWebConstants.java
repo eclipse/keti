@@ -17,12 +17,13 @@
 package com.ge.predix.acs.commons.web;
 
 /**
- *
  * @author 212319607
  */
 public final class ACSWebConstants {
+
+    public static final String APP_ROOT_PATH = "/acs";
+
     private ACSWebConstants() {
     }
 
-    public static final String APP_ROOT_PATH = "/acs";
 }

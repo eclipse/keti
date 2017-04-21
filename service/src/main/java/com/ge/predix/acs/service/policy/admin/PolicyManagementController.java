@@ -68,7 +68,7 @@ public class PolicyManagementController extends BaseRestApi {
                     code = 201,
                     message = "Policy set creation successful. Policy set URI is returned in 'Location' header."), })
     @RequestMapping(method = PUT, value = POLICY_SET_URL, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createPolicySet(@RequestBody final PolicySet policySet,
+    public ResponseEntity<String> createPolicySet(@RequestBody final PolicySet policySet,
             @PathVariable("policySetId") final String policySetId) {
 
         validatePolicyIdOrFail(policySet, policySetId);
@@ -97,7 +97,7 @@ public class PolicyManagementController extends BaseRestApi {
 
     @ApiOperation(value = "Deletes a policy set for the given zone.", tags = { "Policy Set Management" })
     @RequestMapping(method = DELETE, value = POLICY_SET_URL)
-    public ResponseEntity<?> deletePolicySet(@PathVariable("policySetId") final String name) {
+    public ResponseEntity<Void> deletePolicySet(@PathVariable("policySetId") final String name) {
         this.service.deletePolicySet(name);
         return noContent();
     }

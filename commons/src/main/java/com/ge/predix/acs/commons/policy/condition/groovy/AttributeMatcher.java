@@ -58,7 +58,7 @@ public class AttributeMatcher {
         }
 
         // copy source set
-        Set<String> intersection = new HashSet<String>(sourceAttributes);
+        Set<String> intersection = new HashSet<>(sourceAttributes);
         // create intersection of source and target
         intersection.retainAll(targetAttributes);
 

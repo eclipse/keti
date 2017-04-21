@@ -102,8 +102,7 @@ public abstract class ExternalAttributeReader implements AttributeReader {
         return oAuth2RestTemplate;
     }
 
-    @SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
-    CachedAttributes getAttributesFromAdapters(final String identifier) throws AttributeRetrievalException {
+    CachedAttributes getAttributesFromAdapters(final String identifier) {
 
         CachedAttributes cachedAttributes = new CachedAttributes(Collections.emptySet());
 
@@ -120,17 +119,13 @@ public abstract class ExternalAttributeReader implements AttributeReader {
             try {
                 attributesResponse = this.getAdapterOauth2RestTemplate(adapterConnection).
                         getForEntity(adapterUrl, AttributesResponse.class).getBody();
-            } catch (final Throwable e) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug(AttributeRetrievalException.getAdapterErrorMessage(adapterUrl), e);
-                }
+            } catch (final Exception e) {
+                LOGGER.debug(AttributeRetrievalException.getAdapterErrorMessage(adapterUrl), e);
                 throw new AttributeRetrievalException(AttributeRetrievalException.getAdapterErrorMessage(identifier));
             }
 
             if (isSizeLimitsExceeded(attributesResponse.getAttributes())) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug(AttributeRetrievalException.getStorageErrorMessage(identifier));
-                }
+                LOGGER.debug(AttributeRetrievalException.getStorageErrorMessage(identifier));
                 cachedAttributes.setState(CachedAttributes.State.DO_NOT_RETRY);
                 return cachedAttributes;
             }

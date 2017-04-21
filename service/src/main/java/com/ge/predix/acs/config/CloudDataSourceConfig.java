@@ -67,9 +67,8 @@ public class CloudDataSourceConfig extends AbstractCloudConfig {
 
     @Bean
     public DataSource dataSource() {
-        LOGGER.info("Starting ACS with the database that is bound to it:" + this.acsDb); //$NON-NLS-1$
-        DataSource ds = connectionFactory().dataSource(this.acsDb, dataSourceConfig());
-        return ds;
+        LOGGER.info("Starting ACS with the database that is bound to it: {}", this.acsDb); //$NON-NLS-1$
+        return connectionFactory().dataSource(this.acsDb, dataSourceConfig());
     }
 
     @Bean

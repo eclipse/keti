@@ -44,8 +44,7 @@ public final class ResponseEntityBuilder {
     /**
      * Creates a typed ResponseEntity with HTTP status code 201 with a given location.
      *
-     * @param location
-     *            The location of the created resource
+     * @param location The location of the created resource
      * @return The corresponding ResponseEntity
      */
     public static <T> ResponseEntity<T> created(final String location) {
@@ -56,10 +55,8 @@ public final class ResponseEntityBuilder {
     /**
      * Creates a typed ResponseEntity with HTTP status code 201/204 with a given location.
      *
-     * @param location
-     *            The location of the created resource
-     * @param noContent
-     *            false means updated resource which returns 204, true means created resource which returns 201
+     * @param location  The location of the created resource
+     * @param noContent false means updated resource which returns 204, true means created resource which returns 201
      * @return The corresponding ResponseEntity
      */
     public static <T> ResponseEntity<T> created(final String location, final boolean noContent) {
@@ -69,9 +66,9 @@ public final class ResponseEntityBuilder {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(URI.create(location));
-            return new ResponseEntity<T>(headers, status);
+            return new ResponseEntity<>(headers, status);
         }
-        return new ResponseEntity<T>(status);
+        return new ResponseEntity<>(status);
     }
 
     public static <T> ResponseEntity<T> created(final boolean noContent, final String uriTemplate,
@@ -92,15 +89,14 @@ public final class ResponseEntityBuilder {
     /**
      * Creates a typed ResponseEntity with HTTP status code 200 with a given response payload.
      *
-     * @param response
-     *            The response payload
+     * @param response The response payload
      * @return The corresponding ResponseEntity
      */
     public static <T> ResponseEntity<T> ok(final T response) {
         if (response != null) {
-            return new ResponseEntity<T>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
-        return new ResponseEntity<T>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -109,7 +105,7 @@ public final class ResponseEntityBuilder {
      * @return The corresponding ResponseEntity
      */
     public static ResponseEntity<Void> noContent() {
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     /**
@@ -118,7 +114,7 @@ public final class ResponseEntityBuilder {
      * @return The corresponding ResponseEntity
      */
     public static <T> ResponseEntity<T> notFound() {
-        return new ResponseEntity<T>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -128,6 +124,6 @@ public final class ResponseEntityBuilder {
      * @return The corresponding ResponseEntity
      */
     public static ResponseEntity<Void> unprocessable() {
-        return new ResponseEntity<Void>(HttpStatus.UNPROCESSABLE_ENTITY);
+        return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }

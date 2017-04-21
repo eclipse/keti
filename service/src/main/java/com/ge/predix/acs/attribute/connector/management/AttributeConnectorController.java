@@ -34,20 +34,19 @@ public class AttributeConnectorController extends BaseRestApi {
     @Autowired
     private AttributeConnectorServiceImpl service;
 
-    @ApiOperation(
-            value = "Creates or updates connector configuration for external resource attributes for the given zone.",
+    @ApiOperation(value = "Creates or updates connector configuration for external resource attributes for the given "
+            + "zone.",
             tags = { "Attribute Connector Management" })
-    @ApiResponses(
-            value = { @ApiResponse(
-                    code = 201,
-                    message = "Connector configuration for the given zone is successfully created.") })
-    @RequestMapping(
-            method = PUT,
+    @ApiResponses(value = { @ApiResponse(code = 201,
+            message = "Connector configuration for the given zone is successfully created.") })
+    @RequestMapping(method = PUT,
             value = V1 + AcsApiUriTemplates.RESOURCE_CONNECTOR_URL,
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> putResourceConnector(@ApiParam(
-            value = "New or updated connector configuration for external resource attributes",
-            required = true) @RequestBody final AttributeConnector connector) {
+    public ResponseEntity<String> putResourceConnector(
+            @ApiParam(value = "New or updated connector configuration for external resource attributes",
+                    required = true)
+            @RequestBody
+            final AttributeConnector connector) {
         try {
             boolean connectorCreated = this.service.upsertResourceConnector(connector);
 
@@ -62,14 +61,12 @@ public class AttributeConnectorController extends BaseRestApi {
         }
     }
 
-    @ApiOperation(
-            value = "Retrieves connector configuration for external resource attributes for the given zone.",
+    @ApiOperation(value = "Retrieves connector configuration for external resource attributes for the given zone.",
             tags = { "Attribute Connector Management" },
             response = AttributeConnector.class)
-    @ApiResponses(
-            value = { @ApiResponse(code = 404, message = "Connector configuration for the given zone is not found.") })
-    @RequestMapping(
-            method = GET,
+    @ApiResponses(value = { @ApiResponse(code = 404,
+            message = "Connector configuration for the given zone is not found.") })
+    @RequestMapping(method = GET,
             value = V1 + AcsApiUriTemplates.RESOURCE_CONNECTOR_URL,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AttributeConnector> getResourceConnector() {
@@ -84,18 +81,15 @@ public class AttributeConnectorController extends BaseRestApi {
         }
     }
 
-    @ApiOperation(
-            value = "Deletes connector configuration for external resource attributes for the given zone.",
+    @ApiOperation(value = "Deletes connector configuration for external resource attributes for the given zone.",
             tags = { "Attribute Connector Management" })
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 204,
-                            message = "Connector configuration for the given zone is successfully deleted."),
-                    @ApiResponse(code = 404, message = "Connector configuration for the given zone is not found.") })
-    @RequestMapping(method = DELETE, value = V1 + AcsApiUriTemplates.RESOURCE_CONNECTOR_URL)
-    public ResponseEntity<?> deleteResourceConnector() {
+    @ApiResponses(value = { @ApiResponse(code = 204,
+            message = "Connector configuration for the given zone is successfully deleted."), @ApiResponse(code = 404,
+            message = "Connector configuration for the given zone is not found.") })
+    @RequestMapping(method = DELETE,
+            value = V1 + AcsApiUriTemplates.RESOURCE_CONNECTOR_URL)
+    public ResponseEntity<Void> deleteResourceConnector() {
         try {
             Boolean deleted = this.service.deleteResourceConnector();
             if (deleted) {
@@ -107,20 +101,19 @@ public class AttributeConnectorController extends BaseRestApi {
         }
     }
 
-    @ApiOperation(
-            value = "Creates or updates connector configuration for external subject attributes for the given zone.",
+    @ApiOperation(value = "Creates or updates connector configuration for external subject attributes for the given "
+            + "zone.",
             tags = { "Attribute Connector Management" })
-    @ApiResponses(
-            value = { @ApiResponse(
-                    code = 201,
-                    message = "Connector configuration for the given zone is successfully created.") })
-    @RequestMapping(
-            method = PUT,
+    @ApiResponses(value = { @ApiResponse(code = 201,
+            message = "Connector configuration for the given zone is successfully created.") })
+    @RequestMapping(method = PUT,
             value = V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL,
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> putSubjectConnector(@ApiParam(
-            value = "New or updated connector configuration for external subject attributes",
-            required = true) @RequestBody final AttributeConnector connector) {
+    public ResponseEntity<String> putSubjectConnector(
+            @ApiParam(value = "New or updated connector configuration for external subject attributes",
+                    required = true)
+            @RequestBody
+            final AttributeConnector connector) {
         try {
             boolean connectorCreated = this.service.upsertSubjectConnector(connector);
 
@@ -135,14 +128,12 @@ public class AttributeConnectorController extends BaseRestApi {
         }
     }
 
-    @ApiOperation(
-            value = "Retrieves connector configuration for external subject attributes for the given zone.",
+    @ApiOperation(value = "Retrieves connector configuration for external subject attributes for the given zone.",
             tags = { "Attribute Connector Management" },
             response = AttributeConnector.class)
-    @ApiResponses(
-            value = { @ApiResponse(code = 404, message = "Connector configuration for the given zone is not found.") })
-    @RequestMapping(
-            method = GET,
+    @ApiResponses(value = { @ApiResponse(code = 404,
+            message = "Connector configuration for the given zone is not found.") })
+    @RequestMapping(method = GET,
             value = V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AttributeConnector> getSubjectConnector() {
@@ -157,18 +148,15 @@ public class AttributeConnectorController extends BaseRestApi {
         }
     }
 
-    @ApiOperation(
-            value = "Deletes connector configuration for external subject attributes for the given zone.",
+    @ApiOperation(value = "Deletes connector configuration for external subject attributes for the given zone.",
             tags = { "Attribute Connector Management" })
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 204,
-                            message = "Connector configuration for the given zone is successfully deleted."),
-                    @ApiResponse(code = 404, message = "Connector configuration for the given zone is not found.") })
-    @RequestMapping(method = DELETE, value = V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL)
-    public ResponseEntity<?> deleteSubjectConnector() {
+    @ApiResponses(value = { @ApiResponse(code = 204,
+            message = "Connector configuration for the given zone is successfully deleted."), @ApiResponse(code = 404,
+            message = "Connector configuration for the given zone is not found.") })
+    @RequestMapping(method = DELETE,
+            value = V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL)
+    public ResponseEntity<Void> deleteSubjectConnector() {
         try {
             Boolean deleted = this.service.deleteSubjectConnector();
             if (deleted) {
@@ -181,9 +169,7 @@ public class AttributeConnectorController extends BaseRestApi {
     }
 
     private AttributeConnector obfuscateAdapterSecret(final AttributeConnector connector) {
-        connector.getAdapters().stream().forEach(adapter -> {
-            adapter.setUaaClientSecret("**********");
-        });
+        connector.getAdapters().forEach(adapter -> adapter.setUaaClientSecret("**********"));
         return connector;
     }
 }

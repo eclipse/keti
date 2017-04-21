@@ -15,19 +15,23 @@
  *******************************************************************************/
 package com.ge.predix.acs.rest;
 
-import com.ge.predix.acs.model.Attribute;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import com.ge.predix.acs.model.Attribute;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 @SuppressWarnings({ "javadoc", "nls" })
 @ApiModel(description = "Policy evaluation request for V1.")
 public class PolicyEvaluationRequestV1 {
-    public static final LinkedHashSet<String> EMPTY_POLICY_EVALUATION_ORDER = new LinkedHashSet<String>();
+
+    @Deprecated
+    public static final LinkedHashSet<String> EMPTY_POLICY_EVALUATION_ORDER = new LinkedHashSet<>();
 
     private String resourceIdentifier;
 
@@ -39,9 +43,10 @@ public class PolicyEvaluationRequestV1 {
 
     private String action;
 
-    private LinkedHashSet<String> policySetsEvaluationOrder = EMPTY_POLICY_EVALUATION_ORDER;
+    private LinkedHashSet<String> policySetsEvaluationOrder = new LinkedHashSet<>();
 
-    @ApiModelProperty(value = "The resource URI to be consumed", required = true)
+    @ApiModelProperty(value = "The resource URI to be consumed",
+            required = true)
     public String getResourceIdentifier() {
         return this.resourceIdentifier;
     }
@@ -50,7 +55,8 @@ public class PolicyEvaluationRequestV1 {
         this.resourceIdentifier = resourceUri;
     }
 
-    @ApiModelProperty(value = "The subject identifier", required = true)
+    @ApiModelProperty(value = "The subject identifier",
+            required = true)
     public String getSubjectIdentifier() {
         return this.subjectIdentifier;
     }
@@ -77,14 +83,14 @@ public class PolicyEvaluationRequestV1 {
     }
 
     /**
-     * @param subjectAttributes
-     *            the subjectAttributes to set
+     * @param subjectAttributes the subjectAttributes to set
      */
     public void setSubjectAttributes(final Set<Attribute> subjectAttributes) {
         this.subjectAttributes = subjectAttributes;
     }
 
-    @ApiModelProperty(value = "The action on the given resource URI", required = true)
+    @ApiModelProperty(value = "The action on the given resource URI",
+            required = true)
     public String getAction() {
         return this.action;
     }
@@ -93,8 +99,8 @@ public class PolicyEvaluationRequestV1 {
         this.action = action;
     }
 
-    @ApiModelProperty(
-            value = "This list of policy set IDs specifies the order in which the service will evaluate policies. "
+    @ApiModelProperty(value =
+            "This list of policy set IDs specifies the order in which the service will evaluate policies. "
                     + "Evaluation stops when a policy with matching target is found and the condition returns true, "
                     + "Or all policies are exhausted.")
     public LinkedHashSet<String> getPolicySetsEvaluationOrder() {

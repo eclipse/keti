@@ -31,9 +31,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.commons.policy.condition.ConditionShell;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
-import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Condition;
 import com.ge.predix.acs.rest.BaseResource;
@@ -64,10 +62,9 @@ public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
         PolicyEvaluationServiceImpl evaluationService = new PolicyEvaluationServiceImpl();
         Whitebox.setInternalState(evaluationService, "policySetValidator", this.policySetValidator);
         Set<Attribute> subjectAttributes = Collections.emptySet();
-        ConditionShell conditionShell = new GroovyConditionShell();
         try {
-            Assert.assertEquals(evaluationService.evaluateConditions(subjectAttributes, new HashSet<Attribute>(), "",
-                    conditions, "", conditionShell), expectedResult);
+            Assert.assertEquals(evaluationService.evaluateConditions(subjectAttributes, new HashSet<>(), "",
+                    conditions, ""), expectedResult);
         } catch (Exception e) {
             if (throwsException) {
                 Assert.assertTrue(e instanceof PolicyEvaluationException);
@@ -112,11 +109,9 @@ public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
         PolicyEvaluationServiceImpl evaluationService = new PolicyEvaluationServiceImpl();
         Whitebox.setInternalState(evaluationService, "policySetValidator", this.policySetValidator);
 
-        ConditionShell conditionShell = new GroovyConditionShell();
-
         try {
             Assert.assertEquals(evaluationService.evaluateConditions(subjectAttributes, resourceAttributes, resourceURI,
-                    conditions, resourceURITemplate, conditionShell), expectedResult);
+                    conditions, resourceURITemplate), expectedResult);
 
         } catch (Exception e) {
 

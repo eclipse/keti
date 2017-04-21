@@ -18,7 +18,7 @@ public class AttributeAdapterConnection {
     private String uaaClientSecret;
 
     public AttributeAdapterConnection() {
-        
+        // Required to be here for Jackson deserialization
     }
 
     public AttributeAdapterConnection(final String adapterEndpoint, final String uaaTokenUrl, final String uaaClientId,

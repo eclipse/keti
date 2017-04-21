@@ -16,13 +16,23 @@
 
 package com.ge.predix.acs.privilege.management;
 
-import com.ge.predix.acs.commons.web.BaseRestApi;
-import com.ge.predix.acs.commons.web.RestApiException;
-import com.ge.predix.acs.commons.web.UriTemplateUtils;
-import com.ge.predix.acs.rest.BaseResource;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.MANAGED_RESOURCES_URL;
+import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.MANAGED_RESOURCE_URL;
+import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.V1;
+import static com.ge.predix.acs.commons.web.ResponseEntityBuilder.created;
+import static com.ge.predix.acs.commons.web.ResponseEntityBuilder.noContent;
+import static com.ge.predix.acs.commons.web.ResponseEntityBuilder.notFound;
+import static com.ge.predix.acs.commons.web.ResponseEntityBuilder.ok;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,22 +45,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import com.ge.predix.acs.commons.web.BaseRestApi;
+import com.ge.predix.acs.commons.web.RestApiException;
+import com.ge.predix.acs.commons.web.UriTemplateUtils;
+import com.ge.predix.acs.rest.BaseResource;
 
-import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.MANAGED_RESOURCES_URL;
-import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.MANAGED_RESOURCE_URL;
-import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.V1;
-import static com.ge.predix.acs.commons.web.ResponseEntityBuilder.created;
-import static com.ge.predix.acs.commons.web.ResponseEntityBuilder.noContent;
-import static com.ge.predix.acs.commons.web.ResponseEntityBuilder.notFound;
-import static com.ge.predix.acs.commons.web.ResponseEntityBuilder.ok;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  *
@@ -89,7 +91,7 @@ public class ResourcePrivilegeManagementController extends BaseRestApi {
             tags = { "Attribute Management" })
     @ApiResponses(value = { @ApiResponse(code = 204, message = "Resource objects appended successfully."), })
     @RequestMapping(method = POST, value = { V1 + MANAGED_RESOURCES_URL }, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> appendResources(@RequestBody final List<BaseResource> resources) {
+    public ResponseEntity<Void> appendResources(@RequestBody final List<BaseResource> resources) {
         try {
             this.failIfParentsSpecified(resources);
 

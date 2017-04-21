@@ -23,10 +23,9 @@ import com.ge.predix.eventhub.EventHubClientException;
 @Profile("predixAudit")
 public class ACSAuditConfiguration {
 
-    static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ACSAuditConfiguration.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ACSAuditConfiguration.class);
 
     private static final VcapLoaderServiceImpl VCAP_LOADER_SERVICE = new VcapLoaderServiceImpl();
-
 
     @Value("${AUDIT_UAA_URL}")
     private String auditUaaUrl;
@@ -51,37 +50,34 @@ public class ACSAuditConfiguration {
             LOGGER.error("Can not create Audit Client bean due to exception", e);
             return null;
         }
-        AuditClient auditClient = new AuditClient(sdkConfig, auditCallback());
-        return auditClient;
+        return new AuditClient(sdkConfig, new AcsAuditCallBack());
     }
 
-    public AuditCallback auditCallback() {
-        return new AuditCallback() {
-            @Override
-            public void onFailure(final AuditEvent arg0, final FailReport arg1, final String arg2) {
-                LOGGER.info("AUDIT EVENT FAILED: " + arg0.toString());
-                LOGGER.info("AUDIT FAIL REPORT: " + arg1.toString());
-            }
+    private static class AcsAuditCallBack implements AuditCallback {
+        @Override
+        public void onFailure(final AuditEvent arg0, final FailReport arg1, final String arg2) {
+            LOGGER.info("AUDIT EVENT FAILED: {}", arg0);
+            LOGGER.info("AUDIT FAIL REPORT: {}", arg1);
+        }
 
-            @Override
-            public void onSuccees(final AuditEvent arg0) {
-                LOGGER.debug("AUDIT EVENT SUCCESS: " + arg0.toString());
-            }
+        @Override
+        public void onSuccees(final AuditEvent arg0) {
+            LOGGER.debug("AUDIT EVENT SUCCESS: {}", arg0);
+        }
 
-            @Override
-            public void onValidate(final AuditEvent arg0, final List<ValidatorReport> arg1) {
-                LOGGER.debug("AUDIT EVENT VALIDATE: " + arg0.toString());
-                for (ValidatorReport report : arg1) {
-                    LOGGER.debug("AUDIT ValidatorReport: " + report.toString());
-                }
+        @Override
+        public void onValidate(final AuditEvent arg0, final List<ValidatorReport> arg1) {
+            LOGGER.debug("AUDIT EVENT VALIDATE: {}", arg0);
+            for (ValidatorReport report : arg1) {
+                LOGGER.debug("AUDIT ValidatorReport: {}", report);
             }
+        }
 
-            @Override
-            public void onFailure(final FailReport arg0, final String arg1) {
-                LOGGER.info("AUDIT EVENT FAILED: " + arg0.toString());
-                LOGGER.info("AUDIT FAIL REPORT: " + arg1);
-            }
-        };
+        @Override
+        public void onFailure(final FailReport arg0, final String arg1) {
+            LOGGER.info("AUDIT EVENT FAILED: {}", arg0);
+            LOGGER.info("AUDIT FAIL REPORT: {}", arg1);
+        }
     }
 
 }

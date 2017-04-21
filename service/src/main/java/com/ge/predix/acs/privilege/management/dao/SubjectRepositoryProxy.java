@@ -1,7 +1,7 @@
 package com.ge.predix.acs.privilege.management.dao;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -23,6 +23,7 @@ import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarchicalRepository, InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubjectRepositoryProxy.class);
+    private static final String MESSAGE = "method not supported";
 
     @Autowired(required = false)
     private GraphSubjectRepository graphRepository;
@@ -50,17 +51,17 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
 
     @Override
     public List<SubjectEntity> findAll() {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public List<SubjectEntity> findAll(final Sort sort) {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public List<SubjectEntity> findAll(final Iterable<Long> ids) {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
@@ -70,32 +71,32 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
 
     @Override
     public void flush() {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public <S extends SubjectEntity> S saveAndFlush(final S entity) {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public void deleteInBatch(final Iterable<SubjectEntity> entities) {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public void deleteAllInBatch() {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public SubjectEntity getOne(final Long id) {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public Page<SubjectEntity> findAll(final Pageable pageable) {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
@@ -105,17 +106,17 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
 
     @Override
     public SubjectEntity findOne(final Long id) {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public boolean exists(final Long id) {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public long count() {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
@@ -135,7 +136,7 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
 
     @Override
     public void deleteAll() {
-        throw new RuntimeException("method not supported");
+        throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
@@ -172,7 +173,7 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
         if (this.activeRepository == this.graphRepository) { // i.e. titan is enabled
             return this.graphRepository.getSubjectEntityAndDescendantsIds(entity);
         } else {
-            return new HashSet<String>(Arrays.asList(entity.getSubjectIdentifier()));
+            return Collections.singleton(entity.getSubjectIdentifier());
         }
     }
 }

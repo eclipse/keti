@@ -25,6 +25,7 @@ import com.ge.predix.acs.rest.PolicyEvaluationResult;
  *
  * @author 212304931
  */
+@FunctionalInterface
 public interface PolicyEvaluation {
 
     /**

@@ -32,14 +32,14 @@ public class Zone {
     private String description;
     private String subdomain;
 
+    public Zone() {
+        // Intentionally left blank to setup this object with setters
+    }
+
     public Zone(final String name, final String subdomain, final String description) {
         this.name = name;
         this.subdomain = subdomain;
         this.description = description;
-    }
-
-    public Zone() {
-
     }
 
     /**

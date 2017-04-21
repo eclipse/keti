@@ -5,7 +5,8 @@ import com.ge.predix.acs.attribute.readers.CachedAttributes;
 public class NonCachingAttributeCache implements AttributeCache {
 
     @Override
-    public void set(final String key, final CachedAttributes value) throws StorageLimitExceededException {
+    public void set(final String key, final CachedAttributes value) {
+        //Intentionally left empty to satisfy interface
     }
 
     @Override
@@ -15,7 +16,7 @@ public class NonCachingAttributeCache implements AttributeCache {
 
     @Override
     public void flushAll() {
-
+        //Intentionally left empty to satisfy interface
     }
 
     @Override
