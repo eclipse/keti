@@ -16,9 +16,9 @@
 
 package com.ge.predix.acs;
 
-import static com.google.common.base.Predicates.or;
-import static springfox.documentation.builders.PathSelectors.regex;
-
+import com.ge.predix.acs.monitoring.ManagementSecurityRoleFilter;
+import com.ge.predix.acs.request.context.AcsRequestEnrichingFilter;
+import com.google.common.base.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,15 +26,14 @@ import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
-
-import com.ge.predix.acs.request.context.AcsRequestEnrichingFilter;
-import com.google.common.base.Predicate;
-
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import static com.google.common.base.Predicates.or;
+import static springfox.documentation.builders.PathSelectors.regex;
 
 /**
  * Access Control Service - Spring Boot Application.
@@ -49,6 +48,9 @@ public class AccessControlService {
 
     @Autowired
     private AcsRequestEnrichingFilter acsRequestEnrichingFilter;
+
+    @Autowired
+    private ManagementSecurityRoleFilter managementSecurityRoleFilter;
 
     private String serviceId;
 
@@ -73,6 +75,14 @@ public class AccessControlService {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
         filterRegistrationBean.setEnabled(false);
         filterRegistrationBean.setFilter(this.acsRequestEnrichingFilter);
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean monitoringFilterRegistrationBean() {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(this.managementSecurityRoleFilter);
+        filterRegistrationBean.addUrlPatterns("/health*");
+        filterRegistrationBean.setOrder(1);
         return filterRegistrationBean;
     }
 

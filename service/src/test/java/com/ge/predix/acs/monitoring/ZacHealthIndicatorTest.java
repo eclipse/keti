@@ -24,23 +24,23 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class UaaHealthIndicatorTest {
+public class ZacHealthIndicatorTest {
 
-    @Value("${uaaCheckHealthUrl}")
-    private String uaaCheckHealthUrl;
+    @Value("${zacCheckHealthUrl}")
+    private String zacCheckHealthUrl;
 
     @Test(dataProvider = "statuses")
     public void testHealth(final RestTemplate restTemplate, final Status status,
             final AcsMonitoringUtilities.HealthCode healthCode) throws Exception {
-        UaaHealthIndicator uaaHealthIndicator = new UaaHealthIndicator(restTemplate);
-        Assert.assertEquals(status, uaaHealthIndicator.health().getStatus());
-        Assert.assertEquals(uaaHealthIndicator.getDescription(),
-                uaaHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.DESCRIPTION_KEY));
+        ZacHealthIndicator zacHealthIndicator = new ZacHealthIndicator(restTemplate);
+        Assert.assertEquals(status, zacHealthIndicator.health().getStatus());
+        Assert.assertEquals(zacHealthIndicator.getDescription(),
+                zacHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.DESCRIPTION_KEY));
         if (healthCode == AcsMonitoringUtilities.HealthCode.AVAILABLE) {
-            Assert.assertFalse(uaaHealthIndicator.health().getDetails().containsKey(AcsMonitoringUtilities.CODE_KEY));
+            Assert.assertFalse(zacHealthIndicator.health().getDetails().containsKey(AcsMonitoringUtilities.CODE_KEY));
         } else {
             Assert.assertEquals(healthCode,
-                    uaaHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.CODE_KEY));
+                    zacHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.CODE_KEY));
         }
     }
 
@@ -48,6 +48,12 @@ public class UaaHealthIndicatorTest {
     public Object[][] statuses() {
         return new Object[][] {
                 new Object[] { mockRestWithUp(), Status.UP, AcsMonitoringUtilities.HealthCode.AVAILABLE },
+
+                { mockRestWithInvalidJson("{\"bogus_json\":}"), Status.DOWN,
+                        AcsMonitoringUtilities.HealthCode.INVALID_JSON },
+
+                { mockRestWithInvalidJson("{\"status\":\"BOGUS\"}"), Status.DOWN,
+                        AcsMonitoringUtilities.HealthCode.ERROR },
 
                 { mockRestWithException(new RestClientException("")), Status.DOWN,
                         AcsMonitoringUtilities.HealthCode.UNREACHABLE },
@@ -58,13 +64,19 @@ public class UaaHealthIndicatorTest {
 
     private RestTemplate mockRestWithUp() {
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        Mockito.when(restTemplate.getForObject(this.uaaCheckHealthUrl, String.class)).thenReturn("OK");
+        Mockito.when(restTemplate.getForObject(this.zacCheckHealthUrl, String.class)).thenReturn("{\"status\":\"UP\"}");
+        return restTemplate;
+    }
+
+    private RestTemplate mockRestWithInvalidJson(final String json) {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+        Mockito.when(restTemplate.getForObject(this.zacCheckHealthUrl, String.class)).thenReturn(json);
         return restTemplate;
     }
 
     private RestTemplate mockRestWithException(final Exception e) {
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        Mockito.when(restTemplate.getForObject(this.uaaCheckHealthUrl, String.class)).thenThrow(e);
+        Mockito.when(restTemplate.getForObject(this.zacCheckHealthUrl, String.class)).thenThrow(e);
         return restTemplate;
     }
 }

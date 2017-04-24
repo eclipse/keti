@@ -424,6 +424,7 @@
                             <argLine></argLine>
                             <systemPropertyVariables>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
+                                <spring.profiles.active>h2,predix,simple-cache</spring.profiles.active>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
@@ -472,14 +473,12 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
-                            <environmentVariables>
-                                <SPRING_PROFILES_ACTIVE>h2,predix,simple-cache,titan</SPRING_PROFILES_ACTIVE>
-                            </environmentVariables>
                             <forkCount>0</forkCount>
                             <parallel>methods</parallel>
                             <argLine></argLine>
                             <systemPropertyVariables>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
+                                <spring.profiles.active>h2,predix,simple-cache,titan</spring.profiles.active>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>

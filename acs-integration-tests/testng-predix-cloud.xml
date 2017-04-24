@@ -8,6 +8,7 @@
 
             <class name="com.ge.predix.acs.cloudfoundry.ApplicationHealthChecks"/>
 
+            <class name="com.ge.predix.integration.test.AcsMonitoringIT"/>
             <class name="com.ge.predix.integration.test.PredixAuditIT"/>
             <class name="com.ge.predix.integration.test.AccessControlServiceIT"/>
             <class name="com.ge.predix.integration.test.ACSCorsFilterIT"/>
