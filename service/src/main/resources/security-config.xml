@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright 2016 General Electric Company. 
-   
-    Licensed under the Apache License, Version 2.0 (the "License"); 
-    you may not use this file except in compliance with the License. 
+    Copyright 2016 General Electric Company.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
-   
+
     http://www.apache.org/licenses/LICENSE-2.0
-   
-    Unless required by applicable law or agreed to in writing, software 
-    distributed under the License is distributed on an "AS IS" BASIS, 
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-    See the License for the specific language governing permissions and 
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
     limitations under the License.
  -->
 
@@ -67,7 +67,7 @@
     <!-- Filter for Oauth Token Validation -->
     <oauth:resource-server id="oauth2remoteTokenFilter"
         token-services-ref="tokenService" />
-        
+
     <!-- Authorization Configuration For V1 policy-set APIS -->
     <http pattern="/v1/policy-set/**" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
@@ -93,11 +93,11 @@
 
         <custom-filter ref="oauth2remoteTokenFilter"
             position="PRE_AUTH_FILTER" />
-            
+
         <custom-filter ref="acsRequestEnrichingFilter"
-                after="BASIC_AUTH_FILTER" />            
+                after="BASIC_AUTH_FILTER" />
     </http>
-    
+
     <!-- Authorization Configuration For V1 policy-evaluation APIS -->
     <http pattern="/v1/policy-evaluation/**" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
@@ -110,11 +110,11 @@
 
         <custom-filter ref="oauth2remoteTokenFilter"
             position="PRE_AUTH_FILTER" />
-            
+
         <custom-filter ref="acsRequestEnrichingFilter"
             after="BASIC_AUTH_FILTER" />
     </http>
-    
+
     <!-- Authorization Configuration For V1 resource APIS -->
     <http pattern="/v1/resource/**" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
@@ -136,14 +136,14 @@
         <intercept-url pattern="/v1/resource/**" method="DELETE"
             access="hasAnyAuthority('acs.attributes.write') " />
         <intercept-url pattern="/v1/resource/**" method="PATCH"
-            access="hasAnyAuthority('acs.attributes.write') "/> 
+            access="hasAnyAuthority('acs.attributes.write') "/>
 
         <custom-filter ref="oauth2remoteTokenFilter"
             position="PRE_AUTH_FILTER" />
         <custom-filter ref="acsRequestEnrichingFilter"
                 after="BASIC_AUTH_FILTER" />
     </http>
-    
+
     <!-- Authorization Configuration For V1 subject APIS -->
     <http pattern="/v1/subject/**" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
@@ -172,7 +172,7 @@
         <custom-filter ref="acsRequestEnrichingFilter"
                 after="BASIC_AUTH_FILTER" />
     </http>
-        
+
     <!-- Authorization Configuration For V1 connector APIS -->
     <http pattern="/v1/connector/*" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
@@ -209,8 +209,8 @@
         entry-point-ref="preAuthenticationEntryPoint">
         <csrf disabled="true"/>
 
-        <!-- ZacTokenService will only verify the token against defaultTrustedIssuerId 
-            for requests with no zone. Additional scope acs.zones.admin needs to be asserted 
+        <!-- ZacTokenService will only verify the token against defaultTrustedIssuerId
+            for requests with no zone. Additional scope acs.zones.admin needs to be asserted
             here. -->
         <intercept-url pattern="/v1/zone/**"
             access="isFullyAuthenticated() and hasAnyAuthority('acs.zones.admin')" />
@@ -219,7 +219,20 @@
             position="PRE_AUTH_FILTER" />
     </http>
 
+    <!-- Authorization Configuration For Monitoring APIs -->
+    <http pattern="/health*" request-matcher="ant" create-session="stateless"
+          xmlns="http://www.springframework.org/schema/security"
+          disable-url-rewriting="true" use-expressions="true"
+          entry-point-ref="preAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
+        <intercept-url pattern="/health*" access="isAnonymous() or hasAnyAuthority('acs.monitoring')"/>
+        <custom-filter ref="oauth2remoteTokenFilter" position="PRE_AUTH_FILTER"/>
+        <custom-filter ref="managementSecurityRoleFilter" after="BASIC_AUTH_FILTER"/>
+    </http>
+
     <bean id="uaaTemplate" class="org.springframework.web.client.RestTemplate" />
+    <bean id="zacTemplate" class="org.springframework.web.client.RestTemplate" />
 
     <beans profile="public">
         <bean id="tokenService" class="com.ge.predix.uaa.token.lib.ZoneAwareFastTokenService">
@@ -247,6 +260,7 @@
             <property name="allowedUriPatterns">
                 <list>
                     <value>/v1/zone/**</value>
+                    <value>/health*</value>
                 </list>
             </property>
         </bean>
@@ -258,6 +272,7 @@
             <property name="allowedUriPatterns">
                 <list>
                     <value>/v1/zone/**</value>
+                    <value>/health*</value>
                 </list>
             </property>
         </bean>
