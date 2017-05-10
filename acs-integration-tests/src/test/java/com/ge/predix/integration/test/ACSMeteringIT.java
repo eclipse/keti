@@ -70,8 +70,14 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
     @Value("${NUREGO_API_URL}")
     private String nuregoApiBase;
 
-    @Value("${NUREGO_API_KEY}")
-    private String nuregoApiKey;
+    @Value("${NUREGO_USERNAME}")
+    private String nuregoUsername;
+
+    @Value("${NUREGO_PASSWORD}")
+    private String nuregoPassword;
+
+    @Value("${NUREGO_INSTANCE_ID}")
+    private String nuregoInstanceId;
 
     @Value("${STEADY_STATE_SLEEP_MS:10000}")
     private int steadyStateSleepMS;
@@ -98,7 +104,7 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
                 .getSubdomain();
         this.acsUrl = this.zoneHelper.getAcsBaseURL();
         Nurego.setApiBase(this.nuregoApiBase);
-        Nurego.apiKey = this.nuregoApiKey;
+        Nurego.setApiCredentials(nuregoUsername, nuregoPassword, nuregoInstanceId);
 
         //Busy wait for the meter to achieve steady state for POLICY_UPDATE and POLICY_EVAL
         waitForSteadyStateEntitlementUsage(POLICY_UPDATE_FEATURE_ID, this.zoneId);

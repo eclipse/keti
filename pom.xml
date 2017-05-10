@@ -67,9 +67,10 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven-bundle-plugin.version>2.3.7</maven-bundle-plugin.version>
         <!-- Spring framework upgrade to 4.3.1 requires this version of Jackson -->
+
         <jackson.version>2.6.7</jackson.version>
         <jedis.version>2.9.0</jedis.version>
-        <spring-metering-filter.version>1.2.1</spring-metering-filter.version>
+        <spring-metering-filter.version>1.2.4</spring-metering-filter.version>
         <spring-data-redis.version>1.6.4.RELEASE</spring-data-redis.version>
         <spring-log-filter.version>1.1.0</spring-log-filter.version>
         <springfox.swagger.version>2.6.1</springfox.swagger.version>
