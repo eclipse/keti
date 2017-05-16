@@ -152,6 +152,6 @@ public class PolicyEvaluationRequestCacheKeyTest {
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
                 .request(request).build();
-        assertEquals(key.toRedisKey(), ZONE_NAME + ":*:*:" + Integer.toHexString(request.hashCode()));
+        assertEquals(key.toDecisionKey(), ZONE_NAME + ":*:*:" + Integer.toHexString(request.hashCode()));
     }
 }

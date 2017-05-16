@@ -49,7 +49,7 @@ public class PolicyEvaluationRequestCacheKey {
         this.zoneId = zoneId;
     }
 
-    public String toRedisKey() {
+    public String toDecisionKey() {
         StringBuilder keyBuilder = new StringBuilder();
         if (null == this.zoneId) {
             keyBuilder.append("*:");

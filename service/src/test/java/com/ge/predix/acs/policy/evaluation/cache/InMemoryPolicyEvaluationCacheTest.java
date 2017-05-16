@@ -56,7 +56,7 @@ public class InMemoryPolicyEvaluationCacheTest {
 
         PolicyEvaluationResult result = new PolicyEvaluationResult(Effect.PERMIT);
         String value = OBJECT_MAPPER.writeValueAsString(result);
-        this.cache.set(key.toRedisKey(), value);
+        this.cache.set(key.toDecisionKey(), value);
 
         Map<String, String> evalCache = (Map<String, String>) getInternalState(this.cache, "evalCache");
         assertEquals(evalCache.size(), 1);

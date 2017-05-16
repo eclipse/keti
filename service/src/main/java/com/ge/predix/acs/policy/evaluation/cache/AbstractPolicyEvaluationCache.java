@@ -19,7 +19,6 @@ package com.ge.predix.acs.policy.evaluation.cache;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -78,61 +77,124 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
      * Result. If the key is not in the cache or the result is invalidated, it will return null. Also it will remove
      * the Policy EvaluationResult so that subsequent evaluations won't find the key in the cache.
      *
-     * @param key
+     * @param evalRequestkey
      *            The Policy Evaluation key to retrieve.
-     * @return The Policy Evaluation Result if the key is the the cache and the result isn't invalidated, or null
+     * @return The Policy Evaluation Result if the key is in the cache and the result isn't invalidated, or null
      */
     @Override
-    public PolicyEvaluationResult get(final PolicyEvaluationRequestCacheKey key) {
-        String redisKey = key.toRedisKey();
-        List<String> keys = assembleKeys(key);
-        List<String> values = multiGet(keys);
+    public PolicyEvaluationResult get(final PolicyEvaluationRequestCacheKey evalRequestkey) {
+        //Get all result related entries
+        DecisionCacheEntries cachedEntries = new DecisionCacheEntries(evalRequestkey);
 
-        logCacheGetDebugMessages(key, redisKey, keys, values);
-        if (!isRequestCached(values)) {
+        String cachedEvalResultString = cachedEntries.getDecisionString();
+        if (null == cachedEvalResultString) {
+            return null;
+        }
+        PolicyEvaluationResult cachedEvalResult = toPolicyEvaluationResult(cachedEvalResultString);
+        
+        List<String> invalidationTimeStamps = new ArrayList<>();
+        invalidationTimeStamps.add(cachedEntries.getSubjectLastModified());
+        invalidationTimeStamps.addAll(cachedEntries.getPolicySetsLastModified());
+
+        Set<String> cachedResolvedResourceUris = cachedEvalResult.getResolvedResourceUris();
+        //is requested resource id same as resolved resource uri ?
+        if (cachedResolvedResourceUris.size() == 1
+                && cachedResolvedResourceUris.iterator().next().equals(evalRequestkey.getResourceId())) {
+            invalidationTimeStamps.add(cachedEntries.getRequestedResourceLastModified());
+        } else {
+            List<String> cacheResolvedResourceKeys = cachedResolvedResourceUris.stream()
+                    .map(resolvedResourceUri -> resourceKey(evalRequestkey.getZoneId(), resolvedResourceUri))
+                    .collect(Collectors.toList());
+            invalidationTimeStamps.addAll(multiGet(cacheResolvedResourceKeys));
+        }
+
+        if (isCachedRequestInvalid(invalidationTimeStamps, new DateTime(cachedEvalResult.getTimestamp()))) {
+            delete(cachedEntries.getDecisionKey());
+            LOGGER.debug("Cached decision for key '{}' is not valid.", cachedEntries.getDecisionKey());
             return null;
         }
 
-        PolicyEvaluationResult cachedResult;
+        return cachedEvalResult;
+    }
+
+    private PolicyEvaluationResult toPolicyEvaluationResult(final String cachedDecisionString) {
         try {
-            cachedResult = OBJECT_MAPPER.readValue(values.get(values.size() - 1), PolicyEvaluationResult.class);
+            return OBJECT_MAPPER.readValue(cachedDecisionString, PolicyEvaluationResult.class);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read policy evaluation result as JSON.", e);
         }
-        // Remove the Policy Evaluation Result out of values because we deserialized it
-        values.remove(values.size() - 1);
-
-        String zone = key.getZoneId();
-        // Add the resolved resource URI's stored in the decision to values only if the resource in the request
-        // does not match the resource stored in the cached decision so that we can check timestamps of all entities
-        // involved in the request.
-        Set<String> cachedResolvedResourceUris = cachedResult.getResolvedResourceUris();
-        if (!cachedResolvedResourceUris.equals(Collections.singleton(values.get(values.size() - 1)))) {
-            values.remove(values.size() - 1);
-            values.addAll(multiGet(cachedResolvedResourceUris.stream()
-                    .map(resourceUri -> resourceKey(zone, resourceUri)).collect(Collectors.toList())));
-        }
-
-        if (isCachedRequestInvalid(values, new DateTime(cachedResult.getTimestamp()))) {
-            delete(keys.get(keys.size() - 1));
-            LOGGER.debug("Cached decision for key '{}' is not valid.", redisKey);
-            return null;
-        }
-        return cachedResult;
     }
 
-    private List<String> assembleKeys(final PolicyEvaluationRequestCacheKey key) {
-        // Only need to assemble keys for policy sets, the subject, and the policy evaluation result.
-        // Resource-related information will be captured in the resolved resource URIs from the cached
-        // policy evaluation result.
-        List<String> keys = new ArrayList<>();
-        LinkedHashSet<String> policySetIds = key.getPolicySetIds();
-        policySetIds.forEach(policySetId -> keys.add(policySetKey(key.getZoneId(), policySetId)));
-        keys.add(subjectKey(key.getZoneId(), key.getSubjectId()));
-        keys.add(resourceKey(key.getZoneId(), key.getResourceId()));
-        keys.add(key.toRedisKey());
-        return keys;
-    }
+    private final class DecisionCacheEntries {
+        private final List<String> entryValues;
+        private final List<String> entryKeys;
+        private final List<String> policySetTimestamps = new ArrayList<>();
+        private final int lastValueIndex;
+        private final String decisionKey;
+        
+        /**
+         * Execute a multi-get operation on all entries related to a cached result,
+         * and provides a immutable object for the values fetched.
+         */
+        DecisionCacheEntries(final PolicyEvaluationRequestCacheKey evalRequestKey) {
+            //Get all values with a batch get
+            this.decisionKey = evalRequestKey.toDecisionKey();
+            this.entryKeys =  prepareKeys(evalRequestKey);
+            this.entryValues = multiGet(this.entryKeys);
+            this.lastValueIndex = this.entryValues.size() - 1;
+
+            logCacheGetDebugMessages(evalRequestKey, this.decisionKey, this.entryKeys, this.entryValues);
+
+            //create separate list of policySetTimes to prevent mutation on entryValues
+            for (int i = 0; i < evalRequestKey.getPolicySetIds().size(); i++) {
+                this.policySetTimestamps.add(this.entryValues.get(i));
+            }
+        }
+        
+        //Prepare keys to fetch in one batch            
+        private List<String> prepareKeys(final PolicyEvaluationRequestCacheKey evalRequestKey) {
+            List<String> keys = new ArrayList<>();
+
+            //Add 'n' Policy Set keys
+            LinkedHashSet<String> policySetIds = evalRequestKey.getPolicySetIds();
+            policySetIds.forEach(policySetId -> keys.add(policySetKey(evalRequestKey.getZoneId(), policySetId)));
+            
+            // n+1
+            keys.add(subjectKey(evalRequestKey.getZoneId(), evalRequestKey.getSubjectId()));
+
+            //n+2
+            keys.add(resourceKey(evalRequestKey.getZoneId(), evalRequestKey.getResourceId()));
+
+            //n+3
+            keys.add(this.decisionKey);
+            
+            return keys;
+        }
+
+        /**
+         * (eval result, eval time, resolved resource uri(s)). 
+         */
+        String getDecisionString() {
+            return entryValues.get(this.lastValueIndex);
+        }
+
+        String getDecisionKey() {
+            return decisionKey;
+        }
+
+        String getSubjectLastModified() {
+            return entryValues.get(lastValueIndex - 2);
+        }
+
+        String getRequestedResourceLastModified() {
+            return entryValues.get(lastValueIndex - 1);
+        }
+
+        List<String> getPolicySetsLastModified() {
+            return this.policySetTimestamps;
+        }
+     }
+    
 
     private void logCacheGetDebugMessages(final PolicyEvaluationRequestCacheKey key, final String redisKey,
             final List<String> keys, final List<String> values) {
@@ -156,8 +218,8 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
             setEntityTimestamps(key, result);
             result.setTimestamp(new DateTime().getMillis());
             String value = OBJECT_MAPPER.writeValueAsString(result);
-            set(key.toRedisKey(), value);
-            LOGGER.debug("Setting policy evaluation to cache; key: '{}', value: '{}'.", key.toRedisKey(), value);
+            set(key.toDecisionKey(), value);
+            LOGGER.debug("Setting policy evaluation to cache; key: '{}', value: '{}'.", key.toDecisionKey(), value);
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to write policy evaluation result as JSON.", e);
         }
@@ -190,7 +252,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
     @Override
     public void reset(final PolicyEvaluationRequestCacheKey key) {
-        Set<String> keys = keys(key.toRedisKey());
+        Set<String> keys = keys(key.toDecisionKey());
         delete(keys);
     }
 
@@ -287,10 +349,6 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         String timestamp = timestampValue();
         logSetEntityTimestampsDebugMessage(key, timestamp, subjectId, entityType);
         map.put(key, timestamp);
-    }
-
-    private boolean isRequestCached(final List<String> values) {
-        return null != values.get(values.size() - 1);
     }
 
     private boolean isCachedRequestInvalid(final List<String> values, final DateTime policyEvalTimestamp) {
