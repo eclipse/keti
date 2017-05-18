@@ -1,16 +1,16 @@
 /*******************************************************************************
- * Copyright 2016 General Electric Company. 
+ * Copyright 2016 General Electric Company.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
 package com.ge.predix.acceptance.test.zone.admin;
@@ -30,9 +30,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.web.client.HttpClientErrorException;
 import org.testng.Assert;
 
@@ -56,7 +57,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
 //CHECKSTYLE:OFF
-//Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules. 
+//Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules.
 public class ZoneEnforcementStepsDefinitions {
 
     @Value("${ACS_UAA_URL}")
@@ -225,9 +226,10 @@ public class ZoneEnforcementStepsDefinitions {
             default:
                 Assert.fail("Api " + api + " does not match/is not yet implemented for this test code.");
             }
-        } catch (OAuth2Exception e) {
-            this.status = e.getHttpErrorCode();
+        } catch (AccessTokenRequiredException | HttpClientErrorException e) {
+            this.status = HttpStatus.FORBIDDEN.value();
         }
+
     }
 
     @When("^client_one does a PUT on (.*?) with (.*?) in zone 1$")

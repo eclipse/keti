@@ -6,11 +6,26 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.sleuth.DefaultSpanNamer;
+import org.springframework.cloud.sleuth.Span;
+import org.springframework.cloud.sleuth.TraceKeys;
+import org.springframework.cloud.sleuth.instrument.web.HttpTraceKeysInjector;
+import org.springframework.cloud.sleuth.instrument.web.ZipkinHttpSpanInjector;
+import org.springframework.cloud.sleuth.instrument.web.client.TraceRestTemplateInterceptor;
+import org.springframework.cloud.sleuth.log.NoOpSpanLogger;
+import org.springframework.cloud.sleuth.sampler.AlwaysSampler;
+import org.springframework.cloud.sleuth.trace.DefaultTracer;
+import org.springframework.cloud.sleuth.util.ArrayListSpanAccumulator;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +38,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -43,14 +59,9 @@ import com.ge.predix.test.utils.ZoneHelper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-@ContextConfiguration("classpath:integration-test-spring-context.xml")
-public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpringContextTests {
-
-    @Value("${ZONE1_NAME:testzone1}")
-    private String acsZone1Name;
-
-    @Value("${ACS_UAA_URL}")
-    private String acsUaaUrl;
+@Configuration
+@ImportResource("classpath:integration-test-spring-context.xml")
+class PolicyEvaluationWithAttributeConnectorITConfiguration {
 
     @Value("${ASSET_TOKEN_URL}")
     private String assetTokenUrl;
@@ -60,6 +71,65 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
 
     @Value("${ASSET_CLIENT_SECRET}")
     private String assetClientSecret;
+
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private ACSRestTemplateFactory acsRestTemplateFactory;
+
+    @Autowired
+    private DefaultTracer tracer;
+
+    private void setRestTemplateInterceptor(final RestTemplate restTemplate) {
+        restTemplate.setInterceptors(Collections.singletonList(new TraceRestTemplateInterceptor(this.tracer,
+                new ZipkinHttpSpanInjector(), new HttpTraceKeysInjector(this.tracer, new TraceKeys()))));
+    }
+
+    @Bean
+    public DefaultTracer tracer() {
+        return new DefaultTracer(new AlwaysSampler(), new Random(), new DefaultSpanNamer(), new NoOpSpanLogger(),
+                new ArrayListSpanAccumulator(), new TraceKeys());
+    }
+
+    @Bean
+    public OAuth2RestTemplate assetRestTemplate() {
+        ClientCredentialsResourceDetails clientCredentials = new ClientCredentialsResourceDetails();
+        clientCredentials.setAccessTokenUri(this.assetTokenUrl);
+        clientCredentials.setClientId(this.assetClientId);
+        clientCredentials.setClientSecret(this.assetClientSecret);
+        OAuth2RestTemplate assetRestTemplate = new OAuth2RestTemplate(clientCredentials);
+
+        CloseableHttpClient httpClient = HttpClientBuilder.create().useSystemProperties().build();
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        assetRestTemplate.setRequestFactory(requestFactory);
+
+        setRestTemplateInterceptor(assetRestTemplate);
+
+        return assetRestTemplate;
+    }
+
+    @Bean
+    public OAuth2RestTemplate acsAdminRestTemplate() {
+        OAuth2RestTemplate acsAdminRestTemplate;
+        if (Arrays.asList(this.environment.getActiveProfiles()).contains("public")) {
+            acsAdminRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForAcsAdmin();
+        } else {
+            acsAdminRestTemplate = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
+        }
+        setRestTemplateInterceptor(acsAdminRestTemplate);
+        return acsAdminRestTemplate;
+    }
+}
+
+@ContextConfiguration(classes = { PolicyEvaluationWithAttributeConnectorITConfiguration.class })
+public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpringContextTests {
+
+    @Value("${ZONE1_NAME:testzone1}")
+    private String acsZone1Name;
+
+    @Value("${ACS_UAA_URL}")
+    private String acsUaaUrl;
 
     @Value("${ASSET_ZONE_ID}")
     private String assetZoneId;
@@ -94,12 +164,19 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
     @Autowired
     private PolicyHelper policyHelper;
 
+    @Autowired
+    private OAuth2RestTemplate acsAdminRestTemplate;
+
+    @Autowired
+    private OAuth2RestTemplate assetRestTemplate;
+
+    @Autowired
+    private DefaultTracer tracer;
+
     private static final String TEST_PART_ID = "part/03f95db1-4255-4265-a509-f7bca3e1fee4";
     private static final String ASSET_URI_PATH_SEGMENT = '/' + TEST_PART_ID;
 
     private Zone zone;
-    private OAuth2RestTemplate acsAdminRestTemplate;
-    private OAuth2RestTemplate assetRestTemplate;
     private boolean registerWithZac;
     private URI resourceAttributeConnectorUrl;
 
@@ -116,21 +193,7 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
         return httpHeaders;
     }
 
-    private void createAssetRestTemplate() {
-        ClientCredentialsResourceDetails clientCredentials = new ClientCredentialsResourceDetails();
-        clientCredentials.setAccessTokenUri(this.assetTokenUrl);
-        clientCredentials.setClientId(this.assetClientId);
-        clientCredentials.setClientSecret(this.assetClientSecret);
-        this.assetRestTemplate = new OAuth2RestTemplate(clientCredentials);
-
-        CloseableHttpClient httpClient = HttpClientBuilder.create().useSystemProperties().build();
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        this.assetRestTemplate.setRequestFactory(requestFactory);
-    }
-
     private void configureMockAssetData() throws IOException {
-        this.createAssetRestTemplate();
-
         JsonObject part = new JsonObject();
         part.addProperty("id", "03f95db1-4255-4265-a509-f7bca3e1fee4");
         part.addProperty("collection", "part");
@@ -163,16 +226,13 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
 
     private void setupPredixAcs() throws IOException {
         this.zacTestUtil.assumeZacServerAvailable();
-        this.acsAdminRestTemplate = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
         this.registerWithZac = true;
-
     }
 
     private void setupPublicAcs() throws IOException {
         UaaTestUtil uaaTestUtil = new UaaTestUtil(this.acsRestTemplateFactory.getOAuth2RestTemplateForUaaAdmin(),
                 this.acsUaaUrl);
         uaaTestUtil.setup(Collections.singletonList(this.acsZone1Name));
-        this.acsAdminRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForAcsAdmin();
         this.registerWithZac = false;
     }
 
@@ -206,7 +266,8 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
     }
 
     @Test(dataProvider = "adapterStatusesAndResultingEffects")
-    public void testPolicyEvaluationWithAdapters(final boolean adapterActive, final Effect expectedEffect)
+    public void testPolicyEvaluationWithAdapters(final boolean adapterActive, final Effect expectedEffect,
+            final boolean enableSleuthTracing)
             throws Exception {
         String testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, zoneHeader(),
                 this.zoneHelper.getAcsBaseURL(),
@@ -216,10 +277,23 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
             this.configureAttributeConnector(adapterActive);
             PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper.createEvalRequest("GET",
                     "testSubject", TEST_PART_ID, null);
+
+            if (enableSleuthTracing) {
+                this.tracer.continueSpan(Span.builder().traceId(1L).spanId(2L).parent(3L).build());
+            }
+
             ResponseEntity<PolicyEvaluationResult> policyEvaluationResponse = this.acsAdminRestTemplate.postForEntity(
                     this.zoneHelper.getAcsBaseURL() + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
                     new HttpEntity<>(policyEvaluationRequest, zoneHeader()), PolicyEvaluationResult.class);
             Assert.assertEquals(policyEvaluationResponse.getStatusCode(), HttpStatus.OK);
+
+            HttpHeaders responseHeaders = policyEvaluationResponse.getHeaders();
+            Assert.assertTrue(
+                    responseHeaders.containsKey(Span.TRACE_ID_NAME) && StringUtils.isNotEmpty(Span.TRACE_ID_NAME));
+            if (enableSleuthTracing) {
+                Assert.assertEquals(Span.hexToId(responseHeaders.get(Span.TRACE_ID_NAME).get(0)), 1L);
+            }
+
             PolicyEvaluationResult policyEvaluationResult = policyEvaluationResponse.getBody();
             Assert.assertEquals(policyEvaluationResult.getEffect(), expectedEffect);
         } finally {
@@ -231,6 +305,7 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
 
     @DataProvider
     private Object[][] adapterStatusesAndResultingEffects() {
-        return new Object[][] { { true, Effect.PERMIT }, { false, Effect.NOT_APPLICABLE } };
+        return new Object[][] { { true, Effect.PERMIT, true }, { true, Effect.PERMIT, false },
+                { false, Effect.NOT_APPLICABLE, true } };
     }
 }

@@ -26,7 +26,7 @@ final class PushAcsApplication {
     @Value("${ACS_SERVICE_ARTIFACT_DIR:../service/target}")
     private String serviceArtifactDir;
 
-    @Value("${ACS_SERVICE_ARTIFACT_PATTERN:acs-service-*.jar}")
+    @Value("${ACS_SERVICE_ARTIFACT_PATTERN:acs-service-*-exec.jar}")
     private String serviceArtifactPattern;
 
     @Autowired

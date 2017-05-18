@@ -6,7 +6,7 @@ import org.testng.annotations.BeforeSuite;
 import com.ge.predix.acs.AccessControlService;
 
 public final class TestConfig {
-    
+
     private TestConfig() {
         //not called
      }

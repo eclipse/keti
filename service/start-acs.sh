@@ -23,6 +23,7 @@ export DIR=$( dirname "$( python -c "import os; print os.path.abspath('${BASH_SO
 
 if [ "$#" -eq 0 ]; then
     unset JAVA_DEBUG_OPTS
+    unset LOGGING_OPTS
 fi
 
 main() {
@@ -32,14 +33,18 @@ main() {
                 JAVA_DEBUG_OPTS='-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005'
                 shift
                 ;;
+            'human-readable-logging')
+                LOGGING_OPTS="-Dlog4j.debug -Dlog4j.configuration=file:${DIR}/src/main/resources/log4j-dev.xml"
+                shift
+                ;;
             *)
                 break
                 ;;
         esac
     done
 
-    cp "${DIR}"/target/acs-service-*.jar "${DIR}"/.acs-service-copy.jar
-    java -Xms1g -Xmx1g $JAVA_DEBUG_OPTS $PROXY_OPTS -jar "${DIR}"/.acs-service-copy.jar
+    cp "${DIR}"/target/acs-service-*-exec.jar "${DIR}"/.acs-service-copy.jar
+    java -Xms1g -Xmx1g $JAVA_DEBUG_OPTS $LOGGING_OPTS $PROXY_OPTS -jar "${DIR}"/.acs-service-copy.jar
 }
 
 main "$@"

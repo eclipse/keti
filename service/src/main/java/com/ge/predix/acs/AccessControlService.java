@@ -16,24 +16,25 @@
 
 package com.ge.predix.acs;
 
-import com.ge.predix.acs.monitoring.ManagementSecurityRoleFilter;
-import com.ge.predix.acs.request.context.AcsRequestEnrichingFilter;
-import com.google.common.base.Predicate;
+import static com.google.common.base.Predicates.or;
+import static springfox.documentation.builders.PathSelectors.regex;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.embedded.FilterRegistrationBean;
-import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+
+import com.ge.predix.acs.monitoring.ManagementSecurityRoleFilter;
+import com.ge.predix.acs.request.context.AcsRequestEnrichingFilter;
+import com.google.common.base.Predicate;
+
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-import static com.google.common.base.Predicates.or;
-import static springfox.documentation.builders.PathSelectors.regex;
 
 /**
  * Access Control Service - Spring Boot Application.
@@ -41,7 +42,6 @@ import static springfox.documentation.builders.PathSelectors.regex;
  * @author 212304931
  */
 @SpringBootApplication
-@EnableCircuitBreaker
 @EnableSwagger2
 @ImportResource(value = "classpath:security-config.xml")
 public class AccessControlService {

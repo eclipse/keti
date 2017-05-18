@@ -121,75 +121,52 @@
     </build>
 
     <dependencies>
-        <!-- Begin dependencies added for Hystrix circuit breaker functionality. -->
         <dependency>
-            <groupId>com.netflix.hystrix</groupId>
-            <artifactId>hystrix-core</artifactId>
-            <version>${hystrix.version}</version>
+            <groupId>com.ge.predix</groupId>
+            <artifactId>acs-commons</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>com.netflix.archaius</groupId>
-                    <artifactId>archaius-core</artifactId>
+                    <groupId>io.springfox</groupId>
+                    <artifactId>springfox-swagger-ui</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.springfox</groupId>
+                    <artifactId>springfox-swagger2</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.swagger</groupId>
+                    <artifactId>swagger-annotations</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.netflix.archaius</groupId>
-            <artifactId>archaius-core</artifactId>
-            <version>${archaius.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.netflix.hystrix</groupId>
-            <artifactId>hystrix-javanica</artifactId>
-            <version>${hystrix.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.netflix.hystrix</groupId>
-            <artifactId>hystrix-metrics-event-stream</artifactId>
-            <version>${hystrix.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-commons</artifactId>
-            <version>${spring-cloud.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-netflix-core</artifactId>
-            <version>${spring-cloud-netflix.version}</version>
-        </dependency>
-        <!-- End dependencies added for Hystrix circuit breaker functionality. -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5</version><!--$NO-MVN-MAN-VER$-->
-        </dependency>
-        <dependency>
-            <groupId>com.ge.predix</groupId>
-            <artifactId>acs-commons</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.ge.predix</groupId>
             <artifactId>acs-model</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.springfox</groupId>
+                    <artifactId>springfox-swagger-ui</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.springfox</groupId>
+                    <artifactId>springfox-swagger2</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.swagger</groupId>
+                    <artifactId>swagger-annotations</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.ge.predix</groupId>
             <artifactId>acs-service</artifactId>
             <version>4.7.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.9.10</version>
-            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -199,7 +176,6 @@
         <dependency>
             <groupId>org.springframework.security.oauth</groupId>
             <artifactId>spring-security-oauth2</artifactId>
-            <version>2.0.3.RELEASE</version><!--$NO-MVN-MAN-VER$-->
             <!-- These transitive dependencies are incompatible with spring
                 core dependencies pulled in by spring boot -->
             <exclusions>
@@ -214,11 +190,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-java</artifactId>
             <version>${cucumber.version}</version>
@@ -227,13 +198,13 @@
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-testng</artifactId>
-            <version>${cucumber.testng.version}</version>
+            <version>${cucumber.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-spring</artifactId>
-            <version>${cucumber.testng.version}</version>
+            <version>${cucumber.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -254,6 +225,12 @@
             <groupId>com.nurego</groupId>
             <artifactId>nurego-java</artifactId>
             <version>${nurego-java.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.cloudfoundry.identity</groupId>
@@ -267,6 +244,16 @@
             <groupId>org.cloudfoundry</groupId>
             <artifactId>cloudfoundry-client-reactor</artifactId>
             <version>2.1.0.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.projectreactor</groupId>
+                    <artifactId>reactor-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.projectreactor.ipc</groupId>
+                    <artifactId>reactor-netty</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.cloudfoundry</groupId>
@@ -282,6 +269,12 @@
             <groupId>io.projectreactor.ipc</groupId>
             <artifactId>reactor-netty</artifactId>
             <version>0.6.2.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.projectreactor</groupId>
+                    <artifactId>reactor-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
@@ -411,6 +404,12 @@
                     <groupId>com.ge.predix.audit</groupId>
                     <artifactId>audit-sdk</artifactId>
                     <version>${audit-sdk.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>commons-io</groupId>
+                            <artifactId>commons-io</artifactId>
+                        </exclusion>
+                    </exclusions>
                 </dependency>
             </dependencies>
             <build>
@@ -465,6 +464,12 @@
                     <groupId>com.ge.predix.audit</groupId>
                     <artifactId>audit-sdk</artifactId>
                     <version>${audit-sdk.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>commons-io</groupId>
+                            <artifactId>commons-io</artifactId>
+                        </exclusion>
+                    </exclusions>
                 </dependency>
             </dependencies>
             <build>
@@ -737,6 +742,12 @@
                     <groupId>com.ge.predix.audit</groupId>
                     <artifactId>audit-sdk</artifactId>
                     <version>${audit-sdk.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>commons-io</groupId>
+                            <artifactId>commons-io</artifactId>
+                        </exclusion>
+                    </exclusions>
                 </dependency>
             </dependencies>
             <build>
