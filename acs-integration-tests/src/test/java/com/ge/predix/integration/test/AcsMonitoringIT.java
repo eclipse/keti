@@ -1,26 +1,30 @@
 package com.ge.predix.integration.test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ge.predix.acs.monitoring.AcsMonitoringUtilities;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ge.predix.acs.monitoring.AcsMonitoringUtilities;
+import com.ge.predix.acs.rest.AttributeAdapterConnection;
 
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 public class AcsMonitoringIT extends AbstractTestNGSpringContextTests {
@@ -53,11 +57,19 @@ public class AcsMonitoringIT extends AbstractTestNGSpringContextTests {
     }
 
     private ResponseEntity<String> hitHealthCheckUrl(final String uaaTokenUrl, final String clientId) {
+        AttributeAdapterConnection attributeAdapterConnection = new AttributeAdapterConnection();
         ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
         resource.setAccessTokenUri(uaaTokenUrl);
         resource.setClientId(clientId);
         resource.setClientSecret(this.clientSecret);
-        return new OAuth2RestTemplate(resource).getForEntity(this.getHealthUrl(), String.class);
+        OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(resource);
+
+        CloseableHttpClient httpClient = HttpClientBuilder.create().useSystemProperties().build();
+        HttpComponentsClientHttpRequestFactory requestFactory =
+                new HttpComponentsClientHttpRequestFactory(httpClient);
+        restTemplate.setRequestFactory(requestFactory);
+
+        return restTemplate.getForEntity(this.getHealthUrl(), String.class);
     }
 
     private static boolean isOverallStatusUp(final JsonNode jsonNode) {
@@ -77,13 +89,13 @@ public class AcsMonitoringIT extends AbstractTestNGSpringContextTests {
     }
 
     @Test(
-            expectedExceptions = { OAuth2AccessDeniedException.class },
-            expectedExceptionsMessageRegExp = "Invalid token.*")
+            expectedExceptions = { HttpClientErrorException.class },
+            expectedExceptionsMessageRegExp = "401 Unauthorized")
     public void testStatusWithUntrustedUaaTokenUrl() throws Exception {
         this.hitHealthCheckUrl(this.untrustedUaaTokenUrl, this.authorizedClientId);
     }
 
-    @Test(expectedExceptions = { OAuth2Exception.class }, expectedExceptionsMessageRegExp = "Forbidden")
+    @Test(expectedExceptions = { HttpClientErrorException.class }, expectedExceptionsMessageRegExp = "403 Forbidden")
     public void testStatusWithUnauthorizedClient() throws Exception {
         this.hitHealthCheckUrl(this.trustedUaaTokenUrl, this.unauthorizedClientId);
     }

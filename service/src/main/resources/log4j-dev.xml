@@ -18,7 +18,9 @@
 <log4j:configuration debug="false" xmlns:log4j='http://jakarta.apache.org/log4j/'>
 
     <appender name="console" class="org.apache.log4j.ConsoleAppender">
-        <layout class="com.ge.predix.log4j1.PredixLayout"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[Z:%X{Zone-Id} T:%X{X-B3-TraceId} S:%X{X-B3-SpanId}] %d{YYYY-MM-dd HH:mm:ss} %p [%t] %c [%F:%L] %m%n"/>
+        </layout>
     </appender>
 
     <logger name="org.springframework.security">

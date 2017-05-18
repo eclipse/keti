@@ -11,6 +11,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -64,6 +65,21 @@ public class ResourceRepositoryProxy implements ResourceRepository, ResourceHier
     }
 
     @Override
+    public <S extends ResourceEntity> Page<S> findAll(final Example<S> example, final Pageable pageable) {
+        throw new UnsupportedOperationException(MESSAGE);
+    }
+
+    @Override
+    public <S extends ResourceEntity> List<S> findAll(final Example<S> example, final Sort sort) {
+        throw new UnsupportedOperationException(MESSAGE);
+    }
+
+    @Override
+    public <S extends ResourceEntity> List<S> findAll(final Example<S> example) {
+        throw new UnsupportedOperationException(MESSAGE);
+    }
+
+    @Override
     public <S extends ResourceEntity> List<S> save(final Iterable<S> arg0) {
         return this.activeRepository.save(arg0);
     }
@@ -109,12 +125,27 @@ public class ResourceRepositoryProxy implements ResourceRepository, ResourceHier
     }
 
     @Override
+    public <S extends ResourceEntity> S findOne(final Example<S> example) {
+        throw new UnsupportedOperationException(MESSAGE);
+    }
+
+    @Override
     public boolean exists(final Long arg0) {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public long count() {
+        throw new UnsupportedOperationException(MESSAGE);
+    }
+
+    @Override
+    public <S extends ResourceEntity> long count(final Example<S> example) {
+        throw new UnsupportedOperationException(MESSAGE);
+    }
+
+    @Override
+    public <S extends ResourceEntity> boolean exists(final Example<S> example) {
         throw new UnsupportedOperationException(MESSAGE);
     }
 

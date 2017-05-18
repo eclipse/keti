@@ -23,10 +23,10 @@ import com.ge.predix.acs.rest.attribute.adapter.AttributesResponse;
 public abstract class ExternalAttributeReader implements AttributeReader {
 
     @Value("${MAX_NUMBER_OF_ATTRIBUTES:1500}")
-    private int maxNumberOfAttributes;
+    private int maxNumberOfAttributes = 1500;
 
     @Value("${MAX_SIZE_OF_ATTRIBUTES_IN_BYTES:500000}")
-    private int maxSizeOfAttributesInBytes;
+    private int maxSizeOfAttributesInBytes = 500000;
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ExternalAttributeReader.class);
     private static final String ID = "id";
