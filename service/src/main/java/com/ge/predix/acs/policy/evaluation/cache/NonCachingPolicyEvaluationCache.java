@@ -20,17 +20,6 @@ public class NonCachingPolicyEvaluationCache implements PolicyEvaluationCache {
     }
 
     @Override
-    public void setResourceTranslation(final String zoneId, final String fromResourceId, final String toResourceId) {
-        // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
-    }
-
-    @Override
-    public void setResourceTranslations(final String zoneId, final Set<String> fromResourceIds,
-            final String toResourceId) {
-        // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
-    }
-
-    @Override
     public void reset() {
         // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
     }
