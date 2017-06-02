@@ -42,6 +42,7 @@
         <acs.zone.subdomain>test-zone-${zone.var}</acs.zone.subdomain>
         <cf.base.domain>${CF_BASE_DOMAIN}</cf.base.domain>
         <uaa.zone>acs.</uaa.zone>
+        <exec-maven-plugin.version>1.5.0</exec-maven-plugin.version>
     </properties>
 
     <build>
@@ -243,7 +244,7 @@
         <dependency>
             <groupId>org.cloudfoundry</groupId>
             <artifactId>cloudfoundry-client-reactor</artifactId>
-            <version>2.1.0.RELEASE</version>
+            <version>2.12.0.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.projectreactor</groupId>
@@ -258,17 +259,17 @@
         <dependency>
             <groupId>org.cloudfoundry</groupId>
             <artifactId>cloudfoundry-operations</artifactId>
-            <version>2.1.0.RELEASE</version>
+            <version>2.12.0.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
-            <version>3.0.4.RELEASE</version>
+            <version>3.0.7.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>io.projectreactor.ipc</groupId>
             <artifactId>reactor-netty</artifactId>
-            <version>0.6.2.RELEASE</version>
+            <version>0.6.3.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.projectreactor</groupId>
@@ -338,6 +339,45 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>cf-update-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${ACS_REDIS}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-rds-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${ACS_DB}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -390,6 +430,45 @@
                                 <goals>
                                     <goal>verify</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>cf-update-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${ACS_REDIS}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-rds-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${ACS_DB}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

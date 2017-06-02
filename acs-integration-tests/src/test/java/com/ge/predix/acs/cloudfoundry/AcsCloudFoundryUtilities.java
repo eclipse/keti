@@ -33,8 +33,6 @@ public final class AcsCloudFoundryUtilities {
     private static final String APP_AND_SERVICE_NAME_PREFIX = System.getProperty("jenkins.build.number");
 
     static final String ACS_APP_NAME = "acs-ci-" + APP_AND_SERVICE_NAME_PREFIX;
-    static final String ACS_DB_SERVICE_INSTANCE_NAME = "acs-db-ci-" + APP_AND_SERVICE_NAME_PREFIX;
-    static final String ACS_REDIS_SERVICE_INSTANCE_NAME = "acs-redis-ci-" + APP_AND_SERVICE_NAME_PREFIX;
     static final String ACS_AUDIT_SERVICE_INSTANCE_NAME = "acs-audit-service-int-tests";
     static final String PUSH_ACS_APP_TEST_GROUP = "pushAcsApplication";
     public static final String CHECK_APP_HEALTH_TEST_GROUP = "checkApplicationHealth";
@@ -45,8 +43,7 @@ public final class AcsCloudFoundryUtilities {
         private static final Logger LOGGER = LoggerFactory.getLogger(Adapter.class);
         static final String ACS_ASSET_ADAPTER_APP_NAME = "acs-asset-adapter-ci-" + APP_AND_SERVICE_NAME_PREFIX;
         static final String ACS_ASSET_SERVICE_INSTANCE_NAME = "acs-asset-ci-" + APP_AND_SERVICE_NAME_PREFIX;
-        static final String ACS_ASSET_UAA_SERVICE_INSTANCE_NAME = "acs-asset-uaa-ci-"
-                + APP_AND_SERVICE_NAME_PREFIX;
+        static final String ACS_ASSET_UAA_SERVICE_INSTANCE_NAME = "acs-asset-uaa-ci-" + APP_AND_SERVICE_NAME_PREFIX;
         static final String PUSH_ASSET_ADAPTER_APP_TEST_GROUP = "pushAssetAdapterApplication";
 
         @Value("${https.proxyHost}")
@@ -79,8 +76,8 @@ public final class AcsCloudFoundryUtilities {
             OAuth2RestTemplate adminRestTemplate = new OAuth2RestTemplate(adminClientCredentials);
 
             CloseableHttpClient httpClient = HttpClientBuilder.create().useSystemProperties().build();
-            HttpComponentsClientHttpRequestFactory requestFactory =
-                    new HttpComponentsClientHttpRequestFactory(httpClient);
+            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(
+                    httpClient);
             adminRestTemplate.setRequestFactory(requestFactory);
 
             try {
