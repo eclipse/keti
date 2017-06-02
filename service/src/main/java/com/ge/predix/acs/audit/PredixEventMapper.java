@@ -2,6 +2,7 @@ package com.ge.predix.acs.audit;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -25,6 +26,8 @@ public class PredixEventMapper {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PredixEventMapper.class);
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final Pattern REGEX = Pattern
+            .compile("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})" + "([0-9a-fA-F]{4})([0-9a-fA-F]+)");
 
     public AuditEventV2 map(final AuditEvent auditEvent) {
         Map<String, String> auditPayload = new HashMap<>();
@@ -39,8 +42,15 @@ public class PredixEventMapper {
             LOGGER.warn("Unable to convert audit payload to json: {}" + auditPayload, e);
         }
 
+        String correlationId = auditEvent.getCorrelationId();
+        // Padding correlation ID with 0's if zipkin id is 64 bit
+        if (correlationId.length() == 16) {
+            correlationId = "0000000000000000" + correlationId;
+        }
+        correlationId = REGEX.matcher(correlationId).replaceFirst("$1-$2-$3-$4-$5");
+
         AuditEventV2Builder auditEventBuilder = AuditEventV2.builder().timestamp(auditEvent.getTime().toEpochMilli())
-                .correlationId(auditEvent.getCorrelationId()).tenantUuid(auditEvent.getZoneId())
+                .correlationId(correlationId).tenantUuid(auditEvent.getZoneId())
                 .publisherType(PublisherType.APP_SERVICE).categoryType(CategoryType.API_CALLS).payload(payload);
 
         if (isSuccessful(auditEvent)) {

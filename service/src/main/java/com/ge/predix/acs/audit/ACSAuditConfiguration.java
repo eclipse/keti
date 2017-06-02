@@ -67,9 +67,9 @@ public class ACSAuditConfiguration {
 
         @Override
         public void onValidate(final AuditEvent arg0, final List<ValidatorReport> arg1) {
-            LOGGER.debug("AUDIT EVENT VALIDATE: {}", arg0);
+            LOGGER.info("AUDIT EVENT VALIDATE: {}", arg0);
             for (ValidatorReport report : arg1) {
-                LOGGER.debug("AUDIT ValidatorReport: {}", report);
+                LOGGER.info("AUDIT ValidatorReport: {}", report);
             }
         }
 
