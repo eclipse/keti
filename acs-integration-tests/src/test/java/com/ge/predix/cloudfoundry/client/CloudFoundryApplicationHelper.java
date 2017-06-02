@@ -66,25 +66,33 @@ public final class CloudFoundryApplicationHelper {
 
     private static <T> Mono<T> addCommonCallbacks(final String messageEnding, final Mono<T> mono) {
         return mono.doOnSubscribe(onSubscribe -> LOGGER.info(PublisherCallback.SUBSCRIBE.message(messageEnding)))
-                .doOnError(onError -> LOGGER.error(PublisherCallback.ERROR.message(messageEnding)))
-                .retry(MAX_RETRIES);
+                .doOnError(onError -> LOGGER.error(PublisherCallback.ERROR.message(messageEnding))).retry(MAX_RETRIES);
     }
 
     private static <T> Flux<T> addCommonCallbacks(final String messageEnding, final Flux<T> flux) {
         return flux.doOnSubscribe(onSubscribe -> LOGGER.info(PublisherCallback.SUBSCRIBE.message(messageEnding)))
-                .doOnError(onError -> LOGGER.error(PublisherCallback.ERROR.message(messageEnding)))
-                .retry(MAX_RETRIES);
+                .doOnError(onError -> LOGGER.error(PublisherCallback.ERROR.message(messageEnding))).retry(MAX_RETRIES);
     }
 
     public void pushApplication(final String applicationName, final Path application,
             final Map<String, String> environmentVariables, final List<CloudFoundryService> services) {
 
         pushApplication(this.cloudFoundryOperations, applicationName, application)
-                .thenMany(setEnvironmentVariables(this.cloudFoundryOperations, applicationName, environmentVariables))
-                .thenMany(createServiceInstances(this.cloudFoundryOperations, services))
                 .thenMany(bindServiceInstances(this.cloudFoundryOperations, applicationName,
                         services.stream().map(CloudFoundryService::getServiceInstanceName)
                                 .collect(Collectors.toList())))
+                .thenMany(setEnvironmentVariables(this.cloudFoundryOperations, applicationName, environmentVariables))
+                .blockLast();
+    }
+
+    public void createServicesAndPushApplication(final String applicationName, final Path application,
+            final Map<String, String> environmentVariables, final List<CloudFoundryService> services) {
+
+        pushApplication(this.cloudFoundryOperations, applicationName, application)
+                .thenMany(setEnvironmentVariables(this.cloudFoundryOperations, applicationName, environmentVariables))
+                .thenMany(createServiceInstances(this.cloudFoundryOperations, services))
+                .thenMany(bindServiceInstances(this.cloudFoundryOperations, applicationName, services.stream()
+                        .map(CloudFoundryService::getServiceInstanceName).collect(Collectors.toList())))
                 .blockLast();
     }
 
@@ -95,22 +103,14 @@ public final class CloudFoundryApplicationHelper {
 
         return addCommonCallbacks(messageEnding,
                 cloudFoundryOperations.applications()
-                .push(PushApplicationRequest.builder()
-                        .application(application)
-                        .host(applicationName)
-                        .domain(System.getenv("CF_BASE_DOMAIN"))
-                        .buildpack("java-buildpack")
-                        .diskQuota(2048)
-                        .healthCheckType(ApplicationHealthCheck.PORT)
-                        .memory(2048)
-                        .name(applicationName)
-                        .noStart(true)
-                        .build()));
+                        .push(PushApplicationRequest.builder().path(application).host(applicationName)
+                                .domain(System.getenv("CF_BASE_DOMAIN")).buildpack("java-buildpack").diskQuota(2048)
+                                .healthCheckType(ApplicationHealthCheck.PORT).memory(2048).name(applicationName)
+                                .noStart(true).build()));
     }
 
     public void setEnvironmentVariables(final String applicationName, final Map<String, String> environmentVariables) {
-        setEnvironmentVariables(this.cloudFoundryOperations, applicationName, environmentVariables)
-                .blockLast();
+        setEnvironmentVariables(this.cloudFoundryOperations, applicationName, environmentVariables).blockLast();
     }
 
     private static Flux<Void> setEnvironmentVariables(final CloudFoundryOperations cloudFoundryOperations,
@@ -124,16 +124,13 @@ public final class CloudFoundryApplicationHelper {
     private static Mono<Void> setEnvironmentVariable(final CloudFoundryOperations cloudFoundryOperations,
             final String applicationName, final String variableName, final String variableValue) {
 
-        String messageEnding = String.format("set environment variable '%s': '%s' on '%s'",
-                variableName, variableValue, applicationName);
+        String messageEnding = String.format("set environment variable '%s': '%s' on '%s'", variableName, variableValue,
+                applicationName);
 
         return addCommonCallbacks(messageEnding,
                 cloudFoundryOperations.applications()
-                .setEnvironmentVariable(SetEnvironmentVariableApplicationRequest.builder()
-                        .name(applicationName)
-                        .variableName(variableName)
-                        .variableValue(variableValue)
-                        .build()));
+                        .setEnvironmentVariable(SetEnvironmentVariableApplicationRequest.builder().name(applicationName)
+                                .variableName(variableName).variableValue(variableValue).build()));
     }
 
     public ApplicationEnvironments getApplicationEnvironments(final String applicationName) {
@@ -142,8 +139,8 @@ public final class CloudFoundryApplicationHelper {
 
         return addCommonCallbacks(messageEnding,
                 this.cloudFoundryOperations.applications()
-                .getEnvironments(GetApplicationEnvironmentsRequest.builder().name(applicationName).build()))
-                .block();
+                        .getEnvironments(GetApplicationEnvironmentsRequest.builder().name(applicationName).build()))
+                                .block();
     }
 
     public void createServiceInstances(final List<CloudFoundryService> services) {
@@ -162,33 +159,29 @@ public final class CloudFoundryApplicationHelper {
             final String planName, final String serviceInstanceName, final String serviceName,
             final Map<String, Object> parameters) {
 
-        CreateServiceInstanceRequest.Builder createServiceInstanceRequestBuilder =
-                CreateServiceInstanceRequest.builder()
-                    .planName(planName)
-                    .serviceInstanceName(serviceInstanceName)
-                    .serviceName(serviceName);
+        CreateServiceInstanceRequest.Builder createServiceInstanceRequestBuilder = CreateServiceInstanceRequest
+                .builder().planName(planName).serviceInstanceName(serviceInstanceName).serviceName(serviceName);
 
         if (MapUtils.isNotEmpty(parameters)) {
             createServiceInstanceRequestBuilder.parameters(parameters);
         }
 
-        String messageEnding = String.format("create service instance '%s' with plan '%s', service name '%s' and"
-                + " parameters '%s'", serviceInstanceName, planName, serviceName, parameters);
+        String messageEnding = String.format(
+                "create service instance '%s' with plan '%s', service name '%s' and" + " parameters '%s'",
+                serviceInstanceName, planName, serviceName, parameters);
 
         return addCommonCallbacks(messageEnding,
-                cloudFoundryOperations.services()
-                .createInstance(createServiceInstanceRequestBuilder.build())
-                .otherwise(ExceptionUtils.statusCode(CF_SERVICE_INSTANCE_NAME_TAKEN), fallback -> Mono.empty()));
+                cloudFoundryOperations.services().createInstance(createServiceInstanceRequestBuilder.build())
+                        .onErrorResume(ExceptionUtils.statusCode(CF_SERVICE_INSTANCE_NAME_TAKEN),
+                                fallback -> Mono.empty()));
     }
 
     public ServiceInstance getServiceInstance(final String serviceInstanceName) {
 
         String messageEnding = String.format("get service instance '%s'", serviceInstanceName);
 
-        return addCommonCallbacks(messageEnding,
-                this.cloudFoundryOperations.services()
-                .getInstance(GetServiceInstanceRequest.builder().name(serviceInstanceName).build()))
-                .block();
+        return addCommonCallbacks(messageEnding, this.cloudFoundryOperations.services()
+                .getInstance(GetServiceInstanceRequest.builder().name(serviceInstanceName).build())).block();
     }
 
     public void bindServiceInstances(final String applicationName, final List<String> serviceInstanceNames) {
@@ -199,27 +192,22 @@ public final class CloudFoundryApplicationHelper {
             final String applicationName, final List<String> serviceInstanceNames) {
 
         return Flux.fromIterable(serviceInstanceNames)
-                .concatMap(serviceInstanceName ->
-                        bindServiceInstance(cloudFoundryOperations, applicationName, serviceInstanceName));
+                .concatMap(serviceInstanceName -> bindServiceInstance(cloudFoundryOperations, applicationName,
+                        serviceInstanceName));
     }
 
     private static Mono<Void> bindServiceInstance(final CloudFoundryOperations cloudFoundryOperations,
             final String applicationName, final String serviceInstanceName) {
 
-        String messageEnding = String.format("bind service instance '%s' to '%s'",
-                serviceInstanceName, applicationName);
+        String messageEnding = String.format("bind service instance '%s' to '%s'", serviceInstanceName,
+                applicationName);
 
-        return addCommonCallbacks(messageEnding,
-                cloudFoundryOperations.services()
-                .bind(BindServiceInstanceRequest.builder()
-                        .applicationName(applicationName)
-                        .serviceInstanceName(serviceInstanceName)
-                        .build()));
+        return addCommonCallbacks(messageEnding, cloudFoundryOperations.services().bind(BindServiceInstanceRequest
+                .builder().applicationName(applicationName).serviceInstanceName(serviceInstanceName).build()));
     }
 
     public void startApplication(final String applicationName) {
-        startApplication(this.cloudFoundryOperations, applicationName)
-                .block();
+        startApplication(this.cloudFoundryOperations, applicationName).block();
     }
 
     private static Mono<Void> startApplication(final CloudFoundryOperations cloudFoundryOperations,
@@ -227,11 +215,8 @@ public final class CloudFoundryApplicationHelper {
 
         String messageEnding = String.format("start application '%s'", applicationName);
 
-        return addCommonCallbacks(messageEnding,
-                cloudFoundryOperations.applications()
-                .start(StartApplicationRequest.builder()
-                        .name(applicationName)
-                        .build()));
+        return addCommonCallbacks(messageEnding, cloudFoundryOperations.applications()
+                .start(StartApplicationRequest.builder().name(applicationName).build()));
     }
 
     // TODO: Add CF logging to integration tests once proxy issues related to pushing/deleting applications are fixed
@@ -241,54 +226,52 @@ public final class CloudFoundryApplicationHelper {
 
         String messageEnding = String.format("get logs for application '%s'", applicationName);
 
-        return addCommonCallbacks(messageEnding,
-                cloudFoundryOperations.applications()
-                .logs(LogsRequest.builder()
-                        .name(applicationName)
-                        .recent(false)
-                        .build()));
+        return addCommonCallbacks(messageEnding, cloudFoundryOperations.applications()
+                .logs(LogsRequest.builder().name(applicationName).recent(false).build()));
     }
 
-    public void deleteApplicationAndServices(final String applicationName, final List<String> serviceInstanceNames) {
+    public void unbindAndDeleteServicesAndApplication(final String applicationName,
+            final List<String> serviceInstanceNames) {
 
         unbindServiceInstances(this.cloudFoundryOperations, applicationName, serviceInstanceNames)
                 .thenMany(deleteServiceInstances(this.cloudFoundryOperations, serviceInstanceNames))
-                .thenEmpty(deleteApplication(this.cloudFoundryOperations, applicationName))
-                .block();
+                .thenEmpty(deleteApplication(this.cloudFoundryOperations, applicationName)).block();
+    }
+
+    public void unbindServicesAndDeleteApplication(final String applicationName,
+            final List<String> serviceInstanceNames) {
+
+        unbindServiceInstances(this.cloudFoundryOperations, applicationName, serviceInstanceNames)
+                .thenEmpty(deleteApplication(this.cloudFoundryOperations, applicationName)).block();
+    }
+
+    public void deleteApplication(final String applicationName) {
+        deleteApplication(this.cloudFoundryOperations, applicationName).block();
     }
 
     private static Flux<Void> unbindServiceInstances(final CloudFoundryOperations cloudFoundryOperations,
             final String applicationName, final List<String> serviceInstanceNames) {
 
         return Flux.fromIterable(serviceInstanceNames)
-                .concatMap(serviceInstanceName ->
-                        unbindServiceInstance(cloudFoundryOperations, applicationName, serviceInstanceName));
+                .concatMap(serviceInstanceName -> unbindServiceInstance(cloudFoundryOperations, applicationName,
+                        serviceInstanceName));
     }
 
     private static Mono<Void> unbindServiceInstance(final CloudFoundryOperations cloudFoundryOperations,
             final String applicationName, final String serviceInstanceName) {
 
-        String messageEnding = String.format("unbind service instance '%s' from '%s'",
-                serviceInstanceName, applicationName);
+        String messageEnding = String.format("unbind service instance '%s' from '%s'", serviceInstanceName,
+                applicationName);
 
-        return addCommonCallbacks(messageEnding,
-                cloudFoundryOperations.services()
-                .unbind(UnbindServiceInstanceRequest.builder()
-                        .applicationName(applicationName)
-                        .serviceInstanceName(serviceInstanceName)
-                        .build())
-                .otherwise(throwable -> (
-                                throwable instanceof IllegalArgumentException
-                                && (throwable.getMessage().contains(String.format(
-                                        "Service instance %s does not exist", serviceInstanceName))
-                                    || throwable.getMessage().contains(String.format(
-                                            "Application %s does not exist", applicationName)))
-                            )
-                            || (
-                                throwable instanceof IllegalStateException
-                                && throwable.getMessage().contains(String.format(
-                                        "Service instance %s is not bound to application", serviceInstanceName))
-                            ),
+        return addCommonCallbacks(messageEnding, cloudFoundryOperations.services()
+                .unbind(UnbindServiceInstanceRequest.builder().applicationName(applicationName)
+                        .serviceInstanceName(serviceInstanceName).build())
+                .onErrorResume(throwable -> (throwable instanceof IllegalArgumentException && (throwable.getMessage()
+                        .contains(String.format("Service instance %s does not exist", serviceInstanceName))
+                        || throwable.getMessage()
+                                .contains(String.format("Application %s does not exist", applicationName))))
+                        || (throwable instanceof IllegalStateException && throwable.getMessage().contains(
+                                String.format("Service instance %s is not bound to application", serviceInstanceName))),
                         fallback -> Mono.empty()));
     }
 
@@ -304,12 +287,9 @@ public final class CloudFoundryApplicationHelper {
 
         String messageEnding = String.format("delete service instance '%s'", serviceInstanceName);
 
-        return addCommonCallbacks(messageEnding,
-                cloudFoundryOperations.services()
-                .deleteInstance(DeleteServiceInstanceRequest.builder()
-                        .name(serviceInstanceName)
-                        .build())
-                .otherwise(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage()
+        return addCommonCallbacks(messageEnding, cloudFoundryOperations.services()
+                .deleteInstance(DeleteServiceInstanceRequest.builder().name(serviceInstanceName).build()).onErrorResume(
+                        throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage()
                                 .contains(String.format("Service instance %s does not exist", serviceInstanceName)),
                         fallback -> Mono.empty()));
     }
@@ -321,18 +301,15 @@ public final class CloudFoundryApplicationHelper {
 
         return addCommonCallbacks(messageEnding,
                 cloudFoundryOperations.applications()
-                .delete(DeleteApplicationRequest.builder()
-                        .name(applicationName)
-                        .deleteRoutes(false)
-                        .build())
-                .otherwise(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage()
-                                .contains(String.format("Application %s does not exist", applicationName)),
-                        fallback -> Mono.empty()));
+                        .delete(DeleteApplicationRequest.builder().name(applicationName).deleteRoutes(false).build())
+                        .onErrorResume(
+                                throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage()
+                                        .contains(String.format("Application %s does not exist", applicationName)),
+                                fallback -> Mono.empty()));
     }
 
     public boolean applicationStarted(final String applicationName) {
-        String applicationState = getApplication(this.cloudFoundryOperations, applicationName)
-                .block()
+        String applicationState = getApplication(this.cloudFoundryOperations, applicationName).block()
                 .getRequestedState();
         LOGGER.info("Requested state of application '{}': {}", applicationName, applicationState);
         return StringUtils.containsIgnoreCase(applicationState, "started");
@@ -343,10 +320,7 @@ public final class CloudFoundryApplicationHelper {
 
         String messageEnding = String.format("get application '%s'", applicationName);
 
-        return addCommonCallbacks(messageEnding,
-                cloudFoundryOperations.applications()
-                .get(GetApplicationRequest.builder()
-                        .name(applicationName)
-                        .build()));
+        return addCommonCallbacks(messageEnding, cloudFoundryOperations.applications()
+                .get(GetApplicationRequest.builder().name(applicationName).build()));
     }
 }

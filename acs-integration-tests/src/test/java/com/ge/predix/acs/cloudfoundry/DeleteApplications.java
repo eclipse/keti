@@ -23,14 +23,14 @@ public final class DeleteApplications extends AbstractTestNGSpringContextTests {
 
     @Test(dependsOnGroups = { TestAnnotationTransformer.INTEGRATION_TEST_GROUP }, alwaysRun = true)
     public void deleteAcsApplication() throws Exception {
-        this.cloudFoundryApplicationHelper.deleteApplicationAndServices(AcsCloudFoundryUtilities.ACS_APP_NAME,
-                new ArrayList<>(Arrays.asList(AcsCloudFoundryUtilities.ACS_DB_SERVICE_INSTANCE_NAME,
-                        AcsCloudFoundryUtilities.ACS_REDIS_SERVICE_INSTANCE_NAME)));
+        this.cloudFoundryApplicationHelper.unbindServicesAndDeleteApplication(AcsCloudFoundryUtilities.ACS_APP_NAME,
+                new ArrayList<>(Arrays.asList(PushAcsApplication.getAcsDbServiceName(),
+                        PushAcsApplication.getAcsRedisServiceName())));
     }
 
     @Test(dependsOnGroups = { TestAnnotationTransformer.INTEGRATION_TEST_GROUP }, alwaysRun = true)
     public void deleteAssetAdapterApplication() throws Exception {
-        this.cloudFoundryApplicationHelper.deleteApplicationAndServices(
+        this.cloudFoundryApplicationHelper.unbindAndDeleteServicesAndApplication(
                 AcsCloudFoundryUtilities.Adapter.ACS_ASSET_ADAPTER_APP_NAME,
                 new ArrayList<>(Arrays.asList(AcsCloudFoundryUtilities.Adapter.ACS_ASSET_UAA_SERVICE_INSTANCE_NAME,
                         AcsCloudFoundryUtilities.Adapter.ACS_ASSET_SERVICE_INSTANCE_NAME)));

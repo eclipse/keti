@@ -52,9 +52,11 @@ public final class PushAdapterApplication extends AbstractTestNGSpringContextTes
         String assetUaaServiceName = "predix-uaa";
         String assetServiceName = "predix-asset";
 
-        Map<String, Object> assetUaaParameters = new HashMap<String, Object>() {{
-            put("adminClientSecret", System.getenv("ASSET_CLIENT_SECRET"));
-        }};
+        Map<String, Object> assetUaaParameters = new HashMap<String, Object>() {
+            {
+                put("adminClientSecret", System.getenv("ASSET_CLIENT_SECRET"));
+            }
+        };
         CloudFoundryService assetUaaService = new CloudFoundryService("Free",
                 AcsCloudFoundryUtilities.Adapter.ACS_ASSET_UAA_SERVICE_INSTANCE_NAME, assetUaaServiceName,
                 assetUaaParameters);
@@ -62,14 +64,16 @@ public final class PushAdapterApplication extends AbstractTestNGSpringContextTes
         this.cloudFoundryApplicationHelper.createServiceInstances(Collections.singletonList(assetUaaService));
 
         String cfBaseDomain = System.getenv("CF_BASE_DOMAIN");
-        String assetUaaZoneId = this.cloudFoundryApplicationHelper.getServiceInstance(
-                AcsCloudFoundryUtilities.Adapter.ACS_ASSET_UAA_SERVICE_INSTANCE_NAME).getId();
+        String assetUaaZoneId = this.cloudFoundryApplicationHelper
+                .getServiceInstance(AcsCloudFoundryUtilities.Adapter.ACS_ASSET_UAA_SERVICE_INSTANCE_NAME).getId();
         String assetUaaUri = String.format("https://%s.%s.%s", assetUaaZoneId, assetUaaServiceName, cfBaseDomain);
         String assetTokenUrl = assetUaaUri + "/oauth/token";
 
-        Map<String, Object> assetServiceParameters = new HashMap<String, Object>() {{
-            put("trustedIssuerIds", Collections.singletonList(assetTokenUrl));
-        }};
+        Map<String, Object> assetServiceParameters = new HashMap<String, Object>() {
+            {
+                put("trustedIssuerIds", Collections.singletonList(assetTokenUrl));
+            }
+        };
         CloudFoundryService assetService = new CloudFoundryService("Tiered",
                 AcsCloudFoundryUtilities.Adapter.ACS_ASSET_SERVICE_INSTANCE_NAME, assetServiceName,
                 assetServiceParameters);
@@ -84,24 +88,25 @@ public final class PushAdapterApplication extends AbstractTestNGSpringContextTes
         environmentVariables.put("ASSET_ADAPTER_CLIENT_ID", environmentVariables.get("ASSET_CLIENT_ID"));
         environmentVariables.put("ASSET_ADAPTER_CLIENT_SECRET", environmentVariables.get("ASSET_CLIENT_SECRET"));
 
-        Path assetAdapterArtifactFilePath = CloudFoundryUtilities.getPathOfFileMatchingPattern(
-                this.assetAdapterArtifactDir, this.assetAdapterArtifactPattern);
+        Path assetAdapterArtifactFilePath = CloudFoundryUtilities
+                .getPathOfFileMatchingPattern(this.assetAdapterArtifactDir, this.assetAdapterArtifactPattern);
         LOGGER.info("Asset adapter artifact file path: '{}'", assetAdapterArtifactFilePath);
 
-        this.cloudFoundryApplicationHelper.pushApplication(AcsCloudFoundryUtilities.Adapter.ACS_ASSET_ADAPTER_APP_NAME,
-                assetAdapterArtifactFilePath, environmentVariables,
-                new ArrayList<>(Arrays.asList(assetUaaService, assetService)));
+        this.cloudFoundryApplicationHelper.createServicesAndPushApplication(
+                AcsCloudFoundryUtilities.Adapter.ACS_ASSET_ADAPTER_APP_NAME, assetAdapterArtifactFilePath,
+                environmentVariables, new ArrayList<>(Arrays.asList(assetUaaService, assetService)));
 
-        Map<String, Object> systemProvidedEnv = this.cloudFoundryApplicationHelper.getApplicationEnvironments(
-                AcsCloudFoundryUtilities.Adapter.ACS_ASSET_ADAPTER_APP_NAME).getSystemProvided();
+        Map<String, Object> systemProvidedEnv = this.cloudFoundryApplicationHelper
+                .getApplicationEnvironments(AcsCloudFoundryUtilities.Adapter.ACS_ASSET_ADAPTER_APP_NAME)
+                .getSystemProvided();
         Map<String, Object> vcapServicesFromEnv = (Map<String, Object>) systemProvidedEnv.get("VCAP_SERVICES");
         List<Object> predixAssetFromEnv = (List<Object>) vcapServicesFromEnv.get(assetServiceName);
-        Map<String, Object> predixAssetCredentialsFromEnv = (Map<String, Object>)
-                ((Map<String, Object>) predixAssetFromEnv.get(0)).get("credentials");
+        Map<String, Object> predixAssetCredentialsFromEnv =
+            (Map<String, Object>) ((Map<String, Object>) predixAssetFromEnv.get(0)).get("credentials");
         String assetUrl = (String) predixAssetCredentialsFromEnv.get("uri");
 
-        String assetZoneId = this.cloudFoundryApplicationHelper.getServiceInstance(
-                AcsCloudFoundryUtilities.Adapter.ACS_ASSET_SERVICE_INSTANCE_NAME).getId();
+        String assetZoneId = this.cloudFoundryApplicationHelper
+                .getServiceInstance(AcsCloudFoundryUtilities.Adapter.ACS_ASSET_SERVICE_INSTANCE_NAME).getId();
 
         this.adapterUtilities.createUaaClient(assetUaaUri, assetClientId, this.clientSecret, Collections.singleton(
                 new SimpleGrantedAuthority(String.format("%s.zones.%s.user", assetServiceName, assetZoneId))));
@@ -115,7 +120,7 @@ public final class PushAdapterApplication extends AbstractTestNGSpringContextTes
         this.cloudFoundryApplicationHelper.setEnvironmentVariables(
                 AcsCloudFoundryUtilities.Adapter.ACS_ASSET_ADAPTER_APP_NAME, environmentVariables);
 
-        this.cloudFoundryApplicationHelper.startApplication(
-                AcsCloudFoundryUtilities.Adapter.ACS_ASSET_ADAPTER_APP_NAME);
+        this.cloudFoundryApplicationHelper
+                .startApplication(AcsCloudFoundryUtilities.Adapter.ACS_ASSET_ADAPTER_APP_NAME);
     }
 }
