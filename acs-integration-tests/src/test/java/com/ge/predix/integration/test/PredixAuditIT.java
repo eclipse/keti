@@ -49,7 +49,7 @@ public class PredixAuditIT extends AbstractTestNGSpringContextTests {
 
     private OAuth2RestTemplate auditRestTemplate;
 
-    @BeforeClass(enabled = false)
+    @BeforeClass
     public void setup() {
         ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
 
@@ -63,7 +63,7 @@ public class PredixAuditIT extends AbstractTestNGSpringContextTests {
         this.auditRestTemplate.setRequestFactory(requestFactory);
     }
 
-    @Test(enabled = false)
+    @Test
     public void testAudit() throws Exception {
         long startTime = Instant.now().toEpochMilli();
         this.zoneHelper.createTestZone(this.acsRestTemplateFactory.getACSTemplateWithPolicyScope(), "predix-audit-zone",
