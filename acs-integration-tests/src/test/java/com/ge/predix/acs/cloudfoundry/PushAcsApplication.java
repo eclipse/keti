@@ -34,7 +34,7 @@ final class PushAcsApplication {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PushAcsApplication.class);
     private static final String ACS_SERVICE_ID = "predix-acs";
-
+    
     private static final Map<String, String> COMMON_ENVIRONMENT_VARIABLES = new HashMap<String, String>() {
         {
             put("ACS_BASE_DOMAIN", String.format("%s-integration.%s", ACS_SERVICE_ID, System.getenv("CF_BASE_DOMAIN")));
@@ -42,7 +42,9 @@ final class PushAcsApplication {
             put("ACS_DEFAULT_ISSUER_ID", System.getenv("ACS_DEFAULT_ISSUER_ID"));
             put("ACS_REDIS", System.getenv("ACS_REDIS"));
             put("ACS_SERVICE_ID", ACS_SERVICE_ID);
-            put("NUREGO_API_KEY", System.getenv("NUREGO_API_KEY"));
+            put("NUREGO_USERNAME", System.getenv("NUREGO_USERNAME"));
+            put("NUREGO_PASSWORD", System.getenv("NUREGO_PASSWORD"));
+            put("NUREGO_INSTANCE_ID", System.getenv("NUREGO_INSTANCE_ID"));
             put("NUREGO_API_URL", System.getenv("NUREGO_API_URL"));
             put("NUREGO_BATCH_MAX_MAP_SIZE", "1");
             put("UAA_CHECK_HEALTH_URL", System.getenv("UAA_CHECK_HEALTH_URL"));
