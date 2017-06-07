@@ -25,7 +25,7 @@
     <!-- Project information necessary to deploy to Maven Central (see: http://central.sonatype.org/pages/requirements.html) -->
     <groupId>com.ge.predix</groupId>
     <artifactId>acs</artifactId>
-    <version>4.8.0-SNAPSHOT</version>
+    <version>4.8.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Predix Access Control Services Parent</name>
     <description>Service to enforce authentication and/or authorization of certain resources</description>
