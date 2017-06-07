@@ -20,3 +20,4 @@ model/pom.xml.versionsBackup
 commons/pom.xml.versionsBackup
 **/surefire~
 **/gotty-client*
+.acs.*

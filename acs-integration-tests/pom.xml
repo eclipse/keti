@@ -104,7 +104,7 @@
 
                         <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
                         <NUREGO_USERNAME>${NUREGO_USERNAME}</NUREGO_USERNAME>
-                        <NUREGO_PASSSWORD>${NUREGO_PASSWORD}</NUREGO_PASSSWORD>
+                        <NUREGO_PASSWORD>${NUREGO_PASSWORD}</NUREGO_PASSWORD>
                         <NUREGO_INSTANCE_ID>${NUREGO_INSTANCE_ID}</NUREGO_INSTANCE_ID>
 
                         <!-- ACS zones (a.k.a tenancies) used for the tests -->
