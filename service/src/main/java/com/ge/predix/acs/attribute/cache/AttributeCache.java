@@ -18,6 +18,4 @@ public interface AttributeCache {
     CachedAttributes get(String key);
 
     void flushAll();
-
-    int getTtlInSeconds();
 }

@@ -22,7 +22,6 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.config.java.AbstractCloudConfig;
 import org.springframework.cloud.service.PooledServiceConnectorConfig.PoolConfig;
 import org.springframework.cloud.service.relational.DataSourceConfig;
@@ -39,7 +38,6 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 @Configuration
 @Profile({ "cloudDbConfig" })
-@EnableAutoConfiguration
 @EnableJpaRepositories({ "com.ge.predix.acs.service.policy.admin.dao",
         "com.ge.predix.acs.privilege.management.dao",
         "com.ge.predix.acs.zone.management.dao",

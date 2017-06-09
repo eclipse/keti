@@ -16,23 +16,33 @@
 
 package com.ge.predix.acs.monitoring;
 
+import java.util.function.Supplier;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 
-import java.util.function.Supplier;
-
 public final class AcsMonitoringUtilities {
 
     enum HealthCode {
-        ERROR, AVAILABLE, UNAVAILABLE, UNREACHABLE, MISCONFIGURATION, MIGRATION_INCOMPLETE, INVALID_QUERY, INVALID_JSON,
-        DEGRADED, DISABLED, HEALTH_CHECK_DISABLED, IN_MEMORY
+        ERROR,
+        AVAILABLE,
+        UNAVAILABLE,
+        UNREACHABLE,
+        MISCONFIGURATION,
+        MIGRATION_INCOMPLETE,
+        INVALID_QUERY,
+        INVALID_JSON,
+        DEGRADED,
+        DISABLED,
+        HEALTH_CHECK_DISABLED,
+        IN_MEMORY
     }
 
     public static final String STATUS = "status";
     private static final Logger LOGGER = LoggerFactory.getLogger(AcsMonitoringUtilities.class);
-    private static final String ERROR_MESSAGE_FORMAT = "Unexpected exception while checking health: {}";
+    static final String ERROR_MESSAGE_FORMAT = "Unexpected exception while checking health: {}";
     static final String DESCRIPTION_KEY = "description";
     static final String CODE_KEY = "code";
 

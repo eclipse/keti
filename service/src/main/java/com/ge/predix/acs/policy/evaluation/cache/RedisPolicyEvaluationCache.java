@@ -41,13 +41,13 @@ public class RedisPolicyEvaluationCache extends AbstractPolicyEvaluationCache im
     private long cachedEvalTimeToLiveSeconds;
 
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisTemplate<String, String> decisionCacheRedisTemplate;
 
     @Override
     public void afterPropertiesSet() {
         LOGGER.info("Starting Redis policy evaluation cache.");
         try {
-            String pingResult = this.redisTemplate.getConnectionFactory().getConnection().ping();
+            String pingResult = this.decisionCacheRedisTemplate.getConnectionFactory().getConnection().ping();
             LOGGER.info("Redis server ping: {}", pingResult);
         } catch (RedisConnectionFailureException ex) {
             LOGGER.error("Redis server ping failed.", ex);
@@ -56,39 +56,40 @@ public class RedisPolicyEvaluationCache extends AbstractPolicyEvaluationCache im
 
     @Override
     void delete(final String key) {
-        this.redisTemplate.delete(key);
+        this.decisionCacheRedisTemplate.delete(key);
     }
 
     @Override
     void delete(final Collection<String> keys) {
-        this.redisTemplate.delete(keys);
+        this.decisionCacheRedisTemplate.delete(keys);
     }
 
     @Override
     void flushAll() {
-        this.redisTemplate.getConnectionFactory().getConnection().flushAll();
+        this.decisionCacheRedisTemplate.getConnectionFactory().getConnection().flushAll();
     }
 
     @Override
     Set<String> keys(final String key) {
-        return this.redisTemplate.keys(key);
+        return this.decisionCacheRedisTemplate.keys(key);
     }
 
     @Override
     List<String> multiGet(final List<String> keys) {
-        return this.redisTemplate.opsForValue().multiGet(keys);
+        return this.decisionCacheRedisTemplate.opsForValue().multiGet(keys);
     }
 
     void multiSet(final Map<String, String> map) {
-        this.redisTemplate.opsForValue().multiSet(map);
+        this.decisionCacheRedisTemplate.opsForValue().multiSet(map);
     }
 
     @Override
     void set(final String key, final String value) {
         if (isPolicyEvalResultKey(key)) {
-            this.redisTemplate.opsForValue().set(key, value, this.cachedEvalTimeToLiveSeconds, TimeUnit.SECONDS);
+            this.decisionCacheRedisTemplate.opsForValue().set(key, value, this.cachedEvalTimeToLiveSeconds,
+                    TimeUnit.SECONDS);
         } else {
-            this.redisTemplate.opsForValue().set(key, value);
+            this.decisionCacheRedisTemplate.opsForValue().set(key, value);
         }
     }
 
@@ -97,6 +98,6 @@ public class RedisPolicyEvaluationCache extends AbstractPolicyEvaluationCache im
     }
 
     void setIfNotExists(final String key, final String value) {
-        this.redisTemplate.boundValueOps(key).setIfAbsent(value);
+        this.decisionCacheRedisTemplate.boundValueOps(key).setIfAbsent(value);
     }
 }

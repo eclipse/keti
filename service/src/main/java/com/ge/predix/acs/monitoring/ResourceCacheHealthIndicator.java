@@ -7,10 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile({ "cloud-redis", "redis" })
 // This class doesn't extend RedisHealthIndicator on purpose because we don't want to output Redis-specific properties
-public class DecisionCacheHealthIndicator extends AbstractCacheHealthIndicator {
+public class ResourceCacheHealthIndicator extends AbstractCacheHealthIndicator {
 
-    public DecisionCacheHealthIndicator(final RedisConnectionFactory decisionRedisConnectionFactory) {
-        super(decisionRedisConnectionFactory, "decision");
+    public ResourceCacheHealthIndicator(final RedisConnectionFactory resourceRedisConnectionFactory) {
+        super(resourceRedisConnectionFactory, "resource");
     }
-
 }

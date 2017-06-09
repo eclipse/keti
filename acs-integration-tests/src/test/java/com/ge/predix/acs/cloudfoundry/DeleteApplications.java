@@ -21,18 +21,23 @@ public final class DeleteApplications extends AbstractTestNGSpringContextTests {
     @Autowired
     private CloudFoundryApplicationHelper cloudFoundryApplicationHelper;
 
-    @Test(dependsOnGroups = { TestAnnotationTransformer.INTEGRATION_TEST_GROUP }, alwaysRun = true)
+    @Test(dependsOnGroups = { TestAnnotationTransformer.INTEGRATION_TEST_GROUP },
+            alwaysRun = true)
     public void deleteAcsApplication() throws Exception {
         this.cloudFoundryApplicationHelper.unbindServicesAndDeleteApplication(AcsCloudFoundryUtilities.ACS_APP_NAME,
                 new ArrayList<>(Arrays.asList(PushAcsApplication.getAcsDbServiceName(),
-                        PushAcsApplication.getAcsRedisServiceName())));
+                        PushAcsApplication.getAcsDecisionRedisServiceName(),
+                        PushAcsApplication.getAcsResourceRedisServiceName(),
+                        PushAcsApplication.getAcsSubjectRedisServiceName())));
     }
 
-    @Test(dependsOnGroups = { TestAnnotationTransformer.INTEGRATION_TEST_GROUP }, alwaysRun = true)
+    @Test(dependsOnGroups = { TestAnnotationTransformer.INTEGRATION_TEST_GROUP },
+            alwaysRun = true)
     public void deleteAssetAdapterApplication() throws Exception {
-        this.cloudFoundryApplicationHelper.unbindAndDeleteServicesAndApplication(
-                AcsCloudFoundryUtilities.Adapter.ACS_ASSET_ADAPTER_APP_NAME,
-                new ArrayList<>(Arrays.asList(AcsCloudFoundryUtilities.Adapter.ACS_ASSET_UAA_SERVICE_INSTANCE_NAME,
-                        AcsCloudFoundryUtilities.Adapter.ACS_ASSET_SERVICE_INSTANCE_NAME)));
+        this.cloudFoundryApplicationHelper
+                .unbindAndDeleteServicesAndApplication(AcsCloudFoundryUtilities.Adapter.ACS_ASSET_ADAPTER_APP_NAME,
+                        new ArrayList<>(
+                                Arrays.asList(AcsCloudFoundryUtilities.Adapter.ACS_ASSET_UAA_SERVICE_INSTANCE_NAME,
+                                        AcsCloudFoundryUtilities.Adapter.ACS_ASSET_SERVICE_INSTANCE_NAME)));
     }
 }
