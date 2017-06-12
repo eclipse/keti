@@ -42,23 +42,20 @@ import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 
 enum EntityType {
-    RESOURCE {
-        @Override
-        public String toString() {
-            return "resource";
-        }
-    },
-    SUBJECT {
-        @Override
-        public String toString() {
-            return "subject";
-        }
-    },
-    POLICY_SET {
-        @Override
-        public String toString() {
-            return "policy set";
-        }
+
+    RESOURCE("resource"),
+    SUBJECT("subject"),
+    POLICY_SET("policy set");
+
+    private final String name;
+
+    EntityType(final String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
 
@@ -91,7 +88,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
             return null;
         }
         PolicyEvaluationResult cachedEvalResult = toPolicyEvaluationResult(cachedEvalResultString);
-        
+
         List<String> invalidationTimeStamps = new ArrayList<>();
         invalidationTimeStamps.add(cachedEntries.getSubjectLastModified());
         invalidationTimeStamps.addAll(cachedEntries.getPolicySetsLastModified());
@@ -131,7 +128,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         private final List<String> policySetTimestamps = new ArrayList<>();
         private final int lastValueIndex;
         private final String decisionKey;
-        
+
         /**
          * Execute a multi-get operation on all entries related to a cached result,
          * and provides a immutable object for the values fetched.
@@ -150,15 +147,15 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
                 this.policySetTimestamps.add(this.entryValues.get(i));
             }
         }
-        
-        //Prepare keys to fetch in one batch            
+
+        //Prepare keys to fetch in one batch
         private List<String> prepareKeys(final PolicyEvaluationRequestCacheKey evalRequestKey) {
             List<String> keys = new ArrayList<>();
 
             //Add 'n' Policy Set keys
             LinkedHashSet<String> policySetIds = evalRequestKey.getPolicySetIds();
             policySetIds.forEach(policySetId -> keys.add(policySetKey(evalRequestKey.getZoneId(), policySetId)));
-            
+
             // n+1
             keys.add(subjectKey(evalRequestKey.getZoneId(), evalRequestKey.getSubjectId()));
 
@@ -167,12 +164,12 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
             //n+3
             keys.add(this.decisionKey);
-            
+
             return keys;
         }
 
         /**
-         * (eval result, eval time, resolved resource uri(s)). 
+         * (eval result, eval time, resolved resource uri(s)).
          */
         String getDecisionString() {
             return entryValues.get(this.lastValueIndex);
@@ -194,7 +191,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
             return this.policySetTimestamps;
         }
      }
-    
+
 
     private void logCacheGetDebugMessages(final PolicyEvaluationRequestCacheKey key, final String redisKey,
             final List<String> keys, final List<String> values) {

@@ -16,7 +16,6 @@
 
 package com.ge.predix.acs.monitoring;
 
-import com.ge.predix.acs.privilege.management.dao.TitanMigrationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +27,15 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookupFailureException;
 import org.springframework.stereotype.Component;
 
+import com.ge.predix.acs.privilege.management.dao.TitanMigrationManager;
+
 @Component
 public class AcsDbHealthIndicator implements HealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AcsDbHealthIndicator.class);
     private static final String ERROR_MESSAGE_FORMAT = "Unexpected exception while checking ACS database status: {}";
-    static final String DESCRIPTION = "Health check performed by attempting to get the count of policy sets stored in"
-            + " the database";
+    static final String DESCRIPTION = "Health check performed by attempting to run a SELECT query against policy "
+            + "sets stored in the database";
 
     private final AcsMonitoringRepository acsMonitoringRepository;
     private TitanMigrationManager migrationManager;

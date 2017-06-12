@@ -12,29 +12,21 @@ import com.ge.predix.acs.cloudfoundry.DeleteApplications;
 
 public class TestNameLogger implements IInvokedMethodListener {
     private enum TestStatus {
-        STARTING {
-            @Override
-            public String toString() {
-                return "Starting";
-            }
-        },
-        FINISHING {
-            @Override
-            public String toString() {
-                return "Finishing";
-            }
-        },
-        SKIPPING {
-            @Override
-            public String toString() {
-                return "Skipping";
-            }
-        },
-        ERRORED_OUT {
-            @Override
-            public String toString() {
-                return "Errored out on";
-            }
+
+        STARTING("Starting"),
+        FINISHING("Finishing"),
+        SKIPPING("Skipping"),
+        ERRORED_OUT("Errored out on");
+
+        private final String name;
+
+        TestStatus(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
         }
     }
 

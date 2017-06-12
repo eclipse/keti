@@ -16,13 +16,15 @@
 
 package com.ge.predix.acs.monitoring;
 
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
-import javax.sql.DataSource;
 
 /**
  *
@@ -41,8 +43,9 @@ public class AcsMonitoringRepository {
     }
 
     void queryPolicySetTable() {
-        String query = "select count(id) from policy_set";
-        this.jdbcTemplate.queryForObject(query, Integer.class);
-        LOGGER.info("Successfully executed health check query on ACS database: {}", query);
+        String query = "select policy_set_id from policy_set limit 1";
+        List<String> queryResults = this.jdbcTemplate.query(query, (rs, rowNum) -> rs.getString(1));
+        LOGGER.info("Successfully executed health check query on ACS database: {} (result set size: {})", query,
+                queryResults.size());
     }
 }
