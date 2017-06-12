@@ -1,17 +1,17 @@
 package com.ge.predix.acs.monitoring;
 
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthAggregator;
-import org.springframework.boot.actuate.health.Status;
-import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthAggregator;
+import org.springframework.boot.actuate.health.Status;
+import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 @Component
 // Modified version of org.springframework.boot.actuate.health.OrderedHealthAggregator
@@ -59,15 +59,18 @@ public class AcsHealthAggregator implements HealthAggregator {
     }
 
     private Status aggregateStatus(final List<Status> candidates) {
+        // Only sort those status instances that we know about
         List<Status> filteredCandidates = new ArrayList<>();
         for (Status candidate : candidates) {
             if (this.statusOrder.contains(candidate.getCode())) {
                 filteredCandidates.add(candidate);
             }
         }
+        // If no status is given return UNKNOWN
         if (filteredCandidates.isEmpty()) {
             return Status.UNKNOWN;
         }
+        // Sort given Status instances by configured order
         filteredCandidates.sort(new StatusComparator(this.statusOrder));
         return filteredCandidates.get(0);
     }

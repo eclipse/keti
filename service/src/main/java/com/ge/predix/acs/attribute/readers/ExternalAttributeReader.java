@@ -150,7 +150,7 @@ public abstract class ExternalAttributeReader implements AttributeReader {
         if (attributes.size() > this.maxNumberOfAttributes) {
             return true;
         }
-        int size = 0;
+        long size = 0;
         for (Attribute attribute : attributes) {
             size += size(attribute);
             if (size > this.maxSizeOfAttributesInBytes) {

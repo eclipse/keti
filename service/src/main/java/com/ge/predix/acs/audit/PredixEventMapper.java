@@ -27,7 +27,7 @@ public class PredixEventMapper {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Pattern REGEX = Pattern
-            .compile("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})" + "([0-9a-fA-F]{4})([0-9a-fA-F]+)");
+            .compile("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)");
 
     public AuditEventV2 map(final AuditEvent auditEvent) {
         Map<String, String> auditPayload = new HashMap<>();
@@ -43,7 +43,8 @@ public class PredixEventMapper {
         }
 
         String correlationId = auditEvent.getCorrelationId();
-        // Padding correlation ID with 0's if zipkin id is 64 bit
+        // Padding correlation ID with 0s if zipkin id is 64 bit. Audit requires a correlation ID of 128 bits, each
+        // hex character is 4 bits so we must have a string of length 32 with only hex values.
         if (correlationId.length() == 16) {
             correlationId = "0000000000000000" + correlationId;
         }
