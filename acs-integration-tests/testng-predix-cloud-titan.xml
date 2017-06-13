@@ -3,7 +3,7 @@
 <suite name="testAll">
     <test name="predix-cloud-titan">
         <classes>
-            <class name="com.ge.predix.acs.cloudfoundry.PushAdapterApplication"/>
+            <class name="com.ge.predix.acs.cloudfoundry.PushMockedAdapterApplication"/>
             <class name="com.ge.predix.acs.cloudfoundry.PushPredixCloudTitanApplication"/>
 
             <class name="com.ge.predix.acs.cloudfoundry.ApplicationHealthChecks"/>

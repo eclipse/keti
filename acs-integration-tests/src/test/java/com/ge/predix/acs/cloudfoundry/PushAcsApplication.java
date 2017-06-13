@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.ge.predix.cloudfoundry.client.CloudFoundryApplicationHelper;
@@ -31,6 +32,9 @@ final class PushAcsApplication {
 
     @Autowired
     private CloudFoundryApplicationHelper cloudFoundryApplicationHelper;
+
+    @Autowired
+    private Environment environment;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PushAcsApplication.class);
     private static final String ACS_SERVICE_ID = "predix-acs";
@@ -77,13 +81,13 @@ final class PushAcsApplication {
                 .getUserProvided();
 
         String assetAdapterUrl = (String) userProvidedAssetAdapterEnv.get("ASSET_ADAPTER_URL");
+        String assetAdapterTokenUrl = (String) userProvidedAssetAdapterEnv.get("ASSET_ADAPTER_TOKEN_URL");
         String assetTokenUrl = (String) userProvidedAssetAdapterEnv.get("ASSET_TOKEN_URL");
         String assetZoneId = (String) userProvidedAssetAdapterEnv.get("ASSET_ZONE_ID");
         String assetUrl = (String) userProvidedAssetAdapterEnv.get("ASSET_URL");
 
         COMMON_ENVIRONMENT_VARIABLES.put("ADAPTER_ENDPOINT", assetAdapterUrl);
-        COMMON_ENVIRONMENT_VARIABLES.put("ADAPTER_UAA_TOKEN_URL",
-                (String) userProvidedAssetAdapterEnv.get("ASSET_ADAPTER_TOKEN_URL"));
+        COMMON_ENVIRONMENT_VARIABLES.put("ADAPTER_UAA_TOKEN_URL", assetAdapterTokenUrl);
         COMMON_ENVIRONMENT_VARIABLES.put("ADAPTER_UAA_CLIENT_ID",
                 (String) userProvidedAssetAdapterEnv.get("ASSET_ADAPTER_CLIENT_ID"));
         COMMON_ENVIRONMENT_VARIABLES.put("ADAPTER_UAA_CLIENT_SECRET",
@@ -114,8 +118,10 @@ final class PushAcsApplication {
                 acsServiceArtifactFilePath, environmentVariables,
                 new ArrayList<>(Arrays.asList(postgresService, redisService)));
 
-        this.cloudFoundryApplicationHelper.bindServiceInstances(AcsCloudFoundryUtilities.ACS_APP_NAME,
-                Collections.singletonList(AcsCloudFoundryUtilities.ACS_AUDIT_SERVICE_INSTANCE_NAME));
+        if (Arrays.asList(this.environment.getActiveProfiles()).contains("predixAudit")) {
+            this.cloudFoundryApplicationHelper.bindServiceInstances(AcsCloudFoundryUtilities.ACS_APP_NAME,
+                    Collections.singletonList(AcsCloudFoundryUtilities.ACS_AUDIT_SERVICE_INSTANCE_NAME));
+        }
 
         this.cloudFoundryApplicationHelper.startApplication(AcsCloudFoundryUtilities.ACS_APP_NAME);
 
@@ -123,6 +129,7 @@ final class PushAcsApplication {
         System.setProperty("ASSET_TOKEN_URL", assetTokenUrl);
         System.setProperty("ASSET_ZONE_ID", assetZoneId);
         System.setProperty("ASSET_URL", assetUrl);
+        System.setProperty("ADAPTER_UAA_TOKEN_URL", assetAdapterTokenUrl);
     }
 
     static String getAcsRedisServiceName() {

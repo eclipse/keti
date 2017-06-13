@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.sleuth.DefaultSpanNamer;
@@ -31,11 +29,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
@@ -56,22 +51,10 @@ import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.UaaTestUtil;
 import com.ge.predix.test.utils.ZacTestUtil;
 import com.ge.predix.test.utils.ZoneHelper;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 @Configuration
 @ImportResource("classpath:integration-test-spring-context.xml")
 class PolicyEvaluationWithAttributeConnectorITConfiguration {
-
-    @Value("${ASSET_TOKEN_URL}")
-    private String assetTokenUrl;
-
-    @Value("${ASSET_CLIENT_ID}")
-    private String assetClientId;
-
-    @Value("${ASSET_CLIENT_SECRET}")
-    private String assetClientSecret;
-
     @Autowired
     private Environment environment;
 
@@ -90,23 +73,6 @@ class PolicyEvaluationWithAttributeConnectorITConfiguration {
     public DefaultTracer tracer() {
         return new DefaultTracer(new AlwaysSampler(), new Random(), new DefaultSpanNamer(), new NoOpSpanLogger(),
                 new ArrayListSpanAccumulator(), new TraceKeys());
-    }
-
-    @Bean
-    public OAuth2RestTemplate assetRestTemplate() {
-        ClientCredentialsResourceDetails clientCredentials = new ClientCredentialsResourceDetails();
-        clientCredentials.setAccessTokenUri(this.assetTokenUrl);
-        clientCredentials.setClientId(this.assetClientId);
-        clientCredentials.setClientSecret(this.assetClientSecret);
-        OAuth2RestTemplate assetRestTemplate = new OAuth2RestTemplate(clientCredentials);
-
-        CloseableHttpClient httpClient = HttpClientBuilder.create().useSystemProperties().build();
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        assetRestTemplate.setRequestFactory(requestFactory);
-
-        setRestTemplateInterceptor(assetRestTemplate);
-
-        return assetRestTemplate;
     }
 
     @Bean
@@ -130,12 +96,6 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
 
     @Value("${ACS_UAA_URL}")
     private String acsUaaUrl;
-
-    @Value("${ASSET_ZONE_ID}")
-    private String assetZoneId;
-
-    @Value("${ASSET_URL}")
-    private String assetUrl;
 
     @Value("${ADAPTER_ENDPOINT:${ASSET_ADAPTER_URL}}")
     private String adapterEndpoint;
@@ -168,13 +128,9 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
     private OAuth2RestTemplate acsAdminRestTemplate;
 
     @Autowired
-    private OAuth2RestTemplate assetRestTemplate;
-
-    @Autowired
     private DefaultTracer tracer;
 
     private static final String TEST_PART_ID = "part/03f95db1-4255-4265-a509-f7bca3e1fee4";
-    private static final String ASSET_URI_PATH_SEGMENT = '/' + TEST_PART_ID;
 
     private Zone zone;
     private boolean registerWithZac;
@@ -184,32 +140,6 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(PolicyHelper.PREDIX_ZONE_ID, this.zone.getSubdomain());
         return httpHeaders;
-    }
-
-    private HttpHeaders assetZoneHeader() throws IOException {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set(PolicyHelper.PREDIX_ZONE_ID, this.assetZoneId);
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        return httpHeaders;
-    }
-
-    private void configureMockAssetData() throws IOException {
-        JsonObject part = new JsonObject();
-        part.addProperty("id", "03f95db1-4255-4265-a509-f7bca3e1fee4");
-        part.addProperty("collection", "part");
-        part.addProperty("partModel", "/partmodels/9a92831d-42f1-4f9e-86bf-4c0914f481e4");
-        part.addProperty("structureModel", "/structureModels/8c787978-bd8b-417a-b759-f63a8a6d43ee");
-        part.addProperty("serialNumber", "775277328");
-        part.addProperty("parent", "/part/01af94ed-5425-44e4-9f6e-2a58cba7b559");
-        part.addProperty("aircraftPart", "/aircraftPart/13a71359-db68-4602-aac5-a8fa401c3194");
-        part.addProperty("aircraftPartModel", "/aircraftPartModels/1dc6a36d-a24e-4fec-a181-f576c95a8104");
-        part.addProperty("uri", ASSET_URI_PATH_SEGMENT);
-
-        JsonArray partArray = new JsonArray();
-        partArray.add(part);
-
-        this.assetRestTemplate.exchange(this.assetUrl + "/part", HttpMethod.POST,
-                new HttpEntity<>(partArray.toString(), assetZoneHeader()), String.class);
     }
 
     private void configureAttributeConnector(final boolean isActive) throws IOException {
@@ -246,12 +176,6 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
 
         this.zone = this.zoneHelper.createTestZone(this.acsAdminRestTemplate, this.acsZone1Name, this.registerWithZac);
         this.resourceAttributeConnectorUrl = URI.create(this.zoneHelper.getAcsBaseURL() + "/v1/connector/resource");
-        this.configureMockAssetData();
-    }
-
-    private void deconfigureMockAssetData() throws IOException {
-        this.assetRestTemplate.exchange(this.assetUrl + ASSET_URI_PATH_SEGMENT, HttpMethod.DELETE,
-                new HttpEntity<>(assetZoneHeader()), Void.class);
     }
 
     private void deconfigureAttributeConnector() throws IOException {
@@ -261,7 +185,6 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
 
     @AfterClass
     void afterClass() throws IOException {
-        this.deconfigureMockAssetData();
         this.zoneHelper.deleteZone(this.acsAdminRestTemplate, this.acsZone1Name, this.registerWithZac);
     }
 
