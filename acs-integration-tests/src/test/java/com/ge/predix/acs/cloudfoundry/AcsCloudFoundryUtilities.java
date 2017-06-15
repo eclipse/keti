@@ -36,6 +36,8 @@ public final class AcsCloudFoundryUtilities {
     static final String ACS_AUDIT_SERVICE_INSTANCE_NAME = "acs-audit-service-int-tests";
     static final String PUSH_ACS_APP_TEST_GROUP = "pushAcsApplication";
     public static final String CHECK_APP_HEALTH_TEST_GROUP = "checkApplicationHealth";
+    public static final String UAA_SERVICE_ID = "predix-uaa";
+    public static final String ASSET_SERVICE_ID = "predix-asset";
 
     @Component
     static final class Adapter {
