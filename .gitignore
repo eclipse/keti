@@ -21,3 +21,4 @@ commons/pom.xml.versionsBackup
 **/surefire~
 **/gotty-client*
 .acs.*
+xmlstarlet*
