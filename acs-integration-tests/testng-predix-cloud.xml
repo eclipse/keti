@@ -6,23 +6,7 @@
             <class name="com.ge.predix.acs.cloudfoundry.PushMockedAdapterApplication"/>
             <class name="com.ge.predix.acs.cloudfoundry.PushPredixCloudApplication"/>
 
-            <class name="com.ge.predix.acs.cloudfoundry.ApplicationHealthChecks"/>
-
-            <class name="com.ge.predix.acceptance.test.ACSAcceptanceIT"/>
-            <class name="com.ge.predix.acceptance.test.policy.admin.PolicyCreationCucumberTest"/>
-            <class name="com.ge.predix.acceptance.test.policy.evaluation.PolicyEvaluationCucumberTest"/>
-            <class name="com.ge.predix.acceptance.test.zone.admin.DefaultZoneAuthorizationIT"/>
-            <class name="com.ge.predix.acceptance.test.zone.admin.ZoneEnforcementCucumberTest"/>
-            <class name="com.ge.predix.integration.test.AccessControlServiceIT"/>
-            <class name="com.ge.predix.integration.test.ACSCorsFilterIT"/>
-            <class name="com.ge.predix.integration.test.ACSMeteringIT"/>
-            <class name="com.ge.predix.integration.test.AcsMonitoringIT"/>
-            <class name="com.ge.predix.integration.test.AttributeConnectorConfigurationIT"/>
-            <class name="com.ge.predix.integration.test.PolicyEvaluationCachingIT"/>
-            <class name="com.ge.predix.integration.test.PolicyEvaluationWithAttributeConnectorIT"/>
-            <class name="com.ge.predix.integration.test.PredixAuditIT"/>
-            <class name="com.ge.predix.integration.test.PrivilegeManagementAccessControlServiceIT"/>
-
+            <class name="com.ge.predix.acs.cloudfoundry.CreateLogs"/>
             <class name="com.ge.predix.acs.cloudfoundry.DeleteApplications"/>
         </classes>
     </test>
