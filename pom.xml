@@ -82,7 +82,7 @@
         <titandb.version>1.1.0-SNAPSHOT</titandb.version>
         <openjpa.version>2.4.2</openjpa.version>
         <uaa-token-lib.version>3.2.3</uaa-token-lib.version>
-        <audit-sdk.version>0.0.8-SNAPSHOT</audit-sdk.version>
+        <audit-sdk.version>0.0.8</audit-sdk.version>
 
         <!-- Test Dependency Version -->
         <mockito.version>1.10.19</mockito.version>
