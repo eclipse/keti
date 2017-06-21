@@ -31,6 +31,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
+import com.ge.predix.acs.attribute.cache.AttributeCacheFactory;
 import com.ge.predix.acs.attribute.connector.management.AttributeConnectorServiceImpl;
 import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
 import com.ge.predix.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
@@ -52,13 +53,12 @@ import com.ge.predix.acs.zone.management.ZoneService;
 import com.ge.predix.acs.zone.management.ZoneServiceImpl;
 import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
 
-@ContextConfiguration(
-        classes = { AcsRequestContextHolder.class, InMemoryDataSourceConfig.class, InMemoryPolicyEvaluationCache.class,
-                PrivilegeManagementServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class,
-                ZoneServiceImpl.class, SpringSecurityPolicyContextResolver.class, SpringSecurityZoneResolver.class,
-                SubjectRepositoryProxy.class, ResourceRepositoryProxy.class, AttributeConnectorServiceImpl.class,
-                AttributeReaderFactory.class, PrivilegeServiceResourceAttributeReader.class,
-                PrivilegeServiceSubjectAttributeReader.class })
+@ContextConfiguration(classes = { AcsRequestContextHolder.class, InMemoryDataSourceConfig.class,
+        InMemoryPolicyEvaluationCache.class, AttributeCacheFactory.class, PrivilegeManagementServiceImpl.class,
+        GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class, ZoneServiceImpl.class,
+        SpringSecurityPolicyContextResolver.class, SpringSecurityZoneResolver.class, SubjectRepositoryProxy.class,
+        ResourceRepositoryProxy.class, AttributeConnectorServiceImpl.class, AttributeReaderFactory.class,
+        PrivilegeServiceResourceAttributeReader.class, PrivilegeServiceSubjectAttributeReader.class })
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 @TestPropertySource("classpath:application.properties")
 @Test
@@ -97,8 +97,8 @@ public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringConte
         } catch (PrivilegeManagementException e) {
             // not checking id in toString(), just validating rest of error
             // message due to id mismatch on CI
-            boolean checkMessage = (e.getMessage().contains("Unable to persist Subject(s) for zone")
-                    || (e.getMessage().contains("Duplicate Subject(s)")));
+            boolean checkMessage = (e.getMessage().contains("Unable to persist Subject(s) for zone") || (e.getMessage()
+                    .contains("Duplicate Subject(s)")));
             Assert.assertTrue(checkMessage, "Invalid Error Message: " + e.getMessage());
             Assert.assertEquals(this.service.getSubjects().size(), 0);
             return;
@@ -120,8 +120,8 @@ public class PrivilegeManagementNoRollbackTest extends AbstractTestNGSpringConte
             this.service.appendResources(resourceList);
 
         } catch (PrivilegeManagementException e) {
-            boolean checkMessage = (e.getMessage().contains("Unable to persist Resource(s) for zone")
-                    || (e.getMessage().contains("Duplicate Resource(s)")));
+            boolean checkMessage = (e.getMessage().contains("Unable to persist Resource(s) for zone") || (e.getMessage()
+                    .contains("Duplicate Resource(s)")));
             Assert.assertTrue(checkMessage, "Invalid Error Message: " + e.getMessage());
             Assert.assertEquals(this.service.getResources().size(), 0);
             return;

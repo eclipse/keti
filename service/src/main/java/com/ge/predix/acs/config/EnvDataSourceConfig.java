@@ -23,7 +23,6 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -36,7 +35,6 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 @Configuration
 @Profile({ "envDbConfig" })
-@EnableAutoConfiguration
 @EnableJpaRepositories({ "com.ge.predix.acs.service.policy.admin.dao",
     "com.ge.predix.acs.privilege.management.dao",
     "com.ge.predix.acs.zone.management.dao",

@@ -38,13 +38,17 @@ final class PushAcsApplication {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PushAcsApplication.class);
     private static final String ACS_SERVICE_ID = "predix-acs";
-    
+    private static final String CACHE_SERVICE_NAME = "aws-redis";
+    private static final String CACHE_SERVICE_PLAN = "2-3GB";
+
     private static final Map<String, String> COMMON_ENVIRONMENT_VARIABLES = new HashMap<String, String>() {
         {
             put("ACS_BASE_DOMAIN", String.format("%s-integration.%s", ACS_SERVICE_ID, System.getenv("CF_BASE_DOMAIN")));
             put("ACS_DB", System.getenv("ACS_DB"));
             put("ACS_DEFAULT_ISSUER_ID", System.getenv("ACS_DEFAULT_ISSUER_ID"));
-            put("ACS_REDIS", System.getenv("ACS_REDIS"));
+            put("DECISION_CACHE_NAME", System.getenv("DECISION_CACHE_NAME"));
+            put("RESOURCE_CACHE_NAME", System.getenv("RESOURCE_CACHE_NAME"));
+            put("SUBJECT_CACHE_NAME", System.getenv("SUBJECT_CACHE_NAME"));
             put("ACS_SERVICE_ID", ACS_SERVICE_ID);
             put("NUREGO_USERNAME", System.getenv("NUREGO_USERNAME"));
             put("NUREGO_PASSWORD", System.getenv("NUREGO_PASSWORD"));
@@ -93,20 +97,24 @@ final class PushAcsApplication {
         COMMON_ENVIRONMENT_VARIABLES.put("ADAPTER_UAA_CLIENT_SECRET",
                 (String) userProvidedAssetAdapterEnv.get("ASSET_ADAPTER_CLIENT_SECRET"));
         COMMON_ENVIRONMENT_VARIABLES.put("ASSET_TOKEN_URL", assetTokenUrl);
-        COMMON_ENVIRONMENT_VARIABLES.put("ASSET_CLIENT_ID",
-                (String) userProvidedAssetAdapterEnv.get("ASSET_CLIENT_ID"));
-        COMMON_ENVIRONMENT_VARIABLES.put("ASSET_CLIENT_SECRET",
-                (String) userProvidedAssetAdapterEnv.get("ASSET_CLIENT_SECRET"));
+        COMMON_ENVIRONMENT_VARIABLES
+                .put("ASSET_CLIENT_ID", (String) userProvidedAssetAdapterEnv.get("ASSET_CLIENT_ID"));
+        COMMON_ENVIRONMENT_VARIABLES
+                .put("ASSET_CLIENT_SECRET", (String) userProvidedAssetAdapterEnv.get("ASSET_CLIENT_SECRET"));
         COMMON_ENVIRONMENT_VARIABLES.put("ASSET_ZONE_ID", assetZoneId);
         COMMON_ENVIRONMENT_VARIABLES.put("ASSET_URL", assetUrl);
 
-        CloudFoundryService postgresService = new CloudFoundryService("dedicated-10.1",
-                getAcsDbServiceName(), "postgres-2.0", Collections.emptyMap());
-        CloudFoundryService redisService = new CloudFoundryService("2-3GB",
-                getAcsRedisServiceName(), "aws-redis", Collections.emptyMap());
+        CloudFoundryService postgresService = new CloudFoundryService("dedicated-10.1", getAcsDbServiceName(),
+                "postgres-2.0", Collections.emptyMap());
+        CloudFoundryService decisionRedisService = new CloudFoundryService(CACHE_SERVICE_PLAN,
+                getAcsDecisionRedisServiceName(), CACHE_SERVICE_NAME, Collections.emptyMap());
+        CloudFoundryService resourceRedisService = new CloudFoundryService(CACHE_SERVICE_PLAN,
+                getAcsResourceRedisServiceName(), CACHE_SERVICE_NAME, Collections.emptyMap());
+        CloudFoundryService subjectRedisService = new CloudFoundryService(CACHE_SERVICE_PLAN,
+                getAcsSubjectRedisServiceName(), CACHE_SERVICE_NAME, Collections.emptyMap());
 
-        Path acsServiceArtifactFilePath = CloudFoundryUtilities.getPathOfFileMatchingPattern(this.serviceArtifactDir,
-                this.serviceArtifactPattern);
+        Path acsServiceArtifactFilePath = CloudFoundryUtilities
+                .getPathOfFileMatchingPattern(this.serviceArtifactDir, this.serviceArtifactPattern);
         LOGGER.info("ACS service artifact file path: '{}'", acsServiceArtifactFilePath);
 
         this.cloudFoundryApplicationHelper.deleteApplication(AcsCloudFoundryUtilities.ACS_APP_NAME);
@@ -114,9 +122,11 @@ final class PushAcsApplication {
         Map<String, String> environmentVariables = new HashMap<>(COMMON_ENVIRONMENT_VARIABLES);
         environmentVariables.putAll(additionalEnvironmentVariables);
         environmentVariables.values().removeIf(Objects::isNull);
-        this.cloudFoundryApplicationHelper.pushApplication(AcsCloudFoundryUtilities.ACS_APP_NAME,
-                acsServiceArtifactFilePath, environmentVariables,
-                new ArrayList<>(Arrays.asList(postgresService, redisService)));
+        this.cloudFoundryApplicationHelper
+                .pushApplication(AcsCloudFoundryUtilities.ACS_APP_NAME, acsServiceArtifactFilePath,
+                        environmentVariables, new ArrayList<>(
+                                Arrays.asList(postgresService, decisionRedisService, resourceRedisService,
+                                        subjectRedisService)));
 
         if (Arrays.asList(this.environment.getActiveProfiles()).contains("predixAudit")) {
             this.cloudFoundryApplicationHelper.bindServiceInstances(AcsCloudFoundryUtilities.ACS_APP_NAME,
@@ -132,8 +142,16 @@ final class PushAcsApplication {
         System.setProperty("ADAPTER_UAA_TOKEN_URL", assetAdapterTokenUrl);
     }
 
-    static String getAcsRedisServiceName() {
-        return COMMON_ENVIRONMENT_VARIABLES.get("ACS_REDIS");
+    static String getAcsDecisionRedisServiceName() {
+        return COMMON_ENVIRONMENT_VARIABLES.get("DECISION_CACHE_NAME");
+    }
+
+    static String getAcsResourceRedisServiceName() {
+        return COMMON_ENVIRONMENT_VARIABLES.get("RESOURCE_CACHE_NAME");
+    }
+
+    static String getAcsSubjectRedisServiceName() {
+        return COMMON_ENVIRONMENT_VARIABLES.get("SUBJECT_CACHE_NAME");
     }
 
     static String getAcsDbServiceName() {

@@ -19,9 +19,4 @@ public class NonCachingAttributeCache implements AttributeCache {
         //Intentionally left empty to satisfy interface
     }
 
-    @Override
-    public int getTtlInSeconds() {
-        return 0;
-    }
-
 }

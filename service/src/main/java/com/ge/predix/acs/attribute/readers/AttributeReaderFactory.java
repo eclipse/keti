@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
@@ -15,27 +16,34 @@ import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
 @Component
 public class AttributeReaderFactory {
 
-    // Temporary - this will eventually come from some zone level configuration
-    private long maxCacheMegaBytes = 100;
-
     @Value("${ADAPTER_TIMEOUT_MILLIS:3000}")
     private int adapterTimeoutMillis;
 
-    @Autowired
     private AttributeConnectorService connectorService;
-
-    @Autowired
     private PrivilegeServiceResourceAttributeReader privilegeServiceResourceAttributeReader;
+    private PrivilegeServiceSubjectAttributeReader privilegeServiceSubjectAttributeReader;
+    private RedisTemplate<String, String> resourceCacheRedisTemplate;
+    private RedisTemplate<String, String> subjectCacheRedisTemplate;
+    private AttributeCacheFactory attributeCacheFactory;
 
     @Autowired
-    private PrivilegeServiceSubjectAttributeReader privilegeServiceSubjectAttributeReader;
+    public AttributeReaderFactory(final PrivilegeServiceResourceAttributeReader privilegeServiceResourceAttributeReader,
+            final PrivilegeServiceSubjectAttributeReader privilegeServiceSubjectAttributeReader,
+            final AttributeCacheFactory attributeCacheFactory) {
+        this.privilegeServiceResourceAttributeReader = privilegeServiceResourceAttributeReader;
+        this.privilegeServiceSubjectAttributeReader = privilegeServiceSubjectAttributeReader;
+        this.attributeCacheFactory = attributeCacheFactory;
+
+    }
 
     // Caches that use the multiton design pattern (keyed off the zone name)
-    private final Map<String, ExternalResourceAttributeReader> externalResourceAttributeReaderCache = new ConcurrentReferenceHashMap<>();
-    private final Map<String, ExternalSubjectAttributeReader> externalSubjectAttributeReaderCache = new ConcurrentReferenceHashMap<>();
+    private final Map<String, ExternalResourceAttributeReader> externalResourceAttributeReaderCache = new
+            ConcurrentReferenceHashMap<>();
+    private final Map<String, ExternalSubjectAttributeReader> externalSubjectAttributeReaderCache = new
+            ConcurrentReferenceHashMap<>();
 
     public ResourceAttributeReader getResourceAttributeReader() {
-        if (!connectorService.isResourceAttributeConnectorConfigured()) {
+        if (!this.connectorService.isResourceAttributeConnectorConfigured()) {
             return this.privilegeServiceResourceAttributeReader;
         }
 
@@ -46,8 +54,10 @@ public class AttributeReaderFactory {
             return externalResourceAttributeReader;
         }
 
-        externalResourceAttributeReader = new ExternalResourceAttributeReader(connectorService,
-                AttributeCacheFactory.createResourceAttributeCache(this.maxCacheMegaBytes), adapterTimeoutMillis);
+        externalResourceAttributeReader = new ExternalResourceAttributeReader(this.connectorService,
+                this.attributeCacheFactory.createResourceAttributeCache(
+                        this.connectorService.getResourceAttributeConnector().getMaxCachedIntervalMinutes(), zoneName,
+                        this.resourceCacheRedisTemplate), adapterTimeoutMillis);
         this.externalResourceAttributeReaderCache.put(zoneName, externalResourceAttributeReader);
         return externalResourceAttributeReader;
     }
@@ -64,8 +74,10 @@ public class AttributeReaderFactory {
             return externalSubjectAttributeReader;
         }
 
-        externalSubjectAttributeReader = new ExternalSubjectAttributeReader(connectorService,
-                AttributeCacheFactory.createSubjectAttributeCache(this.maxCacheMegaBytes), adapterTimeoutMillis);
+        externalSubjectAttributeReader = new ExternalSubjectAttributeReader(connectorService, this.attributeCacheFactory
+                .createSubjectAttributeCache(
+                        this.connectorService.getSubjectAttributeConnector().getMaxCachedIntervalMinutes(), zoneName,
+                        this.subjectCacheRedisTemplate), adapterTimeoutMillis);
         this.externalSubjectAttributeReaderCache.put(zoneName, externalSubjectAttributeReader);
         return externalSubjectAttributeReader;
     }
@@ -76,6 +88,21 @@ public class AttributeReaderFactory {
 
     public void removeSubjectReader(final String zoneName) {
         this.externalSubjectAttributeReaderCache.remove(zoneName);
+    }
+
+    @Autowired(required = false)
+    public void setResourceCacheRedisTemplate(final RedisTemplate<String, String> resourceCacheRedisTemplate) {
+        this.resourceCacheRedisTemplate = resourceCacheRedisTemplate;
+    }
+
+    @Autowired(required = false)
+    public void setSubjectCacheRedisTemplate(final RedisTemplate<String, String> subjectCacheRedisTemplate) {
+        this.subjectCacheRedisTemplate = subjectCacheRedisTemplate;
+    }
+
+    @Autowired
+    public void setConnectorService(final AttributeConnectorService connectorService) {
+        this.connectorService = connectorService;
     }
 }
 // CHECKSTYLE:ON: FinalClass

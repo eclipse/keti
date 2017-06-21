@@ -35,6 +35,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
+import com.ge.predix.acs.attribute.cache.AttributeCacheFactory;
 import com.ge.predix.acs.attribute.connector.management.AttributeConnectorServiceImpl;
 import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
 import com.ge.predix.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
@@ -60,13 +61,12 @@ import com.ge.predix.acs.zone.resolver.ZoneResolver;
 @Test
 @TestPropertySource("classpath:application.properties")
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
-@ContextConfiguration(
-        classes = { InMemoryPolicyEvaluationCache.class, InMemoryDataSourceConfig.class,
-                PolicyManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
-                PolicySetValidatorImpl.class, GroovyConditionShell.class, SpringSecurityZoneResolver.class,
-                GroovyConditionCache.class, AttributeConnectorServiceImpl.class, AttributeReaderFactory.class,
-                PrivilegeServiceResourceAttributeReader.class, PrivilegeServiceSubjectAttributeReader.class,
-                PrivilegeManagementServiceImpl.class, SubjectRepositoryProxy.class, ResourceRepositoryProxy.class })
+@ContextConfiguration(classes = { InMemoryPolicyEvaluationCache.class, InMemoryDataSourceConfig.class,
+        AttributeCacheFactory.class, PolicyManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
+        PolicySetValidatorImpl.class, GroovyConditionShell.class, SpringSecurityZoneResolver.class,
+        GroovyConditionCache.class, AttributeConnectorServiceImpl.class, AttributeReaderFactory.class,
+        PrivilegeServiceResourceAttributeReader.class, PrivilegeServiceSubjectAttributeReader.class,
+        PrivilegeManagementServiceImpl.class, SubjectRepositoryProxy.class, ResourceRepositoryProxy.class })
 public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpringContextTests {
 
     private static final String SUBDOMAIN1 = "tenant1";
@@ -87,8 +87,8 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
 
     private final ZoneEntity zone1 = this.createZone("zone1", SUBDOMAIN1, "description for Zone1");
     private final ZoneEntity zone2 = this.createZone("zone2", SUBDOMAIN2, "description for Zone2");
-    private final ZoneEntity defaultZone = this.createZone("defaultZone", DEFAULT_SUBDOMAIN,
-            "description for defaultZone");
+    private final ZoneEntity defaultZone = this
+            .createZone("defaultZone", DEFAULT_SUBDOMAIN, "description for defaultZone");
 
     @BeforeClass
     public void beforeClass() {
@@ -144,8 +144,8 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
 
     @Test
     public void testCreateApmPolicySetPositive() {
-        PolicySet policySet = this.jsonUtils.deserializeFromFile("testApmPolicySetLoadsSuccessfully.json",
-                PolicySet.class);
+        PolicySet policySet = this.jsonUtils
+                .deserializeFromFile("testApmPolicySetLoadsSuccessfully.json", PolicySet.class);
         String policyName = policySet.getName();
         this.policyService.upsertPolicySet(policySet);
         PolicySet savedPolicySet = this.policyService.getPolicySet(policyName);
@@ -180,8 +180,8 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
 
     public void testCreateMultiplePolicySets() {
         PolicySet policySet = this.jsonUtils.deserializeFromFile("set-with-1-policy.json", PolicySet.class);
-        PolicySet policySet2 = this.jsonUtils.deserializeFromFile("policy-set-with-one-policy-one-condition.json",
-                PolicySet.class);
+        PolicySet policySet2 = this.jsonUtils
+                .deserializeFromFile("policy-set-with-one-policy-one-condition.json", PolicySet.class);
 
         this.policyService.upsertPolicySet(policySet);
         try {
@@ -199,15 +199,15 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
 
     @Test(expectedExceptions = { PolicyManagementException.class })
     public void testCreatePolicySetWithInvalidConditions() {
-        PolicySet policySet = this.jsonUtils.deserializeFromFile("policy-set-with-one-policy-invalid-condition.json",
-                PolicySet.class);
+        PolicySet policySet = this.jsonUtils
+                .deserializeFromFile("policy-set-with-one-policy-invalid-condition.json", PolicySet.class);
         this.policyService.upsertPolicySet(policySet);
     }
 
     @Test(expectedExceptions = { PolicyManagementException.class })
     public void testCreatePolicySetWithInvalidJson() {
-        PolicySet policySet = this.jsonUtils.deserializeFromFile("policyset/validator/test/missing-effect-policy.json",
-                PolicySet.class);
+        PolicySet policySet = this.jsonUtils
+                .deserializeFromFile("policyset/validator/test/missing-effect-policy.json", PolicySet.class);
         this.policyService.upsertPolicySet(policySet);
     }
 
@@ -225,8 +225,8 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
 
     public void testCreatePolicySetsForMultipleApplications() {
         PolicySet client1PolicySet = this.jsonUtils.deserializeFromFile("set-with-1-policy.json", PolicySet.class);
-        PolicySet client2PolicySet = this.jsonUtils.deserializeFromFile("policy-set-with-one-policy-one-condition.json",
-                PolicySet.class);
+        PolicySet client2PolicySet = this.jsonUtils
+                .deserializeFromFile("policy-set-with-one-policy-one-condition.json", PolicySet.class);
 
         Mockito.when(this.mockZoneResolver.getZoneEntityOrFail()).thenReturn(this.zone1);
 
@@ -261,8 +261,8 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
 
     public void testCreatePolicySetsForMultipleZones() {
         PolicySet issuer1PolicySet = this.jsonUtils.deserializeFromFile("set-with-1-policy.json", PolicySet.class);
-        PolicySet issuer2PolicySet = this.jsonUtils.deserializeFromFile("policy-set-with-one-policy-one-condition.json",
-                PolicySet.class);
+        PolicySet issuer2PolicySet = this.jsonUtils
+                .deserializeFromFile("policy-set-with-one-policy-one-condition.json", PolicySet.class);
 
         Mockito.when(this.mockZoneResolver.getZoneEntityOrFail()).thenReturn(this.zone1);
         this.policyService.upsertPolicySet(issuer1PolicySet);

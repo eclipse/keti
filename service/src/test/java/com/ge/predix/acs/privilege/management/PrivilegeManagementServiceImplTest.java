@@ -36,6 +36,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.SpringSecurityPolicyContextResolver;
+import com.ge.predix.acs.attribute.cache.AttributeCacheFactory;
 import com.ge.predix.acs.attribute.connector.management.AttributeConnectorServiceImpl;
 import com.ge.predix.acs.attribute.readers.AttributeReaderFactory;
 import com.ge.predix.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
@@ -59,13 +60,12 @@ import com.ge.predix.acs.zone.management.ZoneService;
 import com.ge.predix.acs.zone.management.ZoneServiceImpl;
 import com.ge.predix.acs.zone.resolver.SpringSecurityZoneResolver;
 
-@ContextConfiguration(
-        classes = { AcsRequestContextHolder.class, InMemoryDataSourceConfig.class, InMemoryPolicyEvaluationCache.class,
-                PrivilegeManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
-                SpringSecurityZoneResolver.class, ZoneServiceImpl.class, GraphBeanDefinitionRegistryPostProcessor.class,
-                GraphConfig.class, SubjectRepositoryProxy.class, ResourceRepositoryProxy.class,
-                AttributeConnectorServiceImpl.class, AttributeReaderFactory.class,
-                PrivilegeServiceResourceAttributeReader.class, PrivilegeServiceSubjectAttributeReader.class })
+@ContextConfiguration(classes = { AcsRequestContextHolder.class, InMemoryDataSourceConfig.class,
+        InMemoryPolicyEvaluationCache.class, AttributeCacheFactory.class, PrivilegeManagementServiceImpl.class,
+        SpringSecurityPolicyContextResolver.class, SpringSecurityZoneResolver.class, ZoneServiceImpl.class,
+        GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class, SubjectRepositoryProxy.class,
+        ResourceRepositoryProxy.class, AttributeConnectorServiceImpl.class, AttributeReaderFactory.class,
+        PrivilegeServiceResourceAttributeReader.class, PrivilegeServiceSubjectAttributeReader.class })
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 @TestPropertySource("classpath:application.properties")
 public class PrivilegeManagementServiceImplTest extends AbstractTransactionalTestNGSpringContextTests {

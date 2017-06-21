@@ -61,6 +61,7 @@ public abstract class ExternalAttributeReader implements AttributeReader {
     public Set<Attribute> getAttributes(final String identifier) {
         CachedAttributes cachedAttributes = this.attributeCache.getAttributes(identifier);
         if (null == cachedAttributes) {
+            LOGGER.trace("Attributes not found in cache");
             // If get returns null then key either doesn't exist in cache or has been evicted.
             // Circuit breaker story to check adapter connection to be done soon.
             cachedAttributes = getAttributesFromAdapters(identifier);

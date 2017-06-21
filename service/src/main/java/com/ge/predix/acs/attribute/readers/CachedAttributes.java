@@ -9,6 +9,10 @@ public class CachedAttributes {
     private State state;
     private Set<Attribute> attributes;
 
+    public CachedAttributes() {
+        // Needed for jackson serialization
+    }
+
     public CachedAttributes(final Set<Attribute> attributes) {
         this.attributes = attributes;
         this.state = State.SUCCESS;
@@ -36,6 +40,7 @@ public class CachedAttributes {
 
     public enum State {
 
-        SUCCESS, DO_NOT_RETRY
+        SUCCESS,
+        DO_NOT_RETRY
     }
 }

@@ -348,7 +348,7 @@
                         <version>${exec-maven-plugin.version}</version>
                         <executions>
                             <execution>
-                                <id>cf-update-redis-service</id>
+                                <id>cf-update-decision-redis-service</id>
                                 <phase>post-integration-test</phase>
                                 <goals>
                                     <goal>exec</goal>
@@ -357,7 +357,39 @@
                                     <executable>cf</executable>
                                     <arguments>
                                         <argument>update-service</argument>
-                                        <argument>${ACS_REDIS}</argument>
+                                        <argument>${DECISION_CACHE_NAME}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-resource-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${RESOURCE_CACHE_NAME}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-subject-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${SUBJECT_CACHE_NAME}</argument>
                                         <argument>-t</argument>
                                         <argument>""</argument>
                                     </arguments>
@@ -442,7 +474,7 @@
                         <version>${exec-maven-plugin.version}</version>
                         <executions>
                             <execution>
-                                <id>cf-update-redis-service</id>
+                                <id>cf-update-decision-redis-service</id>
                                 <phase>post-integration-test</phase>
                                 <goals>
                                     <goal>exec</goal>
@@ -451,7 +483,39 @@
                                     <executable>cf</executable>
                                     <arguments>
                                         <argument>update-service</argument>
-                                        <argument>${ACS_REDIS}</argument>
+                                        <argument>${DECISION_CACHE_NAME}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-resource-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${RESOURCE_CACHE_NAME}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-subject-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${SUBJECT_CACHE_NAME}</argument>
                                         <argument>-t</argument>
                                         <argument>""</argument>
                                     </arguments>
