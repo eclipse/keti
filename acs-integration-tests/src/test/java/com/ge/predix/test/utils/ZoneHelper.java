@@ -21,8 +21,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,8 +89,11 @@ public class ZoneHelper {
     @Value("${ACS_SERVICE_ID:predix-acs}")
     private String serviceId;
 
-    @Autowired
+    @Autowired(required = false)
     private OAuth2RestTemplate zacRestTemplate;
+
+    @Autowired(required = false)
+    private OptionalTestSetup zacHelperUtil;
 
     public String getZone1Url() {
         return getZoneSpecificUrl(this.zone1Name);
@@ -136,6 +142,18 @@ public class ZoneHelper {
         return createTestZone(restTemplate, zoneId, registerWithZac, trustedIssuers);
     }
 
+    public Zone createTestZone(final RestTemplate restTemplate, final String zoneId,
+            final List<String> trustedIssuerIds) throws IOException {
+
+        if (this.zacHelperUtil != null) {
+            zacHelperUtil.setup(zoneId, Collections.singletonMap("trustedIssuerIds", trustedIssuerIds));
+        }
+        Zone zone = new Zone(zoneId, zoneId, "Zone for integration testing.");
+        restTemplate.put(this.acsBaseUrl + ACS_ZONE_API_PATH + zoneId, zone);
+
+        return zone;
+    }
+
     public Zone createTestZone(final RestTemplate restTemplate, final String zoneId, final boolean registerWithZac,
             final Map<String, Object> trustedIssuers) throws JsonParseException, JsonMappingException, IOException {
         Zone zone = new Zone(zoneId, zoneId, "Zone for integration testing.");
@@ -145,7 +163,7 @@ public class ZoneHelper {
                 throw new RuntimeException(String.format("Failed to register '%s' zone with ZAC.", zoneId));
             }
         }
-
+        
         restTemplate.put(this.acsBaseUrl + ACS_ZONE_API_PATH + zoneId, zone);
         return zone;
     }
@@ -165,9 +183,9 @@ public class ZoneHelper {
         HttpEntity<String> requestEntity = new HttpEntity<>(new ObjectMapper().writeValueAsString(trustedIssuers),
                 headers);
 
-        ResponseEntity<String> response = this.zacRestTemplate.exchange(
-                this.zacUrl + "/v1/registration/" + this.serviceId + "/" + zoneId, HttpMethod.PUT, requestEntity,
-                String.class);
+        ResponseEntity<String> response = this.zacRestTemplate
+                .exchange(this.zacUrl + "/v1/registration/" + this.serviceId + "/" + zoneId, HttpMethod.PUT,
+                        requestEntity, String.class);
         return response;
     }
 
@@ -178,9 +196,9 @@ public class ZoneHelper {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = this.zacRestTemplate.exchange(
-                this.zacUrl + "/v1/registration/" + this.serviceId + "/" + zoneId, HttpMethod.DELETE, requestEntity,
-                String.class);
+        ResponseEntity<String> response = this.zacRestTemplate
+                .exchange(this.zacUrl + "/v1/registration/" + this.serviceId + "/" + zoneId, HttpMethod.DELETE,
+                        requestEntity, String.class);
         return response;
     }
 
@@ -205,8 +223,8 @@ public class ZoneHelper {
         try {
 
             RestTemplate acs = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
-            ResponseEntity<Zone> responseEntity = acs.getForEntity(this.acsBaseUrl + ACS_ZONE_API_PATH + zoneName,
-                    Zone.class);
+            ResponseEntity<Zone> responseEntity = acs
+                    .getForEntity(this.acsBaseUrl + ACS_ZONE_API_PATH + zoneName, Zone.class);
             return responseEntity.getBody();
 
         } catch (RestClientException e) {
@@ -236,15 +254,36 @@ public class ZoneHelper {
         }
     }
 
+    public HttpStatus deleteZone(final RestTemplate restTemplate, final String zoneName) {
+
+        if (this.zacHelperUtil != null) {
+            this.zacHelperUtil.tearDown(zoneName);
+        }
+
+        try {
+            restTemplate.delete(this.acsBaseUrl + ACS_ZONE_API_PATH + zoneName);
+
+            return HttpStatus.NO_CONTENT;
+        } catch (HttpClientErrorException httpException) {
+            return httpException.getStatusCode();
+        } catch (RestClientException e) {
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+    }
+
     public String getZone1Name() {
         return this.zone1Name;
     }
-    
+
     public String getZone2Name() {
         return this.zone2Name;
     }
 
     public String getZone2Url() {
         return getZoneSpecificUrl(this.zone2Name);
+    }
+
+    public String getRandomName(final String clazz) {
+        return clazz + Integer.toString(new Random().nextInt());
     }
 }
