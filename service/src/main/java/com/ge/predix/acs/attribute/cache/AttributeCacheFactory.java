@@ -1,5 +1,7 @@
 package com.ge.predix.acs.attribute.cache;
 
+import java.util.function.BiFunction;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,28 +28,27 @@ public class AttributeCacheFactory {
 
     public AttributeCache createResourceAttributeCache(final long maxCachedIntervalMinutes, final String zoneName,
             final RedisTemplate<String, String> resourceCacheRedisTemplate) {
-        if (!this.enableAttributeCaching) {
-            return new NonCachingAttributeCache();
-        }
-        if (ArrayUtils.contains(environment.getActiveProfiles(), "redis") || ArrayUtils
-                .contains(environment.getActiveProfiles(), "cloud-redis")) {
-            return new RedisAttributeCache(maxCachedIntervalMinutes, zoneName, AbstractAttributeCache::resourceKey,
-                    resourceCacheRedisTemplate);
-        }
-        return new InMemoryAttributeCache(maxCachedIntervalMinutes, zoneName, AbstractAttributeCache::resourceKey);
+        return createAttributeCache(maxCachedIntervalMinutes, zoneName, resourceCacheRedisTemplate,
+                AbstractAttributeCache::resourceKey);
     }
 
     public AttributeCache createSubjectAttributeCache(final long maxCachedIntervalMinutes, final String zoneName,
             final RedisTemplate<String, String> subjectCacheRedisTemplate) {
+        return createAttributeCache(maxCachedIntervalMinutes, zoneName, subjectCacheRedisTemplate,
+                AbstractAttributeCache::subjectKey);
+    }
+
+    private AttributeCache createAttributeCache(final long maxCachedIntervalMinutes, final String zoneName,
+            final RedisTemplate<String, String> cacheRedisTemplate, final BiFunction<String, String, String> getKey) {
+        String[] profiles = environment.getActiveProfiles();
+
         if (!this.enableAttributeCaching) {
             return new NonCachingAttributeCache();
         }
-        if (ArrayUtils.contains(environment.getActiveProfiles(), "redis") || ArrayUtils
-                .contains(environment.getActiveProfiles(), "cloud-redis")) {
-            return new RedisAttributeCache(maxCachedIntervalMinutes, zoneName, AbstractAttributeCache::subjectKey,
-                    subjectCacheRedisTemplate);
+        if (ArrayUtils.contains(profiles, "redis") || ArrayUtils.contains(profiles, "cloud-redis")) {
+            return new RedisAttributeCache(maxCachedIntervalMinutes, zoneName, getKey, cacheRedisTemplate);
         }
-        return new InMemoryAttributeCache(maxCachedIntervalMinutes, zoneName, AbstractAttributeCache::subjectKey);
+        return new InMemoryAttributeCache(maxCachedIntervalMinutes, zoneName, getKey);
     }
 }
 // CHECKSTYLE:ON: FinalClass

@@ -16,11 +16,11 @@
 
 package com.ge.predix.acs.config;
 
-import java.util.function.Supplier;
+import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.config.java.AbstractCloudConfig;
 import org.springframework.cloud.service.PooledServiceConnectorConfig;
 import org.springframework.cloud.service.PooledServiceConnectorConfig.PoolConfig;
@@ -28,6 +28,7 @@ import org.springframework.cloud.service.common.RedisServiceInfo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 
@@ -43,123 +44,63 @@ import redis.clients.jedis.JedisPoolConfig;
 public class CloudRedisConnectionFactoryConfig extends AbstractCloudConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudRedisConnectionFactoryConfig.class);
 
-    @Value("${DECISION_CACHE_NAME:acs-redis}")
-    private String decisionCacheName;
-    @Value("${DECISION_REDIS_MIN_ACTIVE:0}")
-    private int decisionMinActive;
-    @Value("${DECISION_REDIS_MAX_ACTIVE:100}")
-    private int decisionMaxActive;
-    @Value("${DECISION_REDIS_MAX_WAIT_TIME:2000}")
-    private int decisionMaxWaitTime;
-    @Value("${DECISION_REDIS_SOCKET_TIMEOUT:3000}")
-    private int decisionSoTimeout;
-    @Value("${DECISION_REDIS_USE_JEDIS_FACTORY:false}")
-    private boolean decisionUseJedisFactory;
+    @Autowired
+    private Environment environment;
 
-    @Value("${RESOURCE_CACHE_NAME:acs-resource-redis}")
-    private String resourceCacheName;
-    @Value("${RESOURCE_REDIS_MIN_ACTIVE:0}")
-    private int resourceMinActive;
-    @Value("${RESOURCE_REDIS_MAX_ACTIVE:100}")
-    private int resourceMaxActive;
-    @Value("${RESOURCE_REDIS_MAX_WAIT_TIME:2000}")
-    private int resourceMaxWaitTime;
-    @Value("${RESOURCE_REDIS_SOCKET_TIMEOUT:3000}")
-    private int resourceSoTimeout;
-    @Value("${RESOURCE_REDIS_USE_JEDIS_FACTORY:false}")
-    private boolean resourceUseJedisFactory;
+    private CloudRedisProperties decisionRedisProperties;
+    private CloudRedisProperties resourceRedisProperties;
+    private CloudRedisProperties subjectRedisProperties;
 
-    @Value("${SUBJECT_CACHE_NAME:acs-subject-redis}")
-    private String subjectCacheName;
-    @Value("${SUBJECT_REDIS_MIN_ACTIVE:0}")
-    private int subjectMinActive;
-    @Value("${SUBJECT_REDIS_MAX_ACTIVE:100}")
-    private int subjectMaxActive;
-    @Value("${SUBJECT_REDIS_MAX_WAIT_TIME:2000}")
-    private int subjectMaxWaitTime;
-    @Value("${SUBJECT_REDIS_SOCKET_TIMEOUT:3000}")
-    private int subjectSoTimeout;
-    @Value("${SUBJECT_REDIS_USE_JEDIS_FACTORY:false}")
-    private boolean subjectUseJedisFactory;
+    @PostConstruct
+    private void setupProperties() {
+        this.decisionRedisProperties = new CloudRedisProperties(this.environment, "DECISION");
+        this.resourceRedisProperties = new CloudRedisProperties(this.environment, "RESOURCE");
+        this.subjectRedisProperties = new CloudRedisProperties(this.environment, "SUBJECT");
+    }
 
     @Bean(name = { "redisConnectionFactory", "decisionRedisConnectionFactory" })
     public RedisConnectionFactory decisionRedisConnectionFactory() {
-        return createRedisConnectionFactory(this.decisionUseJedisFactory, this::createDecisionJedisConnectionFactory,
-                this::createDecisionSpringCloudConnectionFactory, "Decision");
+        return createRedisConnectionFactory(this.decisionRedisProperties);
     }
 
     @Bean(name = { "resourceRedisConnectionFactory" })
     public RedisConnectionFactory resourceRedisConnectionFactory() {
-        return createRedisConnectionFactory(this.resourceUseJedisFactory, this::createResourceJedisConnectionFactory,
-                this::createResourceSpringCloudConnectionFactory, "Resource");
+        return createRedisConnectionFactory(this.resourceRedisProperties);
     }
 
     @Bean(name = { "subjectRedisConnectionFactory" })
     public RedisConnectionFactory subjectRedisConnectionFactory() {
-        return createRedisConnectionFactory(this.subjectUseJedisFactory, this::createSubjectJedisConnectionFactory,
-                this::createSubjectSpringCloudConnectionFactory, "Subject");
+        return createRedisConnectionFactory(this.subjectRedisProperties);
     }
 
-    private RedisConnectionFactory createDecisionSpringCloudConnectionFactory() {
-        return createSpringCloudConnectionFactory(this.decisionMinActive, this.decisionMaxActive,
-                this.decisionMaxWaitTime, this.decisionCacheName);
-    }
-
-    private RedisConnectionFactory createResourceSpringCloudConnectionFactory() {
-        return createSpringCloudConnectionFactory(this.resourceMinActive, this.resourceMaxActive,
-                this.resourceMaxWaitTime, this.resourceCacheName);
-    }
-
-    private RedisConnectionFactory createSubjectSpringCloudConnectionFactory() {
-        return createSpringCloudConnectionFactory(this.subjectMinActive, this.subjectMaxActive, this.subjectMaxWaitTime,
-                this.subjectCacheName);
-    }
-
-    private RedisConnectionFactory createDecisionJedisConnectionFactory() {
-        return createJedisConnectionFactory(this.decisionMaxActive, this.decisionMinActive, this.decisionMaxWaitTime,
-                this.decisionCacheName, this.decisionSoTimeout);
-    }
-
-    private RedisConnectionFactory createResourceJedisConnectionFactory() {
-        return createJedisConnectionFactory(this.resourceMaxActive, this.resourceMinActive, this.resourceMaxWaitTime,
-                this.resourceCacheName, this.resourceSoTimeout);
-    }
-
-    private RedisConnectionFactory createSubjectJedisConnectionFactory() {
-        return createJedisConnectionFactory(this.subjectMaxActive, this.subjectMinActive, this.subjectMaxWaitTime,
-                this.subjectCacheName, this.subjectSoTimeout);
-    }
-
-    private RedisConnectionFactory createRedisConnectionFactory(final boolean useJedis,
-            final Supplier<RedisConnectionFactory> jedisConnectionFactory,
-            final Supplier<RedisConnectionFactory> springCloudConnectionFactory, final String cacheName) {
+    private RedisConnectionFactory createRedisConnectionFactory(final CloudRedisProperties redisProperties) {
         RedisConnectionFactory connFactory;
-        if (useJedis) {
-            connFactory = jedisConnectionFactory.get();
+        if (redisProperties.useJedisFactory()) {
+            connFactory = createJedisConnectionFactory(redisProperties);
         } else {
-            connFactory = springCloudConnectionFactory.get();
+            connFactory = createSpringCloudConnectionFactory(redisProperties);
         }
-        LOGGER.info("Successfully created cloud {} Redis connection factory.", cacheName);
+        LOGGER.info("Successfully created cloud {} Redis connection factory.", redisProperties.getCacheName());
         return connFactory;
     }
 
-    private RedisConnectionFactory createSpringCloudConnectionFactory(final int minActive, final int maxActive,
-            final int maxWaitTime, final String cacheName) {
-        return connectionFactory().redisConnectionFactory(cacheName,
-                new PooledServiceConnectorConfig(new PoolConfig(minActive, maxActive, maxWaitTime)));
+    private RedisConnectionFactory createSpringCloudConnectionFactory(final CloudRedisProperties redisProperties) {
+        return connectionFactory().redisConnectionFactory(redisProperties.getCacheName(),
+                new PooledServiceConnectorConfig(
+                        new PoolConfig(redisProperties.getMinActive(), redisProperties.getMaxActive(),
+                                redisProperties.getMaxWaitTime())));
     }
 
-    private JedisConnectionFactory createJedisConnectionFactory(final int maxActive, final int minActive,
-            final int maxWaitTime, final String cacheName, final int soTimeout) {
+    private JedisConnectionFactory createJedisConnectionFactory(final CloudRedisProperties redisProperties) {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxTotal(maxActive);
-        poolConfig.setMinIdle(minActive);
-        poolConfig.setMaxWaitMillis(maxWaitTime);
+        poolConfig.setMaxTotal(redisProperties.getMaxActive());
+        poolConfig.setMinIdle(redisProperties.getMinActive());
+        poolConfig.setMaxWaitMillis(redisProperties.getMaxWaitTime());
         poolConfig.setTestOnBorrow(false);
-        RedisServiceInfo redisServiceInfo = (RedisServiceInfo) cloud().getServiceInfo(cacheName);
+        RedisServiceInfo redisServiceInfo = (RedisServiceInfo) cloud().getServiceInfo(redisProperties.getCacheName());
         JedisConnectionFactory connFactory = new JedisConnectionFactory(poolConfig);
         connFactory.setUsePool(true);
-        connFactory.setTimeout(soTimeout);
+        connFactory.setTimeout(redisProperties.getSoTimeout());
         connFactory.setHostName(redisServiceInfo.getHost());
         connFactory.setPort(redisServiceInfo.getPort());
         connFactory.setPassword(redisServiceInfo.getPassword());
