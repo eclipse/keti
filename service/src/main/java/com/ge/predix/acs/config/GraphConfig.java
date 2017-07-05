@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -84,9 +85,8 @@ public class GraphConfig {
         if (this.cassandraEnabled) {
             Builder titanBuilder = TitanFactory.build().set("storage.backend", "cassandra")
                     .set("storage.cassandra.keyspace", this.cassandraKeyspace)
-                    .set("storage.hostname", Arrays.asList(hostname.split(",")))
-                    .set("storage.port", this.port).set("cache.db-cache", this.cacheEnabled)
-                    .set("cache.db-cache-clean-wait", this.titanCacheCleanWait)
+                    .set("storage.hostname", Arrays.asList(hostname.split(","))).set("storage.port", this.port)
+                    .set("cache.db-cache", this.cacheEnabled).set("cache.db-cache-clean-wait", this.titanCacheCleanWait)
                     .set("cache.db-cache-time", this.titanCacheTime).set("cache.db-cache-size", this.titanCacheSize);
             if (StringUtils.isNotEmpty(this.username)) {
                 titanBuilder = titanBuilder.set("storage.username", this.username);
@@ -213,7 +213,7 @@ public class GraphConfig {
     }
 
     @Bean
-    Graph graph() {
-        return this.graph;
+    GraphTraversalSource graphTraversal() {
+        return this.graph.traversal();
     }
 }

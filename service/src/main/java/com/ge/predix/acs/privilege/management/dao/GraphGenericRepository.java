@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
@@ -51,7 +51,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     public static final String VERSION_VERTEX_LABEL = "version";
 
     @Autowired
-    private Graph graph;
+    private GraphTraversalSource graphTraversal;
 
     @Value("${TITAN_TRAVERSAL_LIMIT:256}")
     private long traversalLimit = 256;
@@ -69,10 +69,10 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     @Override
     public List<E> findAll() {
         try {
-            return this.graph.traversal().V().has(ZONE_ID_KEY).has(getEntityIdKey()).toList().stream()
+            return this.graphTraversal.V().has(ZONE_ID_KEY).has(getEntityIdKey()).toList().stream()
                     .map(this::vertexToEntity).collect(Collectors.toList());
         } finally {
-            this.graph.tx().commit();
+            this.graphTraversal.tx().commit();
         }
     }
 
@@ -84,10 +84,10 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     @Override
     public List<E> findAll(final Iterable<Long> ids) {
         try {
-            return this.graph.traversal().V(iterableToArray(ids)).toList().stream().map(this::vertexToEntity)
+            return this.graphTraversal.V(iterableToArray(ids)).toList().stream().map(this::vertexToEntity)
                     .collect(Collectors.toList());
         } finally {
-            this.graph.tx().commit();
+            this.graphTraversal.tx().commit();
         }
     }
 
@@ -110,13 +110,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     @Override
     public <S extends E> List<S> save(final Iterable<S> entities) {
         List<S> savedEntities = new ArrayList<>();
-        try {
-            entities.forEach(item -> savedEntities.add(saveCommon(item)));
-            this.graph.tx().commit();
-        } catch (Exception e) {
-            this.graph.tx().rollback();
-            throw e;
-        }
+        this.commitTransaction(() -> entities.forEach(item -> savedEntities.add(saveCommon(item))));
         return savedEntities;
     }
 
@@ -133,81 +127,55 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     @Override
     public long count() {
         try {
-            return this.graph.traversal().V().has(getEntityIdKey()).count().next();
+            return this.graphTraversal.V().has(getEntityIdKey()).count().next();
         } finally {
-            this.graph.tx().commit();
+            this.graphTraversal.tx().commit();
         }
     }
 
     @Override
     public void delete(final Long id) {
-        try {
-            this.graph.traversal().V(id).drop().iterate();
-            this.graph.tx().commit();
-        } catch (Exception e) {
-            this.graph.tx().rollback();
-            throw e;
-        }
+        this.commitTransaction(() -> this.graphTraversal.V(id).drop().iterate());
     }
 
     @Override
     public void delete(final E entity) {
-        try {
-            this.graph.traversal().V(entity.getId()).drop().iterate();
-            this.graph.tx().commit();
-        } catch (Exception e) {
-            this.graph.tx().rollback();
-            throw e;
-        }
+        this.commitTransaction(() -> this.graphTraversal.V(entity.getId()).drop().iterate());
     }
 
     @Override
     public void delete(final Iterable<? extends E> entities) {
-        // Assemble list of entity ids.
-        try {
-            List<Long> ids = new ArrayList<>();
-            entities.forEach(item -> ids.add(item.getId()));
-            // Delete all entities in one fell swoop.
-            this.graph.traversal().V(ids.toArray()).drop().iterate();
-            this.graph.tx().commit();
-        } catch (Exception e) {
-            this.graph.tx().rollback();
-            throw e;
-        }
+        List<Long> ids = new ArrayList<>();
+        entities.forEach(item -> ids.add(item.getId()));
+        this.commitTransaction(() -> this.graphTraversal.V(ids.toArray()).drop().iterate());
     }
 
     @Override
     public void deleteAll() {
-        try {
-            this.graph.traversal().V().has(getEntityIdKey()).drop().iterate();
-            this.graph.tx().commit();
-        } catch (Exception e) {
-            this.graph.tx().rollback();
-            throw e;
-        }
+        this.commitTransaction(() -> this.graphTraversal.V().has(getEntityIdKey()).drop().iterate());
     }
 
     @Override
     public boolean exists(final Long id) {
         try {
-            GraphTraversal<Vertex, Vertex> traversal = this.graph.traversal().V(id);
+            GraphTraversal<Vertex, Vertex> traversal = this.graphTraversal.V(id);
             return traversal.hasNext();
         } finally {
-            this.graph.tx().commit();
+            this.graphTraversal.tx().commit();
         }
     }
 
     @Override
     public E findOne(final Long id) {
         try {
-            GraphTraversal<Vertex, Vertex> traversal = this.graph.traversal().V(id);
+            GraphTraversal<Vertex, Vertex> traversal = this.graphTraversal.V(id);
             if (traversal.hasNext()) {
                 Vertex vertex = traversal.next();
                 return vertexToEntity(vertex);
             }
             return null;
         } finally {
-            this.graph.tx().commit();
+            this.graphTraversal.tx().commit();
         }
     }
 
@@ -216,9 +184,9 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
         S saveCommon;
         try {
             saveCommon = saveCommon(entity);
-            this.graph.tx().commit();
+            this.graphTraversal.tx().commit();
         } catch (Exception e) {
-            this.graph.tx().rollback();
+            this.graphTraversal.tx().rollback();
             throw e;
         }
         return saveCommon;
@@ -232,14 +200,15 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
             Assert.notNull(entity.getZone(), "ZonableEntity must have a non-null zone.");
             String zoneId = entity.getZone().getName();
             Assert.hasText(zoneId, "zoneName is required.");
-            Vertex entityVertex = this.graph
-                    .addVertex(T.label, getEntityLabel(), ZONE_ID_KEY, zoneId, getEntityIdKey(), entityId);
+            Vertex entityVertex = this.graphTraversal.addV().property(T.label, getEntityLabel())
+                    .property(ZONE_ID_KEY, zoneId).property(getEntityIdKey(), entityId).next();
+
             updateVertexProperties(entity, entityVertex);
             saveParentRelationships(entity, entityVertex, false);
             entity.setId((Long) entityVertex.id());
         } else {
             verifyEntityReferencesNotCyclic(entity);
-            GraphTraversal<Vertex, Vertex> traversal = this.graph.traversal().V(entity.getId());
+            GraphTraversal<Vertex, Vertex> traversal = this.graphTraversal.V(entity.getId());
             Vertex entityVertex = traversal.next();
             updateVertexProperties(entity, entityVertex);
             saveParentRelationships(entity, entityVertex, true);
@@ -259,7 +228,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
         verifyEntityNotSelfReferencing(entity);
 
         // Now check for potential cyclic references.
-        getGraph().traversal().V(entity.getId()).has(getEntityIdKey()).emit().repeat(in().has(getEntityIdKey()))
+        this.graphTraversal.V(entity.getId()).has(getEntityIdKey()).emit().repeat(in().has(getEntityIdKey()))
                 .until(eq(null)).values(getEntityIdKey()).toStream().forEach(id -> {
             if (entity.getParents().contains(new Parent((String) id))) {
                 throw new SchemaViolationException(
@@ -277,8 +246,8 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     }
 
     private void saveParentRelationship(final E entity, final Vertex vertex, final Parent parent) {
-        GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V()
-                .has(ZONE_ID_KEY, entity.getZone().getName()).has(getEntityIdKey(), parent.getIdentifier());
+        GraphTraversal<Vertex, Vertex> traversal = this.graphTraversal.V().has(ZONE_ID_KEY, entity.getZone().getName())
+                .has(getEntityIdKey(), parent.getIdentifier());
         if (!traversal.hasNext()) {
             throw new IllegalStateException(
                     String.format("No parent exists in zone '%s' with '%s' value of '%s'.", entity.getZone().getName(),
@@ -291,7 +260,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     Set<ParentEntity> getParentEntities(final E entity) {
         Set<ParentEntity> parents = new HashSet<>();
         entity.getParents().forEach(parent -> {
-            GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V()
+            GraphTraversal<Vertex, Vertex> traversal = this.graphTraversal.V()
                     .has(ZONE_ID_KEY, entity.getZone().getName()).has(getEntityIdKey(), parent.getIdentifier());
             if (!traversal.hasNext()) {
                 throw new IllegalStateException(String.format("No parent exists in zone '%s' with '%s' value of '%s'.",
@@ -307,7 +276,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
             Vertex versionVertex = null;
             // Value has to be provided to the has() method for index to be used. Composite indexes only work on
             // equality comparisons.
-            GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V()
+            GraphTraversal<Vertex, Vertex> traversal = this.graphTraversal.V()
                     .has(VERSION_VERTEX_LABEL, VERSION_PROPERTY_KEY, versionNumber);
             if (traversal.hasNext()) {
                 versionVertex = traversal.next();
@@ -316,24 +285,19 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
             }
             return versionVertex != null;
         } finally {
-            this.graph.tx().commit();
+            this.graphTraversal.tx().commit();
         }
     }
 
     public void createVersionVertex(final int version) {
-        try {
-            this.graph.addVertex(T.label, VERSION_VERTEX_LABEL, VERSION_PROPERTY_KEY, version);
-            this.graph.tx().commit();
-        } catch (Exception e) {
-            this.graph.tx().rollback();
-            throw e;
-        }
+       this.commitTransaction(() -> this.graphTraversal.addV().property(T.label, VERSION_VERTEX_LABEL)
+           .property(VERSION_PROPERTY_KEY, version).next());
     }
 
     public List<E> findByZone(final ZoneEntity zoneEntity) {
         try {
             String zoneName = zoneEntity.getName();
-            GraphTraversal<Vertex, Vertex> traversal = this.graph.traversal().V()
+            GraphTraversal<Vertex, Vertex> traversal = this.graphTraversal.V()
                     .has(getEntityLabel(), ZONE_ID_KEY, zoneName).has(getEntityIdKey());
             List<E> entities = new ArrayList<>();
             while (traversal.hasNext()) {
@@ -341,7 +305,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
             }
             return entities;
         } finally {
-            this.graph.tx().commit();
+            this.graphTraversal.tx().commit();
         }
     }
 
@@ -376,7 +340,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
      */
     public E getEntity(final ZoneEntity zone, final String identifier) {
         try {
-            GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V().has(ZONE_ID_KEY, zone.getName())
+            GraphTraversal<Vertex, Vertex> traversal = this.graphTraversal.V().has(ZONE_ID_KEY, zone.getName())
                     .has(getEntityIdKey(), identifier);
             if (!traversal.hasNext()) {
                 return null;
@@ -389,14 +353,14 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
                     String.format("There are two entities with the same %s.", getEntityIdKey()));
             return entity;
         } finally {
-            this.graph.tx().commit();
+            this.graphTraversal.tx().commit();
         }
     }
 
     public E getEntityWithInheritedAttributes(final ZoneEntity zone, final String identifier,
             final Set<Attribute> scopes) {
         try {
-            GraphTraversal<Vertex, Vertex> traversal = getGraph().traversal().V().has(ZONE_ID_KEY, zone.getName())
+            GraphTraversal<Vertex, Vertex> traversal = this.graphTraversal.V().has(ZONE_ID_KEY, zone.getName())
                     .has(getEntityIdKey(), identifier);
             if (!traversal.hasNext()) {
                 return null;
@@ -410,7 +374,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
                     String.format("There are two entities with the same %s.", getEntityIdKey()));
             return entity;
         } finally {
-            this.graph.tx().commit();
+            this.graphTraversal.tx().commit();
         }
     }
 
@@ -419,7 +383,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
         Set<Attribute> attributes = new HashSet<>();
 
         // First add all attributes inherited from non-scoped relationships.
-        getGraph().traversal().V(vertex.id()).has(ATTRIBUTES_PROPERTY_KEY).emit()
+        this.graphTraversal.V(vertex.id()).has(ATTRIBUTES_PROPERTY_KEY).emit()
                 .repeat(outE().hasNot(SCOPE_PROPERTY_KEY).otherV().simplePath().has(ATTRIBUTES_PROPERTY_KEY))
                 .until(eq(null)).limit(this.traversalLimit + 1).values(ATTRIBUTES_PROPERTY_KEY).toStream()
                 .forEach(it -> {
@@ -433,7 +397,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
                     }
                 });
 
-        getGraph().traversal().V(vertex.id()).has(ATTRIBUTES_PROPERTY_KEY).emit()
+        this.graphTraversal.V(vertex.id()).has(ATTRIBUTES_PROPERTY_KEY).emit()
                 .repeat(outE().has(SCOPE_PROPERTY_KEY, test(elementOf(), scopes)).otherV().simplePath()
                         .has(ATTRIBUTES_PROPERTY_KEY)).until(eq(null)).limit(this.traversalLimit + 1)
                 .values(ATTRIBUTES_PROPERTY_KEY).toStream().forEach(it -> {
@@ -481,7 +445,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
             return Collections.emptySet();
         }
 
-        return this.graph.traversal().V(entity.getId()).has(getEntityIdKey()).emit().repeat(in().has(getEntityIdKey()))
+        return this.graphTraversal.V(entity.getId()).has(getEntityIdKey()).emit().repeat(in().has(getEntityIdKey()))
                 .until(eq(null)).values(getEntityIdKey()).toStream().map(Object::toString).collect(Collectors.toSet());
     }
 
@@ -497,12 +461,12 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
 
     abstract E vertexToEntity(Vertex vertex);
 
-    public Graph getGraph() {
-        return this.graph;
+    public GraphTraversalSource getGraphTraversal() {
+        return graphTraversal;
     }
 
-    public void setGraph(final Graph graph) {
-        this.graph = graph;
+    public void setGraphTraversal(final GraphTraversalSource graphTraversal) {
+        this.graphTraversal = graphTraversal;
     }
 
     public long getTraversalLimit() {
@@ -512,5 +476,13 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     public void setTraversalLimit(final long traversalLimit) {
         this.traversalLimit = traversalLimit;
     }
-
+    private void commitTransaction(final Runnable graphQuery) {
+        try {
+            graphQuery.run();
+            this.graphTraversal.tx().commit();
+        } catch (final Exception e) {
+            this.graphTraversal.tx().rollback();
+            throw e;
+        }
+    }
 }
