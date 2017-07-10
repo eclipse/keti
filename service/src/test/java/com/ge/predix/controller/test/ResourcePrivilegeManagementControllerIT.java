@@ -16,18 +16,17 @@
 // @formatter:off
 package com.ge.predix.controller.test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ge.predix.acs.rest.BaseResource;
-import com.ge.predix.acs.rest.Zone;
-import com.ge.predix.acs.testutils.MockAcsRequestContext;
-import com.ge.predix.acs.testutils.MockMvcContext;
-import com.ge.predix.acs.testutils.MockSecurityContext;
-import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
-import com.ge.predix.acs.testutils.TestUtils;
-import com.ge.predix.acs.utils.JsonUtils;
-import com.ge.predix.acs.zone.management.ZoneService;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isIn;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.net.URLEncoder;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,13 +37,17 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.net.URLEncoder;
-import java.util.List;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isIn;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ge.predix.acs.privilege.management.PrivilegeManagementUtility;
+import com.ge.predix.acs.rest.BaseResource;
+import com.ge.predix.acs.rest.Zone;
+import com.ge.predix.acs.testutils.MockAcsRequestContext;
+import com.ge.predix.acs.testutils.MockMvcContext;
+import com.ge.predix.acs.testutils.MockSecurityContext;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
+import com.ge.predix.acs.testutils.TestUtils;
+import com.ge.predix.acs.utils.JsonUtils;
+import com.ge.predix.acs.zone.management.ZoneService;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
@@ -243,6 +246,24 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
                 .perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(resource)))
                 .andExpect(status().isUnprocessableEntity());
+
+    }
+
+    @Test
+    public void testTypeMismatchForQueryParameter() throws Exception {
+
+        // GET a given resource
+        String thisUri = RESOURCE_BASE_URL + "/%2Fservices%2Fsecured-api?includeInheritedAttributes=true)";
+        MockMvcContext getContext =
+            TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
+        getContext.getMockMvc()
+                .perform(getContext.getBuilder().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_ERROR, is(HttpStatus
+                .BAD_REQUEST.getReasonPhrase())))
+                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_MESSAGE,
+                is("Request Parameter " + PrivilegeManagementUtility.INHERITED_ATTRIBUTES_REQUEST_PARAMETER
+                                    + " must be a boolean value")));
 
     }
 
