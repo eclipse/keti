@@ -19,12 +19,11 @@ package com.ge.predix.acceptance.test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -40,8 +39,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.rest.BaseResource;
@@ -51,9 +48,8 @@ import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
-import com.ge.predix.test.utils.UaaTestUtil;
-import com.ge.predix.test.utils.ZacTestUtil;
 import com.ge.predix.test.utils.ZoneHelper;
+import com.ge.predix.test.utils.v2.UaaTestUtil;
 
 /**
  * @author 212319607
@@ -65,10 +61,6 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
     @Value("${ACS_URL}")
     private String acsBaseUrl;
 
-    private String testZoneSubdomain;
-
-    private HttpHeaders headersWithZoneSubdomain;
-
     @Autowired
     private ZoneHelper zoneHelper;
 
@@ -79,74 +71,50 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
     private PolicyHelper policyHelper;
 
     @Autowired
-    private ZacTestUtil zacTestUtil;
-
-    @Autowired
-    private Environment env;
-
-    @Autowired
     private ACSRestTemplateFactory acsRestTemplateFactory;
 
-    @Value("${ZONE1_NAME:testzone1}")
-    private String acsZone1Name;
-
-    @Value("${ZONE2_NAME:testzone2}")
-    private String acsZone2Name;
-
-    @Value("${ZONE3_NAME:testzone3}")
-    private String acsZone3Name;
-
-    @Value("${ACS_UAA_URL}")
+    @Value("${ACS_TESTING_UAA}")
     private String uaaUrl;
 
+    @Value("${UAA_ADMIN_SECRET:adminsecret}")
+    private String uaaAdminSecret;
+
+    @Value("${ACS_SERVICE_ID:predix-acs}")
+    private String serviceId;
+
     private OAuth2RestTemplate acsAdminRestTemplate;
-    private boolean registerWithZac;
+    private OAuth2RestTemplate acsZoneRestTemplate;
+    private HttpHeaders headersWithZoneSubdomain = new HttpHeaders();
+    private UaaTestUtil uaaTestUtil;
+    private String acsZoneName;
 
     @BeforeClass
-    public void setup() throws JsonParseException, JsonMappingException, IOException {
-        if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
-            setupPublicACS();
-        } else {
-            setupPredixACS();
-        }
-        this.headersWithZoneSubdomain = new HttpHeaders();
-        this.headersWithZoneSubdomain.set("Predix-Zone-Id", this.testZoneSubdomain);
+    public void setup() throws IOException {
+        this.acsZoneName = this.zoneHelper.getRandomName(this.getClass().getSimpleName());
+        this.headersWithZoneSubdomain.set("Predix-Zone-Id", this.acsZoneName);
+        this.uaaTestUtil = new UaaTestUtil(this.acsRestTemplateFactory, this.uaaUrl, this.uaaAdminSecret);
+
+        this.acsAdminRestTemplate = this.uaaTestUtil.createAcsAdminClientAndGetTemplate(this.acsZoneName);
+        this.zoneHelper.createTestZone(this.acsAdminRestTemplate, this.acsZoneName,
+                Collections.singletonList(this.uaaUrl + "/oauth/token"));
+        this.acsZoneRestTemplate = this.uaaTestUtil.createZoneClientAndGetTemplate(this.acsZoneName, this.serviceId);
+
     }
 
-    private void setupPredixACS() throws JsonParseException, JsonMappingException, IOException {
-        this.zacTestUtil.assumeZacServerAvailable();
-
-        this.acsAdminRestTemplate = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
-        this.registerWithZac = true;
-        this.testZoneSubdomain = this.zoneHelper
-                .createTestZone(this.acsAdminRestTemplate, this.acsZone1Name, this.registerWithZac).getSubdomain();
-    }
-
-    private void setupPublicACS() throws JsonParseException, JsonMappingException, IOException {
-        UaaTestUtil uaaTestUtil = new UaaTestUtil(this.acsRestTemplateFactory.getOAuth2RestTemplateForUaaAdmin(),
-                this.uaaUrl);
-        uaaTestUtil.setup(Arrays.asList(new String[] { this.acsZone1Name, this.acsZone2Name, this.acsZone3Name }));
-
-        this.acsAdminRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForAcsAdmin();
-        this.registerWithZac = false;
-        this.testZoneSubdomain = this.zoneHelper
-                .createTestZone(this.acsAdminRestTemplate, this.acsZone1Name, this.registerWithZac).getSubdomain();
-    }
-
-    @Test(groups = { "acsHealthCheck" })
+    @Test
     public void testAcsHealth() {
 
         RestTemplate restTemplate = new RestTemplate();
         try {
-            ResponseEntity<String> heartbeatResponse = restTemplate.exchange(this.acsBaseUrl + "/monitoring/heartbeat",
-                    HttpMethod.GET, new HttpEntity<>(this.headersWithZoneSubdomain), String.class);
+            ResponseEntity<String> heartbeatResponse = restTemplate
+                    .exchange(this.acsBaseUrl + "/monitoring/heartbeat", HttpMethod.GET,
+                            new HttpEntity<>(this.headersWithZoneSubdomain), String.class);
             Assert.assertEquals(heartbeatResponse.getBody(), "alive", "ACS Heartbeat Check Failed");
         } catch (Exception e) {
             Assert.fail("Could not perform ACS Heartbeat Check: " + e.getMessage());
         }
 
         try {
-            @SuppressWarnings("rawtypes")
             ResponseEntity<Map> healthStatus = restTemplate.exchange(this.acsBaseUrl + "/health", HttpMethod.GET,
                     new HttpEntity<>(this.headersWithZoneSubdomain), Map.class);
             Assert.assertNotNull(healthStatus);
@@ -167,7 +135,7 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
         BaseSubject marissa = null;
         BaseResource testResource = null;
         try {
-            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, headers, endpoint,
+            testPolicyName = this.policyHelper.setTestPolicy(this.acsZoneRestTemplate, headers, endpoint,
                     "src/test/resources/testCompleteACSFlow.json");
             BaseSubject subject = new BaseSubject(subjectIdentifier);
             Attribute site = new Attribute();
@@ -175,7 +143,7 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
             site.setName("site");
             site.setValue("sanramon");
 
-            marissa = this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, headers, site);
+            marissa = this.privilegeHelper.putSubject(this.acsZoneRestTemplate, subject, endpoint, headers, site);
 
             Attribute region = new Attribute();
             region.setIssuer("issuerId1");
@@ -185,12 +153,12 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
             BaseResource resource = new BaseResource();
             resource.setResourceIdentifier("/alarms/sites/sanramon");
 
-            testResource = this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, headers,
-                    region);
+            testResource = this.privilegeHelper
+                    .putResource(this.acsZoneRestTemplate, resource, endpoint, headers, region);
 
-            ResponseEntity<PolicyEvaluationResult> evalResponse = this.acsAdminRestTemplate.postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH, new HttpEntity<>(policyEvalRequest, headers),
-                    PolicyEvaluationResult.class);
+            ResponseEntity<PolicyEvaluationResult> evalResponse = this.acsZoneRestTemplate
+                    .postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                            new HttpEntity<>(policyEvalRequest, headers), PolicyEvaluationResult.class);
 
             Assert.assertEquals(evalResponse.getStatusCode(), HttpStatus.OK);
             PolicyEvaluationResult responseBody = evalResponse.getBody();
@@ -198,37 +166,38 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
         } finally {
             // delete policy
             if (null != testPolicyName) {
-                this.acsAdminRestTemplate.exchange(endpoint + PolicyHelper.ACS_POLICY_SET_API_PATH + testPolicyName,
-                        HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
+                this.acsZoneRestTemplate
+                        .exchange(endpoint + PolicyHelper.ACS_POLICY_SET_API_PATH + testPolicyName, HttpMethod.DELETE,
+                                new HttpEntity<>(headers), String.class);
             }
 
             // delete attributes
             if (null != marissa) {
-                this.acsAdminRestTemplate.exchange(
-                        endpoint + PrivilegeHelper.ACS_SUBJECT_API_PATH + marissa.getSubjectIdentifier(),
-                        HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
+                this.acsZoneRestTemplate
+                        .exchange(endpoint + PrivilegeHelper.ACS_SUBJECT_API_PATH + marissa.getSubjectIdentifier(),
+                                HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
             }
             if (null != testResource) {
                 String encodedResource = URLEncoder.encode(testResource.getResourceIdentifier(), "UTF-8");
                 URI uri = new URI(endpoint + PrivilegeHelper.ACS_RESOURCE_API_PATH + encodedResource);
-                this.acsAdminRestTemplate.exchange(uri, HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
+                this.acsZoneRestTemplate.exchange(uri, HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
             }
         }
     }
 
     @DataProvider(name = "endpointProvider")
     public Object[][] getAcsEndpoint() throws Exception {
-        PolicyEvaluationRequestV1 policyEvalForBob = this.policyHelper.createEvalRequest("GET", "bob",
-                "/alarms/sites/sanramon", null);
+        PolicyEvaluationRequestV1 policyEvalForBob = this.policyHelper
+                .createEvalRequest("GET", "bob", "/alarms/sites/sanramon", null);
 
-        Object[][] data = new Object[][] {
-                { this.acsBaseUrl, this.headersWithZoneSubdomain, policyEvalForBob, "bob" } };
-        return data;
+        return new Object[][] { { this.acsBaseUrl, this.headersWithZoneSubdomain, policyEvalForBob, "bob" } };
     }
 
     @AfterClass
-    public void cleanUp() {
-        this.zoneHelper.deleteZone(this.acsAdminRestTemplate, this.acsZone1Name, this.registerWithZac);
+    public void tearDown() {
+        this.zoneHelper.deleteZone(this.acsAdminRestTemplate, this.acsZoneName);
+        this.uaaTestUtil.deleteClient(this.acsAdminRestTemplate.getResource().getClientId());
+        this.uaaTestUtil.deleteClient(this.acsZoneRestTemplate.getResource().getClientId());
     }
 
 }

@@ -1,21 +1,23 @@
 /*******************************************************************************
- * Copyright 2016 General Electric Company. 
+ * Copyright 2016 General Electric Company.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
 
 package com.ge.predix.test.utils;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -25,7 +27,6 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.stereotype.Component;
 
 /**
- *
  * @author 212319607
  */
 @Component
@@ -110,6 +111,9 @@ public class ACSRestTemplateFactory {
     @Value("${ACS_UAA_URL}/oauth/token")
     private String uaaTokenUrl;
 
+    @Value("${UAA_ADMIN_SECRET:adminsecret}")
+    private String uaaAdminSecret;
+
     public OAuth2RestTemplate getACSTemplateWithPolicyScope() {
         if (this.authorizedACSTemplate == null) {
             this.authorizedACSTemplate = new OAuth2RestTemplate(getUserWithPolicyScope());
@@ -154,12 +158,27 @@ public class ACSRestTemplateFactory {
         return this.zacTemplate;
     }
 
+    // TODO Move the UAA template gets to UAATestUtil so that the ACSRestTemplateFactory is only for ACSRestTemplates
     public OAuth2RestTemplate getOAuth2RestTemplateForUaaAdmin() {
         if (this.uaaAdminTemplate == null) {
             ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
             resource.setAccessTokenUri(this.uaaTokenUrl);
             resource.setClientId("admin");
-            resource.setClientSecret("adminsecret");
+            resource.setClientSecret(this.uaaAdminSecret);
+            this.uaaAdminTemplate = new OAuth2RestTemplate(resource);
+            this.uaaAdminTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+        }
+
+        return this.uaaAdminTemplate;
+    }
+
+    public OAuth2RestTemplate getOAuth2RestTemplateForUaaAdmin(final String tokenUri, final String clientId,
+            final String clientSecret) {
+        if (this.uaaAdminTemplate == null) {
+            ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
+            resource.setAccessTokenUri(tokenUri);
+            resource.setClientId(clientId);
+            resource.setClientSecret(clientSecret);
             this.uaaAdminTemplate = new OAuth2RestTemplate(resource);
             this.uaaAdminTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
         }
@@ -169,6 +188,10 @@ public class ACSRestTemplateFactory {
 
     public OAuth2RestTemplate getOAuth2RestTemplateForAcsAdmin() {
         return getOAuth2RestTemplateForClient(this.uaaTokenUrl, this.acsAdminClientId, this.acsAdminClientSecret);
+    }
+
+    public OAuth2RestTemplate getOAuth2RestTemplateForAcsAdmin(final String clientId, final String clientSecret) {
+        return getOAuth2RestTemplateForClient(this.uaaTokenUrl, clientId, clientSecret);
     }
 
     public OAuth2RestTemplate getOAuth2RestTemplateForReadOnlyClient() {
@@ -187,7 +210,9 @@ public class ACSRestTemplateFactory {
         resource.setClientId(clientId);
         resource.setClientSecret(clientSecret);
         OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(resource);
-        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+        CloseableHttpClient httpClient = HttpClientBuilder.create().useSystemProperties().build();
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        restTemplate.setRequestFactory(requestFactory);
 
         return restTemplate;
     }
@@ -202,7 +227,7 @@ public class ACSRestTemplateFactory {
 
     /**
      * The client used by this template has acs.zones.admin scope from a zone specific issuer.
-     * 
+     *
      * @return
      */
     public OAuth2RestTemplate getACSZone2RogueTemplate() {
