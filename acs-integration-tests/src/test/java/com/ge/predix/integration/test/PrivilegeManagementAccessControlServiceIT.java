@@ -61,6 +61,7 @@ import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.test.TestConfig;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
 import com.ge.predix.test.utils.UaaTestUtil;
@@ -113,9 +114,9 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
         TestConfig.setupForEclipse(); // Starts ACS when running the test in eclipse.
 
         this.acsUrl = this.zoneHelper.getAcsBaseURL();
-        this.zone1Headers = new HttpHeaders();
+        this.zone1Headers = ACSTestUtil.httpHeaders();
         this.zone1Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
-        this.zone3Headers = new HttpHeaders();
+        this.zone3Headers = ACSTestUtil.httpHeaders();
         this.zone3Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.acsZone3Name);
         if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
             setupPublicACS();
@@ -175,7 +176,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public void testCreateSubjectWithMalformedJSON() {
         try {
             String badSubject = "{\"subject\": bad-subject-form\"}";
-            MultiValueMap<String, String> headers = new HttpHeaders();
+            MultiValueMap<String, String> headers = ACSTestUtil.httpHeaders();
             headers.add("Content-type", "application/json");
             headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name);
             HttpEntity<String> httpEntity = new HttpEntity<String>(badSubject, headers);
@@ -194,7 +195,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
         try {
             String badSubject = "{\"subject\":{\"name\" : \"good-subject-brittany\"},"
                     + "{\"subject\": bad-subject-sarah\"}";
-            MultiValueMap<String, String> headers = new HttpHeaders();
+            MultiValueMap<String, String> headers = ACSTestUtil.httpHeaders();
             headers.add("Content-type", "application/json");
             headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name);
             HttpEntity<String> httpEntity = new HttpEntity<String>(badSubject, headers);
@@ -215,7 +216,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     public void testCreateResourceWithMalformedJSON() {
         try {
             String badResource = "{\"resource\": bad-resource-form\"}";
-            MultiValueMap<String, String> headers = new HttpHeaders();
+            MultiValueMap<String, String> headers = ACSTestUtil.httpHeaders();
             headers.add("Content-type", "application/json");
             headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name);
             HttpEntity<String> httpEntity = new HttpEntity<String>(badResource, headers);
@@ -234,7 +235,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
         try {
             String badResource = "{\"resource\":{\"name\" : \"Site\", \"uriTemplate\" : "
                     + "\"/secured-by-value/sites/{site_id}\"},{\"resource\": bad-resource-form\"}";
-            MultiValueMap<String, String> headers = new HttpHeaders();
+            MultiValueMap<String, String> headers = ACSTestUtil.httpHeaders();
             headers.add("Content-type", "application/json");
             headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name);
             HttpEntity<String> httpEntity = new HttpEntity<String>(badResource, headers);

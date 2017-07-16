@@ -163,7 +163,7 @@ public class ZoneHelper {
                 throw new RuntimeException(String.format("Failed to register '%s' zone with ZAC.", zoneId));
             }
         }
-        
+
         restTemplate.put(this.acsBaseUrl + ACS_ZONE_API_PATH + zoneId, zone);
         return zone;
     }
@@ -176,7 +176,7 @@ public class ZoneHelper {
 
     public ResponseEntity<String> registerServicetoZac(final String zoneId, final Map<String, Object> trustedIssuers)
             throws JsonProcessingException {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = ACSTestUtil.httpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add(this.acsZoneHeaderName, zoneId);
 
@@ -190,7 +190,7 @@ public class ZoneHelper {
     }
 
     public ResponseEntity<String> deleteServiceFromZac(final String zoneId) throws JsonProcessingException {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = ACSTestUtil.httpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add(this.acsZoneHeaderName, zoneId);
 

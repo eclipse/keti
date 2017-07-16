@@ -46,6 +46,7 @@ import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
 import com.ge.predix.test.utils.ZoneHelper;
@@ -84,7 +85,7 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
 
     private OAuth2RestTemplate acsAdminRestTemplate;
     private OAuth2RestTemplate acsZoneRestTemplate;
-    private HttpHeaders headersWithZoneSubdomain = new HttpHeaders();
+    private HttpHeaders headersWithZoneSubdomain = ACSTestUtil.httpHeaders();
     private UaaTestUtil uaaTestUtil;
     private String acsZoneName;
 

@@ -19,7 +19,12 @@ package com.ge.predix.acs;
 import static com.google.common.base.Predicates.or;
 import static springfox.documentation.builders.PathSelectors.regex;
 
+import java.net.URI;
+import java.util.Collections;
+
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -30,6 +35,7 @@ import com.ge.predix.acs.monitoring.ManagementSecurityRoleFilter;
 import com.ge.predix.acs.request.context.AcsRequestEnrichingFilter;
 import com.google.common.base.Predicate;
 
+import io.swagger.models.Scheme;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
@@ -46,20 +52,17 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @ImportResource(value = "classpath:security-config.xml")
 public class AccessControlService {
 
-    @Autowired
-    private AcsRequestEnrichingFilter acsRequestEnrichingFilter;
+    private final AcsRequestEnrichingFilter acsRequestEnrichingFilter;
+    private final ManagementSecurityRoleFilter managementSecurityRoleFilter;
+
+    @Value("${ACS_URL:}")
+    private String acsUrl;
 
     @Autowired
-    private ManagementSecurityRoleFilter managementSecurityRoleFilter;
-
-    private String serviceId;
-
-    public String getServiceId() {
-        return this.serviceId;
-    }
-
-    public void setServiceId(final String serviceId) {
-        this.serviceId = serviceId;
+    public AccessControlService(final AcsRequestEnrichingFilter acsRequestEnrichingFilter,
+            final ManagementSecurityRoleFilter managementSecurityRoleFilter) {
+        this.acsRequestEnrichingFilter = acsRequestEnrichingFilter;
+        this.managementSecurityRoleFilter = managementSecurityRoleFilter;
     }
 
     public static void main(final String[] args) {
@@ -67,8 +70,8 @@ public class AccessControlService {
     }
 
     /**
-     * Register acsRequestEnrichingFilter and disable it. If not disabled spring-boot applies this to all requests.
-     * This is configured explicitly as a custom filter in security-config.xml.
+     * Register acsRequestEnrichingFilter and disable it. If not disabled spring-boot applies this to all requests. This
+     * is configured explicitly as a custom filter in security-config.xml.
      */
     @Bean
     public FilterRegistrationBean filterRegistrationBean() {
@@ -88,17 +91,19 @@ public class AccessControlService {
 
     @Bean
     public Docket attributeManagementApi() {
-        return new Docket(DocumentationType.SWAGGER_2).groupName("acs").apiInfo(apiInfo()).select()
-                .paths(attributeManagementPaths()).build();
+        return new Docket(DocumentationType.SWAGGER_2).groupName("acs")
+                .protocols(Collections.singleton(StringUtils.isEmpty(this.acsUrl) ? Scheme.HTTPS.toValue()
+                        : URI.create(this.acsUrl).getScheme()))
+                .apiInfo(apiInfo()).select().paths(attributeManagementPaths()).build();
     }
 
     @SuppressWarnings("unchecked")
-    private Predicate<String> attributeManagementPaths() {
+    private static Predicate<String> attributeManagementPaths() {
         return or(regex("/v1/subject.*"), regex("/v1/resource.*"), regex("/v1/policy-set.*"),
                 regex("/v1/policy-evaluation.*"), regex("/monitoring/heartbeat.*"), regex("/v1/connector.*"));
     }
 
-    private ApiInfo apiInfo() {
+    private static ApiInfo apiInfo() {
         return new ApiInfoBuilder().title("Access Control").description("Access Control Services (ACS). ").version("v1")
                 .license("Apache 2.0").licenseUrl("https://github.com/predix/acs/blob/develop/LICENSE").build();
     }

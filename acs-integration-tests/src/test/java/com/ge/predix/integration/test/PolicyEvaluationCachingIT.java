@@ -50,6 +50,7 @@ import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.test.TestConfig;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
 import com.ge.predix.test.utils.UaaTestUtil;
@@ -90,7 +91,7 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
 
     private OAuth2RestTemplate acsAdminRestTemplate;
     private UaaTestUtil uaaTestUtil;
-    private final HttpHeaders acsZone1Headers = new HttpHeaders();
+    private final HttpHeaders acsZone1Headers = ACSTestUtil.httpHeaders();
 
     @BeforeClass
     public void setup() throws JsonParseException, JsonMappingException, IOException {
@@ -164,7 +165,7 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
     /**
      * This test makes sure that cached policy evaluation results are properly invalidated when one of the policies in
      * a multiple policy set evaluation order list changes.
-     * 
+     *
      */
     @Test
     public void testPolicyEvalCacheWithMultiplePolicySets() throws Exception {

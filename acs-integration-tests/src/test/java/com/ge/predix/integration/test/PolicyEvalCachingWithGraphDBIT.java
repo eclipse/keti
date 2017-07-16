@@ -30,6 +30,7 @@ import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.test.TestConfig;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
 import com.ge.predix.test.utils.UaaTestUtil;
@@ -67,7 +68,7 @@ public class PolicyEvalCachingWithGraphDBIT extends AbstractTestNGSpringContextT
     private ZoneHelper zoneHelper;
     private OAuth2RestTemplate acsAdminRestTemplate;
     private UaaTestUtil uaaTestUtil;
-    private final HttpHeaders acsZone1Headers = new HttpHeaders();
+    private final HttpHeaders acsZone1Headers = ACSTestUtil.httpHeaders();
 
     private static final String ISSUER_URI = "acs.example.org";
     private static final Attribute TOP_SECRET_CLASSIFICATION = new Attribute(ISSUER_URI, "classification",
@@ -113,7 +114,7 @@ public class PolicyEvalCachingWithGraphDBIT extends AbstractTestNGSpringContextT
         this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers);
         this.policyHelper.deletePolicySets(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers);
     }
-    
+
     /**
      * This test makes sure that cached policy evaluation results are properly invalidated for a subject and its
      * descendants, when attributes are changed for the parent subject.
@@ -149,7 +150,7 @@ public class PolicyEvalCachingWithGraphDBIT extends AbstractTestNGSpringContextT
                 this.acsZone1Headers, this.SPECIAL_AGENTS_GROUP_ATTRIBUTE);
         this.privilegeHelper.putSubject(this.acsAdminRestTemplate, agentMulder, endpoint, this.acsZone1Headers);
         this.privilegeHelper.putSubject(this.acsAdminRestTemplate, agentScully, endpoint, this.acsZone1Headers);
-        
+
         // Set up resource
         this.privilegeHelper.putResource(this.acsAdminRestTemplate, scullysTestimony, endpoint,
                 this.acsZone1Headers, this.SPECIAL_AGENTS_GROUP_ATTRIBUTE, this.TOP_SECRET_CLASSIFICATION);
@@ -207,7 +208,7 @@ public class PolicyEvalCachingWithGraphDBIT extends AbstractTestNGSpringContextT
 
         parentResource.setParents(
                 new HashSet<>(Arrays.asList(new Parent[] { new Parent(grandparentResource.getResourceIdentifier()) })));
-        
+
         childResource.setParents(
                 new HashSet<>(Arrays.asList(new Parent[] { new Parent(parentResource.getResourceIdentifier()) })));
 
@@ -215,7 +216,7 @@ public class PolicyEvalCachingWithGraphDBIT extends AbstractTestNGSpringContextT
 
         PolicyEvaluationRequestV1 sanramonPolicyEvaluationRequest = this.policyHelper
                 .createEvalRequest(agentMulder.getSubjectIdentifier(), "sanramon");
-        
+
         PolicyEvaluationRequestV1 basementPolicyEvaluationRequest = this.policyHelper
                 .createEvalRequest(agentMulder.getSubjectIdentifier(), "basement");
 
@@ -240,7 +241,7 @@ public class PolicyEvalCachingWithGraphDBIT extends AbstractTestNGSpringContextT
         Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
         PolicyEvaluationResult responseBody = postForEntity.getBody();
         Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
-        
+
         // Subject policy evaluation request for site "basement"
         postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
                 new HttpEntity<>(basementPolicyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
@@ -260,7 +261,7 @@ public class PolicyEvalCachingWithGraphDBIT extends AbstractTestNGSpringContextT
         Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
         responseBody = postForEntity.getBody();
         Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
-        
+
         // Subject policy evaluation request for site "basement"
         postForEntity = this.acsAdminRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
                 new HttpEntity<>(basementPolicyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);

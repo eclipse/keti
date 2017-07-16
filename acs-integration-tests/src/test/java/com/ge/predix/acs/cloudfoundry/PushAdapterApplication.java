@@ -30,6 +30,7 @@ import org.testng.annotations.Test;
 import com.ge.predix.cloudfoundry.client.CloudFoundryApplicationHelper;
 import com.ge.predix.cloudfoundry.client.CloudFoundryService;
 import com.ge.predix.cloudfoundry.client.CloudFoundryUtilities;
+import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -177,7 +178,7 @@ public final class PushAdapterApplication extends AbstractTestNGSpringContextTes
     }
 
     private HttpHeaders assetZoneHeader(final String assetZoneId) throws IOException {
-        HttpHeaders httpHeaders = new HttpHeaders();
+        HttpHeaders httpHeaders = ACSTestUtil.httpHeaders();
         httpHeaders.set(PolicyHelper.PREDIX_ZONE_ID, assetZoneId);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return httpHeaders;

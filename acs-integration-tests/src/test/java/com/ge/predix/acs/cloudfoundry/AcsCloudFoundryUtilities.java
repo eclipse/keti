@@ -24,6 +24,8 @@ import org.springframework.security.oauth2.common.exceptions.InvalidClientExcept
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.stereotype.Component;
 
+import com.ge.predix.test.utils.ACSTestUtil;
+
 public final class AcsCloudFoundryUtilities {
 
     private AcsCloudFoundryUtilities() {
@@ -66,7 +68,7 @@ public final class AcsCloudFoundryUtilities {
             client.setScope(authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
             client.addAdditionalInformation("name", clientId);
 
-            HttpHeaders headers = new HttpHeaders();
+            HttpHeaders headers = ACSTestUtil.httpHeaders();
             headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
             HttpEntity<BaseClientDetails> requestEntity = new HttpEntity<>(client, headers);

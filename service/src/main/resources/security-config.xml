@@ -16,14 +16,14 @@
  -->
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:mvc="http://www.springframework.org/schema/mvc"
-    xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
-    xmlns:p="http://www.springframework.org/schema/p"
-    xmlns:redis="http://www.springframework.org/schema/redis"
-    xmlns:sec="http://www.springframework.org/schema/security"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:redis="http://www.springframework.org/schema/redis"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
         http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
@@ -68,6 +68,8 @@
     <oauth:resource-server id="oauth2remoteTokenFilter"
         token-services-ref="tokenService" />
 
+    <bean id="policyHttpMethodsFilter" class="com.ge.predix.acs.service.policy.admin.PolicyHttpMethodsFilter"/>
+
     <!-- Authorization Configuration For V1 policy-set APIS -->
     <http pattern="/v1/policy-set/**" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
@@ -91,12 +93,15 @@
         <intercept-url pattern="/v1/policy-set/**" method="PATCH"
             access="hasAnyAuthority('acs.policies.write') " />
 
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="policyHttpMethodsFilter" before="FIRST"/>
         <custom-filter ref="oauth2remoteTokenFilter"
             position="PRE_AUTH_FILTER" />
-
         <custom-filter ref="acsRequestEnrichingFilter"
                 after="BASIC_AUTH_FILTER" />
     </http>
+
+    <bean id="evaluationHttpMethodsFilter" class="com.ge.predix.acs.service.policy.evaluation.EvaluationHttpMethodsFilter"/>
 
     <!-- Authorization Configuration For V1 policy-evaluation APIS -->
     <http pattern="/v1/policy-evaluation/**" request-matcher="ant" create-session="stateless"
@@ -108,12 +113,15 @@
         <intercept-url pattern="/v1/policy-evaluation"
             access="isFullyAuthenticated() " />
 
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="evaluationHttpMethodsFilter" before="FIRST"/>
         <custom-filter ref="oauth2remoteTokenFilter"
             position="PRE_AUTH_FILTER" />
-
         <custom-filter ref="acsRequestEnrichingFilter"
             after="BASIC_AUTH_FILTER" />
     </http>
+
+    <bean id="resourceHttpMethodsFilter" class="com.ge.predix.acs.privilege.management.ResourceHttpMethodsFilter"/>
 
     <!-- Authorization Configuration For V1 resource APIS -->
     <http pattern="/v1/resource/**" request-matcher="ant" create-session="stateless"
@@ -138,11 +146,15 @@
         <intercept-url pattern="/v1/resource/**" method="PATCH"
             access="hasAnyAuthority('acs.attributes.write') "/>
 
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="resourceHttpMethodsFilter" before="FIRST"/>
         <custom-filter ref="oauth2remoteTokenFilter"
             position="PRE_AUTH_FILTER" />
         <custom-filter ref="acsRequestEnrichingFilter"
                 after="BASIC_AUTH_FILTER" />
     </http>
+
+    <bean id="subjectHttpMethodsFilter" class="com.ge.predix.acs.privilege.management.SubjectHttpMethodsFilter"/>
 
     <!-- Authorization Configuration For V1 subject APIS -->
     <http pattern="/v1/subject/**" request-matcher="ant" create-session="stateless"
@@ -167,11 +179,15 @@
         <intercept-url pattern="/v1/subject/**" method="PATCH"
             access="hasAnyAuthority('acs.attributes.write') "/>
 
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="subjectHttpMethodsFilter" before="FIRST"/>
         <custom-filter ref="oauth2remoteTokenFilter"
             position="PRE_AUTH_FILTER" />
         <custom-filter ref="acsRequestEnrichingFilter"
                 after="BASIC_AUTH_FILTER" />
     </http>
+
+    <bean id="connectorHttpMethodsFilter" class="com.ge.predix.acs.attribute.connector.ConnectorHttpMethodsFilter"/>
 
     <!-- Authorization Configuration For V1 connector APIS -->
     <http pattern="/v1/connector/*" request-matcher="ant" create-session="stateless"
@@ -196,14 +212,18 @@
         <intercept-url pattern="/v1/connector/*" method="PATCH"
             access="hasAnyAuthority('acs.connectors.write') "/>
 
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="connectorHttpMethodsFilter" before="FIRST"/>
         <custom-filter ref="oauth2remoteTokenFilter"
             position="PRE_AUTH_FILTER" />
         <custom-filter ref="acsRequestEnrichingFilter"
                 after="BASIC_AUTH_FILTER" />
     </http>
 
+    <bean id="zoneHttpMethodsFilter" class="com.ge.predix.acs.zone.management.ZoneHttpMethodsFilter"/>
+
     <!-- Authorization Configuration For V1 APIS -->
-    <http pattern="/v1/**" request-matcher="ant" create-session="stateless"
+    <http pattern="/v1/zone/**" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
         disable-url-rewriting="true" use-expressions="true"
         entry-point-ref="preAuthenticationEntryPoint">
@@ -215,11 +235,27 @@
         <intercept-url pattern="/v1/zone/**"
             access="isFullyAuthenticated() and hasAnyAuthority('acs.zones.admin')" />
 
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="zoneHttpMethodsFilter" before="FIRST"/>
         <custom-filter ref="oauth2remoteTokenFilter"
             position="PRE_AUTH_FILTER" />
     </http>
 
     <!-- Authorization Configuration For Monitoring APIs -->
+    <bean id="noAuthenticationEntryPoint" class="com.ge.predix.acs.security.NoAuthenticationEntryPoint" />
+    <bean id="monitoringHttpMethodsFilter" class="com.ge.predix.acs.monitoring.MonitoringHttpMethodsFilter"/>
+    <http pattern="/monitoring/heartbeat*" request-matcher="ant" create-session="stateless"
+          xmlns="http://www.springframework.org/schema/security"
+          disable-url-rewriting="true" use-expressions="true"
+          entry-point-ref="noAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
+        <intercept-url pattern="/monitoring/heartbeat*" access="permitAll()"/>
+
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="monitoringHttpMethodsFilter" before="FIRST"/>
+    </http>
+
     <http pattern="/health*" request-matcher="ant" create-session="stateless"
           xmlns="http://www.springframework.org/schema/security"
           disable-url-rewriting="true" use-expressions="true"
@@ -261,6 +297,7 @@
                 <list>
                     <value>/v1/zone/**</value>
                     <value>/health*</value>
+                    <value>/monitoring/heartbeat*</value>
                 </list>
             </property>
         </bean>
@@ -273,6 +310,7 @@
                 <list>
                     <value>/v1/zone/**</value>
                     <value>/health*</value>
+                    <value>/monitoring/heartbeat*</value>
                 </list>
             </property>
         </bean>

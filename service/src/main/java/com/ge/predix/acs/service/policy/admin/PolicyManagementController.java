@@ -60,13 +60,9 @@ public class PolicyManagementController extends BaseRestApi {
     @Autowired
     private PolicyManagementService service;
 
-    @ApiOperation(
-            value = "Creates/Updates a policy set for the given zone.",
-            tags = { "Policy Set Management" })
-    @ApiResponses(
-            value = { @ApiResponse(
-                    code = 201,
-                    message = "Policy set creation successful. Policy set URI is returned in 'Location' header."), })
+    @ApiOperation(value = "Creates/Updates a policy set for the given zone.", tags = { "Policy Set Management" })
+    @ApiResponses(value = { @ApiResponse(code = 201,
+            message = "Policy set creation successful. Policy set URI is returned in 'Location' header."), })
     @RequestMapping(method = PUT, value = POLICY_SET_URL, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> createPolicySet(@RequestBody final PolicySet policySet,
             @PathVariable("policySetId") final String policySetId) {
@@ -83,7 +79,7 @@ public class PolicyManagementController extends BaseRestApi {
     }
 
     @ApiOperation(value = "Retrieves a policy set for the given zone.", tags = { "Policy Set Management" })
-    @RequestMapping(method = GET, value = POLICY_SET_URL, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = GET, value = POLICY_SET_URL)
     @ResponseBody
     public ResponseEntity<PolicySet> getPolicySet(@PathVariable("policySetId") final String name) {
         PolicySet result = this.service.getPolicySet(name);

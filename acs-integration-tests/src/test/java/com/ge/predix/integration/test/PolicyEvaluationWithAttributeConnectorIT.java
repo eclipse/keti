@@ -47,6 +47,7 @@ import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.UaaTestUtil;
 import com.ge.predix.test.utils.ZacTestUtil;
@@ -137,7 +138,7 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
     private URI resourceAttributeConnectorUrl;
 
     private HttpHeaders zoneHeader() throws IOException {
-        HttpHeaders httpHeaders = new HttpHeaders();
+        HttpHeaders httpHeaders = ACSTestUtil.httpHeaders();
         httpHeaders.set(PolicyHelper.PREDIX_ZONE_ID, this.zone.getSubdomain());
         return httpHeaders;
     }

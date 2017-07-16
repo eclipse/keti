@@ -19,7 +19,6 @@ package com.ge.predix.acs.monitoring;
 import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.HEARTBEAT_URL;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
 public class AcsMonitoringController {
 
     @ApiOperation(value = "Monitoring API that allows to check the ACS heartbeat", tags = { "Monitoring" })
-    @RequestMapping(method = GET, value = HEARTBEAT_URL, produces = MediaType.TEXT_PLAIN_VALUE)
+    @RequestMapping(method = GET, value = HEARTBEAT_URL)
     public String getHeartBeat() {
         return "alive";
     }
