@@ -5,6 +5,7 @@ import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.SUBJECT_CONNECTOR
 import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.V1;
 import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.ZONE_URL;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -12,12 +13,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.ge.predix.acs.privilege.management.PrivilegeManagementUtility;
+import com.ge.predix.acs.request.context.AcsRequestContext;
+import com.ge.predix.acs.request.context.AcsRequestContextHolder;
+import com.ge.predix.acs.testutils.TestUtils;
+import com.ge.predix.acs.testutils.MockAcsRequestContext;
+import com.ge.predix.acs.testutils.MockMvcContext;
+import com.ge.predix.acs.testutils.MockSecurityContext;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -31,10 +41,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.ge.predix.acs.rest.AttributeConnector;
 import com.ge.predix.acs.rest.Zone;
-import com.ge.predix.acs.testutils.MockAcsRequestContext;
-import com.ge.predix.acs.testutils.MockSecurityContext;
-import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.utils.JsonUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
@@ -51,6 +61,8 @@ public class AttributeConnectorControllerIT extends AbstractTestNGSpringContextT
     private final ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
     private MockMvc mockMvc;
+
+    static final TestUtils TEST_UTILS = new TestUtils();
 
     @BeforeClass
     public void setup() {
@@ -131,6 +143,26 @@ public class AttributeConnectorControllerIT extends AbstractTestNGSpringContextT
         this.mockMvc.perform(
                 put(endpointUrl).contentType(MediaType.APPLICATION_JSON).content(connectorContent))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void testZoneDoesNotExist() throws Exception {
+        Zone testZone3 = new Zone("name", "subdomain", "description");
+        MockSecurityContext.mockSecurityContext(testZone3);
+
+        Map<AcsRequestContext.ACSRequestContextAttribute, Object> newMap = new HashMap<>();
+        newMap.put(AcsRequestContext.ACSRequestContextAttribute.ZONE_ENTITY, null);
+
+        ReflectionTestUtils.setField(AcsRequestContextHolder.getAcsRequestContext(),
+                "unModifiableRequestContextMap", newMap);
+
+        MockMvcContext getContext =
+                TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, testZone3.getSubdomain(),
+                        "/v1/connector/resource");
+        getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_ERROR, is("Bad Request")))
+                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_MESSAGE,
+                        is("Zone not found")));
     }
 
     private void createZone1AndAssert() throws JsonProcessingException, Exception {

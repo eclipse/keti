@@ -15,13 +15,13 @@
  *******************************************************************************/
 package com.ge.predix.acs.zone.resolver;
 
+import com.ge.predix.acs.privilege.management.ZoneDoesNotExistException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.ge.predix.acs.request.context.AcsRequestContext;
 import com.ge.predix.acs.request.context.AcsRequestContext.ACSRequestContextAttribute;
 import com.ge.predix.acs.request.context.AcsRequestContextHolder;
-import com.ge.predix.acs.service.InvalidACSRequestException;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
 
@@ -36,7 +36,7 @@ public class SpringSecurityZoneResolver implements ZoneResolver {
         if (null == result) {
             ZoneOAuth2Authentication zoneAuth = (ZoneOAuth2Authentication) SecurityContextHolder.getContext()
                     .getAuthentication();
-            throw new InvalidACSRequestException("The zone '" + zoneAuth.getZoneId() + "' does not exist.");
+            throw new ZoneDoesNotExistException("The zone '" + zoneAuth.getZoneId() + "' does not exist.");
         }
 
         return result;

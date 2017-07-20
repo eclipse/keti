@@ -372,6 +372,8 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
             // catch (OAuth2Exception e) {
             // Assert.assertTrue(e.getSummary().contains(HttpStatus.FORBIDDEN.toString()),
             // "Zone deletion did not produce the expected HTTP status code. Failed with: " + e);
+        } catch (HttpClientErrorException e) {
+            Assert.assertEquals(e.getStatusCode(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             Assert.fail("Failed with unexpected exception.", e);
         }

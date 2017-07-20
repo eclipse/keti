@@ -17,16 +17,19 @@
 
 package com.ge.predix.controller.test;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isIn;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.List;
-
-import javax.security.auth.Subject;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ge.predix.acs.privilege.management.PrivilegeManagementUtility;
+import com.ge.predix.acs.request.context.AcsRequestContext;
+import com.ge.predix.acs.request.context.AcsRequestContextHolder;
+import com.ge.predix.acs.rest.BaseSubject;
+import com.ge.predix.acs.rest.Zone;
+import com.ge.predix.acs.testutils.TestUtils;
+import com.ge.predix.acs.testutils.MockAcsRequestContext;
+import com.ge.predix.acs.testutils.MockMvcContext;
+import com.ge.predix.acs.testutils.MockSecurityContext;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
+import com.ge.predix.acs.utils.JsonUtils;
+import com.ge.predix.acs.zone.management.ZoneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpStatus;
@@ -35,23 +38,23 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementUtility;
-import com.ge.predix.acs.rest.BaseSubject;
-import com.ge.predix.acs.rest.Zone;
-import com.ge.predix.acs.testutils.MockAcsRequestContext;
-import com.ge.predix.acs.testutils.MockMvcContext;
-import com.ge.predix.acs.testutils.MockSecurityContext;
-import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
-import com.ge.predix.acs.testutils.TestUtils;
-import com.ge.predix.acs.utils.JsonUtils;
-import com.ge.predix.acs.zone.management.ZoneService;
+import javax.security.auth.Subject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isIn;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  *
@@ -320,7 +323,8 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
                                                                           thisUri);
         resultActions = getContext.getMockMvc().perform(getContext.getBuilder());
 
-        resultActions.andExpect(status().isOk()).andExpect(jsonPath("subjectIdentifier", is(subjectIdentifier)))
+        resultActions.andExpect(status().isOk()).andExpect(jsonPath("subjectIdentifier",
+                is(subjectIdentifier)))
                 .andExpect(jsonPath("attributes[0].value", isIn(new String[] { "admin", "sales" })))
                 .andExpect(jsonPath("attributes[0].issuer", is("https://acs.attributes.int")));
 
@@ -329,6 +333,26 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
             TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
         deleteContext.getMockMvc().perform(deleteContext.getBuilder()).andExpect(status().isNoContent());
 
+    }
+
+    @Test
+    public void testZoneDoesNotExist() throws Exception {
+        Zone testZone3 = new Zone("name", "subdomain", "description");
+        MockSecurityContext.mockSecurityContext(testZone3);
+
+        Map<AcsRequestContext.ACSRequestContextAttribute, Object> newMap = new HashMap<>();
+        newMap.put(AcsRequestContext.ACSRequestContextAttribute.ZONE_ENTITY, null);
+
+        ReflectionTestUtils.setField(AcsRequestContextHolder.getAcsRequestContext(),
+                "unModifiableRequestContextMap", newMap);
+
+        MockMvcContext getContext =
+                TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, testZone3.getSubdomain(),
+                        SUBJECT_BASE_URL + "/test-subject");
+        getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_ERROR, is("Bad Request")))
+                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_MESSAGE,
+                        is("Zone not found")));
     }
 
     @Test
