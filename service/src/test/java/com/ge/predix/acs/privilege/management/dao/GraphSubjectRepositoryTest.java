@@ -79,9 +79,6 @@ public class GraphSubjectRepositoryTest {
                 .getByZoneAndSubjectIdentifier(TEST_ZONE_2, subjectEntityForZone2.getSubjectIdentifier());
         assertThat(actualSubjectForZone1, equalTo(subjectEntityForZone1));
         assertThat(actualSubjectForZone2, equalTo(subjectEntityForZone2));
-        this.subjectRepository.delete(subjectEntityForZone1);
-        this.subjectRepository.delete(subjectEntityForZone2);
-
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -107,7 +104,6 @@ public class GraphSubjectRepositoryTest {
                 .getSubjectWithInheritedAttributesForScopes(TEST_ZONE_1, subjectIdentifier,
                         new HashSet<>(Collections.singletonList(SITE_PENTAGON)));
         assertThat(actualSubject, equalTo(expectedSubject));
-        GraphResourceRepositoryTest.deleteTwoLevelEntityAndParents(expectedSubject, TEST_ZONE_1, this.subjectRepository);
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -127,7 +123,6 @@ public class GraphSubjectRepositoryTest {
                 .getSubjectWithInheritedAttributesForScopes(TEST_ZONE_1, agentMulder.getSubjectIdentifier(), null);
         assertThat(actualAgentMulder.getAttributesAsJson(),
                 equalTo("[{\"issuer\":\"acs.example.org\",\"name\":\"site\",\"value\":\"basement\"}]"));
-        GraphResourceRepositoryTest.deleteTwoLevelEntityAndParents(agentScully, TEST_ZONE_1, this.subjectRepository);
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -148,19 +143,15 @@ public class GraphSubjectRepositoryTest {
         assertThat(actualAgentMulder.getAttributesAsJson(),
                 equalTo("[{\"issuer\":\"acs.example.org\",\"name\":\"site\",\"value\":\"basement\"},"
                         + "{\"issuer\":\"acs.example.org\",\"name\":\"site\",\"value\":\"pentagon\"}]"));
-        GraphResourceRepositoryTest.deleteTwoLevelEntityAndParents(agentScully, TEST_ZONE_1, this.subjectRepository);
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
             invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testSave() {
-        SubjectEntity subjectEntity = persistRandomSubjectToZone1AndAssert();
-        String subjectId = subjectEntity.getSubjectIdentifier();
+        String subjectId = persistRandomSubjectToZone1AndAssert().getSubjectIdentifier();
         GraphTraversal<Vertex, Vertex> traversal = this.graphTraversalSource.V().has(SUBJECT_ID_KEY, subjectId);
         assertThat(traversal.hasNext(), equalTo(true));
         assertThat(traversal.next().property(SUBJECT_ID_KEY).value(), equalTo(subjectId));
-        this.subjectRepository.delete(subjectEntity);
-
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -170,7 +161,6 @@ public class GraphSubjectRepositoryTest {
         saveWithRetry(subject, 3);
         assertThat(this.subjectRepository.getByZoneAndSubjectIdentifier(TEST_ZONE_1, subject.getSubjectIdentifier()),
                 equalTo(subject));
-        this.subjectRepository.delete(subject);
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -193,8 +183,6 @@ public class GraphSubjectRepositoryTest {
         }
         assertThat(parent, notNullValue());
         assertThat("Expected scope not found on subject.", parent.getScopes().contains(SITE_BASEMENT));
-        GraphResourceRepositoryTest.deleteTwoLevelEntityAndParents(subject, TEST_ZONE_1, this.subjectRepository);
-
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -239,8 +227,6 @@ public class GraphSubjectRepositoryTest {
         descendantsIds = this.subjectRepository
                 .getSubjectEntityAndDescendantsIds(new SubjectEntity(TEST_ZONE_1, "/nonexistent-subject"));
         assertThat(descendantsIds, empty());
-        GraphResourceRepositoryTest.deleteTwoLevelEntityAndParents(agentMulder, TEST_ZONE_1, this.subjectRepository);
-
     }
 
     private SubjectEntity persistRandomSubjectToZone1AndAssert() {
