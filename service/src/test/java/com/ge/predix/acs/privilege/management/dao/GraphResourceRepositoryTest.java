@@ -95,6 +95,7 @@ public class GraphResourceRepositoryTest {
         persistResource2toZone1AndAssert();
         assertThat(this.graphTraversalSource.V().count().next().intValue(), equalTo(2));
         assertThat(this.resourceRepository.count(), equalTo(2L));
+        dropAllResources();
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -138,6 +139,7 @@ public class GraphResourceRepositoryTest {
         assertThat(this.graphTraversalSource.V().count().next().intValue(), equalTo(0));
         assertThat(this.resourceRepository.findOne(resourceId1), nullValue());
         assertThat(this.resourceRepository.findOne(resourceId2), nullValue());
+        dropAllResources();
     }
 
     @Test
@@ -152,6 +154,7 @@ public class GraphResourceRepositoryTest {
         List<ResourceEntity> resources = this.resourceRepository.findAll();
         assertThat(resources.size(), equalTo(2));
         assertThat(resources, hasItems(resourceEntity1, resourceEntity2));
+        dropAllResources();
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -162,6 +165,8 @@ public class GraphResourceRepositoryTest {
 
         List<ResourceEntity> resources = this.resourceRepository.findByZone(TEST_ZONE_1);
         assertThat(resources, hasItems(resourceEntity1, resourceEntity2));
+        this.resourceRepository.delete(resourceEntity1);
+        this.resourceRepository.delete(resourceEntity2);
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -177,6 +182,7 @@ public class GraphResourceRepositoryTest {
         //Check that the result does not contain inherited attribute. use getResourceWithInheritedAttributes inherit
         //attributes
         assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(false));
+        deleteTwoLevelEntityAndParents(resourceEntity1, TEST_ZONE_1, this.resourceRepository);
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -191,6 +197,7 @@ public class GraphResourceRepositoryTest {
         assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
         // Check that the result contains inherited attribute
         assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
+        deleteTwoLevelEntityAndParents(resourceEntity1, TEST_ZONE_1, this.resourceRepository);
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -203,6 +210,7 @@ public class GraphResourceRepositoryTest {
         ResourceEntity resource = this.resourceRepository
                 .getByZoneAndResourceIdentifier(TEST_ZONE_1, persistedResourceEntity.getResourceIdentifier());
         assertThat(resource, equalTo(persistedResourceEntity));
+        this.resourceRepository.delete(persistedResourceEntity);
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -213,18 +221,20 @@ public class GraphResourceRepositoryTest {
         ResourceEntity resource = this.resourceRepository
                 .getByZoneAndResourceIdentifier(TEST_ZONE_1, persistedResourceEntity.getResourceIdentifier());
         assertThat(resource, equalTo(persistedResourceEntity));
+        this.resourceRepository.delete(persistedResourceEntity);
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
             invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testGetByZoneAndResourceIdentifierWithInheritedAttributes3LevelHierarchical() {
-        String resourceIdentifier = persist3LevelRandomResourcetoZone1().getResourceIdentifier();
+        ResourceEntity expectedResource = persist3LevelRandomResourcetoZone1();
 
-        ResourceEntity resource = this.resourceRepository
-                .getResourceWithInheritedAttributes(TEST_ZONE_1, resourceIdentifier);
-        assertThat(resource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
-        assertThat(resource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
-        assertThat(resource.getAttributes().contains(TOP_SECRET_CLASSIFICATION), equalTo(true));
+        ResourceEntity actualResource = this.resourceRepository
+                .getResourceWithInheritedAttributes(TEST_ZONE_1, expectedResource.getResourceIdentifier());
+        assertThat(actualResource.getAttributes().contains(SITE_BASEMENT), equalTo(true));
+        assertThat(actualResource.getAttributes().contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true));
+        assertThat(actualResource.getAttributes().contains(TOP_SECRET_CLASSIFICATION), equalTo(true));
+        deleteThreeLevelEntityAndParents(expectedResource, TEST_ZONE_1, this.resourceRepository);
     }
 
     @Test(expectedExceptions = SchemaViolationException.class)
@@ -242,7 +252,7 @@ public class GraphResourceRepositoryTest {
      */
     @Test
     public void testPreventEntityParentCyclicReference() {
-        this.dropAllResources();
+        dropAllResources();
         assertThat(this.graphTraversalSource.V().count().next().intValue(), equalTo(0));
         ResourceEntity resource1 = persistResource0toZone1AndAssert();
 
@@ -270,17 +280,20 @@ public class GraphResourceRepositoryTest {
             return;
         }
         Assert.fail("save() did not throw the expected exception.");
+        dropAllResources();
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
             invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testSave() {
-        String resourceId = persistRandomResourcetoZone1AndAssert().getResourceIdentifier();
+        ResourceEntity resource = persistRandomResourcetoZone1AndAssert();
+        String resourceId = resource.getResourceIdentifier();
 
         GraphTraversal<Vertex, Vertex> traversal = this.graphTraversalSource.V().has(RESOURCE_ID_KEY, resourceId);
 
         assertThat(traversal.hasNext(), equalTo(true));
         assertThat(traversal.next().property(RESOURCE_ID_KEY).value(), equalTo(resourceId));
+        this.resourceRepository.delete(resource);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -315,6 +328,7 @@ public class GraphResourceRepositoryTest {
         assertThat(traversal.hasNext(), equalTo(true));
         Vertex parentVertex = traversal.next();
         assertThat(parentVertex.property(RESOURCE_ID_KEY).value(), equalTo(parent.getIdentifier()));
+        deleteTwoLevelEntityAndParents(childResource, TEST_ZONE_1, this.resourceRepository);
     }
 
     @Test(threadPoolSize = CONCURRENT_TEST_THREAD_COUNT,
@@ -334,6 +348,7 @@ public class GraphResourceRepositoryTest {
         saveWithRetry(this.resourceRepository, resourceEntity, 3);
         assertThat(this.resourceRepository.getEntity(TEST_ZONE_1, resourceEntity.getResourceIdentifier())
                 .getAttributesAsJson(), equalTo(updateJSON));
+        this.resourceRepository.delete(resourceEntity);
     }
 
     @Test(expectedExceptions = SchemaViolationException.class)
@@ -362,6 +377,8 @@ public class GraphResourceRepositoryTest {
                 equalTo(resourceEntity1));
         assertThat(this.resourceRepository.getEntity(TEST_ZONE_1, resourceEntity2.getResourceIdentifier()),
                 equalTo(resourceEntity2));
+        this.resourceRepository.delete(resourceEntity1);
+        this.resourceRepository.delete(resourceEntity2);
     }
 
     @Test
@@ -501,6 +518,7 @@ public class GraphResourceRepositoryTest {
                 ResourceEntity(TEST_ZONE_1, "/nonexistent-resource"));
 
         assertThat(descendantsIds, empty());
+        deleteThreeLevelEntityAndParents(basement, TEST_ZONE_1, this.resourceRepository);
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
@@ -525,6 +543,7 @@ public class GraphResourceRepositoryTest {
         // assert that createVersionVertex creates a new vertex.
         this.resourceRepository.createVersionVertex(2);
         assertThat(this.graphTraversalSource.V().count().next().intValue(), equalTo(2));
+        dropAllResources();
     }
 
     private ResourceEntity persist2LevelRandomResourcetoZone1() {
@@ -568,7 +587,7 @@ public class GraphResourceRepositoryTest {
     }
 
     private int getRandomNumber() {
-        return randomGenerator.nextInt(10000000);
+        return randomGenerator.nextInt(100000000);
     }
 
     //Because of unique indices, saves on ZonableEntity can throw a lock exception due to contention on the index
@@ -601,7 +620,7 @@ public class GraphResourceRepositoryTest {
      * com.ge.predix.acs.privilege.management.dao.GraphSubjectRepositoryTest.testGetByZoneAndSubjectIdentifier(
      * GraphSubjectRepositoryTest.java:71)
      */
-    public static <E extends ZonableEntity> E saveWithRetry(final GraphGenericRepository<E> repository,
+    static <E extends ZonableEntity> E saveWithRetry(final GraphGenericRepository<E> repository,
             final E zonableEntity, final int retryCount) throws TitanException {
         try {
             repository.save(zonableEntity);
@@ -630,5 +649,22 @@ public class GraphResourceRepositoryTest {
         ResourceEntity resourceEntity = saveWithRetry(this.resourceRepository, resource, 3);
         assertThat(this.resourceRepository.findOne(resourceEntity.getId()), equalTo(resource));
         return resourceEntity;
+    }
+
+    static <E extends ZonableEntity> void deleteTwoLevelEntityAndParents(final E entity, final ZoneEntity zone,
+            final GraphGenericRepository<E> repository) {
+        Set<Parent> parents = entity.getParents();
+        for (Parent parent : parents) {
+            repository.delete(repository.getEntity(zone, parent.getIdentifier()));
+        }
+        repository.delete(entity);
+    }
+
+    private static <E extends ZonableEntity> void deleteThreeLevelEntityAndParents(final E entity,
+            final ZoneEntity zone, final GraphGenericRepository<E> repository) {
+        Set<Parent> parents = entity.getParents();
+        for (Parent parent : parents) {
+            deleteTwoLevelEntityAndParents(repository.getEntity(zone, parent.getIdentifier()), zone, repository);
+        }
     }
 }
