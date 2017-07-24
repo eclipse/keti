@@ -10,23 +10,28 @@ while 'true'; do
     case "$1" in
         --rtr)
             SHOW_ROUTER_LOGS='true'
+            shift
             ;;
         --stg)
             SHOW_STAGING_LOGS='true'
+            shift
             ;;
         --app)
             SHOW_APPLICATION_LOGS='true'
+            shift
             ;;
         --)
+            shift
+            break
             ;;
         *)
             if [[ -n "$1" ]]; then
                 echo "'${1}' is not a valid option"
                 exit 2
             fi
+            break
             ;;
     esac
-    shift
 done
 
 unset LOG_REGEX
