@@ -55,7 +55,8 @@ public class AcsMonitoringControllerIT extends AbstractTestNGSpringContextTests 
 
     public void testMonitoringHeartBeat() throws Exception {
         this.mockMvc.perform(get(HEARTBEAT_URL).accept(MediaType.TEXT_PLAIN_VALUE)).andExpect(status().isOk())
-                .andExpect(content().contentType("text/plain;charset=UTF-8")).andExpect(content().string("alive"));
+                .andExpect(content().contentType(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"))
+                .andExpect(content().string("alive"));
     }
 
 }

@@ -31,6 +31,7 @@ import com.ge.predix.acs.rest.AttributeAdapterConnection;
 import com.ge.predix.acs.rest.AttributeConnector;
 import com.ge.predix.test.TestConfig;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.UaaTestUtil;
 import com.ge.predix.test.utils.ZacTestUtil;
 import com.ge.predix.test.utils.ZoneHelper;
@@ -77,14 +78,14 @@ public class AttributeConnectorConfigurationIT extends AbstractTestNGSpringConte
     @BeforeClass
     public void setup() throws Exception {
         TestConfig.setupForEclipse(); // Starts ACS when running the test in eclipse.
- 
+
         this.acsUrl = this.zoneHelper.getAcsBaseURL();
         this.zone1ConnectorAdmin = this.acsRestTemplateFactory.getOAuth2RestTemplateForClient(this.zone1TokenUrl,
                 this.zone1ConnectorAdminClientId, this.zone1ConnectorAdminClientSecret);
         this.zone1ConnectorReadClient = this.acsRestTemplateFactory.getOAuth2RestTemplateForClient(this.zone1TokenUrl,
                 this.zone1ConnectorReadClientId, this.zone1ConnectorReadClientSecret);
 
-        this.zone1Headers = new HttpHeaders();
+        this.zone1Headers = ACSTestUtil.httpHeaders();
         this.zone1Headers.set(PREDIX_ZONE_ID, this.acsZone1Name);
 
         if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {

@@ -40,6 +40,7 @@ import org.testng.annotations.Test;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.ZacTestUtil;
 import com.ge.predix.test.utils.ZoneHelper;
@@ -166,7 +167,7 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
     }
 
     private HttpHeaders getZoneHeaders() {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = ACSTestUtil.httpHeaders();
         headers.set("Predix-Zone-Id", this.zoneId);
         return headers;
     }

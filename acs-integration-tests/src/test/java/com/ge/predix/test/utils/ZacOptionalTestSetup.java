@@ -57,7 +57,7 @@ public class ZacOptionalTestSetup implements OptionalTestSetup {
 
     private ResponseEntity<String> registerServiceToZac(final String zoneId, final Map<String, Object> trustedIssuers)
             throws JsonProcessingException {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = ACSTestUtil.httpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add(this.PREDIX_ZONE_ID, zoneId);
 
@@ -69,7 +69,7 @@ public class ZacOptionalTestSetup implements OptionalTestSetup {
     }
 
     private ResponseEntity<String> deleteServiceFromZac(final String zoneId) {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = ACSTestUtil.httpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add(this.PREDIX_ZONE_ID, zoneId);
 

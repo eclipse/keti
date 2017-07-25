@@ -43,6 +43,7 @@ import com.ge.predix.acs.model.PolicySet;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.CreatePolicyStatus;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
@@ -118,7 +119,7 @@ public class ZoneEnforcementStepsDefinitions {
     @Before
     public void setup() throws JsonParseException, JsonMappingException, IOException {
         this.acsUrl = this.zoneHelper.getAcsBaseURL();
-        this.zone1Headers = new HttpHeaders();
+        this.zone1Headers = ACSTestUtil.httpHeaders();
         this.zone1Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
         if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
             setupPublicACS();
@@ -165,7 +166,7 @@ public class ZoneEnforcementStepsDefinitions {
     @When("^client_two does a PUT on (.*?) with (.*?) in zone (.*?)$")
     public void client_two_does_a_PUT_on_subject_with_subject_id__in_zone(final String api, final String identifier,
             final String subdomainSuffix) throws Throwable {
-        HttpHeaders zoneHeaders = new HttpHeaders();
+        HttpHeaders zoneHeaders = ACSTestUtil.httpHeaders();
         OAuth2RestTemplate acsTemplate = this.acsZone2Template;
         zoneHeaders.set(PolicyHelper.PREDIX_ZONE_ID, getZoneName(subdomainSuffix));
 
@@ -200,7 +201,7 @@ public class ZoneEnforcementStepsDefinitions {
 
         OAuth2RestTemplate acsTemplate = this.acsZone2Template;
         String encodedIdentifier = URLEncoder.encode(identifier, "UTF-8");
-        HttpHeaders zoneHeaders = new HttpHeaders();
+        HttpHeaders zoneHeaders = ACSTestUtil.httpHeaders();
         // differentiate between zone 1 and zone 2, which will have slightly different uris
         zoneHeaders.set(PolicyHelper.PREDIX_ZONE_ID, getZoneName(subdomainSuffix));
 
@@ -314,7 +315,7 @@ public class ZoneEnforcementStepsDefinitions {
         OAuth2RestTemplate acsTemplate = this.acsZone2Template;
         String zoneName = getZoneName(zone);
 
-        HttpHeaders zoneHeaders = new HttpHeaders();
+        HttpHeaders zoneHeaders = ACSTestUtil.httpHeaders();
         zoneHeaders.set(PolicyHelper.PREDIX_ZONE_ID, zoneName);
 
         String encodedIdentifier = URLEncoder.encode(identifier, "UTF-8");

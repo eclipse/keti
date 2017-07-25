@@ -20,6 +20,7 @@ import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PrivilegeHelper;
 import com.ge.predix.test.utils.ZoneHelper;
 
@@ -47,7 +48,7 @@ public class AttributeMigrationTest extends AbstractTestNGSpringContextTests {
             Arrays.asList(new Attribute("https://issuer1/oauth/token", "role", "admin"),
                     new Attribute("https://issuer1/oauth/token", "site", "ny"),
                     new Attribute("https://issuer2/oauth/token", "region", "west")));
-    
+
     private final List<BaseResource> testResources = Arrays.asList(
             new BaseResource("testMigrate-resource-0", Collections.emptySet()),
             new BaseResource("testMigrate-resource-1", this.oneAttribute),
@@ -67,7 +68,7 @@ public class AttributeMigrationTest extends AbstractTestNGSpringContextTests {
 
     @Test(dataProvider = "zoneUrls")
     public void pushResourceAndSubjectAttributesForMigration(final String zoneUrl) {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = ACSTestUtil.httpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
         //write resources
         this.privilegeHelper.postResources(this.acsZoneTemplate, zoneUrl, headers,
@@ -84,13 +85,13 @@ public class AttributeMigrationTest extends AbstractTestNGSpringContextTests {
     //@Test(dataProvider = "zoneUrls")
     public void testMigratedAttributesPostMigration(final String zoneUrl) {
         //Uncomment this after new acs version is deployed and attributes migrated.
-        
+
         //verifyResourceAndSubjectAttributesPostMigration(zoneUrl);
     }
 
     private void verifyResourceAndSubjectAttributesPostMigration(final String zoneUrl) {
 
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = ACSTestUtil.httpHeaders();
         headers.add(HttpHeaders.ACCEPT, "application/json");
         //Retrieve resources and compare
         BaseResource[] migratedResources = this.privilegeHelper.listResources(this.acsZoneTemplate,
@@ -101,7 +102,7 @@ public class AttributeMigrationTest extends AbstractTestNGSpringContextTests {
 
         //Retrieve subjects and compare
         BaseSubject[] migratedSubjects = this.privilegeHelper.listSubjects(this.acsZoneTemplate,
-                this.zoneHelper.getZone1Url(), new HttpHeaders());
+                this.zoneHelper.getZone1Url(), ACSTestUtil.httpHeaders());
         Assert.assertEquals(migratedSubjects.length, this.testSubjects.size());
         this.testSubjects.stream()
                 .forEach(testSubject -> assertTestSubjectExists(testSubject, Arrays.asList(migratedSubjects)));
@@ -117,7 +118,7 @@ public class AttributeMigrationTest extends AbstractTestNGSpringContextTests {
         }
         Assert.fail("Expected Resource not found: " + expectedResource);
     }
-    
+
     private void assertTestSubjectExists(final BaseSubject expectedSubject, final List<BaseSubject> actualSubjects) {
         for (BaseSubject actualSubject : actualSubjects) {
             if (expectedSubject.getSubjectIdentifier().equals(actualSubject.getSubjectIdentifier())) {

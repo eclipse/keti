@@ -39,6 +39,7 @@ import org.testng.annotations.Test;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
 import com.ge.predix.test.utils.ZacTestUtil;
@@ -91,7 +92,7 @@ public class DefaultZoneAuthorizationIT extends AbstractTestNGSpringContextTests
     public void testAccessGlobalResourceWithZoneIssuer() throws Exception {
         OAuth2RestTemplate zone2AcsTemplate = this.acsRestTemplateFactory.getACSZone2RogueTemplate();
 
-        HttpHeaders zoneTwoHeaders = new HttpHeaders();
+        HttpHeaders zoneTwoHeaders = ACSTestUtil.httpHeaders();
         zoneTwoHeaders.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone2Name());
 
         // Write a resource to zone2. This should work

@@ -109,7 +109,7 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     public void setup() throws JsonParseException, JsonMappingException, IOException {
         TestConfig.setupForEclipse(); // Starts ACS when running the test in eclipse.
         this.acsUrl = this.zoneHelper.getAcsBaseURL();
-        this.zone1Headers = new HttpHeaders();
+        this.zone1Headers = ACSTestUtil.httpHeaders();
         this.zone1Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
 
         if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {

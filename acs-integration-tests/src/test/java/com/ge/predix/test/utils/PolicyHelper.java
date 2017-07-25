@@ -93,7 +93,7 @@ public class PolicyHelper {
 
     public CreatePolicyStatus createPolicySet(final String policyFile) {
         RestTemplate acs = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
-        HttpHeaders zoneHeaders = new HttpHeaders();
+        HttpHeaders zoneHeaders = ACSTestUtil.httpHeaders();
         zoneHeaders.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
         return createPolicySet(policyFile, acs, zoneHeaders);
     }

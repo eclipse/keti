@@ -85,10 +85,8 @@ public class ResourcePrivilegeManagementController extends BaseRestApi {
         }
     }
 
-    @ApiOperation(
-            value = "Creates a list of resources for the given zone. "
-                    + "Existing resources will be updated with the provided values.",
-            tags = { "Attribute Management" })
+    @ApiOperation(value = "Creates a list of resources for the given zone. "
+            + "Existing resources will be updated with the provided values.", tags = { "Attribute Management" })
     @ApiResponses(value = { @ApiResponse(code = 204, message = "Resource objects appended successfully."), })
     @RequestMapping(method = POST, value = { V1 + MANAGED_RESOURCES_URL }, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> appendResources(@RequestBody final List<BaseResource> resources) {
@@ -115,15 +113,12 @@ public class ResourcePrivilegeManagementController extends BaseRestApi {
         return ok(resources);
     }
 
-    @ApiOperation(
-            value = "Retrieves the resource for the given zone. The resourceIdentifier must be URL encoded in "
-                    + "application/x-www-form-urlencoded format with UTF-8.",
-            tags = { "Attribute Management" })
-    @RequestMapping(method = GET, value = V1 + MANAGED_RESOURCE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Retrieves the resource for the given zone. The resourceIdentifier must be URL encoded in "
+            + "application/x-www-form-urlencoded format with UTF-8.", tags = { "Attribute Management" })
+    @RequestMapping(method = GET, value = V1 + MANAGED_RESOURCE_URL)
     public ResponseEntity<BaseResource> getResourceV1(
             @PathVariable("resourceIdentifier") final String resourceIdentifier,
-            @RequestParam(
-                    name = "includeInheritedAttributes",
+            @RequestParam(name = "includeInheritedAttributes",
                     defaultValue = "false") final boolean includeInheritedAttributes) {
         BaseResource resource;
         if (includeInheritedAttributes) {
@@ -138,10 +133,8 @@ public class ResourcePrivilegeManagementController extends BaseRestApi {
         return ok(resource);
     }
 
-    @ApiOperation(
-            value = "Creates/Updates a given resource for a given zone. "
-                    + "The resourceIdentifier must be URL encoded in application/x-www-form-urlencoded format with "
-                    + "UTF-8.",
+    @ApiOperation(value = "Creates/Updates a given resource for a given zone. "
+            + "The resourceIdentifier must be URL encoded in application/x-www-form-urlencoded format with " + "UTF-8.",
             tags = { "Attribute Management" })
     @RequestMapping(method = PUT, value = { V1 + MANAGED_RESOURCE_URL }, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<BaseResource> putResourceV1(@RequestBody final BaseResource resource,
@@ -185,10 +178,8 @@ public class ResourcePrivilegeManagementController extends BaseRestApi {
         }
     }
 
-    @ApiOperation(
-            value = "Deletes the resource for a given zone. The resourceIdentifier must be URL encoded in "
-                    + "application/x-www-form-urlencoded format with UTF-8.",
-            tags = { "Attribute Management" })
+    @ApiOperation(value = "Deletes the resource for a given zone. The resourceIdentifier must be URL encoded in "
+            + "application/x-www-form-urlencoded format with UTF-8.", tags = { "Attribute Management" })
     @RequestMapping(method = DELETE, value = V1 + MANAGED_RESOURCE_URL)
     public ResponseEntity<Void> deleteResourceV1(@PathVariable("resourceIdentifier") final String resourceIdentifier) {
         this.service.deleteResource(resourceIdentifier);

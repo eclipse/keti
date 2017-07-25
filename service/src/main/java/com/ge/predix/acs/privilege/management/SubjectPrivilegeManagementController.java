@@ -80,8 +80,7 @@ public class SubjectPrivilegeManagementController extends BaseRestApi {
         }
     }
 
-    @ApiOperation(
-            value = "Creates a list of subjects. Existing subjects will be updated with the provided values.",
+    @ApiOperation(value = "Creates a list of subjects. Existing subjects will be updated with the provided values.",
             tags = { "Attribute Management" })
     @ApiResponses(value = { @ApiResponse(code = 204, message = "Subject objects added successfully."), })
     @RequestMapping(method = POST, value = { V1 + SUBJECTS_URL }, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -107,14 +106,11 @@ public class SubjectPrivilegeManagementController extends BaseRestApi {
         return ok(subjects);
     }
 
-    @ApiOperation(
-            value = "Retrieves the subject for the given zone. The subjectIdentifier must be URL encoded in "
-                    + "application/x-www-form-urlencoded format with UTF-8.",
-            tags = { "Attribute Management" })
-    @RequestMapping(method = GET, value = { V1 + SUBJECT_URL }, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Retrieves the subject for the given zone. The subjectIdentifier must be URL encoded in "
+            + "application/x-www-form-urlencoded format with UTF-8.", tags = { "Attribute Management" })
+    @RequestMapping(method = GET, value = { V1 + SUBJECT_URL })
     public ResponseEntity<BaseSubject> getSubject(@PathVariable("subjectIdentifier") final String subjectIdentifier,
-            @RequestParam(
-                    name = "includeInheritedAttributes",
+            @RequestParam(name = "includeInheritedAttributes",
                     defaultValue = "false") final boolean includeInheritedAttributes) {
         BaseSubject subject;
         if (includeInheritedAttributes) {
@@ -160,10 +156,8 @@ public class SubjectPrivilegeManagementController extends BaseRestApi {
         }
     }
 
-    @ApiOperation(
-            value = "Deletes the subject for a given zone. The subjectIdentifier must be URL encoded in "
-                    + "application/x-www-form-urlencoded format with UTF-8.",
-            tags = { "Attribute Management" })
+    @ApiOperation(value = "Deletes the subject for a given zone. The subjectIdentifier must be URL encoded in "
+            + "application/x-www-form-urlencoded format with UTF-8.", tags = { "Attribute Management" })
     @RequestMapping(method = DELETE, value = { V1 + SUBJECT_URL })
     public ResponseEntity<Void> deleteSubject(@PathVariable("subjectIdentifier") final String subjectIdentifier) {
         this.service.deleteSubject(subjectIdentifier);
