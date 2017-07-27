@@ -1,7 +1,10 @@
 package com.ge.predix.acs.security;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -13,6 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.google.common.net.HttpHeaders;
@@ -20,6 +25,8 @@ import com.google.common.net.HttpHeaders;
 public abstract class AbstractHttpMethodsFilter extends OncePerRequestFilter {
 
     private final Map<String, Set<HttpMethod>> uriPatternsAndAllowedHttpMethods;
+    private static final Set<MimeType> ACCEPTABLE_MIME_TYPES =
+            new HashSet<>(Arrays.asList(MimeTypeUtils.ALL, MimeTypeUtils.APPLICATION_JSON, MimeTypeUtils.TEXT_PLAIN));
 
     public AbstractHttpMethodsFilter(final Map<String, Set<HttpMethod>> uriPatternsAndAllowedHttpMethods) {
         this.uriPatternsAndAllowedHttpMethods = Collections.unmodifiableMap(uriPatternsAndAllowedHttpMethods);
@@ -31,6 +38,16 @@ public abstract class AbstractHttpMethodsFilter extends OncePerRequestFilter {
         }
     }
 
+    private static void sendMethodNotAllowedError(final HttpServletResponse response) throws IOException {
+        addCommonResponseHeaders(response);
+        response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase());
+    }
+
+    private static void sendNotAcceptableError(final HttpServletResponse response) throws IOException {
+        addCommonResponseHeaders(response);
+        response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, HttpStatus.NOT_ACCEPTABLE.getReasonPhrase());
+    }
+
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain filterChain) throws ServletException, IOException {
@@ -38,9 +55,7 @@ public abstract class AbstractHttpMethodsFilter extends OncePerRequestFilter {
         String requestMethod = request.getMethod();
 
         if (HttpMethod.TRACE.matches(requestMethod)) {
-            addCommonResponseHeaders(response);
-            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED,
-                    HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase());
+            sendMethodNotAllowedError(response);
             return;
         }
 
@@ -52,20 +67,31 @@ public abstract class AbstractHttpMethodsFilter extends OncePerRequestFilter {
                             .entrySet()) {
                 if (Pattern.compile(uriPatternsAndAllowedHttpMethodsEntry.getKey()).matcher(requestUri).matches()) {
                     if (!uriPatternsAndAllowedHttpMethodsEntry.getValue().contains(HttpMethod.resolve(requestMethod))) {
-                        addCommonResponseHeaders(response);
-                        response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED,
-                                HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase());
+                        sendMethodNotAllowedError(response);
                         return;
                     }
 
                     String acceptHeaderValue = request.getHeader(HttpHeaders.ACCEPT);
-                    Pattern validAcceptHeaderRegex = Pattern.compile("\\A(\\*/\\*)|(application/json)|(text/plain)\\Z");
-
-                    if (acceptHeaderValue != null && !validAcceptHeaderRegex.matcher(acceptHeaderValue).matches()) {
-                        addCommonResponseHeaders(response);
-                        response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE,
-                                HttpStatus.NOT_ACCEPTABLE.getReasonPhrase());
-                        return;
+                    if (acceptHeaderValue != null) {
+                        try {
+                            List<MimeType> parsedMimeTypes = MimeTypeUtils.parseMimeTypes(acceptHeaderValue);
+                            boolean foundAcceptableMimeType = false;
+                            for (MimeType parsedMimeType : parsedMimeTypes) {
+                                // When checking for acceptable MIME types, strip out the character set
+                                if (ACCEPTABLE_MIME_TYPES.contains(
+                                        new MimeType(parsedMimeType.getType(), parsedMimeType.getSubtype()))) {
+                                    foundAcceptableMimeType = true;
+                                    break;
+                                }
+                            }
+                            if (!foundAcceptableMimeType) {
+                                sendNotAcceptableError(response);
+                                return;
+                            }
+                        } catch (Exception e) {
+                            sendNotAcceptableError(response);
+                            return;
+                        }
                     }
 
                     break;

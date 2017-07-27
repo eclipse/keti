@@ -23,7 +23,7 @@
     <parent>
         <groupId>com.ge.predix</groupId>
         <artifactId>acs</artifactId>
-        <version>4.8.3-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
 
@@ -162,7 +162,7 @@
         <dependency>
             <groupId>com.ge.predix</groupId>
             <artifactId>acs-service</artifactId>
-            <version>4.8.3-SNAPSHOT</version>
+            <version>5.0.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
