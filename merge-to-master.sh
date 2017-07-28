@@ -21,24 +21,33 @@ function prompt {
     fi
 }
 
-function set_proxies {
-    export http_proxy='http://proxy-src.research.ge.com:8080'
-    export HTTP_PROXY="$http_proxy"
-    export https_proxy="$http_proxy"
-    export HTTPS_PROXY="$https_proxy"
-}
-
-function unset_proxies {
-    unset http_proxy
-    unset HTTP_PROXY
-    unset https_proxy
-    unset HTTPS_PROXY
+function check_internet {
+    { set +e; } 2> /dev/null
+    curl -k "$1" > /dev/null 2>&1
+    if [[ "$?" -ne 0 ]]; then
+        if [[ -n "$http_proxy" || -n "$https_proxy" ]]; then
+            unset http_proxy
+            unset HTTP_PROXY
+            unset https_proxy
+            unset HTTPS_PROXY
+        else
+            export http_proxy='http://proxy-src.research.ge.com:8080'
+            export HTTP_PROXY="$http_proxy"
+            export https_proxy="$http_proxy"
+            export HTTPS_PROXY="$https_proxy"
+        fi
+        curl -k "$1" > /dev/null 2>&1
+        if [[ "$?" -ne 0 ]]; then
+            exit 1
+        fi
+    fi
+    { set -e; } 2> /dev/null
 }
 
 function run_versioning_script {
-    set_proxies
+    check_internet 'https://downloads.sourceforge.net'
     ./versioning.sh "$1"
-    unset_proxies
+    check_internet "https://${GIT_API_URI_PATH}"
 }
 
 function update_version {
@@ -55,15 +64,15 @@ function update_version {
 
 REPOSITORY_URI_PATH=$(git ls-remote --get-url | sed -n 's|.*[:/]\(.*\)/\(.*\)\.git|\1/\2|p')
 
-# Set the GitHub API domain/URI path and GE-specific proxies if the repository is hosted on github.com:
+# Set the GitHub API domain/URI path:
 GIT_DOMAIN=$(git ls-remote --get-url | sed -n 's|\(.*\)[:/].*/.*\.git|\1|;s|.*[/@]\(.*\)|\1|p')
 if [[ $(echo "$GIT_DOMAIN" | grep -q 'github\.com'; echo "$?") -eq 0 ]]; then
     GIT_API_URI_PATH="api.${GIT_DOMAIN}"
-    set_proxies
 else
     GIT_API_URI_PATH="${GIT_DOMAIN}/api/v3"
-    unset_proxies
 fi
+
+check_internet "https://${GIT_API_URI_PATH}"
 
 # Get the personal access token necessary for using the GitHub API:
 { set +x; } 2>/dev/null
