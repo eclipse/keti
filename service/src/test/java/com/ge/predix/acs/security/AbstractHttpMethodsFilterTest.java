@@ -3,8 +3,10 @@ package com.ge.predix.acs.security;
 import java.net.URI;
 import java.util.Collections;
 
+import org.eclipse.jetty.http.MimeTypes;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,17 +56,28 @@ public final class AbstractHttpMethodsFilterTest {
                 MockMvcBuilders.standaloneSetup(this.dummyController).addFilters(new DummyHttpMethodsFilter()).build();
     }
 
+    @Test
+    public void testWithNoAcceptHeaderInRequest() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.request(HttpMethod.GET, URI.create(V1_DUMMY)))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
     @Test(dataProvider = "mediaTypesAndExpectedStatuses")
     public void testUnacceptableMediaTypes(final String mediaType, final ResultMatcher resultMatcher) throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.request(HttpMethod.GET, URI.create(V1_DUMMY)).accept(mediaType))
-                .andExpect(resultMatcher);
+        this.mockMvc.perform(MockMvcRequestBuilders.request(HttpMethod.GET, URI.create(V1_DUMMY))
+                .header(HttpHeaders.ACCEPT, mediaType)).andExpect(resultMatcher);
     }
 
     @DataProvider
     public Object[][] mediaTypesAndExpectedStatuses() {
         return new Object[][] { new Object[] { MediaType.ALL_VALUE, MockMvcResultMatchers.status().isOk() },
                 { MediaType.APPLICATION_JSON_VALUE, MockMvcResultMatchers.status().isOk() },
+                { MimeTypes.Type.APPLICATION_JSON_UTF_8.toString(), MockMvcResultMatchers.status().isOk() },
+                { MediaType.APPLICATION_JSON_VALUE + ", application/*+json", MockMvcResultMatchers.status().isOk() },
                 { MediaType.TEXT_PLAIN_VALUE, MockMvcResultMatchers.status().isOk() },
+                { MimeTypes.Type.TEXT_PLAIN_UTF_8.toString(), MockMvcResultMatchers.status().isOk() },
+                { "text/*+plain, " + MediaType.TEXT_PLAIN_VALUE, MockMvcResultMatchers.status().isOk() },
+                { "fake/type, " + MediaType.TEXT_PLAIN_VALUE, MockMvcResultMatchers.status().isOk() },
                 { "fake/type", MockMvcResultMatchers.status().isNotAcceptable() } };
     }
 }
