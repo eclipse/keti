@@ -301,7 +301,7 @@ public final class CloudFoundryApplicationHelper {
 
         return addCommonCallbacks(messageEnding,
                 cloudFoundryOperations.applications()
-                        .delete(DeleteApplicationRequest.builder().name(applicationName).deleteRoutes(false).build())
+                        .delete(DeleteApplicationRequest.builder().name(applicationName).deleteRoutes(true).build())
                         .onErrorResume(
                                 throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage()
                                         .contains(String.format("Application %s does not exist", applicationName)),
