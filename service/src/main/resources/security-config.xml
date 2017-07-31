@@ -68,8 +68,6 @@
     <oauth:resource-server id="oauth2remoteTokenFilter"
         token-services-ref="tokenService" />
 
-    <bean id="policyHttpMethodsFilter" class="com.ge.predix.acs.service.policy.admin.PolicyHttpMethodsFilter"/>
-
     <!-- Authorization Configuration For V1 policy-set APIS -->
     <http pattern="/v1/policy-set/**" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
@@ -101,8 +99,6 @@
                 after="BASIC_AUTH_FILTER" />
     </http>
 
-    <bean id="evaluationHttpMethodsFilter" class="com.ge.predix.acs.service.policy.evaluation.EvaluationHttpMethodsFilter"/>
-
     <!-- Authorization Configuration For V1 policy-evaluation APIS -->
     <http pattern="/v1/policy-evaluation/**" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
@@ -120,8 +116,6 @@
         <custom-filter ref="acsRequestEnrichingFilter"
             after="BASIC_AUTH_FILTER" />
     </http>
-
-    <bean id="resourceHttpMethodsFilter" class="com.ge.predix.acs.privilege.management.ResourceHttpMethodsFilter"/>
 
     <!-- Authorization Configuration For V1 resource APIS -->
     <http pattern="/v1/resource/**" request-matcher="ant" create-session="stateless"
@@ -154,8 +148,6 @@
                 after="BASIC_AUTH_FILTER" />
     </http>
 
-    <bean id="subjectHttpMethodsFilter" class="com.ge.predix.acs.privilege.management.SubjectHttpMethodsFilter"/>
-
     <!-- Authorization Configuration For V1 subject APIS -->
     <http pattern="/v1/subject/**" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
@@ -186,8 +178,6 @@
         <custom-filter ref="acsRequestEnrichingFilter"
                 after="BASIC_AUTH_FILTER" />
     </http>
-
-    <bean id="connectorHttpMethodsFilter" class="com.ge.predix.acs.attribute.connector.ConnectorHttpMethodsFilter"/>
 
     <!-- Authorization Configuration For V1 connector APIS -->
     <http pattern="/v1/connector/*" request-matcher="ant" create-session="stateless"
@@ -220,8 +210,6 @@
                 after="BASIC_AUTH_FILTER" />
     </http>
 
-    <bean id="zoneHttpMethodsFilter" class="com.ge.predix.acs.zone.management.ZoneHttpMethodsFilter"/>
-
     <!-- Authorization Configuration For V1 APIS -->
     <http pattern="/v1/zone/**" request-matcher="ant" create-session="stateless"
         xmlns="http://www.springframework.org/schema/security"
@@ -243,7 +231,6 @@
 
     <!-- Authorization Configuration For Monitoring APIs -->
     <bean id="noAuthenticationEntryPoint" class="com.ge.predix.acs.security.NoAuthenticationEntryPoint" />
-    <bean id="monitoringHttpMethodsFilter" class="com.ge.predix.acs.monitoring.MonitoringHttpMethodsFilter"/>
     <http pattern="/monitoring/heartbeat*" request-matcher="ant" create-session="stateless"
           xmlns="http://www.springframework.org/schema/security"
           disable-url-rewriting="true" use-expressions="true"
@@ -341,5 +328,25 @@
 
         <!-- Nurego Metering Filter -->
         <import resource="classpath:META-INF/spring-metering-filter.xml" />
+    </beans>
+
+    <beans profile="httpValidation">
+        <bean id="policyHttpMethodsFilter" class="com.ge.predix.acs.service.policy.admin.PolicyHttpMethodsFilter"/>
+        <bean id="evaluationHttpMethodsFilter" class="com.ge.predix.acs.service.policy.evaluation.EvaluationHttpMethodsFilter"/>
+        <bean id="resourceHttpMethodsFilter" class="com.ge.predix.acs.privilege.management.ResourceHttpMethodsFilter"/>
+        <bean id="subjectHttpMethodsFilter" class="com.ge.predix.acs.privilege.management.SubjectHttpMethodsFilter"/>
+        <bean id="connectorHttpMethodsFilter" class="com.ge.predix.acs.attribute.connector.ConnectorHttpMethodsFilter"/>
+        <bean id="zoneHttpMethodsFilter" class="com.ge.predix.acs.zone.management.ZoneHttpMethodsFilter"/>
+        <bean id="monitoringHttpMethodsFilter" class="com.ge.predix.acs.monitoring.MonitoringHttpMethodsFilter"/>
+    </beans>
+
+    <beans profile="!httpValidation">
+        <bean id="policyHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="evaluationHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="resourceHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="subjectHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="connectorHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="zoneHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="monitoringHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
     </beans>
 </beans>
