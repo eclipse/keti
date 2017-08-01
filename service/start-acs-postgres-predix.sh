@@ -23,7 +23,9 @@
 # 4. execute: 'create user postgres;'
 # 5. execute: 'grant all privileges on database acs to postgres;'
 
-export SPRING_PROFILES_ACTIVE='envDbConfig,predix,simple-cache'
+if [[ -z "$SPRING_PROFILES_ACTIVE" ]]; then
+    export SPRING_PROFILES_ACTIVE='envDbConfig,predix,simple-cache'
+fi
 export DB_DRIVER_CLASS_NAME='org.postgresql.Driver'
 export DB_URL='jdbc:postgresql:acs'
 export DB_USERNAME='postgres'

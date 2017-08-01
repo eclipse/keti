@@ -612,7 +612,7 @@
                             <argLine/>
                             <systemPropertyVariables>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
-                                <spring.profiles.active>h2,predix,simple-cache</spring.profiles.active>
+                                <spring.profiles.active>h2,predix,simple-cache,httpValidation</spring.profiles.active>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
@@ -658,7 +658,52 @@
                             <groupId>commons-io</groupId>
                             <artifactId>commons-io</artifactId>
                         </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-handler</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-codec-http</artifactId>
+                        </exclusion>
                     </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>com.ge.predix.eventhub</groupId>
+                    <artifactId>predix-event-hub-sdk</artifactId>
+                    <version>1.2.2-SNAPSHOT</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>grpc-stub</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>grpc-protobuf</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-handler</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>commons-io</groupId>
+                            <artifactId>commons-io</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-codec-http</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-stub</artifactId>
+                    <version>1.0.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-protobuf</artifactId>
+                    <version>1.0.1</version>
                 </dependency>
             </dependencies>
             <build>
@@ -672,7 +717,7 @@
                             <argLine/>
                             <systemPropertyVariables>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
-                                <spring.profiles.active>h2,predix,simple-cache,titan</spring.profiles.active>
+                                <spring.profiles.active>h2,predix,simple-cache,titan,httpValidation</spring.profiles.active>
                             </systemPropertyVariables>
                             <excludes>
                                 <exclude>**/ACSPerformanceIT.java</exclude>
@@ -769,7 +814,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <environmentVariables>
-                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,httpValidation</SPRING_PROFILES_ACTIVE>
                                 <management.health.redis.enabled>false</management.health.redis.enabled>
                                 <uaaCheckHealthUrl>${ACS_UAA_URL}/healthz</uaaCheckHealthUrl>
                                 <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method, Access-Control-Request-Headers</cors.xhr.allowed.headers>
@@ -878,7 +923,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <environmentVariables>
-                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan</SPRING_PROFILES_ACTIVE>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan,httpValidation</SPRING_PROFILES_ACTIVE>
                                 <management.health.redis.enabled>false</management.health.redis.enabled>
                                 <uaaCheckHealthUrl>${ACS_UAA_URL}/healthz</uaaCheckHealthUrl>
                                 <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method, Access-Control-Request-Headers</cors.xhr.allowed.headers>

@@ -19,15 +19,18 @@ package com.ge.predix.acceptance.test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,6 +42,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.ge.predix.acs.commons.web.AcsApiUriTemplates;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.rest.BaseResource;
@@ -61,6 +65,9 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
 
     @Value("${ACS_URL}")
     private String acsBaseUrl;
+
+    @Autowired
+    private Environment environment;
 
     @Autowired
     private ZoneHelper zoneHelper;
@@ -107,8 +114,8 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
 
         RestTemplate restTemplate = new RestTemplate();
         try {
-            ResponseEntity<String> heartbeatResponse = restTemplate
-                    .exchange(this.acsBaseUrl + "/monitoring/heartbeat", HttpMethod.GET,
+            ResponseEntity<String> heartbeatResponse =
+                    restTemplate.exchange(this.acsBaseUrl + AcsApiUriTemplates.HEARTBEAT_URL, HttpMethod.GET,
                             new HttpEntity<>(this.headersWithZoneSubdomain), String.class);
             Assert.assertEquals(heartbeatResponse.getBody(), "alive", "ACS Heartbeat Check Failed");
         } catch (Exception e) {
@@ -154,11 +161,11 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
             BaseResource resource = new BaseResource();
             resource.setResourceIdentifier("/alarms/sites/sanramon");
 
-            testResource = this.privilegeHelper
-                    .putResource(this.acsZoneRestTemplate, resource, endpoint, headers, region);
+            testResource =
+                    this.privilegeHelper.putResource(this.acsZoneRestTemplate, resource, endpoint, headers, region);
 
-            ResponseEntity<PolicyEvaluationResult> evalResponse = this.acsZoneRestTemplate
-                    .postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            ResponseEntity<PolicyEvaluationResult> evalResponse =
+                    this.acsZoneRestTemplate.postForEntity(endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
                             new HttpEntity<>(policyEvalRequest, headers), PolicyEvaluationResult.class);
 
             Assert.assertEquals(evalResponse.getStatusCode(), HttpStatus.OK);
@@ -167,16 +174,15 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
         } finally {
             // delete policy
             if (null != testPolicyName) {
-                this.acsZoneRestTemplate
-                        .exchange(endpoint + PolicyHelper.ACS_POLICY_SET_API_PATH + testPolicyName, HttpMethod.DELETE,
-                                new HttpEntity<>(headers), String.class);
+                this.acsZoneRestTemplate.exchange(endpoint + PolicyHelper.ACS_POLICY_SET_API_PATH + testPolicyName,
+                        HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
             }
 
             // delete attributes
             if (null != marissa) {
-                this.acsZoneRestTemplate
-                        .exchange(endpoint + PrivilegeHelper.ACS_SUBJECT_API_PATH + marissa.getSubjectIdentifier(),
-                                HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
+                this.acsZoneRestTemplate.exchange(
+                        endpoint + PrivilegeHelper.ACS_SUBJECT_API_PATH + marissa.getSubjectIdentifier(),
+                        HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
             }
             if (null != testResource) {
                 String encodedResource = URLEncoder.encode(testResource.getResourceIdentifier(), "UTF-8");
@@ -188,10 +194,25 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
 
     @DataProvider(name = "endpointProvider")
     public Object[][] getAcsEndpoint() throws Exception {
-        PolicyEvaluationRequestV1 policyEvalForBob = this.policyHelper
-                .createEvalRequest("GET", "bob", "/alarms/sites/sanramon", null);
+        PolicyEvaluationRequestV1 policyEvalForBob =
+                this.policyHelper.createEvalRequest("GET", "bob", "/alarms/sites/sanramon", null);
 
         return new Object[][] { { this.acsBaseUrl, this.headersWithZoneSubdomain, policyEvalForBob, "bob" } };
+    }
+
+    // TODO: Remove this test when the "httpValidation" Spring profile is removed
+    @Test
+    public void testHttpValidationBasedOnActiveSpringProfile() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+
+        ResponseEntity<String> response =
+                new RestTemplate().exchange(URI.create(this.acsBaseUrl + AcsApiUriTemplates.HEARTBEAT_URL),
+                        HttpMethod.GET, new HttpEntity<>(headers), String.class);
+        Assert.assertEquals(response.getStatusCode(),
+                (Arrays.asList(this.environment.getActiveProfiles()).contains("httpValidation")
+                        ? HttpStatus.OK : HttpStatus.NOT_ACCEPTABLE));
     }
 
     @AfterClass

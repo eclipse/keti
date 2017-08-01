@@ -16,6 +16,14 @@
 # limitations under the License.
 #*******************************************************************************
 
+HTTP_VALIDATION_SPRING_PROFILE='httpValidation'
+if [[ -z "$SPRING_PROFILES_ACTIVE" ]]; then
+    export SPRING_PROFILES_ACTIVE="$HTTP_VALIDATION_SPRING_PROFILE"
+elif [[ "$SPRING_PROFILES_ACTIVE" != *"$HTTP_VALIDATION_SPRING_PROFILE"* ]]; then
+    export SPRING_PROFILES_ACTIVE="${SPRING_PROFILES_ACTIVE},${HTTP_VALIDATION_SPRING_PROFILE}"
+fi
+echo "SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}"
+
 unset PORT_OFFSET
 source ./set-env-local.sh
 

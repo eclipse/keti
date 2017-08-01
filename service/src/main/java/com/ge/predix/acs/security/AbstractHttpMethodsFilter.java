@@ -14,6 +14,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MimeType;
@@ -25,6 +27,8 @@ import com.google.common.net.HttpHeaders;
 public abstract class AbstractHttpMethodsFilter extends OncePerRequestFilter {
 
     private final Map<String, Set<HttpMethod>> uriPatternsAndAllowedHttpMethods;
+
+    private static final Logger LOGGER_INSTANCE = LoggerFactory.getLogger(AbstractHttpMethodsFilter.class);
     private static final Set<MimeType> ACCEPTABLE_MIME_TYPES =
             new HashSet<>(Arrays.asList(MimeTypeUtils.ALL, MimeTypeUtils.APPLICATION_JSON, MimeTypeUtils.TEXT_PLAIN));
 
@@ -85,6 +89,7 @@ public abstract class AbstractHttpMethodsFilter extends OncePerRequestFilter {
                                 }
                             }
                             if (!foundAcceptableMimeType) {
+                                LOGGER_INSTANCE.error("Malformed Accept header sent in request: {}", acceptHeaderValue);
                                 sendNotAcceptableError(response);
                                 return;
                             }
