@@ -35,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -200,19 +201,28 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
         return new Object[][] { { this.acsBaseUrl, this.headersWithZoneSubdomain, policyEvalForBob, "bob" } };
     }
 
+    private ResponseEntity<String> getMonitoringApiResponse(final HttpHeaders headers) {
+        return new RestTemplate().exchange(URI.create(this.acsBaseUrl + AcsApiUriTemplates.HEARTBEAT_URL),
+                HttpMethod.GET, new HttpEntity<>(headers), String.class);
+    }
+
     // TODO: Remove this test when the "httpValidation" Spring profile is removed
     @Test
     public void testHttpValidationBasedOnActiveSpringProfile() throws Exception {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        headers.add(HttpHeaders.ACCEPT, MediaType.TEXT_HTML_VALUE);
 
-        ResponseEntity<String> response =
-                new RestTemplate().exchange(URI.create(this.acsBaseUrl + AcsApiUriTemplates.HEARTBEAT_URL),
-                        HttpMethod.GET, new HttpEntity<>(headers), String.class);
-        Assert.assertEquals(response.getStatusCode(),
-                (Arrays.asList(this.environment.getActiveProfiles()).contains("httpValidation")
-                        ? HttpStatus.OK : HttpStatus.NOT_ACCEPTABLE));
+        if (!Arrays.asList(this.environment.getActiveProfiles()).contains("httpValidation")) {
+            Assert.assertEquals(this.getMonitoringApiResponse(headers).getStatusCode(), HttpStatus.OK);
+            return;
+        }
+
+        try {
+            this.getMonitoringApiResponse(headers);
+            Assert.fail("Expected an HttpMediaTypeNotAcceptableException exception to be thrown");
+        } catch (final HttpClientErrorException e) {
+            Assert.assertEquals(e.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 
     @AfterClass
