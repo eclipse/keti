@@ -99,9 +99,9 @@ fi
 PYTHON_LOGIC="
 import sys, re, json
 
-regex_prefix=r'^(?:-?(?:[1-9][0-9]*)??[0-9]{4})-(?:1[0-2]|0[1-9])-(?:3[01]|0[1-9]|[12][0-9])T(?:2[0-3]|[01][0-9]):(?:[0-5][0-9]):(?:[0-5][0-9])(?:\.[0-9]+)??(?:Z|[+-](?:2[0-3]|[01][0-9])[0-5][0-9])??\s*?'
-no_cf_regex = re.compile(r'^.*?(\{.*\})\$')
-json_regex = re.compile(regex_prefix + r'\[${LOG_REGEX}\](?:\s*?[A-Z]+)??(?:\s+?)??(\{.*\})\$')
+regex_prefix=r'^((?:-?(?:[1-9][0-9]*)??[0-9]{4})-(?:1[0-2]|0[1-9])-(?:3[01]|0[1-9]|[12][0-9])T(?:2[0-3]|[01][0-9]):(?:[0-5][0-9]):(?:[0-5][0-9])(?:\.[0-9]+)??(?:Z|[+-](?:2[0-3]|[01][0-9])[0-5][0-9])??\s*?)'
+no_cf_regex = re.compile(r'^(.*?)(\{.*\})\$')
+json_regex = re.compile(regex_prefix + r'(\[${LOG_REGEX}\](?:\s*?[A-Z]+)??(?:\s+?)??)(\{.*\})\$')
 "
 
 if [[ -n "$RTR_REGEX" ]]; then
@@ -133,11 +133,11 @@ if [[ -n "$SHOW_APPLICATION_LOGS" ]]; then
 
     PYTHON_LOGIC="${PYTHON_LOGIC}
     if app_regex.search(line) and matched:
-        line_as_json = json.loads(json_regex.sub(r'\1', line))
+        captured_groups = json_regex.match(line)
+        line_as_json = json.loads(json_regex.sub(r'\3', line))
 "
 
-    if [[ -n "$MULTILINE_OUTPUT" ]]; then
-        PYTHON_LOGIC="${PYTHON_LOGIC}
+    PRINT_MULTILINE="
         if 'time' in line_as_json:
             sys.stdout.write(bold + 'Date and time: ' + normal + str(line_as_json['time']) + '\n')
         if 'lvl' in line_as_json:
@@ -152,41 +152,36 @@ if [[ -n "$SHOW_APPLICATION_LOGS" ]]; then
             sys.stdout.write(bold + 'Call stack: ' + normal + json.dumps(line_as_json['stck'], indent=4) + '\n')
         sys.stdout.write('\n')
 "
-    else
-        PYTHON_LOGIC="${PYTHON_LOGIC}
-        sys.stdout.write(line + '\n')
+
+    function print_single_line() {
+        echo "
         if 'stck' in line_as_json:
-            sys.stdout.write(json.dumps(line_as_json['stck'], indent=4) + '\n')
+            line_json_wo_stck = line_as_json.copy()
+            del line_json_wo_stck['stck']
+            sys.stdout.write(${1})
+            sys.stdout.write(json.dumps(line_json_wo_stck).rstrip('}') + ',\n')
+            sys.stdout.write('\"stck\": ' + json.dumps(line_as_json['stck'], indent=4) + '}\n')
+        else:
+            sys.stdout.write(line + '\n')
 "
+    }
+
+    if [[ -n "$MULTILINE_OUTPUT" ]]; then
+        PYTHON_LOGIC="${PYTHON_LOGIC}${PRINT_MULTILINE}"
+    else
+        PYTHON_LOGIC="${PYTHON_LOGIC}$(print_single_line 'captured_groups.group(1) + captured_groups.group(2)')"
     fi
 
     PYTHON_LOGIC="${PYTHON_LOGIC}
     elif no_cf_regex.search(line):
-        line_as_json = json.loads(no_cf_regex.sub(r'\1', line))
+        captured_groups = no_cf_regex.match(line)
+        line_as_json = json.loads(no_cf_regex.sub(r'\2', line))
 "
 
     if [[ -n "$MULTILINE_OUTPUT" ]]; then
-        PYTHON_LOGIC="${PYTHON_LOGIC}
-        if 'time' in line_as_json:
-            sys.stdout.write(bold + 'Date and time: ' + normal + str(line_as_json['time']) + '\n')
-        if 'lvl' in line_as_json:
-            sys.stdout.write(bold + 'Log level: ' + normal + str(line_as_json['lvl']) + '\n')
-        if 'tnt' in line_as_json:
-            sys.stdout.write(bold + 'Tenant: ' + normal + str(line_as_json['tnt']) + '\n')
-        if 'inst' in line_as_json:
-            sys.stdout.write(bold + 'Instance ID: ' + normal + str(line_as_json['inst']) + '\n')
-        if 'msg' in line_as_json:
-            sys.stdout.write(bold + 'Message: ' + normal + str(line_as_json['msg']) + '\n')
-        if 'stck' in line_as_json:
-            sys.stdout.write(bold + 'Call stack: ' + normal + json.dumps(line_as_json['stck'], indent=4) + '\n')
-        sys.stdout.write('\n')
-"
+        PYTHON_LOGIC="${PYTHON_LOGIC}${PRINT_MULTILINE}"
     else
-        PYTHON_LOGIC="${PYTHON_LOGIC}
-        sys.stdout.write(line + '\n')
-        if 'stck' in line_as_json:
-            sys.stdout.write(json.dumps(line_as_json['stck'], indent=4) + '\n')
-"
+        PYTHON_LOGIC="${PYTHON_LOGIC}$(print_single_line 'captured_groups.group(1)')"
     fi
 
 fi
