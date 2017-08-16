@@ -3,6 +3,8 @@ package com.ge.predix.acs.attribute.cache;
 import com.ge.predix.acs.attribute.readers.CachedAttributes;
 
 public interface AttributeCache {
+    String RESOURCE = "resource";
+    String SUBJECT = "subject";
 
     default void setAttributes(final String identifier, final CachedAttributes value) {
         this.set(identifier, value);

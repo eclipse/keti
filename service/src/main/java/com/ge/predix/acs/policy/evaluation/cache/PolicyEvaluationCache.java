@@ -24,6 +24,8 @@ import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 
 public interface PolicyEvaluationCache {
+    String DECISION = "decision";
+
 
     PolicyEvaluationResult get(PolicyEvaluationRequestCacheKey key);
 

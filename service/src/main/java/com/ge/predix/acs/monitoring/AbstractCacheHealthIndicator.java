@@ -19,7 +19,6 @@ public abstract class AbstractCacheHealthIndicator implements CacheHealthIndicat
 
     private RedisConnectionFactory redisConnectionFactory;
 
-    @Value("${ENABLE_CACHING:false}")
     private boolean cachingEnabled;
 
     @Value("${ENABLED_REDIS_HEALTH_CHECK:false}")
@@ -27,21 +26,23 @@ public abstract class AbstractCacheHealthIndicator implements CacheHealthIndicat
 
     private String cacheType;
 
-    public AbstractCacheHealthIndicator(final RedisConnectionFactory redisConnectionFactory, final String cacheType) {
+    public AbstractCacheHealthIndicator(final RedisConnectionFactory redisConnectionFactory, final String cacheType,
+            final boolean cachingEnabled) {
         Assert.notNull(redisConnectionFactory, "ConnectionFactory must not be null");
         this.redisConnectionFactory = redisConnectionFactory;
         this.cacheType = cacheType;
+        this.cachingEnabled = cachingEnabled;
     }
 
     @Override
     public Health health() {
-        if (!this.cachingEnabled) {
-            return AcsMonitoringUtilities
-                    .health(Status.UNKNOWN, AcsMonitoringUtilities.HealthCode.DISABLED, DESCRIPTION);
-        }
         if (!this.healthCheckEnabled) {
             return AcsMonitoringUtilities
                     .health(Status.UNKNOWN, AcsMonitoringUtilities.HealthCode.HEALTH_CHECK_DISABLED, DESCRIPTION);
+        }
+        if (!this.cachingEnabled) {
+            return AcsMonitoringUtilities
+                    .health(Status.UNKNOWN, AcsMonitoringUtilities.HealthCode.DISABLED, DESCRIPTION);
         }
         return cacheHealth(redisConnectionFactory, this.cacheType, DESCRIPTION, this::getRedisConnection);
     }
@@ -75,6 +76,7 @@ public abstract class AbstractCacheHealthIndicator implements CacheHealthIndicat
         }
     }
 
+    @Override
     public RedisConnection getRedisConnection() {
         return RedisConnectionUtils.getConnection(this.redisConnectionFactory);
     }
