@@ -22,9 +22,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,16 +49,16 @@ import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
 public class AbstractPolicyEvaluationCacheTest {
 
-    public static final String ZONE_NAME = "testzone1";
-    public static final ZoneEntity ZONE_ENTITY = new ZoneEntity(1L, ZONE_NAME);
-    public static final String ACTION_GET = "GET";
-    public static final PolicySet POLICY_ONE = new PolicySet("policyOne");
-    public static final PolicySet POLICY_TWO = new PolicySet("policyTwo");
-    public static final LinkedHashSet<String> EVALUATION_ORDER_POLICYONE_POLICYTWO = Stream.of("policyOne", "policyTwo")
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-    public static final LinkedHashSet<String> EVALUATION_ORDER_POLICYTWO_POLICYONE = Stream.of("policyTwo", "policyOne")
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-    public static final LinkedHashSet<String> EVALUATION_ORDER_POLICYONE = Stream.of("policyOne")
+    private static final String ZONE_NAME = "testzone1";
+    private static final ZoneEntity ZONE_ENTITY = new ZoneEntity(1L, ZONE_NAME);
+    private static final String ACTION_GET = "GET";
+    private static final PolicySet POLICY_ONE = new PolicySet("policyOne");
+    private static final PolicySet POLICY_TWO = new PolicySet("policyTwo");
+    private static final LinkedHashSet<String> EVALUATION_ORDER_POLICYONE_POLICYTWO = Stream
+            .of("policyOne", "policyTwo").collect(Collectors.toCollection(LinkedHashSet::new));
+    private static final LinkedHashSet<String> EVALUATION_ORDER_POLICYTWO_POLICYONE = Stream
+            .of("policyTwo", "policyOne").collect(Collectors.toCollection(LinkedHashSet::new));
+    private static final LinkedHashSet<String> EVALUATION_ORDER_POLICYONE = Stream.of("policyOne")
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
     private final InMemoryPolicyEvaluationCache cache = new InMemoryPolicyEvaluationCache();
@@ -274,8 +272,7 @@ public class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult.getEffect(), result.getEffect());
 
         Thread.sleep(1);
-        this.cache.resetForResources(ZONE_NAME,
-                Arrays.asList(new ResourceEntity[] { new ResourceEntity(ZONE_ENTITY, XFILES_ID) }));
+        this.cache.resetForResources(ZONE_NAME, Collections.singletonList(new ResourceEntity(ZONE_ENTITY, XFILES_ID)));
         assertNull(this.cache.get(key));
     }
 
@@ -301,7 +298,7 @@ public class AbstractPolicyEvaluationCacheTest {
 
         Thread.sleep(1);
         this.cache.resetForResources(ZONE_NAME,
-                Arrays.asList(new ResourceEntity[] { new ResourceEntity(ZONE_ENTITY, resolvedResourceUri) }));
+                Collections.singletonList(new ResourceEntity(ZONE_ENTITY, resolvedResourceUri)));
         assertNull(this.cache.get(key));
     }
 
@@ -324,7 +321,7 @@ public class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult.getEffect(), result.getEffect());
 
         Thread.sleep(1);
-        this.cache.resetForResourcesByIds(ZONE_NAME, new HashSet<>(Arrays.asList(XFILES_ID)));
+        this.cache.resetForResourcesByIds(ZONE_NAME, Collections.singleton(XFILES_ID));
         assertNull(this.cache.get(key));
     }
 
@@ -370,7 +367,7 @@ public class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult.getEffect(), result.getEffect());
 
         Thread.sleep(1);
-        this.cache.resetForSubjectsByIds(ZONE_NAME, new HashSet<>(Arrays.asList(AGENT_MULDER)));
+        this.cache.resetForSubjectsByIds(ZONE_NAME, Collections.singleton(AGENT_MULDER));
         assertNull(this.cache.get(key));
     }
 
@@ -393,8 +390,7 @@ public class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult.getEffect(), result.getEffect());
 
         Thread.sleep(1);
-        this.cache.resetForSubjects(ZONE_NAME,
-                Arrays.asList(new SubjectEntity[] { new SubjectEntity(ZONE_ENTITY, AGENT_MULDER) }));
+        this.cache.resetForSubjects(ZONE_NAME, Collections.singletonList(new SubjectEntity(ZONE_ENTITY, AGENT_MULDER)));
         assertNull(this.cache.get(key));
     }
 
@@ -428,6 +424,7 @@ public class AbstractPolicyEvaluationCacheTest {
 
         Mockito.doReturn(resourceConnector).when(connectorService).getResourceAttributeConnector();
         Mockito.doReturn(subjectConnector).when(connectorService).getSubjectAttributeConnector();
+        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE.getName());
 
         boolean isResourceConnectorConfigured = resourceConnector != null;
         boolean isSubjectConnectorConfigured = subjectConnector != null;
@@ -441,14 +438,20 @@ public class AbstractPolicyEvaluationCacheTest {
         request.setAction(ACTION_GET);
         request.setSubjectIdentifier(AGENT_MULDER);
         request.setResourceIdentifier(XFILES_ID);
+        request.setPolicySetsEvaluationOrder(EVALUATION_ORDER_POLICYONE);
         PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
                 .request(request).build();
 
-        PolicyEvaluationResult result = mockPermitResult();
-        spiedCache.set(key, result);
-        spiedCache.get(key);
-        Mockito.verify(spiedCache, Mockito.times(isResourceConnectorConfigured || isSubjectConnectorConfigured ? 0 : 1))
-                .havePrivilegeServiceAttributesChanged(Mockito.any(), Mockito.any());
+        PolicyEvaluationResult expectedResult = mockPermitResult();
+        spiedCache.set(key, expectedResult);
+
+        PolicyEvaluationResult actualResult = spiedCache.get(key);
+        Assert.assertEquals(actualResult.getEffect(), expectedResult.getEffect());
+        Assert.assertEquals(actualResult.getResourceAttributes(), expectedResult.getResourceAttributes());
+        Assert.assertEquals(actualResult.getSubjectAttributes(), expectedResult.getSubjectAttributes());
+
+        Mockito.verify(spiedCache, Mockito.times(isResourceConnectorConfigured || isSubjectConnectorConfigured ? 1 : 2))
+                .haveEntitiesChanged(Mockito.any(), Mockito.any());
         Mockito.verify(spiedCache, Mockito.times(isResourceConnectorConfigured || isSubjectConnectorConfigured ? 1 : 0))
                 .haveConnectorCacheIntervalsLapsed(Mockito.any(), Mockito.any());
         Assert.assertEquals(this.cache.haveConnectorCacheIntervalsLapsed(connectorService, currentTime),
@@ -456,9 +459,9 @@ public class AbstractPolicyEvaluationCacheTest {
 
     }
 
-    public static PolicyEvaluationResult mockPermitResult() {
+    private static PolicyEvaluationResult mockPermitResult() {
         PolicyEvaluationResult result = new PolicyEvaluationResult(Effect.PERMIT);
-        result.setResolvedResourceUris(new HashSet<>(Arrays.asList(new String[] { XFILES_ID })));
+        result.setResolvedResourceUris(Collections.singleton(XFILES_ID));
         return result;
     }
 
@@ -511,10 +514,7 @@ public class AbstractPolicyEvaluationCacheTest {
     }
 
     private Object[] connectorsNotConfigured() {
-        AttributeConnector resourceConnector = new AttributeConnector();
-        AttributeConnector subjectConnector = new AttributeConnector();
-
-        return new Object[] { resourceConnector, subjectConnector, DateTime.now().minusMinutes(3), false };
+        return new Object[] { null, null, DateTime.now().minusMinutes(3), false };
     }
 
 }
