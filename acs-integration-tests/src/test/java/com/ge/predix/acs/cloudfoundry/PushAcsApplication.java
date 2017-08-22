@@ -62,6 +62,9 @@ final class PushAcsApplication {
             put("ACS_UAA_URL", System.getenv("ACS_UAA_URL"));
             put("ZAC_URL", System.getenv("ZAC_URL"));
             put("ENABLED_REDIS_HEALTH_CHECK", "true");
+            put("ENABLE_DECISION_CACHING", "true");
+            put("ENABLE_RESOURCE_CACHING", "true");
+            put("ENABLE_SUBJECT_CACHING", "true");
             put("DEPLOYMENT_TYPE", System.getenv("DEPLOYMENT_TYPE"));
             put("BASE_APP_NAME", System.getenv("BASE_APP_NAME"));
             put("CONFIG_CLIENT_ID", System.getenv("CONFIG_CLIENT_ID"));

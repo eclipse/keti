@@ -24,7 +24,6 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ge.predix.acs.monitoring.AcsMonitoringUtilities;
-import com.ge.predix.acs.rest.AttributeAdapterConnection;
 
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 public class AcsMonitoringIT extends AbstractTestNGSpringContextTests {
@@ -57,7 +56,6 @@ public class AcsMonitoringIT extends AbstractTestNGSpringContextTests {
     }
 
     private ResponseEntity<String> hitHealthCheckUrl(final String uaaTokenUrl, final String clientId) {
-        AttributeAdapterConnection attributeAdapterConnection = new AttributeAdapterConnection();
         ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
         resource.setAccessTokenUri(uaaTokenUrl);
         resource.setClientId(clientId);
@@ -112,9 +110,11 @@ public class AcsMonitoringIT extends AbstractTestNGSpringContextTests {
         List<String> activeProfiles = Arrays.asList(this.environment.getActiveProfiles());
         Assert.assertTrue(activeProfiles.contains("titan") == isDependencyStatusUp(responseJson, "graphDb"));
         Assert.assertTrue(activeProfiles.contains("predix") == isDependencyStatusUp(responseJson, "zac"));
-        Assert.assertTrue((activeProfiles.contains("redis")
-                || activeProfiles.contains("cloud-redis")) == isDependencyStatusAsExpected(responseJson,
-                        "decisionCache", Status.UNKNOWN));
+        if (activeProfiles.contains("redis") || activeProfiles.contains("cloud-redis")) {
+            Assert.assertTrue(isDependencyStatusUp(responseJson, "decisionCache"));
+            Assert.assertTrue(isDependencyStatusUp(responseJson, "resourceCache"));
+            Assert.assertTrue(isDependencyStatusUp(responseJson, "subjectCache"));
+        }
     }
 
     @Test

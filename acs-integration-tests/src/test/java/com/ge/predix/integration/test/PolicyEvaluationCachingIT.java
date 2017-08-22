@@ -290,7 +290,7 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
      * This test makes sure that cached policy evaluation results are properly invalidated when a policy has multiple
      * resource attribute URI templates that match the request.
      */
-    @Test
+    @Test(enabled = false)
     public void testPolicyWithMultAttrUriTemplatatesEvalCache() throws Exception {
         BaseSubject subject = MARISSA_V1;
         PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper.createEvalRequest("GET",
