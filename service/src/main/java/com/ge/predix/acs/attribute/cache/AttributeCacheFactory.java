@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 public class AttributeCacheFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(AttributeCacheFactory.class);
 
-    @Value("${ENABLE_RESOURCE_CACHING:false}")
+    @Value("${ENABLE_RESOURCE_CACHING:true}")
     private boolean resourceCachingEnabled;
 
-    @Value("${ENABLE_SUBJECT_CACHING:false}")
+    @Value("${ENABLE_SUBJECT_CACHING:true}")
     private boolean subjectCachingEnabled;
 
     private Environment environment;

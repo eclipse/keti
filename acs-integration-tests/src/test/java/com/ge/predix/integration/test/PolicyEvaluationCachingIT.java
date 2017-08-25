@@ -214,6 +214,53 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
 
     /**
      * This test makes sure that cached policy evaluation results are properly invalidated when an affected resource
+     * is created.
+     */
+    @Test
+    public void testPolicyEvalCacheWhenResourceAdded() throws Exception {
+        String endpoint = this.acsUrl;
+
+        // create test subject
+        BaseSubject subject = MARISSA_V1;
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultOrgAttribute());
+
+        // create test policy set
+        String policyFile = "src/test/resources/policies/single-org-based.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, policyFile);
+
+        // post policy evaluation request
+        PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper
+                .createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanramon");
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
+
+        // at this point evaluation decision is cached
+        // timestamps for subject and resource involved in the decision are also cached even though resource doesn't
+        // exist yet
+
+        // add a resource which is expected to reset resource cached timestamp and invalidate cached decision
+        BaseResource resource = new BaseResource("/secured-by-value/sites/sanramon");
+        this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultOrgAttribute());
+
+        // post policy evaluation request; decision should be reevaluated.
+        postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+    }
+
+    /**
+     * This test makes sure that cached policy evaluation results are properly invalidated when an affected resource
      * is updated with different attributes.
      */
     @Test
@@ -250,6 +297,53 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
         responseBody = postForEntity.getBody();
         Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
 
+    }
+
+    /**
+     * This test makes sure that cached policy evaluation results are properly invalidated when an affected subject
+     * is created.
+     */
+    @Test
+    public void testPolicyEvalCacheWhenSubjectAdded() throws Exception {
+        String endpoint = this.acsUrl;
+
+        //create test resource
+        BaseResource resource = new BaseResource("/secured-by-value/sites/sanramon");
+        this.privilegeHelper.putResource(this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultAttribute());
+
+        // create test policy set
+        String policyFile = "src/test/resources/policies/single-site-based.json";
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, policyFile);
+
+        // post policy evaluation request
+        PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper
+                .createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanramon");
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        PolicyEvaluationResult responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.NOT_APPLICABLE);
+
+        // at this point evaluation decision is cached
+        // timestamps for resource and subject involved in the decision are also cached even though subject doesn't
+        // exist yet
+
+        // add a subject which is expected to reset subject cached timestamp and invalidate cached decision
+        BaseSubject subject = MARISSA_V1;
+        this.privilegeHelper.putSubject(this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+                this.privilegeHelper.getDefaultAttribute(), this.privilegeHelper.getDefaultAttribute());
+
+        // post policy evaluation request; decision should be reevaluated.
+        postForEntity = this.acsAdminRestTemplate.postForEntity(
+                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                new HttpEntity<>(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult.class);
+
+        Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
+        responseBody = postForEntity.getBody();
+        Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
     }
 
     /**
@@ -290,7 +384,7 @@ public class PolicyEvaluationCachingIT extends AbstractTestNGSpringContextTests 
      * This test makes sure that cached policy evaluation results are properly invalidated when a policy has multiple
      * resource attribute URI templates that match the request.
      */
-    @Test(enabled = false)
+    @Test
     public void testPolicyWithMultAttrUriTemplatatesEvalCache() throws Exception {
         BaseSubject subject = MARISSA_V1;
         PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper.createEvalRequest("GET",
