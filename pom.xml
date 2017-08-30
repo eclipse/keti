@@ -88,33 +88,20 @@
         <testng.version>6.9.10</testng.version>
         <cucumber.version>1.2.5</cucumber.version>
         <groovy-all.version>2.4.12</groovy-all.version>
+        <maven-surefire.version>2.20</maven-surefire.version>
+        <maven-failsafe.version>2.20</maven-failsafe.version>
+        <custom-argline>-Xms512m -Xmx1024m -XX:MaxMetaspaceSize=512m</custom-argline>
 
     </properties>
 
-    <repositories>
-        <repository>
-            <id>staging</id>
-            <name>Maven Staging Repo</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <distributionManagement>
         <repository>
-            <id>artifactory.releases</id>
-            <name>artifactory.releases</name>
-            <url>https://devcloud.swcoe.ge.com/artifactory/PREDIX</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
         <snapshotRepository>
-            <id>artifactory.snapshots</id>
-            <name>artifactory.snapshots</name>
-            <url>https://devcloud.swcoe.ge.com/artifactory/PREDIX-SNAPSHOT</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -234,6 +221,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -394,16 +382,6 @@
         </profile>
         <profile>
             <id>release</id>
-            <distributionManagement>
-                <repository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
-            </distributionManagement>
             <build>
                 <plugins>
                     <plugin>
@@ -446,7 +424,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -454,6 +432,13 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                                <configuration>
+                                    <homedir>${gpg.homedir}</homedir>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
