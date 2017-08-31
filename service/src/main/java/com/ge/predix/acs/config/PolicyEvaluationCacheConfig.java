@@ -20,15 +20,12 @@ import com.ge.predix.acs.policy.evaluation.cache.RedisPolicyEvaluationCache;
 public class PolicyEvaluationCacheConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyEvaluationCacheConfig.class);
 
-    @Value("${ENABLE_DECISION_CACHING:false}")
-    private boolean cachingEnabled;
-
     @Autowired
     private Environment environment;
 
     @Bean
-    public PolicyEvaluationCache cache() {
-        if (!this.cachingEnabled) {
+    public PolicyEvaluationCache cache(@Value("${ENABLE_DECISION_CACHING:true}") final boolean cachingEnabled) {
+        if (!cachingEnabled) {
             LOGGER.info("Caching disabled for policy evaluation");
             return new NonCachingPolicyEvaluationCache();
         }

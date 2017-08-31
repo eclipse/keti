@@ -69,7 +69,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
-     * This method will get the Policy Evaluation Result in the cache. It will check if any of the subject, policy
+     * This method will get the Policy Evaluation Result from the cache. It will check if any of the subject, policy
      * sets or resolved resource URI's have a timestamp in the cache after the timestamp of the Policy Evaluation
      * Result. If the key is not in the cache or the result is invalidated, it will return null. Also it will remove
      * the Policy EvaluationResult so that subsequent evaluations won't find the key in the cache.
@@ -94,6 +94,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         policyInvalidationTimeStamps.addAll(cachedEntries.getPolicySetsLastModified());
 
         Set<String> cachedResolvedResourceUris = cachedEvalResult.getResolvedResourceUris();
+
         //is requested resource id same as resolved resource uri ?
         if (cachedResolvedResourceUris.size() == 1 && cachedResolvedResourceUris.iterator().next()
                 .equals(evalRequestkey.getResourceId())) {
@@ -106,7 +107,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         }
 
         if (isCachedRequestInvalid(attributeInvalidationTimeStamps, policyInvalidationTimeStamps,
-                new DateTime(cachedEvalResult.getTimestamp()))) {
+                timestampToDateUTC(cachedEvalResult.getTimestamp()))) {
             delete(cachedEntries.getDecisionKey());
             LOGGER.debug("Cached decision for key '{}' is not valid.", cachedEntries.getDecisionKey());
             return null;
@@ -195,17 +196,17 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
     private void logCacheGetDebugMessages(final PolicyEvaluationRequestCacheKey key, final String redisKey,
             final List<String> keys, final List<String> values) {
-        if (LOGGER.isDebugEnabled()) {
-            LinkedHashSet<String> policySetIds = key.getPolicySetIds();
-            policySetIds.forEach(policySetId -> LOGGER.debug(String
-                    .format("Getting timestamp for policy set: '%s', key: '%s', timestamp:'%s'.", policySetId,
-                            keys.get(0), values.get(0))));
-            LOGGER.debug("Getting timestamp for resource: '{}', key: '{}', timestamp:'{}'.", key.getResourceId(),
-                    keys.get(1), values.get(1));
-            LOGGER.debug("Getting timestamp for subject: '{}', key: '{}', timestamp:'{}'.", key.getSubjectId(),
-                    keys.get(2), values.get(2));
-            LOGGER.debug("Getting policy evaluation from cache; key: '{}', value: '{}'.", redisKey, values.get(3));
+        LinkedHashSet<String> policySetIds = key.getPolicySetIds();
+        int idx = 0;
+        for (String policySetId : policySetIds) {
+            LOGGER.debug("Getting timestamp for policy set: '{}', key: '{}', timestamp:'{}'.", policySetId,
+                    keys.get(idx), values.get(idx++));
         }
+        LOGGER.debug("Getting timestamp for subject: '{}', key: '{}', timestamp:'{}'.", key.getSubjectId(),
+                keys.get(idx), values.get(idx++));
+        LOGGER.debug("Getting timestamp for resource: '{}', key: '{}', timestamp:'{}'.", key.getResourceId(),
+                keys.get(idx), values.get(idx++));
+        LOGGER.debug("Getting policy evaluation from cache; key: '{}', value: '{}'.", redisKey, values.get(idx));
     }
 
     // Set's the policy evaluation key to the policy evaluation result in the cache
@@ -213,7 +214,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     public void set(final PolicyEvaluationRequestCacheKey key, final PolicyEvaluationResult result) {
         try {
             setEntityTimestamps(key, result);
-            result.setTimestamp(new DateTime().getMillis());
+            result.setTimestamp(currentDateUTC().getMillis());
             String value = OBJECT_MAPPER.writeValueAsString(result);
             set(key.toDecisionKey(), value);
             LOGGER.debug("Setting policy evaluation to cache; key: '{}', value: '{}'.", key.toDecisionKey(), value);
@@ -228,6 +229,8 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         // decision.
         // We reset the timestamp to now for entities only if they do not exist in the cache so that we don't
         // invalidate previous cached decisions.
+        LOGGER.debug("Setting timestamp to now for entities if they do not exist in the cache"); 
+
         String zoneId = key.getZoneId();
         setSubjectIfNotExists(zoneId, key.getSubjectId());
 
@@ -257,7 +260,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     private void resetForEntity(final String zoneId, final String entityId, final EntityType entityType,
             final BiFunction<String, String, String> getKey) {
         String key = getKey.apply(zoneId, entityId);
-        String timestamp = timestampValue();
+        String timestamp = timestampUTC();
         logSetEntityTimestampsDebugMessage(timestamp, key, entityId, entityType);
         set(key, timestamp);
     }
@@ -265,7 +268,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     private void setEntityIfNotExists(final String zoneId, final String entityId,
             final BiFunction<String, String, String> getKey) {
         String key = getKey.apply(zoneId, entityId);
-        setIfNotExists(key, timestampValue());
+        setIfNotExists(key, timestampUTC());
     }
 
     private void logSetEntityTimestampsDebugMessage(final String timestamp, final String key, final String entityId,
@@ -343,17 +346,17 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     private void createMutliSetEntityMap(final String zoneId, final Map<String, String> map, final String subjectId,
             final EntityType entityType, final BiFunction<String, String, String> getKey) {
         String key = getKey.apply(zoneId, subjectId);
-        String timestamp = timestampValue();
+        String timestamp = timestampUTC();
         logSetEntityTimestampsDebugMessage(key, timestamp, subjectId, entityType);
         map.put(key, timestamp);
     }
 
     private boolean isCachedRequestInvalid(final List<String> attributeInvalidationTimeStamps,
-            final List<String> policyInvalidationTimeStamps, final DateTime policyEvalTimestamp) {
-        DateTime policyEvalTimestampUTC = policyEvalTimestamp.withZone(DateTimeZone.UTC);
+            final List<String> policyInvalidationTimeStamps, final DateTime policyEvalTimestampUTC) {
         if (haveEntitiesChanged(policyInvalidationTimeStamps, policyEvalTimestampUTC)) {
             return true;
         }
+
         if (this.connectorService.isResourceAttributeConnectorConfigured() || this.connectorService
                 .isSubjectAttributeConnectorConfigured()) {
             return haveConnectorCacheIntervalsLapsed(this.connectorService, policyEvalTimestampUTC);
@@ -376,12 +379,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
             if (null == value) {
                 return true;
             }
-            DateTime invalidationTimestampUTC;
-            try {
-                invalidationTimestampUTC = (OBJECT_MAPPER.readValue(value, DateTime.class)).withZone(DateTimeZone.UTC);
-            } catch (IOException e) {
-                throw new IllegalStateException("Failed to read timestamp from JSON.", e);
-            }
+            DateTime invalidationTimestampUTC = timestampToDateUTC(value);
             if (invalidationTimestampUTC.isAfter(policyEvalTimestampUTC)) {
                 LOGGER.debug("Privilege service attributes have timestamp '{}' which is after "
                         + "policy evaluation timestamp '{}'", invalidationTimestampUTC, policyEvalTimestampUTC);
@@ -393,7 +391,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
 
     boolean haveConnectorCacheIntervalsLapsed(final AttributeConnectorService localConnectorService,
             final DateTime policyEvalTimestampUTC) {
-        DateTime nowUTC = new DateTime().withZone(DateTimeZone.UTC);
+        DateTime nowUTC = currentDateUTC();
 
         int decisionAgeMinutes = Minutes.minutesBetween(policyEvalTimestampUTC, nowUTC).getMinutes();
 
@@ -436,12 +434,24 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         return key.matches("^[^:]*:sub-id:[^:]*$");
     }
 
-    private String timestampValue() {
+    private static DateTime currentDateUTC() {
+        return new DateTime().withZone(DateTimeZone.UTC);
+    }
+
+    private static String timestampUTC() {
         try {
-            return OBJECT_MAPPER.writeValueAsString(new DateTime());
+            return OBJECT_MAPPER.writeValueAsString(currentDateUTC().getMillis());
         } catch (IOException e) {
             throw new IllegalStateException("Failed to write timestamp as JSON.", e);
         }
+    }
+
+    private static DateTime timestampToDateUTC(final long timestamp) {
+        return new DateTime(timestamp).withZone(DateTimeZone.UTC);
+    }
+
+    private static DateTime timestampToDateUTC(final String timestamp) {
+        return new DateTime(Long.valueOf(timestamp)).withZone(DateTimeZone.UTC);
     }
 
     abstract void delete(String key);

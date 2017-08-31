@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.env.Environment;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -30,24 +29,23 @@ public class PolicyEvaluationCacheConfigTest {
 
     @Test
     public void testPolicyEvaluationCacheConfigDisabled() {
-        setupEnvironment(false, null);
-        assertThat(policyEvaluationCacheConfig.cache(), instanceOf(NonCachingPolicyEvaluationCache.class));
+        setupEnvironment(null);
+        assertThat(policyEvaluationCacheConfig.cache(false), instanceOf(NonCachingPolicyEvaluationCache.class));
     }
 
     @Test
     public void testPolicyEvaluationCacheConfigRedis() {
-        setupEnvironment(true, "redis");
-        assertThat(policyEvaluationCacheConfig.cache(), instanceOf(RedisPolicyEvaluationCache.class));
+        setupEnvironment("redis");
+        assertThat(policyEvaluationCacheConfig.cache(true), instanceOf(RedisPolicyEvaluationCache.class));
     }
 
     @Test
     public void testPolicyEvaluationCacheConfigCloudRedis() {
-        setupEnvironment(true, "cloud-redis");
-        assertThat(policyEvaluationCacheConfig.cache(), instanceOf(RedisPolicyEvaluationCache.class));
+        setupEnvironment("cloud-redis");
+        assertThat(policyEvaluationCacheConfig.cache(true), instanceOf(RedisPolicyEvaluationCache.class));
     }
 
-    private void setupEnvironment(final boolean cachingEnabled, final String springProfileActive) {
-        ReflectionTestUtils.setField(policyEvaluationCacheConfig, "cachingEnabled", cachingEnabled);
+    private void setupEnvironment(final String springProfileActive) {
         String[] redisEnvironment = {springProfileActive};
         Mockito.doReturn(redisEnvironment).when(mockEnvironment).getActiveProfiles();
     }
