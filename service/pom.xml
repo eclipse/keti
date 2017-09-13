@@ -482,20 +482,14 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <environmentVariables>
+                        <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan</SPRING_PROFILES_ACTIVE>
+                    </environmentVariables>
                     <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
                          and retained by Jenkins for each profile -->
-                    <reportsDirectory>${basedir}/surefire-reports</reportsDirectory>
+                    <reportsDirectory>${basedir}/surefire-reports-titan</reportsDirectory>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/unit-tests.xml</suiteXmlFile>
                     </suiteXmlFiles>
@@ -506,18 +500,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
+                    <environmentVariables>
+                        <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan</SPRING_PROFILES_ACTIVE>
+                    </environmentVariables>
                     <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
                          and retained by Jenkins for each profile -->
-                    <reportsDirectory>${basedir}/surefire-reports/controller-tests</reportsDirectory>
-                    <summaryFile>${basedir}/surefire-reports/controller-tests/failsafe-summary.xml</summaryFile>
-                    <systemProperties>
-                        <ZAC_URL>${ZAC_URL}</ZAC_URL>
-                        <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
-                        <ACS_DEFAULT_ISSUER_ID>http://acs.localhost:${UAA_LOCAL_PORT}/uaa</ACS_DEFAULT_ISSUER_ID>
-                        <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
-                        <ZAC_CLIENT_ID>fake-client</ZAC_CLIENT_ID>
-                        <ZAC_CLIENT_SECRET>fake-client</ZAC_CLIENT_SECRET>
-                    </systemProperties>
+                    <reportsDirectory>${basedir}/surefire-reports-titan/controller-tests</reportsDirectory>
+                    <summaryFile>${basedir}/surefire-reports-titan/controller-tests/failsafe-summary.xml</summaryFile>
                     <excludes>
                         <exclude>**/NonHierarchical*IT.java</exclude>
                     </excludes>
@@ -584,6 +573,79 @@
             </activation>
             <build>
                 <plugins>
+                    <!-- TODO: Once we isolate predix related files (including audit) into predix branch, -->
+                    <!-- compiler plugin configuration that explicitly excludes audit files could be removed -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>${maven.compiler.source}</source>
+                            <target>${maven.compiler.target}</target>
+                            <excludes>
+                                <exclude>com/ge/predix/acs/audit/*</exclude>
+                            </excludes>
+                            <testExcludes>
+                                <testExclude>com/ge/predix/acs/audit/*</testExclude>
+                            </testExcludes>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <environmentVariables>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
+                            </environmentVariables>
+                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
+                                 and retained by Jenkins for each profile -->
+                            <reportsDirectory>${basedir}/surefire-reports</reportsDirectory>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/unit-tests.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <environmentVariables>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
+                            </environmentVariables>
+                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
+                                 and retained by Jenkins for each profile -->
+                            <reportsDirectory>${basedir}/surefire-reports/controller-tests</reportsDirectory>
+                            <summaryFile>${basedir}/surefire-reports/controller-tests/failsafe-summary.xml</summaryFile>
+                            <excludes>
+                                <!-- Exclude graph database specific test for public profile -->
+                                <exclude>**/PolicyEvalWithGraphDbControllerIT.java</exclude>
+                                <exclude>**/Hierarchical*IT.java</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>public-titan</id>
+            <build>
+                <plugins>
+                    <!-- TODO: Once we isolate predix related files (including audit) into predix branch, -->
+                    <!-- compiler plugin configuration that explicitly excludes audit files could be removed -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
@@ -601,8 +663,9 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
-            <id>predix</id>
+            <id>predix-titan</id>
             <dependencies>
                 <dependency>
                     <groupId>com.ge.predix.audit</groupId>
@@ -638,164 +701,6 @@
                     <version>1.0.1</version>
                 </dependency>
             </dependencies>
-        </profile>
-        <profile>
-            <id>postgres</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.openjpa</groupId>
-                        <artifactId>openjpa-maven-plugin</artifactId>
-                        <version>${openjpa.version}</version>
-                        <configuration>
-                            <includes>**/dao/*.class</includes>
-                            <addDefaultConstructor>true</addDefaultConstructor>
-                            <enforcePropertyRestrictions>true</enforcePropertyRestrictions>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>enhancer</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>enhance</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.apache.openjpa</groupId>
-                                <artifactId>openjpa</artifactId>
-                                <!-- set the version to be the same as the
-                                    level in your runtime -->
-                                <version>${openjpa.version}</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <configuration>
-                            <mainClass>${start-class}</mainClass>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>repackage</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <source>${maven.compiler.source}</source>
-                            <target>${maven.compiler.target}</target>
-                            <excludes>
-                                <exclude>com/ge/predix/acs/audit/*</exclude>
-                            </excludes>
-                            <testExcludes>
-                                <testExclude>com/ge/predix/acs/audit/*</testExclude>
-                            </testExcludes>
-                        </configuration>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <environmentVariables>
-                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
-                                <reportsDirectory>${project.build.directory}/surefire-reports-postgres</reportsDirectory>
-                            </environmentVariables>
-                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
-                                 and retained by Jenkins for each profile -->
-                            <reportsDirectory>${basedir}/surefire-reports-postgres</reportsDirectory>
-                            <suiteXmlFiles>
-                                <suiteXmlFile>src/test/resources/unit-tests.xml</suiteXmlFile>
-                            </suiteXmlFiles>
-                        </configuration>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <configuration>
-                            <environmentVariables>
-                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
-                            </environmentVariables>
-                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
-                                 and retained by Jenkins for each profile -->
-                            <reportsDirectory>${basedir}/surefire-reports-postgres/controller-tests</reportsDirectory>
-                            <summaryFile>${basedir}/surefire-reports-postgres/controller-tests/failsafe-summary.xml</summaryFile>
-                            <systemProperties>
-                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
-                                <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
-                                <ACS_DEFAULT_ISSUER_ID>http://acs.localhost:${UAA_LOCAL_PORT}/uaa</ACS_DEFAULT_ISSUER_ID>
-                                <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
-                                <ZAC_CLIENT_ID>fake-client</ZAC_CLIENT_ID>
-                                <ZAC_CLIENT_SECRET>fake-client</ZAC_CLIENT_SECRET>
-                            </systemProperties>
-                            <excludes>
-                                <!-- Exclude graph database specific test for postgres profile -->
-                                <exclude>**/PolicyEvalWithGraphDbControllerIT.java</exclude>
-                                <exclude>**/Hierarchical*IT.java</exclude>
-                            </excludes>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>integration-test</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify</id>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-                <pluginManagement>
-                    <plugins>
-                        <!--This plugin's configuration is used to store
-                            Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-                        <plugin>
-                            <groupId>org.eclipse.m2e</groupId>
-                            <artifactId>lifecycle-mapping</artifactId>
-                            <version>1.0.0</version>
-                            <configuration>
-                                <lifecycleMappingMetadata>
-                                    <pluginExecutions>
-                                        <pluginExecution>
-                                            <pluginExecutionFilter>
-                                                <groupId>
-                                                    org.apache.openjpa
-                                                </groupId>
-                                                <artifactId>
-                                                    openjpa-maven-plugin
-                                                </artifactId>
-                                                <versionRange>
-                                                    [2.3.0,)
-                                                </versionRange>
-                                                <goals>
-                                                    <goal>enhance</goal>
-                                                </goals>
-                                            </pluginExecutionFilter>
-                                            <action>
-                                                <ignore/>
-                                            </action>
-                                        </pluginExecution>
-                                    </pluginExecutions>
-                                </lifecycleMappingMetadata>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
         </profile>
     </profiles>
 </project>
