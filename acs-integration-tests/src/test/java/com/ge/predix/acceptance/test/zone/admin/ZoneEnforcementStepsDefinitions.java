@@ -21,12 +21,8 @@ import static com.ge.predix.test.utils.ACSTestUtil.ACS_VERSION;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -43,14 +39,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.ge.predix.acs.model.PolicySet;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
-import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.CreatePolicyStatus;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
-import com.ge.predix.test.utils.UaaTestUtil;
-import com.ge.predix.test.utils.ZacTestUtil;
-import com.ge.predix.test.utils.ZoneHelper;
 
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
@@ -62,26 +55,8 @@ import cucumber.api.java.en.When;
 //Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules.
 public class ZoneEnforcementStepsDefinitions {
 
-    @Value("${ACS_UAA_URL}")
-    private String uaaUrl;
-
-    @Value("${zone1UaaUrl:${ACS_UAA_URL}}")
-    private String zone1UaaBaseUrl;
-
-    @Value("${zone2UaaUrl:${ACS_UAA_URL}}")
-    private String zone2UaaBaseUrl;
-
-    @Value("${ZONE1_NAME:testzone1}")
     private String zone1Name;
-
-    @Value("${ZONE2_NAME:testzone2}")
     private String zone2Name;
-
-    @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
-
-    @Autowired
-    private ZoneHelper zoneHelper;
 
     @Autowired
     private PolicyHelper policyHelper;
@@ -90,7 +65,7 @@ public class ZoneEnforcementStepsDefinitions {
     private PrivilegeHelper privilegeHelper;
 
     @Autowired
-    private ZacTestUtil zacTestUtil;
+    private ACSITSetUpFactory acsitSetUpFactory;
 
     @Autowired
     Environment env;
@@ -112,56 +87,25 @@ public class ZoneEnforcementStepsDefinitions {
     private String testPolicyName;
 
     private ResponseEntity<PolicySet> policyset;
-    private OAuth2RestTemplate acsAdminRestTemplate;
     private OAuth2RestTemplate acsZone1Template;
     private OAuth2RestTemplate acsZone2Template;
-    private boolean registerWithZac;
 
     @Before
     public void setup() throws JsonParseException, JsonMappingException, IOException {
-        this.acsUrl = this.zoneHelper.getAcsBaseURL();
-        this.zone1Headers = ACSTestUtil.httpHeaders();
-        this.zone1Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
-        if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
-            setupPublicACS();
-        } else {
-            setupPredixACS();
-        }
-    }
-
-    private void setupPredixACS() throws JsonParseException, JsonMappingException, IOException {
-        this.zacTestUtil.assumeZacServerAvailable();
-        this.acsAdminRestTemplate = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
-        this.acsZone1Template = this.acsRestTemplateFactory.getACSZone1Template();
-        this.acsZone2Template = this.acsRestTemplateFactory.getACSZone2Template();
-        this.registerWithZac = true;
-        // each acs zone trusts a different issuer
-        // create acs zone 1 which trusts the primary zone issuer
-        this.zoneHelper.createPrimaryTestZone();
-    }
-
-    private void setupPublicACS() throws JsonParseException, JsonMappingException, IOException {
-        UaaTestUtil uaaTestUtil = new UaaTestUtil(this.acsRestTemplateFactory.getOAuth2RestTemplateForUaaAdmin(),
-                this.uaaUrl);
-        uaaTestUtil.setup(Arrays.asList(new String[] { this.zone1Name, this.zone2Name }));
-        uaaTestUtil.setupAcsZoneClient(this.zone1Name, "zone1AdminClient", "zone1AdminClientSecret");
-        uaaTestUtil.setupAcsZoneClient(this.zone2Name, "zone2AdminClient", "zone2AdminClientSecret");
-        this.acsAdminRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForAcsAdmin();
-        this.acsZone1Template = this.acsRestTemplateFactory.getOAuth2RestTemplateForZone1AdminClient();
-        this.acsZone2Template = this.acsRestTemplateFactory.getOAuth2RestTemplateForZone2AdminClient();
-        this.registerWithZac = false;
-        // both acs zones trust the same issuer
-        // create acs zone 1 which trusts the primary zone issuer
-        this.zoneHelper.createTestZone(this.acsAdminRestTemplate, this.zone1Name, this.registerWithZac);
+        this.acsitSetUpFactory.setUp();
+        this.acsUrl = this.acsitSetUpFactory.getAcsUrl();
+        this.zone1Headers = this.acsitSetUpFactory.getZone1Headers();
+        this.acsZone1Template = this.acsitSetUpFactory.getAcsZoneAdminRestTemplate();
+        this.acsZone2Template = this.acsitSetUpFactory.getAcsZone2AdminRestTemplate();
+        this.zone1Name = this.acsitSetUpFactory.getZone1().getName();
+        this.zone2Name = this.acsitSetUpFactory.getZone2().getName();
     }
 
     @Given("^zone 1 and zone (.*?)")
     public void given_zone_1_and_zone(final String subdomainSuffix) throws Throwable {
-        Map<String, Object> trustedIssuers = new HashMap<>();
-        // create acs zone 2 which trusts the zone 2 issuer
-        // for the public profile, the zone 2 issuer is the same as the primary zone issuer
-        trustedIssuers.put("trustedIssuerIds", Arrays.asList(this.zone2UaaBaseUrl + "/oauth/token"));
-        this.zoneHelper.createTestZone(this.acsAdminRestTemplate, this.zone2Name, this.registerWithZac, trustedIssuers);
+        // just checking zones are created ok
+        Assert.assertNotNull(this.acsitSetUpFactory.getZone1().getName());
+        Assert.assertNotNull(this.acsitSetUpFactory.getZone2().getName());
     }
 
     @When("^client_two does a PUT on (.*?) with (.*?) in zone (.*?)$")
@@ -351,7 +295,6 @@ public class ZoneEnforcementStepsDefinitions {
 
     @After
     public void cleanAfterScenario() {
-        this.zoneHelper.deleteZone(this.acsAdminRestTemplate, this.zone1Name, this.registerWithZac);
-        this.zoneHelper.deleteZone(this.acsAdminRestTemplate, this.zone2Name, this.registerWithZac);
+        this.acsitSetUpFactory.destroy();
     }
 }

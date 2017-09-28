@@ -17,7 +17,6 @@
 package com.ge.predix.integration.test;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -56,9 +55,6 @@ public class ACSCorsFilterIT extends AbstractTestNGSpringContextTests {
 
     @BeforeClass
     public void setup() throws JsonParseException, JsonMappingException, IOException {
-        if (!Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
-            this.zacTestUtil.assumeZacServerAvailable();
-        }
         client = HttpClientBuilder.create().useSystemProperties().build();
     }
 

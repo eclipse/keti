@@ -24,13 +24,11 @@ import static com.ge.predix.test.utils.PrivilegeHelper.DEFAULT_SUBJECT_ID;
 import static com.ge.predix.test.utils.PrivilegeHelper.DEFAULT_SUBJECT_IDENTIFIER;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -44,13 +42,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
-import com.ge.predix.test.utils.ACSRestTemplateFactory;
-import com.ge.predix.test.utils.ACSTestUtil;
+import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
-import com.ge.predix.test.utils.UaaTestUtil;
-import com.ge.predix.test.utils.ZacTestUtil;
-import com.ge.predix.test.utils.ZoneHelper;
 
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
@@ -68,15 +62,6 @@ import cucumber.api.java.en.When;
 @SuppressWarnings({ "nls" })
 public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContextTests {
 
-    @Value("${ZONE1_NAME:testzone1}")
-    private String acsZone1Name;
-
-    @Value("${ACS_UAA_URL}")
-    private String uaaUrl;
-
-    @Autowired
-    private ZoneHelper zoneHelper;
-
     @Autowired
     private PolicyHelper policyHelper;
 
@@ -84,49 +69,24 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
     private PrivilegeHelper privilegeHelper;
 
     @Autowired
-    private ZacTestUtil zacTestUtil;
-
-    @Autowired
     Environment env;
-
+    
     @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
+    private ACSITSetUpFactory acsitSetUpFactory;
 
     private String testPolicyName;
     private ResponseEntity<PolicyEvaluationResult> policyEvaluationResponse;
     private String acsUrl;
     private HttpHeaders zone1Headers;
     private OAuth2RestTemplate acsAdminRestTemplate;
-    private boolean registerWithZac;
+
 
     @Before
     public void setup() throws JsonParseException, JsonMappingException, IOException {
-        this.acsUrl = zoneHelper.getAcsBaseURL();
-        this.zone1Headers = ACSTestUtil.httpHeaders();
-        this.zone1Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
-        if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
-            setupPublicACS();
-        } else {
-            setupPredixACS();
-        }
-    }
-
-    private void setupPredixACS() throws JsonParseException, JsonMappingException, IOException {
-        this.zacTestUtil.assumeZacServerAvailable();
-
-        this.acsAdminRestTemplate = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
-        this.registerWithZac = true;
-        this.zoneHelper.createTestZone(this.acsAdminRestTemplate, this.acsZone1Name, this.registerWithZac);
-    }
-
-    private void setupPublicACS() throws JsonParseException, JsonMappingException, IOException {
-        UaaTestUtil uaaTestUtil = new UaaTestUtil(this.acsRestTemplateFactory.getOAuth2RestTemplateForUaaAdmin(),
-                this.uaaUrl);
-        uaaTestUtil.setup(Arrays.asList(new String[] { this.acsZone1Name }));
-
-        this.acsAdminRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForAcsAdmin();
-        this.registerWithZac = false;
-        this.zoneHelper.createTestZone(this.acsAdminRestTemplate, this.acsZone1Name, this.registerWithZac);
+        this.acsitSetUpFactory.setUp();
+        this.acsUrl = this.acsitSetUpFactory.getAcsUrl();
+        this.zone1Headers =this.acsitSetUpFactory.getZone1Headers();
+        this.acsAdminRestTemplate=this.acsitSetUpFactory.getAcsZoneAdminRestTemplate();      
     }
 
     /*
@@ -179,6 +139,7 @@ public class PolicyEvaluationStepsDefinitions extends AbstractTestNGSpringContex
                 this.zone1Headers);
         this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, this.acsUrl, DEFAULT_SUBJECT_ID,
                 this.zone1Headers);
+        this.acsitSetUpFactory.destroy();
     }
 
     /*
