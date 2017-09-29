@@ -105,12 +105,22 @@ TITAN_ARTIFACT_PREFIX='com.thinkaurelius.titan:titan'
 THRIFT_ARTIFACT_PREFIX='org.apache.thrift:libthrift'
 SWAGGER_UI_ARTIFACT_PREFIX='io.springfox:springfox-swagger-ui'
 
-MVN_DEPENDENCY_TREE="$( mvn dependency:tree | grep '^\[INFO\] [+\]-' | awk '{print $3}' | sort -u )"
-for a in $( echo "$MVN_DEPENDENCY_TREE" | grep -v "com\.ge\.predix:acs-\|org\.springframework\.boot:spring-boot-starter-\|${TITAN_ARTIFACT_PREFIX}\|${THRIFT_ARTIFACT_PREFIX}\|${SWAGGER_UI_ARTIFACT_PREFIX}" ); do
+# NOTE: These dependencies either don't have a corresponding sources JAR or are not found in the standard location in Maven Central so they need to be manually downloaded
+JSON_LIB_ARTIFACT_PREFIX='net.sf.json-lib:json-lib'
+SERVICEMIX_ARTIFACT_PREFIX='org.apache.servicemix.bundles:org.apache.servicemix.bundles.commons-csv'
+BSH_ARTIFACT_PREFIX='org.beanshell:bsh'
+
+MVN_DEPENDENCY_TREE="$( mvn dependency:tree | grep '^\[INFO\] [|+]' | \sed 's/\[INFO\] [-\+| ]*//' | sort -u )"
+for a in $( echo "$MVN_DEPENDENCY_TREE" | grep -v "com\.ge\.predix:acs-\|org\.springframework\.boot:spring-boot-starter-\|${TITAN_ARTIFACT_PREFIX}\|${THRIFT_ARTIFACT_PREFIX}\|${SWAGGER_UI_ARTIFACT_PREFIX}\|${SERVICEMIX_ARTIFACT_PREFIX}\|${BSH_ARTIFACT_PREFIX}\|${JSON_LIB_ARTIFACT_PREFIX}" ); do
     GROUP_ID=$( echo "$a" | awk -F ':' '{print $1}' )
     ARTIFACT_ID=$( echo "$a" | awk -F ':' '{print $2}' )
     PACKAGING=$( echo "$a" | awk -F ':' '{print $3}' )
-    VERSION=$( echo "$a" | awk -F ':' '{print $4}' )
+
+    if [[ -n "$( echo "$a" | awk -F ':' '{print $6}' )" ]]; then
+        VERSION=$( echo "$a" | awk -F ':' '{print $5}' )
+    else
+        VERSION=$( echo "$a" | awk -F ':' '{print $4}' )
+    fi
 
     archive_artifact_sources "$GROUP_ID" "$ARTIFACT_ID" "$PACKAGING" "$VERSION" "$LOCAL_MAVEN_REPO" 'true'
 
