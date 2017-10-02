@@ -19,25 +19,17 @@ package com.ge.predix.acceptance.test.policy.admin;
 import static com.ge.predix.test.utils.PrivilegeHelper.DEFAULT_SUBJECT_ID;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.testng.Assert;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.ge.predix.test.utils.ACSRestTemplateFactory;
-import com.ge.predix.test.utils.ACSTestUtil;
+import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.CreatePolicyStatus;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
-import com.ge.predix.test.utils.UaaTestUtil;
-import com.ge.predix.test.utils.ZacTestUtil;
-import com.ge.predix.test.utils.ZoneHelper;
 
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
@@ -53,15 +45,6 @@ import cucumber.api.java.en.Then;
 @SuppressWarnings({ "nls" })
 public class PolicyCreationStepsDefinitions {
 
-    @Value("${ZONE1_NAME:testzone1}")
-    private String acsZone1Name;
-
-    @Value("${ACS_UAA_URL}")
-    private String uaaUrl;
-
-    @Autowired
-    private ZoneHelper zoneHelper;
-
     @Autowired
     private PolicyHelper policyHelper;
 
@@ -69,70 +52,39 @@ public class PolicyCreationStepsDefinitions {
     private PrivilegeHelper privilegeHelper;
 
     @Autowired
-    private ZacTestUtil zacTestUtil;
-
-    @Autowired
     Environment env;
 
     @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
+    private ACSITSetUpFactory acsitSetUpFactory;
 
     private String testPolicyName;
 
     CreatePolicyStatus status;
 
-    private HttpHeaders zone1Headers;
-    private OAuth2RestTemplate acsAdminRestTemplate;
-    private boolean registerWithZac;
-
     @Before
     public void setup() throws JsonParseException, JsonMappingException, IOException {
-        this.zone1Headers = ACSTestUtil.httpHeaders();
-        this.zone1Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
-        if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
-            setupPublicACS();
-        } else {
-            setupPredixACS();
-        }
-    }
-
-    private void setupPredixACS() throws JsonParseException, JsonMappingException, IOException {
-        this.zacTestUtil.assumeZacServerAvailable();
-
-        this.acsAdminRestTemplate = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
-        this.registerWithZac = true;
-        this.zoneHelper.createTestZone(this.acsAdminRestTemplate, this.acsZone1Name, this.registerWithZac);
-    }
-
-    private void setupPublicACS() throws JsonParseException, JsonMappingException, IOException {
-        UaaTestUtil uaaTestUtil = new UaaTestUtil(this.acsRestTemplateFactory.getOAuth2RestTemplateForUaaAdmin(),
-                this.uaaUrl);
-        uaaTestUtil.setup(Arrays.asList(new String[] { this.acsZone1Name }));
-
-        this.acsAdminRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForAcsAdmin();
-        this.registerWithZac = false;
-        this.zoneHelper.createTestZone(this.acsAdminRestTemplate, this.acsZone1Name, this.registerWithZac);
+        this.acsitSetUpFactory.setUp();
     }
 
     @Given("^A policy with no action defined$")
     public void a_policy_with_no_action_defined() throws Throwable {
         this.testPolicyName = "no-defined-action-policy-set";
         this.status = this.policyHelper.createPolicySet("src/test/resources/no-defined-action-policy-set.json",
-                this.acsAdminRestTemplate, this.zone1Headers);
+                this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(), this.acsitSetUpFactory.getZone1Headers());
     }
 
     @Given("^A policy with single valid action defined$")
     public void a_policy_with_single_valid_action_defined() throws Throwable {
         this.testPolicyName = "single-action-defined-policy-set";
         this.status = this.policyHelper.createPolicySet("src/test/resources/single-action-defined-policy-set.json",
-                this.acsAdminRestTemplate, this.zone1Headers);
+                this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(), this.acsitSetUpFactory.getZone1Headers());
     }
 
     @Given("^A policy with multiple valid actions defined$")
     public void a_policy_with_multiple_valid_actions_defined() throws Throwable {
         this.testPolicyName = "multiple-actions-defined-policy-set";
         this.status = this.policyHelper.createPolicySet("src/test/resources/multiple-actions-defined-policy-set.json",
-                this.acsAdminRestTemplate, this.zone1Headers);
+                this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(), this.acsitSetUpFactory.getZone1Headers());
     }
 
     @Then("^the policy creation returns (.*)$")
@@ -144,8 +96,8 @@ public class PolicyCreationStepsDefinitions {
     public void policy_with_single_invalid_action_defined() throws Throwable {
         this.testPolicyName = "single-invalid-action-defined-policy-set";
         this.status = this.policyHelper.createPolicySet(
-                "src/test/resources/single-invalid-action-defined-policy-set.json", this.acsAdminRestTemplate,
-                this.zone1Headers);
+                "src/test/resources/single-invalid-action-defined-policy-set.json",
+                this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(), this.acsitSetUpFactory.getZone1Headers());
     }
 
     @Given("^A policy with multiple actions containing one invalid action defined")
@@ -153,15 +105,16 @@ public class PolicyCreationStepsDefinitions {
         this.testPolicyName = "multiple-actions-with-single-invalid-action-defined-policy-set";
         this.status = this.policyHelper.createPolicySet(
                 "src/test/resources/multiple-actions-with-single-invalid-action-defined-policy-set.json",
-                this.acsAdminRestTemplate, this.zone1Headers);
+                this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(), this.acsitSetUpFactory.getZone1Headers());
     }
 
     @After
     public void cleanAfterScenario() throws Exception {
-        String acsBaseUrl = zoneHelper.getAcsBaseURL();
-        this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, acsBaseUrl, this.testPolicyName,
-                this.zone1Headers);
-        this.privilegeHelper.deleteSubject(this.acsAdminRestTemplate, acsBaseUrl, DEFAULT_SUBJECT_ID,
-                this.zone1Headers);
+        String acsBaseUrl = this.acsitSetUpFactory.getAcsUrl();
+        this.policyHelper.deletePolicySet(this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(), acsBaseUrl,
+                this.testPolicyName, this.acsitSetUpFactory.getZone1Headers());
+        this.privilegeHelper.deleteSubject(this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(), acsBaseUrl,
+                DEFAULT_SUBJECT_ID, this.acsitSetUpFactory.getZone1Headers());
+        this.acsitSetUpFactory.destroy();
     }
 }

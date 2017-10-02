@@ -18,7 +18,6 @@ package com.ge.predix.integration.test;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +39,6 @@ import org.springframework.cloud.sleuth.util.ArrayListSpanAccumulator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -62,28 +60,25 @@ import com.ge.predix.acs.rest.AttributeConnector;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.acs.rest.Zone;
-import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;
-import com.ge.predix.test.utils.UaaTestUtil;
-import com.ge.predix.test.utils.ZacTestUtil;
-import com.ge.predix.test.utils.ZoneHelper;
+import com.ge.predix.test.utils.ZoneFactory;
 
 @Configuration
 @ImportResource("classpath:integration-test-spring-context.xml")
 class PolicyEvaluationWithAttributeConnectorITConfiguration {
-    @Autowired
-    private Environment environment;
 
     @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
+    private ACSITSetUpFactory acsitSetUpFactory;
 
     @Autowired
     private DefaultTracer tracer;
 
     private void setRestTemplateInterceptor(final RestTemplate restTemplate) {
-        restTemplate.setInterceptors(Collections.singletonList(new TraceRestTemplateInterceptor(this.tracer,
-                new ZipkinHttpSpanInjector(), new HttpTraceKeysInjector(this.tracer, new TraceKeys()))));
+        restTemplate.setInterceptors(Collections.singletonList(
+                new TraceRestTemplateInterceptor(this.tracer, new ZipkinHttpSpanInjector(),
+                        new HttpTraceKeysInjector(this.tracer, new TraceKeys()))));
     }
 
     @Bean
@@ -93,15 +88,17 @@ class PolicyEvaluationWithAttributeConnectorITConfiguration {
     }
 
     @Bean
-    public OAuth2RestTemplate acsAdminRestTemplate() {
+    public OAuth2RestTemplate acsAdminRestTemplate() throws IOException {
         OAuth2RestTemplate acsAdminRestTemplate;
-        if (Arrays.asList(this.environment.getActiveProfiles()).contains("public")) {
-            acsAdminRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForAcsAdmin();
-        } else {
-            acsAdminRestTemplate = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
-        }
+        this.acsitSetUpFactory.setUp();
+        acsAdminRestTemplate = this.acsitSetUpFactory.getAcsAdminRestTemplate2();
         setRestTemplateInterceptor(acsAdminRestTemplate);
         return acsAdminRestTemplate;
+    }
+    
+    @Bean
+    public ACSITSetUpFactory acsitSetUpFactory() {
+        return this.acsitSetUpFactory;
     }
 }
 
@@ -127,16 +124,7 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
     private String adapterUaaClientSecret;
 
     @Autowired
-    private Environment environment;
-
-    @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
-
-    @Autowired
-    private ZacTestUtil zacTestUtil;
-
-    @Autowired
-    private ZoneHelper zoneHelper;
+    private ZoneFactory zoneFactory;
 
     @Autowired
     private PolicyHelper policyHelper;
@@ -145,12 +133,15 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
     private OAuth2RestTemplate acsAdminRestTemplate;
 
     @Autowired
+    private ACSITSetUpFactory acsitSetUpFactory;
+
+    @Autowired
     private DefaultTracer tracer;
 
     private static final String TEST_PART_ID = "part/03f95db1-4255-4265-a509-f7bca3e1fee4";
 
     private Zone zone;
-    private boolean registerWithZac;
+
     private URI resourceAttributeConnectorUrl;
 
     private HttpHeaders zoneHeader() throws IOException {
@@ -161,8 +152,9 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
 
     private void configureAttributeConnector(final boolean isActive) throws IOException {
 
-        List<AttributeAdapterConnection> adapters = Collections.singletonList(new AttributeAdapterConnection(
-                this.adapterEndpoint, this.adapterUaaTokenUrl, this.adapterUaaClientId, this.adapterUaaClientSecret));
+        List<AttributeAdapterConnection> adapters = Collections.singletonList(
+                new AttributeAdapterConnection(this.adapterEndpoint, this.adapterUaaTokenUrl, this.adapterUaaClientId,
+                        this.adapterUaaClientSecret));
 
         AttributeConnector attributeConnector = new AttributeConnector();
         attributeConnector.setIsActive(isActive);
@@ -171,60 +163,44 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
                 new HttpEntity<>(attributeConnector, zoneHeader()), AttributeConnector.class);
     }
 
-    private void setupPredixAcs() throws IOException {
-        this.zacTestUtil.assumeZacServerAvailable();
-        this.registerWithZac = true;
-    }
-
-    private void setupPublicAcs() throws IOException {
-        UaaTestUtil uaaTestUtil = new UaaTestUtil(this.acsRestTemplateFactory.getOAuth2RestTemplateForUaaAdmin(),
-                this.acsUaaUrl);
-        uaaTestUtil.setup(Collections.singletonList(this.acsZone1Name));
-        this.registerWithZac = false;
-    }
-
     @BeforeClass
     void beforeClass() throws IOException {
-        if (Arrays.asList(this.environment.getActiveProfiles()).contains("public")) {
-            setupPublicAcs();
-        } else {
-            setupPredixAcs();
-        }
 
-        this.zone = this.zoneHelper.createTestZone(this.acsAdminRestTemplate, this.acsZone1Name, this.registerWithZac);
-        this.resourceAttributeConnectorUrl = URI.create(this.zoneHelper.getAcsBaseURL() + "/v1/connector/resource");
+        this.zone = this.acsitSetUpFactory.getZone1();
+        this.resourceAttributeConnectorUrl = URI.create(this.zoneFactory.getAcsBaseURL() + "/v1/connector/resource");
     }
 
     private void deconfigureAttributeConnector() throws IOException {
-        this.acsAdminRestTemplate.exchange(this.resourceAttributeConnectorUrl, HttpMethod.DELETE,
-                new HttpEntity<>(zoneHeader()), Void.class);
+        this.acsAdminRestTemplate
+                .exchange(this.resourceAttributeConnectorUrl, HttpMethod.DELETE, new HttpEntity<>(zoneHeader()),
+                        Void.class);
     }
 
     @AfterClass
     void afterClass() throws IOException {
-        this.zoneHelper.deleteZone(this.acsAdminRestTemplate, this.acsZone1Name, this.registerWithZac);
+        this.acsitSetUpFactory.destroy();
     }
 
     @Test(dataProvider = "adapterStatusesAndResultingEffects")
     public void testPolicyEvaluationWithAdapters(final boolean adapterActive, final Effect expectedEffect,
-            final boolean enableSleuthTracing)
-            throws Exception {
-        String testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, zoneHeader(),
-                this.zoneHelper.getAcsBaseURL(),
-                "src/test/resources/policy-set-with-one-policy-using-resource-attributes-from-asset-adapter.json");
+            final boolean enableSleuthTracing) throws Exception {
+        String testPolicyName = this.policyHelper
+                .setTestPolicy(this.acsAdminRestTemplate, zoneHeader(), this.zoneFactory.getAcsBaseURL(),
+                        "src/test/resources/policy-set-with-one-policy-using-resource-attributes-from-asset-adapter"
+                                + ".json");
 
         try {
             this.configureAttributeConnector(adapterActive);
-            PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper.createEvalRequest("GET",
-                    "testSubject", TEST_PART_ID, null);
+            PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper
+                    .createEvalRequest("GET", "testSubject", TEST_PART_ID, null);
 
             if (enableSleuthTracing) {
                 this.tracer.continueSpan(Span.builder().traceId(1L).spanId(2L).parent(3L).build());
             }
 
-            ResponseEntity<PolicyEvaluationResult> policyEvaluationResponse = this.acsAdminRestTemplate.postForEntity(
-                    this.zoneHelper.getAcsBaseURL() + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
-                    new HttpEntity<>(policyEvaluationRequest, zoneHeader()), PolicyEvaluationResult.class);
+            ResponseEntity<PolicyEvaluationResult> policyEvaluationResponse = this.acsAdminRestTemplate
+                    .postForEntity(this.zoneFactory.getAcsBaseURL() + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                            new HttpEntity<>(policyEvaluationRequest, zoneHeader()), PolicyEvaluationResult.class);
             Assert.assertEquals(policyEvaluationResponse.getStatusCode(), HttpStatus.OK);
 
             HttpHeaders responseHeaders = policyEvaluationResponse.getHeaders();
@@ -237,8 +213,9 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
             PolicyEvaluationResult policyEvaluationResult = policyEvaluationResponse.getBody();
             Assert.assertEquals(policyEvaluationResult.getEffect(), expectedEffect);
         } finally {
-            this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.zoneHelper.getAcsBaseURL(),
-                    testPolicyName, zoneHeader());
+            this.policyHelper
+                    .deletePolicySet(this.acsAdminRestTemplate, this.zoneFactory.getAcsBaseURL(), testPolicyName,
+                            zoneHeader());
             this.deconfigureAttributeConnector();
         }
     }

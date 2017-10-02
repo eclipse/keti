@@ -14,7 +14,6 @@
 # limitations under the License.
 ################################################################################
 
-
 CF_OUTPUT=$(cf t)
 if [[ $CF_OUTPUT == *"Not logged in"* ]]; then
   echo $'\nYou must be logged into cloud foundry for this script to execute successfully.\n'

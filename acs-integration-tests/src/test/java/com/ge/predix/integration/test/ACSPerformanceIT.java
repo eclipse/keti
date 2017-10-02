@@ -41,11 +41,11 @@ import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
+import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.ACSRestTemplateFactory;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
-import com.ge.predix.test.utils.ZacTestUtil;
-import com.ge.predix.test.utils.ZoneHelper;
+import com.ge.predix.test.utils.ZoneFactory;
 
 @SuppressWarnings({ "nls" })
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
@@ -56,7 +56,7 @@ public class ACSPerformanceIT extends AbstractTestNGSpringContextTests {
     private ACSRestTemplateFactory acsRestTemplateFactory;
 
     @Autowired
-    private ZoneHelper zoneHelper;
+    private ACSITSetUpFactory acsitSetUpFactory;
 
     @Autowired
     private PolicyHelper policyHelper;
@@ -64,10 +64,10 @@ public class ACSPerformanceIT extends AbstractTestNGSpringContextTests {
     @Autowired
     private PrivilegeHelper privilegeHelper;
 
-    private String zoneUrl;
-
     @Autowired
-    private ZacTestUtil zacTestUtil;
+    private ZoneFactory zoneFactory;
+
+    private String zoneUrl;
 
     private String testPolicyName;
     private OAuth2RestTemplate acsRestTemplate;
@@ -76,12 +76,10 @@ public class ACSPerformanceIT extends AbstractTestNGSpringContextTests {
 
     @BeforeClass
     public void setup() throws JsonParseException, JsonMappingException, IOException {
-        this.zacTestUtil.assumeZacServerAvailable();
 
-        this.zoneHelper.createPrimaryTestZone();
-        this.zoneUrl = this.zoneHelper.getZone1Url();
-
-        this.acsRestTemplate = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
+        this.acsitSetUpFactory.setUp();
+        this.zoneUrl = this.zoneFactory.getZoneSpecificUrl(this.acsitSetUpFactory.getZone1().getSubdomain());
+        this.acsRestTemplate = this.acsitSetUpFactory.getAcsZoneAdminRestTemplate();
         this.defaultSubject = new BaseSubject(DEFAULT_SUBJECT_ID);
         this.privilegeHelper.putSubject(this.acsRestTemplate, this.defaultSubject, this.zoneUrl, null,
                 this.privilegeHelper.getDefaultAttribute());
@@ -94,6 +92,7 @@ public class ACSPerformanceIT extends AbstractTestNGSpringContextTests {
     public void tearDown() throws Exception {
         this.policyHelper.deletePolicySet(this.testPolicyName);
         this.privilegeHelper.deleteSubject(this.defaultSubject.getSubjectIdentifier());
+        this.acsitSetUpFactory.destroy();
     }
 
     @AfterMethod
@@ -105,12 +104,13 @@ public class ACSPerformanceIT extends AbstractTestNGSpringContextTests {
     @Test(invocationCount = 2)
     public void testPolicyEvalPerformanceWithLargePolicySet() throws Exception {
 
-        PolicyEvaluationRequestV1 request = this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION,
-                this.defaultSubject.getSubjectIdentifier(),
-                (new BaseResource(DEFAULT_RESOURCE_IDENTIFIER)).getResourceIdentifier(), null);
+        PolicyEvaluationRequestV1 request = this.policyHelper
+                .createEvalRequest(NOT_MATCHING_ACTION, this.defaultSubject.getSubjectIdentifier(),
+                        (new BaseResource(DEFAULT_RESOURCE_IDENTIFIER)).getResourceIdentifier(), null);
 
-        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsRestTemplate.postForEntity(
-                this.zoneUrl + PolicyHelper.ACS_POLICY_EVAL_API_PATH, request, PolicyEvaluationResult.class);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsRestTemplate
+                .postForEntity(this.zoneUrl + PolicyHelper.ACS_POLICY_EVAL_API_PATH, request,
+                        PolicyEvaluationResult.class);
 
         Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
         PolicyEvaluationResult responseBody = postForEntity.getBody();

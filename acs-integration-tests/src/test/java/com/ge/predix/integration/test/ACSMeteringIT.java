@@ -49,6 +49,20 @@ import com.nurego.Nurego;
 import com.nurego.model.Entitlement;
 import com.nurego.model.Subscription;
 
+
+/* TODO
+ * Reverted the implementation where we do not use ACSITSetupfactory for setting up the testcase because of the below
+ * error with nurego subscription model
+ *
+ * The metering-related test failure in the latest run of the acs-integration-pullrequest job for the predix-cloud
+ * and predix-cloud-titan profiles is because test-zone-pipe3 is the Nurego subscription ID used in CF but what's
+ * actually generated here is ACSITSetUpFactoryPublic<UUID>. We should either keep the subscription ID unchanged or
+ * somehow use Nurego APIs to dynamically create the subscription, run tests in this class, then delete the
+ * subscription  (the former is probably simpler).
+ *
+ * Need to change the implementation in sync with other test cases
+ * */
+
 @SuppressWarnings({ "nls" })
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
