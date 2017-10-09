@@ -247,6 +247,8 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
                         Stream.of(twoPolicySets.get(0).getName(), twoPolicySets.get(1).getName())
                                 .collect(Collectors.toCollection(LinkedHashSet::new))));
 
+        Mockito.verify(this.cache, Mockito.times(0)).set(Mockito.any(), Mockito.any());
+
         Assert.assertEquals(result.getEffect(), Effect.INDETERMINATE);
     }
 
