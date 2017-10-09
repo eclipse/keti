@@ -17,6 +17,7 @@
 package com.ge.predix.integration.test;
 
 import java.time.Instant;
+import java.util.Collections;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -73,7 +75,6 @@ public class PredixAuditIT extends AbstractTestNGSpringContextTests {
         resource.setAccessTokenUri(this.auditUaaUrl);
         resource.setClientId(this.auditClientId);
         resource.setClientSecret(this.auditClientSecret);
-
         this.auditRestTemplate = new OAuth2RestTemplate(resource);
         HttpClient httpClient = HttpClientBuilder.create().useSystemProperties().build();
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
@@ -86,12 +87,12 @@ public class PredixAuditIT extends AbstractTestNGSpringContextTests {
         this.zoneHelper.createTestZone(this.acsRestTemplateFactory.getACSTemplateWithPolicyScope(), "predix-audit-zone",
                 true);
         HttpHeaders headers = ACSTestUtil.httpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.add("Predix-Zone-Id", this.auditZoneId);
         Thread.sleep(5000);
         PredixAuditRequest request = new PredixAuditRequest(1, 10, startTime, Instant.now().toEpochMilli());
         ResponseEntity<PredixAuditResponse> response = this.auditRestTemplate.postForEntity(this.auditQueryUrl,
                 new HttpEntity<>(request, headers), PredixAuditResponse.class);
-
         Assert.assertTrue(response.getBody().getContent().size() >= 1);
     }
 
