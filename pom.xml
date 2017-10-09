@@ -89,7 +89,7 @@
         <reportng.version>1.1.2</reportng.version>
         <testng.version>6.9.10</testng.version>
         <cucumber.version>1.2.5</cucumber.version>
-        <groovy-all.version>2.4.4</groovy-all.version>
+        <groovy-all.version>2.4.12</groovy-all.version>
 
     </properties>
 
