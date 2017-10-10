@@ -149,11 +149,18 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
             LOGGER.info("Processed Policy Evaluation for: " + "resourceUri='{}', subjectIdentifier='{}', action='{}',"
                     + " result='{}'", uri, subjectIdentifier, action, result.getEffect());
-            try {
-                this.cache.set(key, result);
-            } catch (Exception e) {
-                LOGGER.error(String.format("Unable to set cache key '%s' to value '%s' due to exception", key, result),
-                        e);
+
+            // A policy evaluation result with an INDETERMINATE effect is almost always due to transient errors.
+            // Caching such results will inevitably cause users to get back a stale result for a period of time
+            // even when the transient error is fixed.
+            if (result.getEffect() != Effect.INDETERMINATE) {
+                try {
+                    this.cache.set(key, result);
+                } catch (Exception e) {
+                    LOGGER.error(
+                            String.format("Unable to set cache key '%s' to value '%s' due to exception", key, result),
+                            e);
+                }
             }
         }
         return result;
