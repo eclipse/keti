@@ -66,12 +66,41 @@ function run_versioning_script {
     check_internet "https://${GIT_API_URI_PATH}"
 }
 
+function disable_pull_request_reviews_on_development_branch {
+    { set -x; } 2>/dev/null
+    local DISABLE_PROTECTION_RESPONSE="$(curl "https://${GIT_API_URI_PATH}/repos/${REPOSITORY_URI_PATH}/branches/${1}/protection/required_pull_request_reviews" -sI -X DELETE \
+    -H "Authorization: token ${GIT_ACCESS_TOKEN}")"
+    { set +x; } 2>/dev/null
+
+    if [[ $(echo "$DISABLE_PROTECTION_RESPONSE" | grep -q '^HTTP.*204'; echo "$?") -ne 0 ]]; then
+        echo -e "\nCouldn't disable protection on the ${1} branch. Exiting..."
+        exit 1
+    fi
+}
+
+function enable_pull_request_reviews_on_development_branch {
+    { set -x; } 2>/dev/null
+    local ENABLE_PROTECTION_RESPONSE="$(curl "https://${GIT_API_URI_PATH}/repos/${REPOSITORY_URI_PATH}/branches/${1}/protection/required_pull_request_reviews" -s -D - -X PATCH \
+    -H "Authorization: token ${GIT_ACCESS_TOKEN}" \
+    -H 'Content-Type: application/json' \
+    -d '{ "dismiss_stale_reviews" : false, "require_code_owner_reviews" : false }')"
+    { set +x; } 2>/dev/null
+
+    if [[ $(echo "$ENABLE_PROTECTION_RESPONSE" | grep -q '^HTTP.*200'; echo "$?") -ne 0 ]]; then
+        echo -e "\nCouldn't enable protection on the ${1} branch. Exiting..."
+        exit 1
+    fi
+}
+
 function update_version {
     if [[ -n "$1" ]]; then
         local SNAPSHOT_VERSION="${1}-SNAPSHOT"
+        local DEVELOPMENT_BRANCH='develop'
+        disable_pull_request_reviews_on_development_branch "$DEVELOPMENT_BRANCH"
         run_versioning_script "$SNAPSHOT_VERSION"
         git commit -am "Bumped up the version to ${SNAPSHOT_VERSION}"
         git push
+        enable_pull_request_reviews_on_development_branch "$DEVELOPMENT_BRANCH"
         RELEASE_VERSION="$1"
     fi
 }
@@ -112,8 +141,8 @@ prompt "About to merge changes from the develop to the master branch. Please sta
 { set -x; } 2>/dev/null
 
 # Checkout the develop branch as follows (note that any local and untracked changes will be removed so they should be stashed prior to running these commands):
-git clean -fd
-git checkout -f develop
+#git clean -fd
+#git checkout -f develop
 git pull --all --prune --tags --verbose
 
 # Cut a new release branch from develop, grabbing the current version from the top-level pom.xml file as follows:
@@ -252,7 +281,7 @@ if [[ -z "$STEP_SKIPPED" ]]; then
     fi
 fi
 
-git checkout -f develop
+#git checkout -f develop
 git pull --all --prune --tags --verbose
 
 { set +x; } 2>/dev/null
