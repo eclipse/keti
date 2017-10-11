@@ -141,8 +141,8 @@ prompt "About to merge changes from the develop to the master branch. Please sta
 { set -x; } 2>/dev/null
 
 # Checkout the develop branch as follows (note that any local and untracked changes will be removed so they should be stashed prior to running these commands):
-#git clean -fd
-#git checkout -f develop
+git clean -fd
+git checkout -f develop
 git pull --all --prune --tags --verbose
 
 # Cut a new release branch from develop, grabbing the current version from the top-level pom.xml file as follows:
@@ -281,7 +281,7 @@ if [[ -z "$STEP_SKIPPED" ]]; then
     fi
 fi
 
-#git checkout -f develop
+git checkout -f develop
 git pull --all --prune --tags --verbose
 
 { set +x; } 2>/dev/null
