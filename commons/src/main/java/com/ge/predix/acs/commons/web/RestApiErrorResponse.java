@@ -16,6 +16,8 @@
 
 package com.ge.predix.acs.commons.web;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Used to provide error payload with code and message.
  *
@@ -25,23 +27,39 @@ package com.ge.predix.acs.commons.web;
 @SuppressWarnings({ "nls", "javadoc" })
 public class RestApiErrorResponse {
 
-    private String errorCode = "FAILED";
-    private String errorMessage = "Operation Failed";
 
-    public String getErrorCode() {
-        return this.errorCode;
+
+    private ErrorDetails errorDetails = new ErrorDetails();
+
+    public void setErrorDetails(final ErrorDetails errorDetails) {
+        this.errorDetails = errorDetails;
+    }
+    @JsonProperty("ErrorDetails")
+    public ErrorDetails getErrorDetails() {
+        return this.errorDetails;
     }
 
-    public void setErrorCode(final String errorCode) {
-        this.errorCode = errorCode;
-    }
+    class ErrorDetails {
 
-    public String getErrorMessage() {
-        return this.errorMessage;
-    }
+        private String errorCode = "FAILED";
+        private String errorMessage = "Operation Failed";
 
-    public void setErrorMessage(final String errorMessage) {
-        this.errorMessage = errorMessage;
+        public String getErrorCode() {
+            return this.errorCode;
+        }
+
+        public void setErrorCode(final String errorCode) {
+            this.errorCode = errorCode;
+        }
+
+        public String getErrorMessage() {
+            return this.errorMessage;
+        }
+
+        public void setErrorMessage(final String errorMessage) {
+            this.errorMessage = errorMessage;
+        }
+
     }
 
 }

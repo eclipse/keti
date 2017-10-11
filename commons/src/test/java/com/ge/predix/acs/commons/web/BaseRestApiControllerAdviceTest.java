@@ -16,41 +16,116 @@
 
 package com.ge.predix.acs.commons.web;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.mockito.Mockito;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import com.ge.predix.acs.commons.exception.UntrustedIssuerException;
 
 @SuppressWarnings({ "javadoc", "nls" })
 public class BaseRestApiControllerAdviceTest {
 
     @Test
-    public void testBaseRestApiControllerAdvice() {
-
-        RestErrorHandler errorHandler = Mockito.mock(RestErrorHandler.class);
-
-        HttpServletRequest request = new MockHttpServletRequest();
-        HttpServletResponse response = new MockHttpServletResponse();
-        Exception e = new Exception();
-
-        ModelAndView errorResponse = new ModelAndView();
-        errorResponse.setViewName("ErrorDetails");
-
-        Mockito.when(errorHandler.createApiErrorResponse(e, request, response)).thenReturn(errorResponse);
+    public void testBaseRestApiControllerAdviceException() {
 
         BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
-        baseRestApiControllerAdvice.setRestErrorHandler(errorHandler);
+        RestApiException e = new RestApiException("Internal server error");
 
-        ModelAndView actualErrorResponse = baseRestApiControllerAdvice.handleException(e, request, response);
+        ResponseEntity<RestApiErrorResponse> actualErrorResponse = baseRestApiControllerAdvice
+                .handleRestApiException(e);
 
         Assert.assertNotNull(actualErrorResponse);
-        Assert.assertEquals(actualErrorResponse.getViewName(), "ErrorDetails");
+        Assert.assertTrue(actualErrorResponse.getStatusCode().toString().equals("500"));
+        Assert.assertTrue(actualErrorResponse.getBody().getErrorDetails().getErrorMessage()
+                .equals("Internal server error"));
+    }
 
-        Mockito.verify(errorHandler, Mockito.times(1)).createApiErrorResponse(e, request, response);
+    @Test
+    public void testBaseRestApiControllerAdviceHttpMediaTypeNotAcceptableException() {
+
+        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+
+        HttpMediaTypeNotAcceptableException e = new HttpMediaTypeNotAcceptableException("Media Type Not Supported");
+
+        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice
+                .handleHttpMediaTypeNotAcceptableException(e);
+
+        Assert.assertNotNull(actualErrorResponse);
+        Assert.assertTrue(actualErrorResponse.getErrorDetails().getErrorMessage().equals("Not Acceptable"));
+    }
+
+    @Test
+    public void testBaseRestApiControllerAdviceHttpRequestMethodNotSupportedException() {
+
+        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+
+        HttpRequestMethodNotSupportedException e = new HttpRequestMethodNotSupportedException("GET");
+
+        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice
+                .handleHttpRequestMethodNotSupportedException(e);
+
+        Assert.assertNotNull(actualErrorResponse);
+        Assert.assertTrue(actualErrorResponse.getErrorDetails().getErrorMessage().equals("Method Not Allowed"));
+    }
+
+    @Test
+    public void testBaseRestApiControllerAdviceIllegalArgumentException() {
+
+        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+
+        IllegalArgumentException e = new IllegalArgumentException("Arguments passed are invalid");
+
+        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice.handleIllegalArgumentException(e);
+
+        Assert.assertNotNull(actualErrorResponse);
+        Assert.assertTrue(
+                actualErrorResponse.getErrorDetails().getErrorMessage().equals("Arguments passed are invalid"));
+    }
+
+    @Test
+    public void testBaseRestApiControllerAdviceUntrustedIssuerException() {
+
+        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+
+        UntrustedIssuerException e = new UntrustedIssuerException("Not a trusted Issuer");
+
+        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice
+                .handleUntrustedIssuerOrSecurityException(e);
+
+        Assert.assertNotNull(actualErrorResponse);
+        Assert.assertTrue(actualErrorResponse.getErrorDetails().getErrorMessage().equals("Not a trusted Issuer"));
+
+    }
+
+    @Test
+    public void testBaseRestApiControllerAdviceHttpMessageNotReadableException() {
+
+        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+        HttpMessageNotReadableException e = new HttpMessageNotReadableException("{JSON}");
+
+        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice.handleHttpMessageNotReadableException(e);
+
+        Assert.assertNotNull(actualErrorResponse);
+        Assert.assertTrue(actualErrorResponse.getErrorDetails().getErrorCode().equals("FAILED"));
+        Assert.assertTrue(
+                actualErrorResponse.getErrorDetails().getErrorMessage().equals("Malformed JSON syntax. {JSON}"));
+    }
+
+    @Test
+    public void testBaseRestApiControllerAdviceHttpMediaTypeNotSupportedException() {
+
+        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+
+        HttpMediaTypeNotSupportedException e = new HttpMediaTypeNotSupportedException("JSON");
+
+        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice
+                .handleHttpMediaTypeNotSupportedException(e);
+
+        Assert.assertNotNull(actualErrorResponse);
+        Assert.assertTrue(actualErrorResponse.getErrorDetails().getErrorMessage().equals("Unsupported Media Type"));
     }
 }

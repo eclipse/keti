@@ -88,6 +88,18 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
     }
 
     @Test
+    public void testResourceInvalidMediaTypeResponseStatusCheck() throws Exception {
+
+        String thisUri = RESOURCE_BASE_URL + "/%2Fservices%2Fsecured-api";
+        // create resource in first zone
+        MockMvcContext putContext =
+            TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
+        putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                .content("testString")).andExpect(status().isUnsupportedMediaType());
+
+    }
+
+    @Test
     public void testSameResourceDifferentZones() throws Exception {
         BaseResource resource = JSON_UTILS.deserializeFromFile("controller-test/a-resource.json",
                                                                     BaseResource.class);

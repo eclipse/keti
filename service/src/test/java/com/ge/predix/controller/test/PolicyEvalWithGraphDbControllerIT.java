@@ -141,6 +141,18 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
         }
     }
 
+    @Test
+    public void testPolicyInvalidMediaTypeResponseStatusCheck()
+            throws Exception {
+
+        String uri = POLICY_SET_URL + "/" + "testString";
+        MockMvcContext putPolicySetContext = this.testUtils
+                .createWACWithCustomPUTRequestBuilder(this.wac, "testZone", uri);
+        putPolicySetContext.getMockMvc().perform(putPolicySetContext.getBuilder().contentType(MediaType.TEXT_HTML_VALUE)
+                .content("testString")).andExpect(status().isUnsupportedMediaType());
+
+    }
+
     @Test(dataProvider = "policyEvalDataProvider")
     public void testPolicyEvaluation(final Zone zone, final PolicySet testPolicySet,
             final List<BaseResource> resourceHierarchy, final List<BaseSubject> subjectHierarchy,
