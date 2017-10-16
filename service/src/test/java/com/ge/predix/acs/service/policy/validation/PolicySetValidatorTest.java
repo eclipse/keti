@@ -19,18 +19,23 @@ package com.ge.predix.acs.service.policy.validation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.commons.policy.condition.ConditionScript;
+import com.ge.predix.acs.commons.policy.condition.ConditionShell;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
+import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.model.Condition;
+import com.ge.predix.acs.model.Policy;
 import com.ge.predix.acs.model.PolicySet;
 import com.ge.predix.acs.utils.JsonUtils;
 
@@ -39,7 +44,8 @@ import com.ge.predix.acs.utils.JsonUtils;
  * @author 212360328
  */
 @Test
-@ContextConfiguration(classes = { GroovyConditionCache.class, PolicySetValidatorImpl.class })
+@ContextConfiguration(
+        classes = { GroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
 public class PolicySetValidatorTest extends AbstractTestNGSpringContextTests {
 
     private final JsonUtils jsonUtils = new JsonUtils();
@@ -199,6 +205,28 @@ public class PolicySetValidatorTest extends AbstractTestNGSpringContextTests {
         Assert.assertNotNull(policySet);
         this.policySetValidator.validatePolicySet(policySet);
         Assert.assertNull(policySet.getPolicies().get(0).getTarget().getAction());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testRemovalOfMultipleCachedConditions() {
+        PolicySet policySet = this.jsonUtils.deserializeFromFile(
+                "policyset/validator/test/multiple-policies-with-multiple-conditions.json", PolicySet.class);
+        Assert.assertNotNull(policySet);
+        this.policySetValidator.validatePolicySet(policySet);
+        GroovyConditionCache conditionCache =
+                (GroovyConditionCache) ReflectionTestUtils.getField(this.policySetValidator, "conditionCache");
+        Map<String, ConditionShell> cache =
+                (Map<String, ConditionShell>) ReflectionTestUtils.getField(conditionCache, "cache");
+        int cacheSize = cache.size();
+        Assert.assertTrue(cacheSize > 0);
+        this.policySetValidator.removeCachedConditions(policySet);
+        Assert.assertEquals(cache.size(), cacheSize - 3);
+        for (Policy policy : policySet.getPolicies()) {
+            for (Condition condition : policy.getConditions()) {
+                Assert.assertNull(conditionCache.get(condition.getCondition()));
+            }
+        }
     }
 
 }

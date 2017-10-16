@@ -32,6 +32,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
+import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Condition;
 import com.ge.predix.acs.rest.BaseResource;
@@ -43,7 +44,8 @@ import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
  *
  * @author 212406427
  */
-@ContextConfiguration(classes = { GroovyConditionCache.class, PolicySetValidatorImpl.class })
+@ContextConfiguration(
+        classes = { GroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
 public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
 
     @Autowired

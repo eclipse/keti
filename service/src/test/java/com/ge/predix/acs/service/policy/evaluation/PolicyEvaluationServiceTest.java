@@ -54,6 +54,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ge.predix.acs.PolicyContextResolver;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
+import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.Policy;
@@ -81,7 +82,8 @@ import com.ge.predix.acs.zone.resolver.ZoneResolver;
  * @author 212406427
  */
 @Test
-@ContextConfiguration(classes = { GroovyConditionCache.class, PolicySetValidatorImpl.class })
+@ContextConfiguration(
+        classes = { GroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
 public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTests {
     private static final String ISSUER = "https://acs.attributes.int";
     private static final String SUBJECT_ATTRIB_NAME_ROLE = "role";

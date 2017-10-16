@@ -74,7 +74,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
             handleException(e, policySetName);
         }
     }
-    
+
     @Transactional
     private void upsertPolicySetInTransaction(final String policySetName, final ZoneEntity zone,
             final String policySetPayload) {
@@ -136,6 +136,12 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         if (policySetEntity != null) {
             LOGGER.info("Found an existing policy set policySetName={}, zone={}, deleting now.", policySetId,
                     zone.getName());
+
+            PolicySet policySet = this.jsonUtils.deserialize(policySetEntity.getPolicySetJson(), PolicySet.class);
+            if (policySet != null) {
+                this.policySetValidator.removeCachedConditions(policySet);
+            }
+
             // Since we only support one policy set and we don't want to load that policy set when checking for a
             // cached invalidation, we use a hard-coded value for the policy set key.
             this.cache.resetForPolicySet(zone.getName(), policySetId);

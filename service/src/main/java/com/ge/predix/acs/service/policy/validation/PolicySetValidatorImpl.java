@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.ge.predix.acs.commons.policy.condition.ConditionScript;
-import com.ge.predix.acs.commons.policy.condition.ConditionShell;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.model.Condition;
@@ -60,6 +59,9 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
     @Autowired
     private GroovyConditionCache conditionCache;
 
+    @Autowired
+    private GroovyConditionShell conditionShell;
+
     static {
         JSONSCHEMA = JSONUTILS.readJsonNodeFromFile("acs-policy-set-schema.json");
     }
@@ -70,11 +72,19 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
     private Set<String> validAcsPolicyHttpActionsSet;
 
     @Override
+    public void removeCachedConditions(final PolicySet policySet) {
+        for (Policy policy : policySet.getPolicies()) {
+            for (Condition condition : policy.getConditions()) {
+                this.conditionCache.remove(condition.getCondition());
+            }
+        }
+    }
+
+    @Override
     public void validatePolicySet(final PolicySet policySet) {
         validateSchema(policySet);
-        GroovyConditionShell shell = new GroovyConditionShell();
         for (Policy p : policySet.getPolicies()) {
-            validatePolicyConditions(p.getConditions(), shell);
+            validatePolicyConditions(p.getConditions());
             validatePolicyActions(p);
         }
     }
@@ -128,12 +138,6 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
 
     @Override
     public List<ConditionScript> validatePolicyConditions(final List<Condition> conditions) {
-        return validatePolicyConditions(conditions, new GroovyConditionShell());
-    }
-
-    @Override
-    public List<ConditionScript> validatePolicyConditions(final List<Condition> conditions,
-            final ConditionShell conditionShell) {
         List<ConditionScript> conditionScripts = new ArrayList<>();
         try {
             if ((conditions == null) || conditions.isEmpty()) {
@@ -149,7 +153,7 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
 
                 try {
                     LOGGER.debug("Adding condition: {}", conditionScript);
-                    compiledScript = conditionShell.parse(conditionScript);
+                    compiledScript = this.conditionShell.parse(conditionScript);
                     conditionScripts.add(compiledScript);
                     this.conditionCache.put(conditionScript, compiledScript);
                 } catch (Exception e) {
