@@ -16,6 +16,8 @@
 
 #!/usr/bin/env bash
 
+echo "JAVA_LOCAL_OPTS: ${JAVA_LOCAL_OPTS}"
+
 HTTP_VALIDATION_SPRING_PROFILE='httpValidation'
 if [[ -z "$SPRING_PROFILES_ACTIVE" ]]; then
     export SPRING_PROFILES_ACTIVE="$HTTP_VALIDATION_SPRING_PROFILE"
@@ -52,7 +54,7 @@ main() {
     done
 
     cp "${DIR}"/target/acs-service-*-exec.jar "${DIR}"/.acs-service-copy.jar
-    java -Xms1g -Xmx1g $JAVA_DEBUG_OPTS $LOGGING_OPTS $PROXY_OPTS -jar "${DIR}"/.acs-service-copy.jar
+    java -Xms1g -Xmx1g $JAVA_LOCAL_OPTS $JAVA_DEBUG_OPTS $LOGGING_OPTS $PROXY_OPTS -jar "${DIR}"/.acs-service-copy.jar
 }
 
 main "$@"

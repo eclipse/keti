@@ -37,11 +37,9 @@ import org.springframework.stereotype.Component;
 import com.ge.predix.acs.attribute.readers.AttributeRetrievalException;
 import com.ge.predix.acs.commons.policy.condition.ConditionAssertionFailedException;
 import com.ge.predix.acs.commons.policy.condition.ConditionScript;
-import com.ge.predix.acs.commons.policy.condition.ConditionShell;
 import com.ge.predix.acs.commons.policy.condition.ResourceHandler;
 import com.ge.predix.acs.commons.policy.condition.SubjectHandler;
 import com.ge.predix.acs.commons.policy.condition.groovy.AttributeMatcher;
-import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Condition;
 import com.ge.predix.acs.model.Effect;
@@ -217,7 +215,6 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
             Set<Attribute> resourceAttributes = Collections.emptySet();
             Set<Attribute> subjectAttributes = Collections.emptySet();
-            ConditionShell groovyShell = null;
             List<MatchedPolicy> matchedPolicies = matchResult.getMatchedPolicies();
             for (MatchedPolicy matchedPolicy : matchedPolicies) {
                 Policy policy = matchedPolicy.getPolicy();
@@ -231,9 +228,6 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
                 boolean conditionEvaluationResult = true;
                 if (!policy.getConditions().isEmpty()) {
-                    if (null == groovyShell) {
-                        groovyShell = new GroovyConditionShell();
-                    }
                     conditionEvaluationResult = evaluateConditions(subjectAttributes, resourceAttributes, resourceURI,
                             policy.getConditions(), resourceURITemplate);
                 }

@@ -25,12 +25,14 @@ import com.ge.predix.acs.commons.policy.condition.ConditionScript;
 public class GroovyConditionCacheTest {
 
     @Test
-    public void testPutAndGet() {
+    public void testPutGetAndRemove() {
         GroovyConditionCache cache = new GroovyConditionCache();
         ConditionScript compiledScript = Mockito.mock(ConditionScript.class);
         String testScript = "1 == 1";
         cache.put(testScript, compiledScript);
         Assert.assertEquals(cache.get(testScript), compiledScript);
+        cache.remove(testScript);
+        Assert.assertNull(cache.get(testScript));
     }
 
 }

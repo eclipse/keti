@@ -24,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -51,6 +52,7 @@ import com.ge.predix.acs.privilege.management.PrivilegeManagementServiceImpl;
 import com.ge.predix.acs.privilege.management.dao.ResourceRepositoryProxy;
 import com.ge.predix.acs.privilege.management.dao.SubjectRepositoryProxy;
 import com.ge.predix.acs.service.InvalidACSRequestException;
+import com.ge.predix.acs.service.policy.validation.PolicySetValidator;
 import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
 import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.utils.JsonUtils;
@@ -73,6 +75,10 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
     private static final String SUBDOMAIN1 = "tenant1";
     private static final String SUBDOMAIN2 = "tenant2";
     private static final String DEFAULT_SUBDOMAIN = "defaultTenant";
+
+    @Autowired
+    @Spy
+    private PolicySetValidator policySetValidator;
 
     @Autowired
     @InjectMocks
@@ -116,6 +122,7 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
         PolicySet policySet = this.jsonUtils.deserializeFromFile("set-with-1-policy.json", PolicySet.class);
         this.policyService.upsertPolicySet(policySet);
         this.policyService.deletePolicySet(policySet.getName());
+        Mockito.verify(this.policySetValidator, Mockito.times(1)).removeCachedConditions(Mockito.any());
         PolicySet retrievedPolicySet = this.policyService.getPolicySet(policySet.getName());
         Assert.assertNull(retrievedPolicySet);
     }

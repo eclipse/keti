@@ -46,6 +46,7 @@ import com.ge.predix.acs.attribute.readers.AttributeRetrievalException;
 import com.ge.predix.acs.attribute.readers.ExternalResourceAttributeReader;
 import com.ge.predix.acs.attribute.readers.ExternalSubjectAttributeReader;
 import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionCache;
+import com.ge.predix.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.model.Effect;
 import com.ge.predix.acs.model.PolicySet;
@@ -62,7 +63,8 @@ import com.ge.predix.acs.service.policy.validation.PolicySetValidatorImpl;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 import com.ge.predix.acs.zone.resolver.ZoneResolver;
 
-@ContextConfiguration(classes = { GroovyConditionCache.class, PolicySetValidatorImpl.class })
+@ContextConfiguration(
+        classes = { GroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
 public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSpringContextTests {
 
     @InjectMocks
