@@ -34,6 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -90,11 +91,8 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
 
     @BeforeClass
     public void setup() {
-        this.testZone = new TestUtils().createTestZone("PolicyEvaluationControllerITZone");
-        this.zoneService.upsertZone(this.testZone);
-        MockSecurityContext.mockSecurityContext(this.testZone);
-        MockAcsRequestContext.mockAcsRequestContext(this.testZone);
 
+        this.testZone =  new TestUtils().setupTestZone("PolicyEvaluationControllerITZone", zoneService);
         this.testSubject = new BaseSubject("testSubject");
         this.testResource = new BaseResource("testResource");
         Assert.assertTrue(this.privilegeManagementService.upsertResource(this.testResource));
@@ -108,6 +106,25 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
     public void testCleanup() {
         List<PolicySet> policySets = this.policyManagementService.getAllPolicySets();
         policySets.forEach(policySet -> this.policyManagementService.deletePolicySet(policySet.getName()));
+    }
+
+    @Test
+    public void testPolicyZoneDoesNotExistException() throws Exception {
+        MockSecurityContext.mockSecurityContext(null);
+        MockAcsRequestContext.mockAcsRequestContext();
+        PolicyEvaluationRequestV1 policyEvalRequest = createPolicyEvalRequest(this.testResource.getResourceIdentifier(),
+                this.testSubject.getSubjectIdentifier(), EMPTY_POLICY_EVALUATION_ORDER);
+        MockMvcContext postPolicyEvalContext = this.testUtils
+                .createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), POLICY_EVAL_URL);
+        ResultActions resultActions = postPolicyEvalContext.getMockMvc().perform(
+                postPolicyEvalContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsString(policyEvalRequest)));
+        resultActions.andReturn().getResponse()
+                .getContentAsString().contentEquals("Zone not found");
+        resultActions.andExpect(status().isBadRequest());
+
+        MockSecurityContext.mockSecurityContext(this.testZone);
+        MockAcsRequestContext.mockAcsRequestContext();
     }
 
     @Test

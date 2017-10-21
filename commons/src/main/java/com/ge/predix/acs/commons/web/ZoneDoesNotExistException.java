@@ -14,7 +14,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.ge.predix.acs.privilege.management;
+package com.ge.predix.acs.commons.web;
 
 public class ZoneDoesNotExistException extends RuntimeException {
 

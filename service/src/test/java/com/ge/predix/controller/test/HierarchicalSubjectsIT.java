@@ -76,7 +76,7 @@ public class HierarchicalSubjectsIT extends AbstractTestNGSpringContextTests {
 
         this.zoneService.upsertZone(TEST_ZONE);
         MockSecurityContext.mockSecurityContext(TEST_ZONE);
-        MockAcsRequestContext.mockAcsRequestContext(TEST_ZONE);
+        MockAcsRequestContext.mockAcsRequestContext();
     }
 
     @Test

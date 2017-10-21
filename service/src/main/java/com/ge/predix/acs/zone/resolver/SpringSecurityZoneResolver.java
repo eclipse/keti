@@ -16,10 +16,10 @@
 
 package com.ge.predix.acs.zone.resolver;
 
-import com.ge.predix.acs.privilege.management.ZoneDoesNotExistException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.ge.predix.acs.commons.web.ZoneDoesNotExistException;
 import com.ge.predix.acs.request.context.AcsRequestContext;
 import com.ge.predix.acs.request.context.AcsRequestContext.ACSRequestContextAttribute;
 import com.ge.predix.acs.request.context.AcsRequestContextHolder;

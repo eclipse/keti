@@ -17,19 +17,18 @@
 // @formatter:off
 package com.ge.predix.controller.test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementUtility;
-import com.ge.predix.acs.request.context.AcsRequestContext;
-import com.ge.predix.acs.request.context.AcsRequestContextHolder;
-import com.ge.predix.acs.rest.BaseSubject;
-import com.ge.predix.acs.rest.Zone;
-import com.ge.predix.acs.testutils.TestUtils;
-import com.ge.predix.acs.testutils.MockAcsRequestContext;
-import com.ge.predix.acs.testutils.MockMvcContext;
-import com.ge.predix.acs.testutils.MockSecurityContext;
-import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
-import com.ge.predix.acs.utils.JsonUtils;
-import com.ge.predix.acs.zone.management.ZoneService;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isIn;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.security.auth.Subject;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpStatus;
@@ -45,16 +44,19 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import javax.security.auth.Subject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isIn;
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ge.predix.acs.privilege.management.PrivilegeManagementUtility;
+import com.ge.predix.acs.request.context.AcsRequestContext;
+import com.ge.predix.acs.request.context.AcsRequestContextHolder;
+import com.ge.predix.acs.rest.BaseSubject;
+import com.ge.predix.acs.rest.Zone;
+import com.ge.predix.acs.testutils.MockAcsRequestContext;
+import com.ge.predix.acs.testutils.MockMvcContext;
+import com.ge.predix.acs.testutils.MockSecurityContext;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
+import com.ge.predix.acs.testutils.TestUtils;
+import com.ge.predix.acs.utils.JsonUtils;
+import com.ge.predix.acs.zone.management.ZoneService;
 
 /**
  *
@@ -82,13 +84,27 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
     private ConfigurableEnvironment env;
 
     @BeforeClass
-    public void setup() throws Exception {
-        this.testZone = TEST_UTILS.createTestZone("SubjectMgmtControllerIT");
-        this.testZone2 = TEST_UTILS.createTestZone("SubjectMgmtControllerIT2");
-        this.zoneService.upsertZone(this.testZone);
-        this.zoneService.upsertZone(this.testZone2);
+    public void setup() {
+        this.testZone = TEST_UTILS.setupTestZone("SubjectMgmtControllerIT", zoneService);
+    }
+
+
+    @Test
+    public void subjectZoneDoesNotExistException() throws Exception {
+        // NOTE: To throw a ZoneDoesNotExistException, we must ensure that the AcsRequestContext in the
+        //       SpringSecurityZoneResolver class returns a null ZoneEntity
+        MockSecurityContext.mockSecurityContext(null);
+        MockAcsRequestContext.mockAcsRequestContext();
+
+        BaseSubject subject = JSON_UTILS.deserializeFromFile("controller-test/a-subject.json", BaseSubject.class);
+        MockMvcContext putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac,
+                "zoneDoesNotExist", SUBJECT_BASE_URL + '/' + subject.getSubjectIdentifier());
+        ResultActions resultActions = putContext.getMockMvc().perform(putContext.getBuilder()
+                .contentType(MediaType.APPLICATION_JSON).content(OBJECT_MAPPER.writeValueAsString(subject)));
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andReturn().getResponse().getContentAsString().contentEquals("Zone not found");
         MockSecurityContext.mockSecurityContext(this.testZone);
-        MockAcsRequestContext.mockAcsRequestContext(this.testZone);
+        MockAcsRequestContext.mockAcsRequestContext();
     }
 
     @Test
@@ -102,8 +118,7 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
                 .content(OBJECT_MAPPER.writeValueAsString(subject))).andExpect(status().isCreated());
 
         // create subject in second zone
-        MockSecurityContext.mockSecurityContext(this.testZone2);
-        MockAcsRequestContext.mockAcsRequestContext(this.testZone2);
+        this.testZone2 = TEST_UTILS.setupTestZone("SubjectMgmtControllerIT2", zoneService);
 
         putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone2.getSubdomain(),
                                                                           thisUri);
@@ -113,6 +128,7 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         // set security context back to first test zone
         MockSecurityContext.mockSecurityContext(this.testZone);
     }
+
     @Test
     public void testSubjectInvalidMediaTypeResponseStatusCheck() throws Exception {
 
