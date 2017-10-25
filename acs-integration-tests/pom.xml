@@ -48,6 +48,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire.version}</version>
                 <configuration>
                     <!-- All tests in this project are run using failsafe.
                         Skip test phase -->
@@ -86,7 +87,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.18.1</version>
+                <version>${maven-failsafe.version}</version>
                 <configuration>
                     <properties>
                         <property>
@@ -296,7 +297,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.18.1</version>
+                        <version>${maven-failsafe.version}</version>
                         <configuration>
                             <properties>
                                 <property>
@@ -422,7 +423,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.18.1</version>
+                        <version>${maven-failsafe.version}</version>
                         <configuration>
                             <properties>
                                 <property>
@@ -606,6 +607,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
                         <configuration>
                             <forkCount>0</forkCount>
                             <parallel>methods</parallel>
@@ -711,6 +713,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
                         <configuration>
                             <forkCount>0</forkCount>
                             <parallel>methods</parallel>
@@ -812,7 +815,9 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
                         <configuration>
+                            <argLine>${custom-argline}</argLine>
                             <environmentVariables>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,httpValidation</SPRING_PROFILES_ACTIVE>
                                 <management.health.redis.enabled>false</management.health.redis.enabled>
@@ -921,7 +926,9 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
                         <configuration>
+                            <argLine>${custom-argline}</argLine>
                             <environmentVariables>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan,httpValidation</SPRING_PROFILES_ACTIVE>
                                 <management.health.redis.enabled>false</management.health.redis.enabled>
@@ -1034,7 +1041,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.18.1</version>
+                        <version>${maven-failsafe.version}</version>
                         <configuration>
                             <forkCount>0</forkCount>
                             <parallel>false</parallel>

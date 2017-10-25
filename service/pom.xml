@@ -483,10 +483,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire.version}</version>
                 <configuration>
                     <environmentVariables>
                         <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan</SPRING_PROFILES_ACTIVE>
                     </environmentVariables>
+                    <argLine>${custom-argline}</argLine>
                     <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
                          and retained by Jenkins for each profile -->
                     <reportsDirectory>${basedir}/surefire-reports-titan</reportsDirectory>
@@ -499,10 +501,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven-failsafe.version}</version>
                 <configuration>
                     <environmentVariables>
                         <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan</SPRING_PROFILES_ACTIVE>
                     </environmentVariables>
+                    <argLine>${custom-argline}</argLine>
                     <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
                          and retained by Jenkins for each profile -->
                     <reportsDirectory>${basedir}/surefire-reports-titan/controller-tests</reportsDirectory>
@@ -592,7 +596,9 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire.version}</version>
                         <configuration>
+                            <argLine>${custom-argline}</argLine>
                             <environmentVariables>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
                             </environmentVariables>
@@ -607,7 +613,9 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
                         <configuration>
+                            <argLine>${custom-argline}</argLine>
                             <environmentVariables>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
                             </environmentVariables>
