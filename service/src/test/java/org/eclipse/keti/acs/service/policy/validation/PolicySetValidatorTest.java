@@ -50,7 +50,7 @@ import org.eclipse.keti.acs.utils.JsonUtils;
         classes = { GroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
 public class PolicySetValidatorTest extends AbstractTestNGSpringContextTests {
 
-    private final JsonUtils jsonUtils = new JsonUtils();
+    private static JsonUtils jsonUtils = new JsonUtils();
     @Autowired
     private PolicySetValidator policySetValidator;
 
@@ -61,87 +61,194 @@ public class PolicySetValidatorTest extends AbstractTestNGSpringContextTests {
         ((PolicySetValidatorImpl) this.policySetValidator).init();
     }
 
-    @Test
-    public void testSuccesfulSchemaValidation() {
-
-        PolicySet policySet = this.jsonUtils.deserializeFromFile("set-with-2-policy.json", PolicySet.class);
-
-        this.policySetValidator.validatePolicySet(policySet);
-    }
-
     @Test(dataProvider = "invalidPolicyProvider")
-    public void testUnsuccessfulSchemaValidation(final String fileName, final String causeSubstring) {
-
-        PolicySet policySet = this.jsonUtils.deserializeFromFile(fileName, PolicySet.class);
-        Assert.assertNotNull(policySet);
+    public void testUnsuccessfulSchemaValidation(final String fileName, final String cause, final String element) {
         try {
-            this.policySetValidator.validatePolicySet(policySet);
+            this.policySetValidator.validatePolicySet(policySetFromFile(fileName));
             Assert.fail("Negative test case should have failed for file " + fileName);
         } catch (PolicySetValidationException e) {
-            Assert.assertTrue(e.getMessage().contains(causeSubstring),
-                    String.format("Expected %s vs Actual %s", causeSubstring, e.getMessage()));
+            System.out.println(e.getMessage());
+            Assert.assertTrue(e.getMessage().contains(cause),
+                    String.format("Actual message [%s] does not contain expected cause [%s]", e.getMessage(), cause));
+            Assert.assertTrue(e.getMessage().contains(element), String
+                    .format("Actual message [%s] does not contain expected pointer [%s]", e.getMessage(), element));
         }
     }
 
-    @DataProvider(name = "invalidPolicyProvider")
-    public Object[][] getInvalidPolicies() {
-        Object[][] data = new Object[][] {
-                { "policyset/validator/test/missing-effect-policy.json", "missing: [\"effect\"]" },
-                { "policyset/validator/test/missing-name-policy-set.json", "missing: [\"name\"]" },
-                { "policyset/validator/test/empty-policies-policy-set.json", "/properties/policies" },
-                { "policyset/validator/test/no-policies-policy-set.json", "/properties/policies" },
-                { "policyset/validator/test/missing-resource-policy-target.json", "missing: [\"resource\"]" },
-                { "policyset/validator/test/missing-uritemplate-policy-resource.json", "missing: [\"uriTemplate\"]" },
-                { "policyset/validator/test/missing-condition-policy-condition.json", "missing: [\"condition\"]" },
-                { "policyset/validator/test/testMatchPolicyWithInvalidAction.json", "Policy Action validation failed" },
-                { "policyset/validator/test/testMatchPolicyWithMultipleActionsOneInvalid.json",
-                        "Policy Action validation failed" }, };
-        return data;
+    @DataProvider
+    private Object[][] invalidPolicyProvider() {
+        return new Object[][] { policyMissignEffect(), policySetMissingName(), policySetEmptyPolicies(),
+                policySetMissingPolicies(), policyTargetMissingResource(), policyResourceMissingUriTemplate(),
+                policyMissingCondition(), policySingleUnsupportedAction(), policyMultipleActionsOneUnsupported(),
+                policyObligationIdEmpty(), policyObligationIdNull(), policyObligationIdsNotUnique(),
+                policyObligationIdsNotFound(), obligationExpressionIdMissing(), obligationExpressionIdEmpty(),
+                obligationExpressionIdNull(), obligationExpressionIdNotUnique(),
+                obligationExpressionActionTemplateMissing(), obligationExpressionActionTemplateNull(),
+                obligationExpressionActionTemplateEmpty(), obligationExpressionActionArgumentNameEmpty(),
+                obligationExpressionActionArgumentNameNull(), obligationExpressionActionArgumentNameMissing(),
+                obligationExpressionActionArgumentValueEmpty(), obligationExpressionActionArgumentValueNull(),
+                obligationExpressionActionArgumentValueMissing(), obligationExpressionActionArgumentsNotUnique() };
     }
 
-    @Test
-    public void testSuccesfulEmptySubjectAttributesSchemaValidation() {
-
-        PolicySet policySet = this.jsonUtils
-                .deserializeFromFile("policyset/validator/test/empty-attributes-target-subject.json", PolicySet.class);
-        Assert.assertNotNull(policySet);
-        this.policySetValidator.validatePolicySet(policySet);
+    private Object[] policyObligationIdsNotFound() {
+        return new Object[] { "obligation/policy-obligation-ids-not-found.json",
+                "Unable to find matching obligation expression", "orphan" };
     }
 
-    @Test
-    public void testSuccesfulEmptyConditionsPolicySchemaValidation() {
-
-        PolicySet policySet = this.jsonUtils
-                .deserializeFromFile("policyset/validator/test/empty-conditions-policy.json", PolicySet.class);
-        Assert.assertNotNull(policySet);
-        this.policySetValidator.validatePolicySet(policySet);
+    private Object[] policyMissignEffect() {
+        return new Object[] { "policyset/validator/test/missing-effect-policy.json", "missing: [\"effect\"]",
+                "/policies/0" };
     }
 
-    @Test
-    public void testSuccesfulMissingConditionNameSchemaValidation() {
-
-        PolicySet policySet = this.jsonUtils
-                .deserializeFromFile("policyset/validator/test/missing-condition-name-policy.json", PolicySet.class);
-        Assert.assertNotNull(policySet);
-        this.policySetValidator.validatePolicySet(policySet);
+    private Object[] policySetMissingName() {
+        return new Object[] { "policyset/validator/test/missing-name-policy-set.json", "missing: [\"name\"]", "" };
     }
 
-    @Test
-    public void testSuccesfulMissingTargetNameSchemaValidation() {
-
-        PolicySet policySet = this.jsonUtils
-                .deserializeFromFile("policyset/validator/test/missing-target-name-policy.json", PolicySet.class);
-        Assert.assertNotNull(policySet);
-        this.policySetValidator.validatePolicySet(policySet);
+    private Object[] policySetEmptyPolicies() {
+        return new Object[] { "policyset/validator/test/empty-policies-policy-set.json", "/properties/policies",
+                "/policies" };
     }
 
-    @Test
-    public void testSuccesfulOnlyPolicySetNameAndEffectSchemaValidation() {
+    private Object[] policySetMissingPolicies() {
+        return new Object[] { "policyset/validator/test/no-policies-policy-set.json", "/properties/policies",
+                "/policies" };
+    }
 
-        PolicySet policySet = this.jsonUtils
-                .deserializeFromFile("policyset/validator/test/policy-set-with-only-name-effect.json", PolicySet.class);
-        Assert.assertNotNull(policySet);
-        this.policySetValidator.validatePolicySet(policySet);
+    private Object[] policyTargetMissingResource() {
+        return new Object[] { "policyset/validator/test/missing-resource-policy-target.json", "missing: [\"resource\"]",
+                "/policies/0/target" };
+    }
+
+    private Object[] policyResourceMissingUriTemplate() {
+        return new Object[] { "policyset/validator/test/missing-uritemplate-policy-resource.json",
+                "missing: [\"uriTemplate\"]", "/policies/0/target/resource" };
+    }
+
+    private Object[] policyMissingCondition() {
+        return new Object[] { "policyset/validator/test/missing-condition-policy-condition.json",
+                "missing: [\"condition\"]", "/policies/0/conditions/0" };
+    }
+
+    private Object[] policySingleUnsupportedAction() {
+        return new Object[] { "policyset/validator/test/testMatchPolicyWithInvalidAction.json",
+                "Policy Action validation failed", "[GET1]" };
+    }
+
+    private Object[] policyMultipleActionsOneUnsupported() {
+        return new Object[] { "policyset/validator/test/testMatchPolicyWithMultipleActionsOneInvalid.json",
+                "Policy Action validation failed", "[PUT1]" };
+    }
+
+    private Object[] policyObligationIdEmpty() {
+        return new Object[] { "obligation/policy-obligation-id-blank.json",
+                "string \"\" is too short (length: 0, required minimum: 1)", "/policies/0/obligationIds/1" };
+    }
+
+    private Object[] policyObligationIdNull() {
+        return new Object[] { "obligation/policy-obligation-id-null.json",
+                "(null) does not match any allowed primitive type (allowed: [\"string\"])",
+                "/policies/0/obligationIds/1" };
+    }
+
+    private Object[] policyObligationIdsNotUnique() {
+        return new Object[] { "obligation/policy-obligation-ids-not-unique.json",
+                "array must not contain duplicate elements", "/policies/0/obligationIds" };
+    }
+
+    private Object[] obligationExpressionIdMissing() {
+        return new Object[] { "obligation/obligation-expression-id-missing.json", "missing: [\"id\"]",
+                "/obligationExpressions/0" };
+    }
+
+    private Object[] obligationExpressionIdEmpty() {
+        return new Object[] { "obligation/obligation-expression-id-empty.json",
+                "string \"\" is too short (length: 0, required minimum: 1)", "/obligationExpressions/0/id" };
+    }
+
+    private Object[] obligationExpressionIdNull() {
+        return new Object[] { "obligation/obligation-expression-id-null.json",
+                "string \"\" is too short (length: 0, required minimum: 1)", "/obligationExpressions/0/id" };
+    }
+
+    private Object[] obligationExpressionActionTemplateEmpty() {
+        return new Object[] { "obligation/obligation-expression-action-template-empty.json", "cannot be null or empty",
+                "actionTemplate" };
+    }
+
+    private Object[] obligationExpressionActionTemplateNull() {
+        return new Object[] { "obligation/obligation-expression-action-template-null.json",
+                "missing: [\"actionTemplate\"]", "/obligationExpressions/0" };
+    }
+
+    private Object[] obligationExpressionActionTemplateMissing() {
+        return new Object[] { "obligation/obligation-expression-action-template-missing.json",
+                "missing: [\"actionTemplate\"]", "/obligationExpressions/0" };
+    }
+
+    private Object[] obligationExpressionActionArgumentValueMissing() {
+        return new Object[] { "obligation/obligation-expression-action-argument-value-missing.json",
+                "missing: [\"value\"]", "/obligationExpressions/0/actionArguments/0" };
+    }
+
+    private Object[] obligationExpressionActionArgumentValueNull() {
+        return new Object[] { "obligation/obligation-expression-action-argument-value-null.json",
+                "missing: [\"value\"]", "/obligationExpressions/0/actionArguments/0" };
+    }
+
+    private Object[] obligationExpressionActionArgumentValueEmpty() {
+        return new Object[] { "obligation/obligation-expression-action-argument-value-blank.json",
+                "string \"\" is too short (length: 0, required minimum: 1)",
+                "/obligationExpressions/0/actionArguments/0/value" };
+    }
+
+    private Object[] obligationExpressionActionArgumentNameMissing() {
+        return new Object[] { "obligation/obligation-expression-action-argument-name-missing.json",
+                "missing: [\"name\"]", "/obligationExpressions/0/actionArguments/0" };
+    }
+
+    private Object[] obligationExpressionActionArgumentNameNull() {
+        return new Object[] { "obligation/obligation-expression-action-argument-name-null.json", "missing: [\"name\"]",
+                "/obligationExpressions/0/actionArguments/0" };
+    }
+
+    private Object[] obligationExpressionActionArgumentNameEmpty() {
+        return new Object[] { "obligation/obligation-expression-action-argument-name-blank.json",
+                "string \"\" is too short (length: 0, required minimum: 1)",
+                "/obligationExpressions/0/actionArguments/0/name" };
+    }
+
+    private Object[] obligationExpressionIdNotUnique() {
+        return new Object[] { "obligation/obligation-expression-id-not-unique.json",
+                "obligation expression has to be unique", "obligation1" };
+    }
+
+    private Object[] obligationExpressionActionArgumentsNotUnique() {
+        return new Object[] { "obligation/obligation-expression-action-arguments-not-unique.json",
+                "actionArguments have to be unique", "resource_site" };
+    }
+
+    @Test(dataProvider = "validPolicyProvider")
+    public void testSuccessfulSchemaValidation(final String fileName) {
+        this.policySetValidator.validatePolicySet(policySetFromFile(fileName));
+    }
+
+    @DataProvider
+    private Object[][] validPolicyProvider() {
+        return new Object[][] { { "set-with-2-policy.json" },
+                { "policyset/validator/test/empty-attributes-target-subject.json" },
+                { "policyset/validator/test/empty-conditions-policy.json" },
+                { "policyset/validator/test/missing-condition-name-policy.json" },
+                { "policyset/validator/test/missing-target-name-policy.json" },
+                { "policyset/validator/test/policy-set-with-only-name-effect.json" },
+                { "policyset/validator/test/testMatchPolicyWithMultipleActions.json" },
+                { "policyset/validator/test/policyWithNullTargetAction.json" },
+                { "policyset/validator/test/policyWithEmptyTargetAction.json" },
+                { "obligation/policy-obligation-ids-null.json" }, { "obligation/policy-obligation-ids-blank.json" },
+                { "obligation/obligation-expressions-empty.json" },
+                { "obligation/set-with-obligation-expressions.json" },
+                { "obligation/obligation-expression-action-arguments-missing.json" },
+                { "obligation/obligation-expression-action-arguments-null.json" },
+                { "obligation/obligation-expression-action-arguments-empty.json" } };
     }
 
     @Test
@@ -182,44 +289,16 @@ public class PolicySetValidatorTest extends AbstractTestNGSpringContextTests {
 
     }
 
-    @Test
-    public void testMatchPolicyWithMultipleActions() {
-        PolicySet policySet = this.jsonUtils.deserializeFromFile(
-                "policyset/validator/test/testMatchPolicyWithMultipleActions.json", PolicySet.class);
-        Assert.assertNotNull(policySet);
-        this.policySetValidator.validatePolicySet(policySet);
-
-    }
-
-    @Test
-    public void testpolicyWithNullTargetAction() {
-        PolicySet policySet = this.jsonUtils
-                .deserializeFromFile("policyset/validator/test/policyWithNullTargetAction.json", PolicySet.class);
-        Assert.assertNotNull(policySet);
-        this.policySetValidator.validatePolicySet(policySet);
-        Assert.assertNull(policySet.getPolicies().get(0).getTarget().getAction());
-    }
-
-    @Test
-    public void testpolicyWithEmptyTargetAction() {
-        PolicySet policySet = this.jsonUtils
-                .deserializeFromFile("policyset/validator/test/policyWithEmptyTargetAction.json", PolicySet.class);
-        Assert.assertNotNull(policySet);
-        this.policySetValidator.validatePolicySet(policySet);
-        Assert.assertNull(policySet.getPolicies().get(0).getTarget().getAction());
-    }
-
     @SuppressWarnings("unchecked")
     @Test
     public void testRemovalOfMultipleCachedConditions() {
-        PolicySet policySet = this.jsonUtils.deserializeFromFile(
-                "policyset/validator/test/multiple-policies-with-multiple-conditions.json", PolicySet.class);
-        Assert.assertNotNull(policySet);
+        PolicySet policySet = policySetFromFile(
+                "policyset/validator/test/multiple-policies-with-multiple-conditions.json");
         this.policySetValidator.validatePolicySet(policySet);
-        GroovyConditionCache conditionCache =
-                (GroovyConditionCache) ReflectionTestUtils.getField(this.policySetValidator, "conditionCache");
-        Map<String, ConditionShell> cache =
-                (Map<String, ConditionShell>) ReflectionTestUtils.getField(conditionCache, "cache");
+        GroovyConditionCache conditionCache = (GroovyConditionCache) ReflectionTestUtils
+                .getField(this.policySetValidator, "conditionCache");
+        Map<String, ConditionShell> cache = (Map<String, ConditionShell>) ReflectionTestUtils.getField(conditionCache,
+                "cache");
         int cacheSize = cache.size();
         Assert.assertTrue(cacheSize > 0);
         this.policySetValidator.removeCachedConditions(policySet);
@@ -231,4 +310,9 @@ public class PolicySetValidatorTest extends AbstractTestNGSpringContextTests {
         }
     }
 
+    private static PolicySet policySetFromFile(final String filename) {
+        PolicySet policySet = jsonUtils.deserializeFromFile(filename, PolicySet.class);
+        Assert.assertNotNull(policySet);
+        return policySet;
+    }
 }

@@ -1,0 +1,24 @@
+{
+    "name": "set-with-1-policy",
+    "policies": [
+        {
+            "name": "Default",
+            "effect": "PERMIT",
+            "obligationIds": ["obligation1", "orphan", "obligation2"]
+        }
+    ],
+    "obligationExpressions": [
+        {
+            "id": "obligation1",
+            "actionTemplate": {
+                "sqlStatement": "some SQL statement"
+            }
+        },
+        {
+            "id": "obligation2",
+            "actionTemplate": {
+                "filter": "some where clause"
+            }
+        }
+    ]
+} 

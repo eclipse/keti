@@ -64,11 +64,17 @@ public class PolicyHelper {
 
     public String setTestPolicy(final RestTemplate acs, final HttpHeaders headers, final String endpoint,
             final String policyFile) throws JsonParseException, JsonMappingException, IOException {
+        PolicySet policySet = putPolicySet(acs, headers, endpoint, policyFile);
+        policySet.getName();
+        return policySet.getName();
+    }
 
+    public PolicySet putPolicySet(final RestTemplate acs, final HttpHeaders headers, final String endpoint,
+            final String policyFile) throws JsonParseException, JsonMappingException, IOException {
         PolicySet policySet = new ObjectMapper().readValue(new File(policyFile), PolicySet.class);
         String policyName = policySet.getName();
         acs.put(endpoint + ACS_POLICY_SET_API_PATH + policyName, new HttpEntity<>(policySet, headers));
-        return policyName;
+        return policySet;
     }
 
     public CreatePolicyStatus createPolicySet(final String policyFile, final RestTemplate restTemplate,

@@ -1,0 +1,10 @@
+{
+    "name": "set-with-1-policy",
+    "policies": [
+        {
+            "name": "ObligationExpressions array contains no values",
+            "effect": "PERMIT"
+        }
+    ],
+    "obligationExpressions": []
+}

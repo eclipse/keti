@@ -1,0 +1,48 @@
+{
+    "name": "set-with-obligation-expressions",
+    "policies": [
+        {
+            "name": "policy with obligationIds",
+            "effect": "PERMIT",
+            "obligationIds": ["obligation1", "obligation2"]
+        }
+    ],
+    "obligationExpressions": [
+        {
+            "id": "obligation1",
+            "actionTemplate": {
+                "sqlStatement": "SELECT firstName, lastName, RIGHT(ssn, 4), LEFT(address, 11) FROM employee_records LIMIT 100 where site = '$resource_site' AND id='$record_id'"
+            },
+            "actionArguments": [
+                {
+                    "name": "resource_site",
+                    "value": "resource.uriVariable('site_id')"
+                },
+                {
+                    "name": "record_id",
+                    "value": "resource.uriVariable('record_id')"
+                }
+            ]
+        },
+        {
+            "id": "obligation2",
+            "actionTemplate": {
+                "filter": "where site = '$subject_site",
+                "select": [
+                    {
+                        "name": "firstName"
+                    },
+                    {
+                        "name": "lastName"
+                    }
+                ]
+            },
+            "actionArguments": [
+                {
+                    "name": "subject_site",
+                    "value": "subject.attributes('https://acs.attributes.int', 'site')"
+                }
+            ]
+        }
+    ]
+} 

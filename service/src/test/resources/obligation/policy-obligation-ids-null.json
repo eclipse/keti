@@ -1,0 +1,10 @@
+{
+    "name": "set-with-1-policy",
+    "policies": [
+        {
+            "name": "ObigationIds array is null",
+            "effect": "PERMIT",
+            "obligationIds": null
+        }
+    ]
+}

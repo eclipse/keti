@@ -1,0 +1,27 @@
+{
+    "name": "set-obligation-expression-action-arguments-duplicated",
+    "policies": [
+        {
+            "name": "policy with obligationIds",
+            "effect": "PERMIT"
+        }
+    ],
+    "obligationExpressions": [
+        {
+            "id": "obligation1",
+            "actionTemplate": {
+                "sqlStatement": "SELECT firstName, lastName FROM employee_records LIMIT 100"
+            },
+            "actionArguments": [
+                {
+                    "name": "resource_site",
+                    "value": "resource.uriVariable('site_id')"
+                },
+                {
+                    "name": "resource_site",
+                    "value": "resource.uriVariable('record_id')"
+                }
+            ]
+        }
+    ]
+} 

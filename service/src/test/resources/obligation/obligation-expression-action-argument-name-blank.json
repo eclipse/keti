@@ -1,0 +1,23 @@
+{
+    "name": "set-obligation-expression-action-argument-name-blank",
+    "policies": [
+        {
+            "name": "policy with obligationIds",
+            "effect": "PERMIT"
+        }
+    ],
+    "obligationExpressions": [
+        {
+            "id": "obligation1",
+            "actionTemplate": {
+                "sqlStatement": "SELECT firstName, lastName FROM employee_records"
+            },
+            "actionArguments": [
+                {
+                    "name": "",
+                    "value": "resource.uriVariable('record_id')"
+                }
+            ]
+        }
+    ]
+}

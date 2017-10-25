@@ -1,0 +1,10 @@
+{
+    "name": "set-with-1-policy",
+    "policies": [
+        {
+            "name": "ObigationIds array contains non-unique values",
+            "effect": "PERMIT",
+            "obligationIds": ["o1", "o2", "o1"]
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "name": "set-with-1-policy",
+    "policies": [
+        {
+            "name": "ObigationIds array contains blank string",
+            "effect": "PERMIT",
+            "obligationIds": ["o1", ""]
+        }
+    ]
+} 

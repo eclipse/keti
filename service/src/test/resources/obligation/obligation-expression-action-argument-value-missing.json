@@ -1,0 +1,22 @@
+{
+    "name": "set-obligation-expression-action-argument-value-missing",
+    "policies": [
+        {
+            "name": "policy with obligationIds",
+            "effect": "PERMIT"
+        }
+    ],
+    "obligationExpressions": [
+        {
+            "id": "obligation1",
+            "actionTemplate": {
+                "sqlStatement": "SELECT firstName, lastName FROM employee_records"
+            },
+            "actionArguments": [
+                {
+                    "name": "record_id"
+                }
+            ]
+        }
+    ]
+}

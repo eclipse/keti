@@ -12,30 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package org.eclipse.keti.acs.model;
 
-import java.io.File;
-import java.io.IOException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  *
- * @author acs-engineers@ge.com
+ * @author Sebastian Torres Brown
+ * 
+ * enum class to define the types of Obligations that are supported
+ * 
  */
-public final class PolicySets {
-    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private PolicySets() {
-        // Prevents instantiation.
-    }
-
-    @SuppressWarnings("javadoc")
-    public static PolicySet loadFromFile(final File file) throws IOException {
-        return OBJECT_MAPPER.readValue(file, PolicySet.class);
-    }
+public enum ObligationType {
+    CUSTOM
 }

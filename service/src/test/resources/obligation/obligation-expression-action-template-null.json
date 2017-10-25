@@ -1,0 +1,15 @@
+{
+    "name": "set-obligation-expression-action-template-null",
+    "policies": [
+        {
+            "name": "policy with obligationIds",
+            "effect": "PERMIT"
+        }
+    ],
+    "obligationExpressions": [
+        {
+            "id": "obligation1",
+            "actionTemplate": null
+        }
+    ]
+} 

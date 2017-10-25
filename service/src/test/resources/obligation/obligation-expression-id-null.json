@@ -1,0 +1,17 @@
+{
+    "name": "set-obligation-expressions-empty-id",
+    "policies": [
+        {
+            "name": "Default",
+            "effect": "PERMIT"
+        }
+    ],
+    "obligationExpressions": [
+        {
+            "id": "",
+            "actionTemplate": {
+                "sqlStatement": "SELECT firstName, lastName, FROM employee_records LIMIT 100"
+            }
+        }
+    ]
+} 
