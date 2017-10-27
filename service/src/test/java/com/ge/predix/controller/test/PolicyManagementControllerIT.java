@@ -88,6 +88,17 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
         Assert.assertNotNull(this.policySet, "complete-sample-policy-set.json file not found or invalid");
     }
 
+    public void testCreatePolicyInvalidMediaTypeResponseStatusCheck() throws Exception {
+
+        String thisUri = VERSION + "/policy-set/" + this.policySet.getName();
+        // create policy-set in first zone
+        MockMvcContext putContext = this.testUtils
+                .createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
+        putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_XML_VALUE)
+                .content("testString"))
+                .andExpect(status().isUnsupportedMediaType());
+    }
+
     public void testCreateSamePolicyDifferentZones() throws Exception {
         String thisUri = VERSION + "/policy-set/" + this.policySet.getName();
         // create policy-set in first zone
@@ -117,7 +128,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
                 .andExpect(jsonPath("name").value(policySetName)).andExpect(jsonPath("policies").isArray())
                 .andExpect(jsonPath("policies[1].target.resource.attributes[0].name").value("group"));
     }
-    
+
     @Test
     public void testCreateMultiplePolicySets() throws Exception {
         //create first policy set
@@ -131,7 +142,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("name").value(policySetName)).andExpect(jsonPath("policies").isArray())
                 .andExpect(jsonPath("policies[1].target.resource.attributes[0].name").value("group"));
-        
+
         String policySet2Name = "";
         try {
             //create second policy set
@@ -147,7 +158,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
             mockMvcContext.getMockMvc().perform(mockMvcContext.getBuilder()).andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
             .andExpect(jsonPath("name").value(policySet2Name));
-            
+
             //assert that policy evaluation fails
             PolicyEvaluationRequestV1 evalRequest = new PolicyEvaluationRequestV1();
             evalRequest.setAction("GET");

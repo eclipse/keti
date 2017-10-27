@@ -86,6 +86,13 @@ public class AttributeConnectorControllerIT extends AbstractTestNGSpringContextT
     }
 
     @Test(dataProvider = "requestUrlProvider")
+    public void testAttributeInvalidMediaTypeResponseStatusCheck(final String endpointUrl) throws Exception {
+        this.mockMvc.perform(
+                put(endpointUrl).contentType(MediaType.APPLICATION_PDF_VALUE).content("testString"))
+                .andExpect(status().isUnsupportedMediaType());
+    }
+
+    @Test(dataProvider = "requestUrlProvider")
     public void testCreateAndGetAndDeleteConnector(final String endpointUrl) throws Exception {
         createZone1AndAssert();
 

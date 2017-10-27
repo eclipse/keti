@@ -82,6 +82,12 @@ public class ZoneControllerIT extends AbstractTestNGSpringContextTests {
         this.mockMvc.perform(delete(V1_ZONE_URL, "zone-1")).andExpect(status().isNoContent());
     }
 
+    public void testZoneInvalidMediaTypeResponseStatusCheck() throws Exception {
+
+        this.mockMvc.perform(put(V1_ZONE_URL, "zone-1").contentType(MediaType.TEXT_XML_VALUE).content("testString"))
+                .andExpect(status().isUnsupportedMediaType());
+    }
+
     public void testUpdateZone() throws Exception {
         this.zone = this.jsonUtils.deserializeFromFile("controller-test/createZone.json", Zone.class);
         Assert.assertNotNull(this.zone, "createZone.json file not found or invalid");

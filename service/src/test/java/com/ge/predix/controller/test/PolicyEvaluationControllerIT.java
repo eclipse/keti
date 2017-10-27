@@ -110,6 +110,18 @@ public class PolicyEvaluationControllerIT extends AbstractTestNGSpringContextTes
         policySets.forEach(policySet -> this.policyManagementService.deletePolicySet(policySet.getName()));
     }
 
+    @Test
+    public void testPolicyInvalidMediaTypeResponseStatusCheck()
+            throws Exception {
+
+        MockMvcContext postPolicyEvalContext = this.testUtils
+                .createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), POLICY_EVAL_URL);
+        postPolicyEvalContext.getMockMvc().perform(
+                postPolicyEvalContext.getBuilder().contentType(MediaType.IMAGE_GIF_VALUE)
+                        .content("testString"))
+                .andExpect(status().isUnsupportedMediaType());
+    }
+
     @Test(dataProvider = "policyEvalDataProvider")
     public void testPolicyEvaluation(final PolicyEvaluationRequestV1 policyEvalRequest,
             final List<PolicySet> policySets, final Effect expectedEffect) throws Exception {

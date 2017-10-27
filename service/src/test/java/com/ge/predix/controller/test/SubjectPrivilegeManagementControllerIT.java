@@ -113,6 +113,14 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         // set security context back to first test zone
         MockSecurityContext.mockSecurityContext(this.testZone);
     }
+    @Test
+    public void testSubjectInvalidMediaTypeResponseStatusCheck() throws Exception {
+
+        MockMvcContext postContext =
+            TEST_UTILS.createWACWithCustomPOSTRequestBuilder(this.wac, this.testZone.getSubdomain(), SUBJECT_BASE_URL);
+        postContext.getMockMvc().perform(postContext.getBuilder().contentType(MediaType.TEXT_PLAIN)
+                .content("testString")).andExpect(status().isUnsupportedMediaType());
+    }
 
     @Test
     @SuppressWarnings("unchecked")
