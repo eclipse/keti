@@ -14,7 +14,8 @@
  - See the License for the specific language governing permissions and
  - limitations under the License.
  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>acs-integration-tests</artifactId>
     <name>Predix Access Control Service Integration Tests</name>
@@ -50,7 +51,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire.version}</version>
                 <configuration>
-                    <!-- All tests in this project are run using failsafe.
+                    <!-- All tests in this project are run using failsafe. 
                         Skip test phase -->
                     <skip>true</skip>
                 </configuration>
@@ -179,7 +180,7 @@
         <dependency>
             <groupId>org.springframework.security.oauth</groupId>
             <artifactId>spring-security-oauth2</artifactId>
-            <!-- These transitive dependencies are incompatible with spring
+            <!-- These transitive dependencies are incompatible with spring 
                 core dependencies pulled in by spring boot -->
             <exclusions>
                 <exclusion>
@@ -238,7 +239,7 @@
         <dependency>
             <groupId>org.cloudfoundry.identity</groupId>
             <artifactId>cloudfoundry-identity-uaa</artifactId>
-            <version>3.6.0</version>
+            <version>4.6.1</version>
             <type>war</type>
         </dependency>
 
@@ -307,8 +308,9 @@
                             </properties>
                             <forkCount>0</forkCount>
                             <parallel>false</parallel>
-                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
-                                 and retained by Jenkins for each profile -->
+                            <!-- us32088: Place test reports outside of target 
+                                directory so reports are not removed by 'mvn clean' and retained by Jenkins 
+                                for each profile -->
                             <reportsDirectory>${basedir}/failsafe-reports-predix-cloud</reportsDirectory>
                             <summaryFile>${basedir}/failsafe-reports-predix-cloud/failsafe-summary.xml</summaryFile>
                             <systemPropertyVariables>
@@ -433,8 +435,9 @@
                             </properties>
                             <forkCount>0</forkCount>
                             <parallel>false</parallel>
-                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
-                                 and retained by Jenkins for each profile -->
+                            <!-- us32088: Place test reports outside of target 
+                                directory so reports are not removed by 'mvn clean' and retained by Jenkins 
+                                for each profile -->
                             <reportsDirectory>${basedir}/failsafe-reports-predix-cloud-titan</reportsDirectory>
                             <summaryFile>${basedir}/failsafe-reports-predix-cloud-titan/failsafe-summary.xml</summaryFile>
                             <systemPropertyVariables>
@@ -611,7 +614,7 @@
                         <configuration>
                             <forkCount>0</forkCount>
                             <parallel>methods</parallel>
-                            <argLine/>
+                            <argLine />
                             <systemPropertyVariables>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
                                 <spring.profiles.active>h2,predix,simple-cache,httpValidation</spring.profiles.active>
@@ -717,7 +720,7 @@
                         <configuration>
                             <forkCount>0</forkCount>
                             <parallel>methods</parallel>
-                            <argLine/>
+                            <argLine />
                             <systemPropertyVariables>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
                                 <spring.profiles.active>h2,predix,simple-cache,titan,httpValidation</spring.profiles.active>
@@ -768,18 +771,18 @@
                         <configuration>
                             <skip>${maven.test.skip}</skip>
                             <configuration>
-                                <home>${project.build.directory}/tomcat7x/container</home>
+                                <home>${project.build.directory}/tomcat8x/container</home>
                                 <properties>
                                     <cargo.port.offset>${PORT_OFFSET}</cargo.port.offset>
                                 </properties>
                             </configuration>
                             <container>
-                                <containerId>tomcat7x</containerId>
+                                <containerId>tomcat8x</containerId>
                                 <systemProperties>
                                     <CLOUD_FOUNDRY_CONFIG_PATH>${project.basedir}/uaa/config</CLOUD_FOUNDRY_CONFIG_PATH>
                                 </systemProperties>
                                 <zipUrlInstaller>
-                                    <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.55/bin/apache-tomcat-7.0.55.tar.gz</url>
+                                    <url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz</url>
                                     <downloadDir>${project.build.directory}/downloads</downloadDir>
                                     <extractDir>${project.build.directory}/extracts</extractDir>
                                 </zipUrlInstaller>
@@ -822,18 +825,20 @@
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,httpValidation</SPRING_PROFILES_ACTIVE>
                                 <management.health.redis.enabled>false</management.health.redis.enabled>
                                 <uaaCheckHealthUrl>${ACS_UAA_URL}/healthz</uaaCheckHealthUrl>
-                                <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method, Access-Control-Request-Headers</cors.xhr.allowed.headers>
+                                <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,
+                                    Access-Control-Request-Headers</cors.xhr.allowed.headers>
                                 <cors.xhr.allowed.origins>^.*\.grc-apps\.svc\.ge\.com$,^.*\.predix\.io$</cors.xhr.allowed.origins>
                                 <cors.xhr.allowed.uris>^/v2/api-docs$</cors.xhr.allowed.uris>
                                 <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
                                 <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
                             </environmentVariables>
-                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
-                                 and retained by Jenkins for each profile -->
+                            <!-- us32088: Place test reports outside of target 
+                                directory so reports are not removed by 'mvn clean' and retained by Jenkins 
+                                for each profile -->
                             <reportsDirectory>${basedir}/failsafe-reports-public</reportsDirectory>
                             <summaryFile>${basedir}/failsafe-reports-public/failsafe-summary.xml</summaryFile>
                             <skipTests>false</skipTests>
-                            <!-- <forkCount>0</forkCount>-->
+                            <!-- <forkCount>0</forkCount> -->
                             <parallel>false</parallel>
                             <!-- <argLine>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</argLine> -->
                             <systemPropertyVariables>
@@ -879,18 +884,18 @@
                         <configuration>
                             <skip>${maven.test.skip}</skip>
                             <configuration>
-                                <home>${project.build.directory}/tomcat7x/container</home>
+                                <home>${project.build.directory}/tomcat8x/container</home>
                                 <properties>
                                     <cargo.port.offset>${PORT_OFFSET}</cargo.port.offset>
                                 </properties>
                             </configuration>
                             <container>
-                                <containerId>tomcat7x</containerId>
+                                <containerId>tomcat8x</containerId>
                                 <systemProperties>
                                     <CLOUD_FOUNDRY_CONFIG_PATH>${project.basedir}/uaa/config</CLOUD_FOUNDRY_CONFIG_PATH>
                                 </systemProperties>
                                 <zipUrlInstaller>
-                                    <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.55/bin/apache-tomcat-7.0.55.tar.gz</url>
+                                    <url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz</url>
                                     <downloadDir>${project.build.directory}/downloads</downloadDir>
                                     <extractDir>${project.build.directory}/extracts</extractDir>
                                 </zipUrlInstaller>
@@ -933,14 +938,16 @@
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan,httpValidation</SPRING_PROFILES_ACTIVE>
                                 <management.health.redis.enabled>false</management.health.redis.enabled>
                                 <uaaCheckHealthUrl>${ACS_UAA_URL}/healthz</uaaCheckHealthUrl>
-                                <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method, Access-Control-Request-Headers</cors.xhr.allowed.headers>
+                                <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,
+                                    Access-Control-Request-Headers</cors.xhr.allowed.headers>
                                 <cors.xhr.allowed.origins>^.*\.grc-apps\.svc\.ge\.com$,^.*\.predix\.io$</cors.xhr.allowed.origins>
                                 <cors.xhr.allowed.uris>^/v2/api-docs$</cors.xhr.allowed.uris>
                                 <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
                                 <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
                             </environmentVariables>
-                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
-                                 and retained by Jenkins for each profile -->
+                            <!-- us32088: Place test reports outside of target 
+                                directory so reports are not removed by 'mvn clean' and retained by Jenkins 
+                                for each profile -->
                             <reportsDirectory>${basedir}/failsafe-reports-public-titan</reportsDirectory>
                             <summaryFile>${basedir}/failsafe-reports-public-titan/failsafe-summary.xml</summaryFile>
                             <parallel>false</parallel>
@@ -1053,10 +1060,12 @@
                                 <ZAC_UAA_URL>https://${uaa.cf.domain}.${cf.base.domain}</ZAC_UAA_URL>
                                 <ACS_UAA_URL>https://${uaa.cf.domain}.${cf.base.domain}</ACS_UAA_URL>
                                 <ZAC_URL>https://${zac.cf.domain}.${cf.base.domain}</ZAC_URL>
-                                <!-- ACS zones (a.k.a tenancies) used for the tests -->
+                                <!-- ACS zones (a.k.a tenancies) used for 
+                                    the tests -->
                                 <ZONE1_UAA_URL>https://${uaa.zone}${uaa.cf.domain}.${cf.base.domain}</ZONE1_UAA_URL>
                                 <ZONE2_UAA_URL>not-used</ZONE2_UAA_URL>
-                                <!-- OAuth clients and users used for the tests -->
+                                <!-- OAuth clients and users used for the 
+                                    tests -->
                                 <ACS_CLIENT_ID>${ACS_CLIENT_ID}</ACS_CLIENT_ID>
                                 <ACS_CLIENT_SECRET>${ACS_CLIENT_SECRET}</ACS_CLIENT_SECRET>
                                 <ACS_TEST_USER>${ACS_TEST_USER}</ACS_TEST_USER>

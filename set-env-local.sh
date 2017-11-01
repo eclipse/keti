@@ -35,7 +35,7 @@ fi
 python <<EOF
 import re, shutil
 
-input_file = './acs-integration-tests/uaa/config/login.yml'
+input_file = './acs-integration-tests/uaa/config/uaa.yml'
 output_file = input_file + '.tmp'
 
 input = open(input_file)
