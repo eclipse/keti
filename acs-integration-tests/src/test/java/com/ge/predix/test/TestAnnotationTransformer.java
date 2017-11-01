@@ -39,13 +39,13 @@ public class TestAnnotationTransformer implements IAnnotationTransformer2 {
             final Class testClass, final Constructor testConstructor, final Method testMethod) {
 
         boolean cloudFoundryTestClass = (testClass != null
-                && testClass.getPackage().getName().contains(TestNameLogger.ACS_CLOUD_FOUNDRY_PACKAGE));
+                && testClass.getPackage().getName().contains(TestNamePredixLogger.ACS_CLOUD_FOUNDRY_PACKAGE));
         boolean cloudFoundryTestConstructor = (testConstructor != null
                 && testConstructor.getDeclaringClass().getPackage().getName().contains(
-                        TestNameLogger.ACS_CLOUD_FOUNDRY_PACKAGE));
+                TestNamePredixLogger.ACS_CLOUD_FOUNDRY_PACKAGE));
         boolean cloudFoundryTestMethod = (testMethod != null
                 && testMethod.getDeclaringClass().getPackage().getName().contains(
-                        TestNameLogger.ACS_CLOUD_FOUNDRY_PACKAGE));
+                TestNamePredixLogger.ACS_CLOUD_FOUNDRY_PACKAGE));
 
         // For all integration tests, ensure all configuration and test classes/constructors/methods:
         //   - Depend on test applications being successfully pushed to Cloud Foundry

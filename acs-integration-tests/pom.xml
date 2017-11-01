@@ -302,7 +302,7 @@
                             <properties>
                                 <property>
                                     <name>listener</name>
-                                    <value>com.ge.predix.test.TestNameLogger,com.ge.predix.test.TestAnnotationTransformer</value>
+                                    <value>com.ge.predix.test.TestNamePredixLogger,com.ge.predix.test.TestAnnotationTransformer</value>
                                 </property>
                             </properties>
                             <forkCount>0</forkCount>
@@ -428,7 +428,7 @@
                             <properties>
                                 <property>
                                     <name>listener</name>
-                                    <value>com.ge.predix.test.TestNameLogger,com.ge.predix.test.TestAnnotationTransformer</value>
+                                    <value>com.ge.predix.test.TestNamePredixLogger,com.ge.predix.test.TestAnnotationTransformer</value>
                                 </property>
                             </properties>
                             <forkCount>0</forkCount>
