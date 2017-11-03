@@ -22,14 +22,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.util.LinkedMultiValueMap;
@@ -41,25 +45,15 @@ public class UAAACSClientsUtil {
 
     private static final JsonUtils JSON_UTILS = new JsonUtils();
 
-    private final OAuth2RestTemplate adminRestTemplate;
+    private final OAuth2RestTemplate uaaAdminTemplate;
     private final String uaaUrl;
-    private final String tokenUrl;
-    private final ACSRestTemplateFactory acsRestTemplateFactory;
 
-    public UAAACSClientsUtil(final ACSRestTemplateFactory acsRestTemplateFactory, final String uaaUrl,
-            final String adminSecret) {
+    public UAAACSClientsUtil(final String uaaUrl, final String adminSecret) {
         this.uaaUrl = uaaUrl;
-        this.tokenUrl = this.uaaUrl + "/oauth/token";
-        this.acsRestTemplateFactory = acsRestTemplateFactory;
-        this.adminRestTemplate = this.acsRestTemplateFactory.getOAuth2RestTemplateForUaaAdmin(this.tokenUrl, "admin",
-                adminSecret);
+        this.uaaAdminTemplate = getOAuth2RestTemplateForClient(this.uaaUrl + "/oauth/token", "admin", adminSecret);
     }
 
     public OAuth2RestTemplate createAcsAdminClient(final List<String> acsZones) {
-
-        if (this.acsRestTemplateFactory == null) {
-            throw new IllegalStateException("ACSRestTemplateFactory is null");
-        }
 
         ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority("acs.zones.admin"));
@@ -80,9 +74,6 @@ public class UAAACSClientsUtil {
     }
 
     public OAuth2RestTemplate createAcsAdminClientAndGetTemplate(final String zoneName) {
-        if (this.acsRestTemplateFactory == null) {
-            throw new IllegalStateException("ACSRestTemplateFactory is null");
-        }
         OAuth2RestTemplate restTemplate = createScopeClient(zoneName, "admin");
         this.createAcsAdminClient(restTemplate.getResource().getClientId(),
                 restTemplate.getResource().getClientSecret());
@@ -90,9 +81,6 @@ public class UAAACSClientsUtil {
     }
 
     public OAuth2RestTemplate createZoneClientAndGetTemplate(final String zoneName, final String serviceId) {
-        if (this.acsRestTemplateFactory == null) {
-            throw new IllegalStateException("ACSRestTemplateFactory is null");
-        }
         OAuth2RestTemplate restTemplate = createScopeClient(zoneName, "zoneAdmin");
         this.createAcsZoneClient(zoneName, restTemplate.getResource().getClientId(),
                 restTemplate.getResource().getClientSecret(), serviceId);
@@ -193,7 +181,7 @@ public class UAAACSClientsUtil {
 
         ResponseEntity<String> clientCreate = null;
         try {
-            clientCreate = this.adminRestTemplate.exchange(this.uaaUrl + "/oauth/clients", HttpMethod.POST, postEntity,
+            clientCreate = this.uaaAdminTemplate.exchange(this.uaaUrl + "/oauth/clients", HttpMethod.POST, postEntity,
                     String.class);
             if (clientCreate.getStatusCode() == HttpStatus.CREATED) {
                 return JSON_UTILS.deserialize(clientCreate.getBody(), BaseClientDetails.class);
@@ -203,7 +191,7 @@ public class UAAACSClientsUtil {
         } catch (InvalidClientException ex) {
             if (ex.getMessage().equals("Client already exists: " + client.getClientId())) {
                 HttpEntity<String> putEntity = new HttpEntity<String>(JSON_UTILS.serialize(client), headers);
-                ResponseEntity<String> clientUpdate = this.adminRestTemplate.exchange(
+                ResponseEntity<String> clientUpdate = this.uaaAdminTemplate.exchange(
                         this.uaaUrl + "/oauth/clients/" + client.getClientId(), HttpMethod.PUT, putEntity,
                         String.class);
                 if (clientUpdate.getStatusCode() == HttpStatus.OK) {
@@ -218,7 +206,7 @@ public class UAAACSClientsUtil {
     }
 
     public void deleteClient(final String clientId) {
-        this.adminRestTemplate.delete(this.uaaUrl + "/oauth/clients/" + clientId);
+        this.uaaAdminTemplate.delete(this.uaaUrl + "/oauth/clients/" + clientId);
     }
 
     private OAuth2RestTemplate createScopeClient(final String zoneName, final String clientRole) {
@@ -232,7 +220,20 @@ public class UAAACSClientsUtil {
             clientId += '-' + clientType;
         }
         String clientSecret = clientId + "-secret";
-        return this.acsRestTemplateFactory.getOAuth2RestTemplateForClient(this.tokenUrl, clientId, clientSecret);
+        return this.getOAuth2RestTemplateForClient(this.uaaUrl + "/oauth/token", clientId, clientSecret);
     }
 
+    private OAuth2RestTemplate getOAuth2RestTemplateForClient(final String tokenUrl, final String clientId,
+            final String clientSecret) {
+        ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
+        resource.setAccessTokenUri(tokenUrl);
+        resource.setClientId(clientId);
+        resource.setClientSecret(clientSecret);
+        OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(resource);
+        CloseableHttpClient httpClient = HttpClientBuilder.create().useSystemProperties().build();
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        restTemplate.setRequestFactory(requestFactory);
+
+        return restTemplate;
+    }
 }

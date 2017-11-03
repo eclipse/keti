@@ -38,9 +38,9 @@ import org.testng.annotations.Test;
 
 import com.ge.predix.audit.rest.PredixAuditRequest;
 import com.ge.predix.audit.rest.PredixAuditResponse;
-import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.ACSTestUtil;
-import com.ge.predix.test.utils.ZoneHelper;
+import com.ge.predix.test.utils.ZoneFactory;
 
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 public class PredixAuditIT extends AbstractTestNGSpringContextTests {
@@ -60,14 +60,19 @@ public class PredixAuditIT extends AbstractTestNGSpringContextTests {
     @Value("${AUDIT_UAA_CLIENT_SECRET}")
     private String auditClientSecret;
 
-    @Autowired
-    private ZoneHelper zoneHelper;
+    @Value("${zone1UaaUrl}/oauth/token")
+    private String zoneTrustedIssuer;
 
     @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
+    private ACSITSetUpFactory acsitSetUpFactory;
+
+    @Autowired
+    private ZoneFactory zoneFactory;
 
     private OAuth2RestTemplate auditRestTemplate;
 
+    //TODO: Successful execution of these tests is not confirmed.
+    // These tests should be enabled once audit is available in integration space.
     @BeforeClass(enabled = false)
     public void setup() {
         ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
@@ -84,8 +89,12 @@ public class PredixAuditIT extends AbstractTestNGSpringContextTests {
     @Test(enabled = false)
     public void testAudit() throws Exception {
         long startTime = Instant.now().toEpochMilli();
-        this.zoneHelper.createTestZone(this.acsRestTemplateFactory.getACSTemplateWithPolicyScope(), "predix-audit-zone",
-                true);
+
+        String zoneId = "predix-audit-zone";
+        OAuth2RestTemplate acsAdminRestTemplate = this.acsitSetUpFactory.getAcsAdminRestTemplate(zoneId);
+        this.zoneFactory.createTestZone(acsAdminRestTemplate, zoneId,
+                Collections.singletonList(this.zoneTrustedIssuer));
+
         HttpHeaders headers = ACSTestUtil.httpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.add("Predix-Zone-Id", this.auditZoneId);

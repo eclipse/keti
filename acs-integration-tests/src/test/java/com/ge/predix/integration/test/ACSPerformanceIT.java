@@ -22,6 +22,8 @@ import static com.ge.predix.test.utils.PrivilegeHelper.DEFAULT_SUBJECT_ID;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -42,18 +44,13 @@ import com.ge.predix.acs.rest.BaseSubject;
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
 import com.ge.predix.test.utils.ACSITSetUpFactory;
-import com.ge.predix.test.utils.ACSRestTemplateFactory;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
-import com.ge.predix.test.utils.ZoneFactory;
 
 @SuppressWarnings({ "nls" })
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 @Test
 public class ACSPerformanceIT extends AbstractTestNGSpringContextTests {
-
-    @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
 
     @Autowired
     private ACSITSetUpFactory acsitSetUpFactory;
@@ -64,12 +61,9 @@ public class ACSPerformanceIT extends AbstractTestNGSpringContextTests {
     @Autowired
     private PrivilegeHelper privilegeHelper;
 
-    @Autowired
-    private ZoneFactory zoneFactory;
-
-    private String zoneUrl;
-
     private String testPolicyName;
+    private String acsUrl;
+    private HttpHeaders zone1Headers;
     private OAuth2RestTemplate acsRestTemplate;
     private BaseSubject defaultSubject;
     private static final String NOT_MATCHING_ACTION = "HEAD";
@@ -78,20 +72,23 @@ public class ACSPerformanceIT extends AbstractTestNGSpringContextTests {
     public void setup() throws JsonParseException, JsonMappingException, IOException {
 
         this.acsitSetUpFactory.setUp();
-        this.zoneUrl = this.zoneFactory.getZoneSpecificUrl(this.acsitSetUpFactory.getZone1().getSubdomain());
+        this.acsUrl = this.acsitSetUpFactory.getAcsUrl();
+        this.zone1Headers = this.acsitSetUpFactory.getZone1Headers();
         this.acsRestTemplate = this.acsitSetUpFactory.getAcsZoneAdminRestTemplate();
         this.defaultSubject = new BaseSubject(DEFAULT_SUBJECT_ID);
-        this.privilegeHelper.putSubject(this.acsRestTemplate, this.defaultSubject, this.zoneUrl, null,
+        this.privilegeHelper.putSubject(this.acsRestTemplate, this.defaultSubject, this.acsUrl, this.zone1Headers,
                 this.privilegeHelper.getDefaultAttribute());
 
         String policyFile = "src/test/resources/policies/large-policy-set.json";
-        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsRestTemplate, null, this.zoneUrl, policyFile);
+        this.testPolicyName = this.policyHelper.setTestPolicy(this.acsRestTemplate, this.zone1Headers, this.acsUrl,
+                policyFile);
     }
 
     @AfterClass
     public void tearDown() throws Exception {
-        this.policyHelper.deletePolicySet(this.testPolicyName);
-        this.privilegeHelper.deleteSubject(this.defaultSubject.getSubjectIdentifier());
+        this.policyHelper.deletePolicySet(this.acsRestTemplate, this.acsUrl, this.testPolicyName, this.zone1Headers);
+        this.privilegeHelper.deleteSubject(this.acsRestTemplate, this.acsUrl,
+                this.defaultSubject.getSubjectIdentifier(), this.zone1Headers);
         this.acsitSetUpFactory.destroy();
     }
 
@@ -108,9 +105,9 @@ public class ACSPerformanceIT extends AbstractTestNGSpringContextTests {
                 .createEvalRequest(NOT_MATCHING_ACTION, this.defaultSubject.getSubjectIdentifier(),
                         (new BaseResource(DEFAULT_RESOURCE_IDENTIFIER)).getResourceIdentifier(), null);
 
-        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsRestTemplate
-                .postForEntity(this.zoneUrl + PolicyHelper.ACS_POLICY_EVAL_API_PATH, request,
-                        PolicyEvaluationResult.class);
+        ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsRestTemplate.postForEntity(
+                this.acsUrl + PolicyHelper.ACS_POLICY_EVAL_API_PATH, new HttpEntity<>(request, this.zone1Headers),
+                PolicyEvaluationResult.class);
 
         Assert.assertEquals(postForEntity.getStatusCode(), HttpStatus.OK);
         PolicyEvaluationResult responseBody = postForEntity.getBody();

@@ -58,10 +58,7 @@ public class PolicyHelper {
     private static final String[] ACTIONS = { "GET", "POST", "DELETE", "PUT" };
 
     @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
-
-    @Autowired
-    private ZoneHelper zoneHelper;
+    private ZoneFactory zoneFactory;
 
     public String setTestPolicy(final RestTemplate acs, final HttpHeaders headers, final String endpoint,
             final String policyFile) throws JsonParseException, JsonMappingException, IOException {
@@ -78,7 +75,7 @@ public class PolicyHelper {
         try {
             policySet = new ObjectMapper().readValue(new File(policyFile), PolicySet.class);
             String policyName = policySet.getName();
-            restTemplate.put(zoneHelper.getAcsBaseURL() + ACS_POLICY_SET_API_PATH + policyName,
+            restTemplate.put(zoneFactory.getAcsBaseURL() + ACS_POLICY_SET_API_PATH + policyName,
                     new HttpEntity<>(policySet, headers));
             return CreatePolicyStatus.SUCCESS;
         } catch (IOException e) {
@@ -90,13 +87,6 @@ public class PolicyHelper {
         } catch (RestClientException e) {
             return CreatePolicyStatus.ACS_ERROR;
         }
-    }
-
-    public CreatePolicyStatus createPolicySet(final String policyFile) {
-        RestTemplate acs = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
-        HttpHeaders zoneHeaders = ACSTestUtil.httpHeaders();
-        zoneHeaders.set(PolicyHelper.PREDIX_ZONE_ID, this.zoneHelper.getZone1Name());
-        return createPolicySet(policyFile, acs, zoneHeaders);
     }
 
     public ResponseEntity<PolicySet> getPolicySet(final String policyName, final RestTemplate restTemplate,
@@ -155,28 +145,12 @@ public class PolicyHelper {
         return createEvalRequest("GET", subject.getSubjectIdentifier(), "/secured-by-value/sites/" + site, null);
     }
 
-    /**
-     * @param headers
-     *            TODO
-     * @param createRandomEvalRequest
-     * @return
-     */
     public ResponseEntity<PolicyEvaluationResult> sendEvaluationRequest(final RestTemplate restTemplate,
             final HttpHeaders headers, final PolicyEvaluationRequestV1 randomEvalRequest) {
         ResponseEntity<PolicyEvaluationResult> evaluationResponse = restTemplate.postForEntity(
-                this.zoneHelper.getAcsBaseURL() + ACS_POLICY_EVAL_API_PATH,
+                this.zoneFactory.getAcsBaseURL() + ACS_POLICY_EVAL_API_PATH,
                 new HttpEntity<>(randomEvalRequest, headers), PolicyEvaluationResult.class);
         return evaluationResponse;
-    }
-
-    /**
-     * @param testPolicyName
-     */
-    public void deletePolicySet(final String testPolicyName) {
-        if (testPolicyName != null) {
-            this.acsRestTemplateFactory.getACSTemplateWithPolicyScope()
-                    .delete(this.zoneHelper.getZone1Url() + ACS_POLICY_SET_API_PATH + testPolicyName);
-        }
     }
 
     public void deletePolicySet(final RestTemplate restTemplate, final String acsUrl, final String testPolicyName) {

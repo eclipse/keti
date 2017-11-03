@@ -104,7 +104,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
         this.acsUrl = this.acsitSetUpFactory.getAcsUrl();
         this.zone1Headers = this.acsitSetUpFactory.getZone1Headers();
         this.zone3Headers = this.acsitSetUpFactory.getZone3Headers();
-        this.acsAdminRestTemplate = this.acsitSetUpFactory.getAcsAdminRestTemplate2();
+        this.acsAdminRestTemplate = this.acsitSetUpFactory.getAcsZonesAdminRestTemplate();
         this.acsZone1Name = this.acsitSetUpFactory.getZone1().getSubdomain();
         this.acsZone3Name = this.acsitSetUpFactory.getAcsZone3Name();
     }
@@ -344,7 +344,7 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
                             HttpMethod.GET, new HttpEntity<>(this.zone3Headers), BaseSubject.class);
             Assert.fail("Zone '" + this.acsZone3Name + "' was not properly deleted.");
         } catch (HttpServerErrorException e) {
-            // This following lines to be uncommented once ZacTokenService returns the right exception instead of a
+            // This following lines to be uncommented once TokenService returns the right exception instead of a
             // 500 - Defect url https://rally1.rallydev.com/#/30377833713d/detail/defect/42793900179
             // catch (OAuth2Exception e) {
             // Assert.assertTrue(e.getSummary().contains(HttpStatus.FORBIDDEN.toString()),

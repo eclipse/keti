@@ -33,9 +33,6 @@ import com.ge.predix.acs.rest.Zone;
 @Scope("prototype")
 public class ACSITSetUpFactoryPublic implements ACSITSetUpFactory {
 
-    @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
-
     private String acsZone1Name;
     private String acsZone2Name;
     private String acsZone3Name;
@@ -55,8 +52,8 @@ public class ACSITSetUpFactoryPublic implements ACSITSetUpFactory {
     private HttpHeaders zone1Headers;
     private HttpHeaders zone3Headers;
     private OAuth2RestTemplate acsAdminRestTemplate;
-    private OAuth2RestTemplate acsAdminRestTemplate2;
-    private OAuth2RestTemplate acsZoneRestTemplate;
+    private OAuth2RestTemplate acsZonesAdminRestTemplate;
+    private OAuth2RestTemplate acsZone1RestTemplate;
     private OAuth2RestTemplate acsZone2RestTemplate;
     private OAuth2RestTemplate acsReadOnlyRestTemplate;
     private OAuth2RestTemplate acsNoPolicyScopeRestTemplate;
@@ -83,16 +80,16 @@ public class ACSITSetUpFactoryPublic implements ACSITSetUpFactory {
         this.zone3Headers = ACSTestUtil.httpHeaders();
         this.zone3Headers.set(PolicyHelper.PREDIX_ZONE_ID, this.acsZone3Name);
 
-        this.uaaTestUtil = new UAAACSClientsUtil(this.acsRestTemplateFactory, this.uaaUrl, this.uaaAdminSecret);
+        this.uaaTestUtil = new UAAACSClientsUtil(this.uaaUrl, this.uaaAdminSecret);
 
         this.acsAdminRestTemplate = this.uaaTestUtil.createAcsAdminClientAndGetTemplate(this.acsZone1Name);
-        this.acsAdminRestTemplate2 = this.uaaTestUtil
+        this.acsZonesAdminRestTemplate = this.uaaTestUtil
                 .createAcsAdminClient(Arrays.asList(this.acsZone1Name, this.acsZone2Name, this.acsZone3Name));
         this.acsReadOnlyRestTemplate = this.uaaTestUtil.createReadOnlyPolicyScopeClient(this.acsZone1Name);
         this.acsNoPolicyScopeRestTemplate = this.uaaTestUtil.createNoPolicyScopeClient(this.acsZone1Name);
         this.zone1 = this.zoneFactory.createTestZone(this.acsAdminRestTemplate, this.acsZone1Name,
                 Collections.singletonList(this.uaaUrl + OAUTH_ENDPOINT));
-        this.acsZoneRestTemplate = this.uaaTestUtil.createZoneClientAndGetTemplate(this.acsZone1Name, this.serviceId);
+        this.acsZone1RestTemplate = this.uaaTestUtil.createZoneClientAndGetTemplate(this.acsZone1Name, this.serviceId);
 
         this.zone2 = this.zoneFactory.createTestZone(this.acsAdminRestTemplate, this.acsZone2Name,
                 Collections.singletonList(this.uaaUrl + OAUTH_ENDPOINT));
@@ -104,11 +101,11 @@ public class ACSITSetUpFactoryPublic implements ACSITSetUpFactory {
         this.zoneFactory.deleteZone(this.acsAdminRestTemplate, this.acsZone1Name);
         this.zoneFactory.deleteZone(this.acsAdminRestTemplate, this.acsZone2Name);
         this.uaaTestUtil.deleteClient(this.acsAdminRestTemplate.getResource().getClientId());
-        this.uaaTestUtil.deleteClient(this.acsZoneRestTemplate.getResource().getClientId());
+        this.uaaTestUtil.deleteClient(this.acsZone1RestTemplate.getResource().getClientId());
         this.uaaTestUtil.deleteClient(this.acsZone2RestTemplate.getResource().getClientId());
         this.uaaTestUtil.deleteClient(this.acsReadOnlyRestTemplate.getResource().getClientId());
         this.uaaTestUtil.deleteClient(this.acsNoPolicyScopeRestTemplate.getResource().getClientId());
-        this.uaaTestUtil.deleteClient(this.acsAdminRestTemplate2.getResource().getClientId());
+        this.uaaTestUtil.deleteClient(this.acsZonesAdminRestTemplate.getResource().getClientId());
     }
 
     @Override
@@ -125,8 +122,7 @@ public class ACSITSetUpFactoryPublic implements ACSITSetUpFactory {
 
     @Override
     public OAuth2RestTemplate getAcsZoneAdminRestTemplate() {
-
-        return this.acsZoneRestTemplate;
+        return this.acsZone1RestTemplate;
     }
 
     @Override
@@ -158,6 +154,16 @@ public class ACSITSetUpFactoryPublic implements ACSITSetUpFactory {
     }
 
     @Override
+    public String getAcsZone1Name() {
+        return this.acsZone1Name;
+    }
+
+    @Override
+    public String getAcsZone2Name() {
+        return this.acsZone2Name;
+    }
+
+    @Override
     public String getAcsZone3Name() {
         return this.acsZone3Name;
     }
@@ -168,8 +174,22 @@ public class ACSITSetUpFactoryPublic implements ACSITSetUpFactory {
     }
 
     @Override
-    public OAuth2RestTemplate getAcsAdminRestTemplate2() {
-        return this.acsAdminRestTemplate2;
+    public OAuth2RestTemplate getAcsZonesAdminRestTemplate() {
+        return this.acsZonesAdminRestTemplate;
     }
 
+    @Override
+    public OAuth2RestTemplate getAcsZoneConnectorAdminRestTemplate(final String zone) {
+        return this.uaaTestUtil.createAdminConnectorScopeClient(zone);
+    }
+
+    @Override
+    public OAuth2RestTemplate getAcsZoneConnectorReadRestTemplate(final String zone) {
+        return this.uaaTestUtil.createReadOnlyConnectorScopeClient(zone);
+    }
+
+    @Override
+    public OAuth2RestTemplate getAcsAdminRestTemplate(final String zone) {
+        return new UAAACSClientsUtil(this.uaaUrl, this.uaaAdminSecret).createAcsAdminClient(Arrays.asList(zone));
+    }
 }
