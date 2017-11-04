@@ -58,6 +58,10 @@
         <level value="DEBUG"/>
     </logger>
 
+    <logger name="com.ge.predix.test.TestNamePredixLogger">
+        <level value="DEBUG"/>
+    </logger>
+
     <!-- Uncomment to debug Cloud-Foundry-related operations -->
     <!--<logger name="cloudfoundry-client">-->
         <!--<level value="DEBUG"/>-->
