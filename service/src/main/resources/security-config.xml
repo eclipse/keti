@@ -218,7 +218,7 @@
         entry-point-ref="preAuthenticationEntryPoint">
         <csrf disabled="true"/>
 
-        <!-- ZacTokenService will only verify the token against defaultTrustedIssuerId
+        <!-- TokenService will only verify the token against defaultTrustedIssuerId
             for requests with no zone. Additional scope acs.zones.admin needs to be asserted
             here. -->
         <intercept-url pattern="/v1/zone/**"

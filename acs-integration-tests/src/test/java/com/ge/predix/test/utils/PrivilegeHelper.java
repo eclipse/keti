@@ -60,10 +60,7 @@ public class PrivilegeHelper {
     public static final String DEFAULT_ATTRIBUTE_ISSUER = "https://acs.attributes.int";
 
     @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
-
-    @Autowired
-    private ZoneHelper zoneHelper;
+    private ZoneFactory zoneFactory;
 
     public BaseSubject putSubject(final OAuth2RestTemplate acsTemplate, final BaseSubject subject,
             final String endpoint, final HttpHeaders headers, final Attribute... attributes)
@@ -81,7 +78,7 @@ public class PrivilegeHelper {
 
         BaseSubject subject = new BaseSubject(subjectIdentifier);
         // no header needed, because it uses zone specific url
-        putSubject(restTemplate, subject, this.zoneHelper.getAcsBaseURL(), headers, attributes);
+        putSubject(restTemplate, subject, this.zoneFactory.getAcsBaseURL(), headers, attributes);
     }
 
     public ResponseEntity<Object> postMultipleSubjects(final OAuth2RestTemplate acsTemplate, final String endpoint,
@@ -184,11 +181,6 @@ public class PrivilegeHelper {
                 new HttpEntity<>(resourcesArray, headers), Object.class);
 
         return responseEntity;
-    }
-
-    public void deleteSubject(final String subjectId) throws Exception {
-        deleteSubject(this.acsRestTemplateFactory.getACSTemplateWithPolicyScope(), this.zoneHelper.getZone1Url(),
-                subjectId, null);
     }
 
     public void deleteSubject(final RestTemplate restTemplate, final String acsUrl, final String subjectId)

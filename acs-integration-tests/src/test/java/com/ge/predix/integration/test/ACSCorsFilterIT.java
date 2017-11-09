@@ -22,9 +22,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -34,7 +32,6 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.ge.predix.test.utils.ZacTestUtil;
 
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 @Test
@@ -45,13 +42,7 @@ public class ACSCorsFilterIT extends AbstractTestNGSpringContextTests {
     @Value("${ACS_URL}")
     private String acsBaseUrl;
 
-    @Autowired
-    private ZacTestUtil zacTestUtil;
-
     private HttpClient client;
-
-    @Autowired
-    private Environment env;
 
     @BeforeClass
     public void setup() throws JsonParseException, JsonMappingException, IOException {

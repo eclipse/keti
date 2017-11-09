@@ -35,10 +35,10 @@ import org.testng.annotations.Test;
 import com.ge.predix.acs.model.Attribute;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.BaseSubject;
-import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.ACSTestUtil;
+import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;
-import com.ge.predix.test.utils.ZoneHelper;
 
 /**
  * This test class is meant for one-off testing of migration of resource, subject attributes from postgres to titan.
@@ -47,13 +47,10 @@ import com.ge.predix.test.utils.ZoneHelper;
 public class AttributeMigrationTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
+    private ACSITSetUpFactory acsitSetUpFactory;
 
     @Autowired
     private PrivilegeHelper privilegeHelper;
-
-    @Autowired
-    private ZoneHelper zoneHelper;
 
     private OAuth2RestTemplate acsZoneTemplate;
 
@@ -77,48 +74,48 @@ public class AttributeMigrationTest extends AbstractTestNGSpringContextTests {
 
     @BeforeClass
     public void setup() throws Exception {
-        this.zoneHelper.createPrimaryTestZone();
-        this.zoneHelper.createTestZone2();
-        this.acsZoneTemplate = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
+        this.acsitSetUpFactory.setUp();
+        this.acsZoneTemplate = this.acsitSetUpFactory.getAcsZonesAdminRestTemplate();
     }
 
-    @Test(dataProvider = "zoneUrls")
-    public void pushResourceAndSubjectAttributesForMigration(final String zoneUrl) {
+    @Test(dataProvider = "zones")
+    public void pushResourceAndSubjectAttributesForMigration(final String zone) {
         HttpHeaders headers = ACSTestUtil.httpHeaders();
-        headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
-        //write resources
-        this.privilegeHelper.postResources(this.acsZoneTemplate, zoneUrl, headers,
+        headers.set(PolicyHelper.PREDIX_ZONE_ID, zone);
+
+        // write resources
+        this.privilegeHelper.postResources(this.acsZoneTemplate, this.acsitSetUpFactory.getAcsUrl(), headers,
                 (BaseResource[]) this.testResources.toArray());
 
-        //write subjects
-        this.privilegeHelper.postSubjects(this.acsZoneTemplate, zoneUrl, headers,
+        // write subjects
+        this.privilegeHelper.postSubjects(this.acsZoneTemplate, this.acsitSetUpFactory.getAcsUrl(), headers,
                 (BaseSubject[]) this.testSubjects.toArray());
 
-
-        verifyResourceAndSubjectAttributesPostMigration(zoneUrl);
+        verifyResourceAndSubjectAttributesPostMigration(zone);
     }
 
-    //@Test(dataProvider = "zoneUrls")
-    public void testMigratedAttributesPostMigration(final String zoneUrl) {
+    //@Test(dataProvider = "zones")
+    public void testMigratedAttributesPostMigration(final String zone) {
         //Uncomment this after new acs version is deployed and attributes migrated.
 
-        //verifyResourceAndSubjectAttributesPostMigration(zoneUrl);
+        //verifyResourceAndSubjectAttributesPostMigration(zone);
     }
 
-    private void verifyResourceAndSubjectAttributesPostMigration(final String zoneUrl) {
+    private void verifyResourceAndSubjectAttributesPostMigration(final String zone) {
 
         HttpHeaders headers = ACSTestUtil.httpHeaders();
-        headers.add(HttpHeaders.ACCEPT, "application/json");
+        headers.set(PolicyHelper.PREDIX_ZONE_ID, zone);
+
         //Retrieve resources and compare
         BaseResource[] migratedResources = this.privilegeHelper.listResources(this.acsZoneTemplate,
-                this.zoneHelper.getZone1Url(), headers);
+                this.acsitSetUpFactory.getAcsUrl(), headers);
         Assert.assertEquals(migratedResources.length, this.testResources.size());
         this.testResources.stream()
                 .forEach(testResource -> assertTestResourceExists(testResource, Arrays.asList(migratedResources)));
 
         //Retrieve subjects and compare
         BaseSubject[] migratedSubjects = this.privilegeHelper.listSubjects(this.acsZoneTemplate,
-                this.zoneHelper.getZone1Url(), ACSTestUtil.httpHeaders());
+                this.acsitSetUpFactory.getAcsUrl(), headers);
         Assert.assertEquals(migratedSubjects.length, this.testSubjects.size());
         this.testSubjects.stream()
                 .forEach(testSubject -> assertTestSubjectExists(testSubject, Arrays.asList(migratedSubjects)));
@@ -146,7 +143,8 @@ public class AttributeMigrationTest extends AbstractTestNGSpringContextTests {
     }
 
     @DataProvider
-    public Object[][] zoneUrls() {
-        return new String[][] { { this.zoneHelper.getZone1Url() }, { this.zoneHelper.getZone2Url() } };
+    public Object[][] zones() {
+        return new String[][] { { this.acsitSetUpFactory.getAcsZone1Name() },
+                { this.acsitSetUpFactory.getAcsZone2Name() } };
     }
 }

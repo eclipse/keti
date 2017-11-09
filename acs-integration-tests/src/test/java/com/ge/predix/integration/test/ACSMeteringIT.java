@@ -18,6 +18,7 @@ package com.ge.predix.integration.test;
 
 import static com.ge.predix.integration.test.SubjectResourceFixture.MARISSA_V1;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,11 +41,10 @@ import org.testng.annotations.Test;
 
 import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
 import com.ge.predix.acs.rest.PolicyEvaluationResult;
-import com.ge.predix.test.utils.ACSRestTemplateFactory;
+import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;
-import com.ge.predix.test.utils.ZacTestUtil;
-import com.ge.predix.test.utils.ZoneHelper;
+import com.ge.predix.test.utils.ZoneFactory;
 import com.nurego.Nurego;
 import com.nurego.model.Entitlement;
 import com.nurego.model.Subscription;
@@ -69,10 +69,10 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(ACSMeteringIT.class);
 
     @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
+    private ACSITSetUpFactory acsitSetUpFactory;
 
     @Autowired
-    private ZoneHelper zoneHelper;
+    private ZoneFactory zoneFactory;
 
     @Autowired
     private PolicyHelper policyHelper;
@@ -98,6 +98,9 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
     @Value("${STEADY_STATE_SLEEP_MS:10000}")
     private int steadyStateSleepMS;
 
+    @Value("${zone1UaaUrl}/oauth/token")
+    private String zoneTrustedIssuer;
+
     private static final String POLICY_UPDATE_FEATURE_ID = "policyset_update";
     private static final String POLICY_EVAL_FEATURE_ID = "policy_eval";
     private static final int MAX_ITERATIONS = 10;
@@ -105,20 +108,18 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
     private Subscription subscription;
 
     private String zoneId;
-
     private String acsUrl;
-
-    @Autowired
-    private ZacTestUtil zacTestUtil;
+    private OAuth2RestTemplate acsAdminRestTemplate;
 
     @BeforeClass
     public void setup() throws Exception {
-        this.zacTestUtil.assumeZacServerAvailable();
-
-        this.zoneId = this.zoneHelper
-                .createTestZone(this.acsRestTemplateFactory.getACSTemplateWithPolicyScope(), "test-zone-pipe3", true)
-                .getSubdomain();
-        this.acsUrl = this.zoneHelper.getAcsBaseURL();
+        
+        this.zoneId = "test-zone-pipe3";
+        this.acsAdminRestTemplate = this.acsitSetUpFactory.getAcsAdminRestTemplate(this.zoneId);
+        this.zoneFactory.createTestZone(this.acsAdminRestTemplate, this.zoneId,
+                Collections.singletonList(this.zoneTrustedIssuer));
+        this.acsUrl = this.zoneFactory.getAcsBaseURL();
+        
         Nurego.setApiBase(this.nuregoApiBase);
         Nurego.setApiCredentials(nuregoUsername, nuregoPassword, nuregoInstanceId);
 
@@ -132,7 +133,6 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
         String testPolicyName = null;
         PolicyEvaluationRequestV1 policyEvaluationRequest = this.policyHelper
                 .createEvalRequest(MARISSA_V1.getSubjectIdentifier(), "sanramon");
-        OAuth2RestTemplate acsRestTemplate = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
         try {
             // Get meter readings before
             Double beforePolicyUpdateMeterCount = getEntitlementUsageByFeatureId(POLICY_UPDATE_FEATURE_ID, this.zoneId);
@@ -142,9 +142,9 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
             LOGGER.info("POLICY EVAL USAGE BEFORE:" + beforePolicyEvalMeterCount);
 
             String policyFile = "src/test/resources/single-site-based-policy-set.json";
-            testPolicyName = this.policyHelper.setTestPolicy(acsRestTemplate, getZoneHeaders(), this.acsUrl,
+            testPolicyName = this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, getZoneHeaders(), this.acsUrl,
                     policyFile);
-            ResponseEntity<PolicyEvaluationResult> evalResponse = acsRestTemplate.postForEntity(
+            ResponseEntity<PolicyEvaluationResult> evalResponse = this.acsAdminRestTemplate.postForEntity(
                     this.acsUrl + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
                     new HttpEntity<>(policyEvaluationRequest, getZoneHeaders()), PolicyEvaluationResult.class);
 
@@ -176,7 +176,8 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
             Assert.assertEquals(evalMeterCount, 1.0);
         } finally {
             if (testPolicyName != null) {
-                this.policyHelper.deletePolicySet(acsRestTemplate, this.acsUrl, testPolicyName, getZoneHeaders());
+                this.policyHelper.deletePolicySet(this.acsAdminRestTemplate, this.acsUrl, testPolicyName,
+                        getZoneHeaders());
             }
         }
     }
@@ -247,7 +248,7 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
 
     @AfterClass
     public void cleanUp() {
-        this.zoneHelper.deleteZone(this.zoneId);
+        this.zoneFactory.deleteZone(this.acsAdminRestTemplate, this.zoneId);
         // cancelNuregoSubscription();
     }
 

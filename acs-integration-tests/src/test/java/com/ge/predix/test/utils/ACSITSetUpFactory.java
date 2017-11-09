@@ -39,6 +39,10 @@ public interface ACSITSetUpFactory {
 
     Zone getZone2();
 
+    String getAcsZone1Name();
+
+    String getAcsZone2Name();
+
     String getAcsZone3Name();
 
     HttpHeaders getZone1Headers();
@@ -47,17 +51,22 @@ public interface ACSITSetUpFactory {
 
     OAuth2RestTemplate getAcsZoneAdminRestTemplate();
 
+    OAuth2RestTemplate getAcsAdminRestTemplate(String zone);
+
     OAuth2RestTemplate getAcsZone2AdminRestTemplate();
 
     OAuth2RestTemplate getAcsReadOnlyRestTemplate();
 
     OAuth2RestTemplate getAcsNoPolicyScopeRestTemplate();
 
-    OAuth2RestTemplate getAcsAdminRestTemplate2();
+    OAuth2RestTemplate getAcsZonesAdminRestTemplate();
+
+    OAuth2RestTemplate getAcsZoneConnectorAdminRestTemplate(String zone);
+
+    OAuth2RestTemplate getAcsZoneConnectorReadRestTemplate(String zone);
 
     void setUp() throws IOException;
 
     void destroy();
-
 
 }

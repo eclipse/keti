@@ -91,7 +91,7 @@ class PolicyEvaluationWithAttributeConnectorITConfiguration {
     public OAuth2RestTemplate acsAdminRestTemplate() throws IOException {
         OAuth2RestTemplate acsAdminRestTemplate;
         this.acsitSetUpFactory.setUp();
-        acsAdminRestTemplate = this.acsitSetUpFactory.getAcsAdminRestTemplate2();
+        acsAdminRestTemplate = this.acsitSetUpFactory.getAcsZonesAdminRestTemplate();
         setRestTemplateInterceptor(acsAdminRestTemplate);
         return acsAdminRestTemplate;
     }
@@ -104,9 +104,6 @@ class PolicyEvaluationWithAttributeConnectorITConfiguration {
 
 @ContextConfiguration(classes = { PolicyEvaluationWithAttributeConnectorITConfiguration.class })
 public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpringContextTests {
-
-    @Value("${ZONE1_NAME:testzone1}")
-    private String acsZone1Name;
 
     @Value("${ACS_UAA_URL}")
     private String acsUaaUrl;

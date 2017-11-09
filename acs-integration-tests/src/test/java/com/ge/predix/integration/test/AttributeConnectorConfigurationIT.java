@@ -19,14 +19,10 @@ package com.ge.predix.integration.test;
 import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.RESOURCE_CONNECTOR_URL;
 import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.SUBJECT_CONNECTOR_URL;
 import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.V1;
-import static com.ge.predix.test.utils.PolicyHelper.PREDIX_ZONE_ID;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -39,53 +35,23 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.ge.predix.acs.rest.AttributeAdapterConnection;
 import com.ge.predix.acs.rest.AttributeConnector;
-import com.ge.predix.test.TestConfig;
-import com.ge.predix.test.utils.ACSRestTemplateFactory;
-import com.ge.predix.test.utils.ACSTestUtil;
-import com.ge.predix.test.utils.UaaTestUtil;
-import com.ge.predix.test.utils.ZacTestUtil;
-import com.ge.predix.test.utils.ZoneHelper;
+import com.ge.predix.test.utils.ACSITSetUpFactory;
 
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 @Test
 public class AttributeConnectorConfigurationIT extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private ACSRestTemplateFactory acsRestTemplateFactory;
-    @Autowired
-    private ZoneHelper zoneHelper;
-    @Autowired
-    private ZacTestUtil zacTestUtil;
-    @Autowired
-    private Environment env;
-
-    @Value("${ZONE1_NAME:testzone1}")
-    private String acsZone1Name;
-    @Value("${ACS_UAA_URL}")
-    private String uaaUrl;
-    @Value("${zone1UaaUrl}/oauth/token")
-    private String zone1TokenUrl;
-    @Value("${connectorReadClientId:acs_connector_read_only_client}")
-    private String zone1ConnectorReadClientId;
-    @Value("${connectorReadClientSecret:s3cr3t}")
-    private String zone1ConnectorReadClientSecret;
-    @Value("${connectorAdminClientId:acs_connector_admin_client}")
-    private String zone1ConnectorAdminClientId;
-    @Value("${connectorAdminClientSecret:s3cr3t}")
-    private String zone1ConnectorAdminClientSecret;
-    @Value("${zone1AdminClientId:zone1AdminClient}")
-    private String zone1AdminClientId;
-    @Value("${zone1AdminClientSecret:zone1AdminClientSecret}")
-    private String zone1AdminClientSecret;
+    private ACSITSetUpFactory acsitSetUpFactory;
 
     private String acsUrl;
-    private OAuth2RestTemplate acsAdmin;
     private OAuth2RestTemplate zone1Admin;
     private OAuth2RestTemplate zone1ConnectorAdmin;
     private OAuth2RestTemplate zone1ConnectorReadClient;
@@ -93,40 +59,19 @@ public class AttributeConnectorConfigurationIT extends AbstractTestNGSpringConte
 
     @BeforeClass
     public void setup() throws Exception {
-        TestConfig.setupForEclipse(); // Starts ACS when running the test in eclipse.
+        this.acsitSetUpFactory.setUp();
 
-        this.acsUrl = this.zoneHelper.getAcsBaseURL();
-        this.zone1ConnectorAdmin = this.acsRestTemplateFactory.getOAuth2RestTemplateForClient(this.zone1TokenUrl,
-                this.zone1ConnectorAdminClientId, this.zone1ConnectorAdminClientSecret);
-        this.zone1ConnectorReadClient = this.acsRestTemplateFactory.getOAuth2RestTemplateForClient(this.zone1TokenUrl,
-                this.zone1ConnectorReadClientId, this.zone1ConnectorReadClientSecret);
+        this.acsUrl = this.acsitSetUpFactory.getAcsUrl();
 
-        this.zone1Headers = ACSTestUtil.httpHeaders();
-        this.zone1Headers.set(PREDIX_ZONE_ID, this.acsZone1Name);
+        this.zone1Admin = this.acsitSetUpFactory.getAcsZoneAdminRestTemplate();
 
-        if (Arrays.asList(this.env.getActiveProfiles()).contains("public")) {
-            setupPublicACS();
-        } else {
-            setupPredixACS();
-        }
-    }
+        this.zone1ConnectorAdmin = this.acsitSetUpFactory
+                .getAcsZoneConnectorAdminRestTemplate(this.acsitSetUpFactory.getAcsZone1Name());
+        this.zone1ConnectorReadClient = this.acsitSetUpFactory
+                .getAcsZoneConnectorReadRestTemplate(this.acsitSetUpFactory.getAcsZone1Name());
 
-    private void setupPredixACS() throws Exception {
-        this.zacTestUtil.assumeZacServerAvailable();
-        this.acsAdmin = this.acsRestTemplateFactory.getACSTemplateWithPolicyScope();
-        this.zone1Admin = this.acsRestTemplateFactory.getACSZone1Template();
-        this.zoneHelper.createTestZone(this.acsAdmin, this.acsZone1Name, true);
-    }
+        this.zone1Headers = this.acsitSetUpFactory.getZone1Headers();
 
-    private void setupPublicACS() throws Exception {
-        UaaTestUtil uaaTestUtil = new UaaTestUtil(this.acsRestTemplateFactory.getOAuth2RestTemplateForUaaAdmin(),
-                this.uaaUrl);
-        uaaTestUtil.setup(Arrays.asList(new String[] { this.acsZone1Name }));
-        uaaTestUtil.setupAcsZoneClient(this.acsZone1Name, this.zone1AdminClientId, this.zone1AdminClientSecret);
-
-        this.acsAdmin = this.acsRestTemplateFactory.getOAuth2RestTemplateForAcsAdmin();
-        this.zone1Admin = this.acsRestTemplateFactory.getOAuth2RestTemplateForZone1AdminClient();
-        this.zoneHelper.createTestZone(this.acsAdmin, this.acsZone1Name, false);
     }
 
     @Test(dataProvider = "requestUrlProvider")
@@ -210,5 +155,10 @@ public class AttributeConnectorConfigurationIT extends AbstractTestNGSpringConte
     @DataProvider(name = "requestUrlProvider")
     private Object[][] requestUrlProvider() {
         return new String[][] { { RESOURCE_CONNECTOR_URL }, { SUBJECT_CONNECTOR_URL } };
+    }
+
+    @AfterClass
+    public void cleanup() throws Exception {
+        this.acsitSetUpFactory.destroy();
     }
 }
