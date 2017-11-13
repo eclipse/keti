@@ -35,22 +35,18 @@ public class AttributeReaderFactory {
     @Value("${ADAPTER_TIMEOUT_MILLIS:3000}")
     private int adapterTimeoutMillis;
 
-    private AttributeConnectorService connectorService;
+    @Autowired
     private PrivilegeServiceResourceAttributeReader privilegeServiceResourceAttributeReader;
-    private PrivilegeServiceSubjectAttributeReader privilegeServiceSubjectAttributeReader;
-    private RedisTemplate<String, String> resourceCacheRedisTemplate;
-    private RedisTemplate<String, String> subjectCacheRedisTemplate;
-    private AttributeCacheFactory attributeCacheFactory;
 
     @Autowired
-    public AttributeReaderFactory(final PrivilegeServiceResourceAttributeReader privilegeServiceResourceAttributeReader,
-            final PrivilegeServiceSubjectAttributeReader privilegeServiceSubjectAttributeReader,
-            final AttributeCacheFactory attributeCacheFactory) {
-        this.privilegeServiceResourceAttributeReader = privilegeServiceResourceAttributeReader;
-        this.privilegeServiceSubjectAttributeReader = privilegeServiceSubjectAttributeReader;
-        this.attributeCacheFactory = attributeCacheFactory;
+    private PrivilegeServiceSubjectAttributeReader privilegeServiceSubjectAttributeReader;
 
-    }
+    @Autowired
+    private AttributeCacheFactory attributeCacheFactory;
+
+    private AttributeConnectorService connectorService;
+    private RedisTemplate<String, String> resourceCacheRedisTemplate;
+    private RedisTemplate<String, String> subjectCacheRedisTemplate;
 
     // Caches that use the multiton design pattern (keyed off the zone name)
     private final Map<String, ExternalResourceAttributeReader> externalResourceAttributeReaderCache = new
