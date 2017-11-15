@@ -88,6 +88,9 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${maven-failsafe.version}</version>
                 <configuration>
+                    <skipTests>false</skipTests>
+                    <parallel>false</parallel>
+                    <argLine>${custom-argline}</argLine>
                     <properties>
                         <property>
                             <name>listener</name>
@@ -96,15 +99,8 @@
                     </properties>
                     <systemPropertyVariables>
                         <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
-                        <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
                         <ACS_URL>${ACS_URL}</ACS_URL>
-                        <ZAC_URL>${ZAC_URL}</ZAC_URL>
-                        <ZONE1_UAA_URL>${ZONE1_UAA_URL}</ZONE1_UAA_URL>
-
-                        <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
-                        <NUREGO_USERNAME>${NUREGO_USERNAME}</NUREGO_USERNAME>
-                        <NUREGO_PASSWORD>${NUREGO_PASSWORD}</NUREGO_PASSWORD>
-                        <NUREGO_INSTANCE_ID>${NUREGO_INSTANCE_ID}</NUREGO_INSTANCE_ID>
+                        <ACS_DEFAULT_ISSUER_ID>${ACS_UAA_URL}/oauth/token</ACS_DEFAULT_ISSUER_ID>
 
                         <!-- proxy settings -->
                         <http.nonProxyHosts>${NON_PROXY_HOSTS}</http.nonProxyHosts>
@@ -112,6 +108,20 @@
                         <https.proxyPort>${HTTPS_PROXY_PORT}</https.proxyPort>
                     </systemPropertyVariables>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>integ-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -284,6 +294,175 @@
 
     <profiles>
         <profile>
+            <id>public</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- run UAA -->
+                    <plugin>
+                        <groupId>org.codehaus.cargo</groupId>
+                        <artifactId>cargo-maven2-plugin</artifactId>
+                        <version>1.4.19</version>
+                        <configuration>
+                            <skip>${maven.test.skip}</skip>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat8x/container</home>
+                                <properties>
+                                    <cargo.port.offset>${PORT_OFFSET}</cargo.port.offset>
+                                </properties>
+                            </configuration>
+                            <container>
+                                <containerId>tomcat8x</containerId>
+                                <systemProperties>
+                                    <CLOUD_FOUNDRY_CONFIG_PATH>${project.basedir}/uaa/config</CLOUD_FOUNDRY_CONFIG_PATH>
+                                </systemProperties>
+                                <zipUrlInstaller>
+                                    <url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz</url>
+                                    <downloadDir>${project.build.directory}/downloads</downloadDir>
+                                    <extractDir>${project.build.directory}/extracts</extractDir>
+                                </zipUrlInstaller>
+                            </container>
+                            <deployables>
+                                <deployable>
+                                    <groupId>org.cloudfoundry.identity</groupId>
+                                    <artifactId>cloudfoundry-identity-uaa</artifactId>
+                                    <type>war</type>
+                                    <properties>
+                                        <context>uaa</context>
+                                    </properties>
+                                </deployable>
+                            </deployables>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-container</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-container</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
+                        <configuration>
+                            <environmentVariables>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,httpValidation</SPRING_PROFILES_ACTIVE>
+                                <management.health.redis.enabled>false</management.health.redis.enabled>
+                                <uaaCheckHealthUrl>${ACS_UAA_URL}/healthz</uaaCheckHealthUrl>
+                                <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,
+                                    Access-Control-Request-Headers</cors.xhr.allowed.headers>
+                                <cors.xhr.allowed.origins>^.*\.grc-apps\.svc\.ge\.com$,^.*\.predix\.io$</cors.xhr.allowed.origins>
+                                <cors.xhr.allowed.uris>^/v2/api-docs$</cors.xhr.allowed.uris>
+                                <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
+                                <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
+                            </environmentVariables>
+                            <reportsDirectory>${basedir}/failsafe-reports-public</reportsDirectory>
+                            <summaryFile>${basedir}/failsafe-reports-public/failsafe-summary.xml</summaryFile>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>testng-public.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>public-titan</id>
+            <build>
+                <plugins>
+                    <!-- run UAA -->
+                    <plugin>
+                        <groupId>org.codehaus.cargo</groupId>
+                        <artifactId>cargo-maven2-plugin</artifactId>
+                        <version>1.4.19</version>
+                        <configuration>
+                            <skip>${maven.test.skip}</skip>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat8x/container</home>
+                                <properties>
+                                    <cargo.port.offset>${PORT_OFFSET}</cargo.port.offset>
+                                </properties>
+                            </configuration>
+                            <container>
+                                <containerId>tomcat8x</containerId>
+                                <systemProperties>
+                                    <CLOUD_FOUNDRY_CONFIG_PATH>${project.basedir}/uaa/config</CLOUD_FOUNDRY_CONFIG_PATH>
+                                </systemProperties>
+                                <zipUrlInstaller>
+                                    <url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz</url>
+                                    <downloadDir>${project.build.directory}/downloads</downloadDir>
+                                    <extractDir>${project.build.directory}/extracts</extractDir>
+                                </zipUrlInstaller>
+                            </container>
+                            <deployables>
+                                <deployable>
+                                    <groupId>org.cloudfoundry.identity</groupId>
+                                    <artifactId>cloudfoundry-identity-uaa</artifactId>
+                                    <type>war</type>
+                                    <properties>
+                                        <context>uaa</context>
+                                    </properties>
+                                </deployable>
+                            </deployables>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-container</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-container</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
+                        <configuration>
+                            <environmentVariables>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan,httpValidation</SPRING_PROFILES_ACTIVE>
+                                <management.health.redis.enabled>false</management.health.redis.enabled>
+                                <uaaCheckHealthUrl>${ACS_UAA_URL}/healthz</uaaCheckHealthUrl>
+                                <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,
+                                    Access-Control-Request-Headers</cors.xhr.allowed.headers>
+                                <cors.xhr.allowed.origins>^.*\.grc-apps\.svc\.ge\.com$,^.*\.predix\.io$</cors.xhr.allowed.origins>
+                                <cors.xhr.allowed.uris>^/v2/api-docs$</cors.xhr.allowed.uris>
+                                <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
+                                <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
+                            </environmentVariables>
+                            <reportsDirectory>${basedir}/failsafe-reports-public-titan</reportsDirectory>
+                            <summaryFile>${basedir}/failsafe-reports-public-titan/failsafe-summary.xml</summaryFile>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>testng-public-titan.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
             <id>predix-cloud</id>
             <build>
                 <plugins>
@@ -298,14 +477,21 @@
                                     <value>com.ge.predix.test.TestNamePredixLogger,com.ge.predix.test.TestAnnotationTransformer</value>
                                 </property>
                             </properties>
-                            <forkCount>0</forkCount>
-                            <parallel>false</parallel>
                             <!-- us32088: Place test reports outside of target 
                                 directory so reports are not removed by 'mvn clean' and retained by Jenkins 
                                 for each profile -->
                             <reportsDirectory>${basedir}/failsafe-reports-predix-cloud</reportsDirectory>
                             <summaryFile>${basedir}/failsafe-reports-predix-cloud/failsafe-summary.xml</summaryFile>
                             <systemPropertyVariables>
+                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
+                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
+                                <ZONE1_UAA_URL>${ZONE1_UAA_URL}</ZONE1_UAA_URL>
+
+                                <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
+                                <NUREGO_USERNAME>${NUREGO_USERNAME}</NUREGO_USERNAME>
+                                <NUREGO_PASSWORD>${NUREGO_PASSWORD}</NUREGO_PASSWORD>
+                                <NUREGO_INSTANCE_ID>${NUREGO_INSTANCE_ID}</NUREGO_INSTANCE_ID>
+
                                 <jenkins.build.number>${jenkins.build.number}</jenkins.build.number>
                                 <cf.org>${cf.org}</cf.org>
                                 <cf.space>${cf.space}</cf.space>
@@ -320,20 +506,6 @@
                                 <suiteXmlFile>testng-predix-cloud.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>
-                        <executions>
-                            <execution>
-                                <id>integ-test</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify</id>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
@@ -425,14 +597,21 @@
                                     <value>com.ge.predix.test.TestNamePredixLogger,com.ge.predix.test.TestAnnotationTransformer</value>
                                 </property>
                             </properties>
-                            <forkCount>0</forkCount>
-                            <parallel>false</parallel>
                             <!-- us32088: Place test reports outside of target 
                                 directory so reports are not removed by 'mvn clean' and retained by Jenkins 
                                 for each profile -->
                             <reportsDirectory>${basedir}/failsafe-reports-predix-cloud-titan</reportsDirectory>
                             <summaryFile>${basedir}/failsafe-reports-predix-cloud-titan/failsafe-summary.xml</summaryFile>
                             <systemPropertyVariables>
+                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
+                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
+                                <ZONE1_UAA_URL>${ZONE1_UAA_URL}</ZONE1_UAA_URL>
+
+                                <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
+                                <NUREGO_USERNAME>${NUREGO_USERNAME}</NUREGO_USERNAME>
+                                <NUREGO_PASSWORD>${NUREGO_PASSWORD}</NUREGO_PASSWORD>
+                                <NUREGO_INSTANCE_ID>${NUREGO_INSTANCE_ID}</NUREGO_INSTANCE_ID>
+
                                 <jenkins.build.number>${jenkins.build.number}</jenkins.build.number>
                                 <cf.org>${cf.org}</cf.org>
                                 <cf.space>${cf.space}</cf.space>
@@ -447,20 +626,6 @@
                                 <suiteXmlFile>testng-predix-cloud-titan.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>
-                        <executions>
-                            <execution>
-                                <id>integ-test</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify</id>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
@@ -608,6 +773,7 @@
                             <parallel>methods</parallel>
                             <argLine />
                             <systemPropertyVariables>
+                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
                                 <spring.profiles.active>h2,predix,simple-cache,httpValidation</spring.profiles.active>
                             </systemPropertyVariables>
@@ -624,20 +790,6 @@
                                 <!-- <include>**/migration/AttributeMigrationTest.java</include> -->
                             </includes>
                         </configuration>
-                        <executions>
-                            <execution>
-                                <id>integ-test</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify</id>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -714,6 +866,7 @@
                             <parallel>methods</parallel>
                             <argLine />
                             <systemPropertyVariables>
+                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
                                 <spring.profiles.active>h2,predix,simple-cache,titan,httpValidation</spring.profiles.active>
                             </systemPropertyVariables>
@@ -729,237 +882,6 @@
                                 <!-- <include>**/migration/AttributeMigrationTest.java</include> -->
                             </includes>
                         </configuration>
-                        <executions>
-                            <execution>
-                                <id>integ-test</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify</id>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>public</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <!-- run UAA -->
-                    <plugin>
-                        <groupId>org.codehaus.cargo</groupId>
-                        <artifactId>cargo-maven2-plugin</artifactId>
-                        <version>1.4.19</version>
-                        <configuration>
-                            <skip>${maven.test.skip}</skip>
-                            <configuration>
-                                <home>${project.build.directory}/tomcat8x/container</home>
-                                <properties>
-                                    <cargo.port.offset>${PORT_OFFSET}</cargo.port.offset>
-                                </properties>
-                            </configuration>
-                            <container>
-                                <containerId>tomcat8x</containerId>
-                                <systemProperties>
-                                    <CLOUD_FOUNDRY_CONFIG_PATH>${project.basedir}/uaa/config</CLOUD_FOUNDRY_CONFIG_PATH>
-                                </systemProperties>
-                                <zipUrlInstaller>
-                                    <url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz</url>
-                                    <downloadDir>${project.build.directory}/downloads</downloadDir>
-                                    <extractDir>${project.build.directory}/extracts</extractDir>
-                                </zipUrlInstaller>
-                            </container>
-                            <deployables>
-                                <deployable>
-                                    <groupId>org.cloudfoundry.identity</groupId>
-                                    <artifactId>cloudfoundry-identity-uaa</artifactId>
-                                    <type>war</type>
-                                    <properties>
-                                        <context>uaa</context>
-                                    </properties>
-                                </deployable>
-                            </deployables>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>start-container</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>start</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>stop-container</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>stop</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>${maven-failsafe.version}</version>
-                        <configuration>
-                            <argLine>${custom-argline}</argLine>
-                            <environmentVariables>
-                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,httpValidation</SPRING_PROFILES_ACTIVE>
-                                <management.health.redis.enabled>false</management.health.redis.enabled>
-                                <uaaCheckHealthUrl>${ACS_UAA_URL}/healthz</uaaCheckHealthUrl>
-                                <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,
-                                    Access-Control-Request-Headers</cors.xhr.allowed.headers>
-                                <cors.xhr.allowed.origins>^.*\.grc-apps\.svc\.ge\.com$,^.*\.predix\.io$</cors.xhr.allowed.origins>
-                                <cors.xhr.allowed.uris>^/v2/api-docs$</cors.xhr.allowed.uris>
-                                <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
-                                <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
-                            </environmentVariables>
-                            <!-- us32088: Place test reports outside of target 
-                                directory so reports are not removed by 'mvn clean' and retained by Jenkins 
-                                for each profile -->
-                            <reportsDirectory>${basedir}/failsafe-reports-public</reportsDirectory>
-                            <summaryFile>${basedir}/failsafe-reports-public/failsafe-summary.xml</summaryFile>
-                            <skipTests>false</skipTests>
-                            <!-- <forkCount>0</forkCount> -->
-                            <parallel>false</parallel>
-                            <!-- <argLine>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</argLine> -->
-                            <systemPropertyVariables>
-                                <ACS_DEFAULT_ISSUER_ID>${ACS_UAA_URL}/oauth/token</ACS_DEFAULT_ISSUER_ID>
-                            </systemPropertyVariables>
-                            <suiteXmlFiles>
-                                <suiteXmlFile>testng-public.xml</suiteXmlFile>
-                            </suiteXmlFiles>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>integ-test</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify</id>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>public-titan</id>
-            <build>
-                <plugins>
-                    <!-- run UAA -->
-                    <plugin>
-                        <groupId>org.codehaus.cargo</groupId>
-                        <artifactId>cargo-maven2-plugin</artifactId>
-                        <version>1.4.19</version>
-                        <configuration>
-                            <skip>${maven.test.skip}</skip>
-                            <configuration>
-                                <home>${project.build.directory}/tomcat8x/container</home>
-                                <properties>
-                                    <cargo.port.offset>${PORT_OFFSET}</cargo.port.offset>
-                                </properties>
-                            </configuration>
-                            <container>
-                                <containerId>tomcat8x</containerId>
-                                <systemProperties>
-                                    <CLOUD_FOUNDRY_CONFIG_PATH>${project.basedir}/uaa/config</CLOUD_FOUNDRY_CONFIG_PATH>
-                                </systemProperties>
-                                <zipUrlInstaller>
-                                    <url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz</url>
-                                    <downloadDir>${project.build.directory}/downloads</downloadDir>
-                                    <extractDir>${project.build.directory}/extracts</extractDir>
-                                </zipUrlInstaller>
-                            </container>
-                            <deployables>
-                                <deployable>
-                                    <groupId>org.cloudfoundry.identity</groupId>
-                                    <artifactId>cloudfoundry-identity-uaa</artifactId>
-                                    <type>war</type>
-                                    <properties>
-                                        <context>uaa</context>
-                                    </properties>
-                                </deployable>
-                            </deployables>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>start-container</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>start</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>stop-container</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>stop</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>${maven-failsafe.version}</version>
-                        <configuration>
-                            <argLine>${custom-argline}</argLine>
-                            <environmentVariables>
-                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan,httpValidation</SPRING_PROFILES_ACTIVE>
-                                <management.health.redis.enabled>false</management.health.redis.enabled>
-                                <uaaCheckHealthUrl>${ACS_UAA_URL}/healthz</uaaCheckHealthUrl>
-                                <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,
-                                    Access-Control-Request-Headers</cors.xhr.allowed.headers>
-                                <cors.xhr.allowed.origins>^.*\.grc-apps\.svc\.ge\.com$,^.*\.predix\.io$</cors.xhr.allowed.origins>
-                                <cors.xhr.allowed.uris>^/v2/api-docs$</cors.xhr.allowed.uris>
-                                <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
-                                <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
-                            </environmentVariables>
-                            <!-- us32088: Place test reports outside of target 
-                                directory so reports are not removed by 'mvn clean' and retained by Jenkins 
-                                for each profile -->
-                            <reportsDirectory>${basedir}/failsafe-reports-public-titan</reportsDirectory>
-                            <summaryFile>${basedir}/failsafe-reports-public-titan/failsafe-summary.xml</summaryFile>
-                            <parallel>false</parallel>
-                            <skipTests>false</skipTests>
-                            <systemPropertyVariables>
-                                <ACS_DEFAULT_ISSUER_ID>${ACS_UAA_URL}/oauth/token</ACS_DEFAULT_ISSUER_ID>
-                            </systemPropertyVariables>
-                            <suiteXmlFiles>
-                                <suiteXmlFile>testng-public-titan.xml</suiteXmlFile>
-                            </suiteXmlFiles>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>integ-test</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify</id>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -1032,8 +954,6 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>${maven-failsafe.version}</version>
                         <configuration>
-                            <forkCount>0</forkCount>
-                            <parallel>false</parallel>
                             <systemPropertyVariables>
                                 <ACS_DEFAULT_ISSUER_ID>https://${uaa.zone}${uaa.cf.domain}.${cf.base.domain}/oauth/token</ACS_DEFAULT_ISSUER_ID>
                                 <ACS_SERVICE_ID>${acs.service.id}</ACS_SERVICE_ID>
@@ -1051,25 +971,10 @@
                                 <exclude>**/NonHierarchical*IT.java</exclude>
                             </excludes>
                         </configuration>
-                        <executions>
-                            <execution>
-                                <id>integ-test</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify</id>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>
         </profile>
-
     </profiles>
 
 </project>
