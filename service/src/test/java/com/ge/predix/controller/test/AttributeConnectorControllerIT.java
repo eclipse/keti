@@ -29,14 +29,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.ge.predix.acs.privilege.management.PrivilegeManagementUtility;
-import com.ge.predix.acs.request.context.AcsRequestContext;
-import com.ge.predix.acs.request.context.AcsRequestContextHolder;
-import com.ge.predix.acs.testutils.TestUtils;
-import com.ge.predix.acs.testutils.MockAcsRequestContext;
-import com.ge.predix.acs.testutils.MockMvcContext;
-import com.ge.predix.acs.testutils.MockSecurityContext;
-import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -55,12 +50,17 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.ge.predix.acs.privilege.management.PrivilegeManagementUtility;
+import com.ge.predix.acs.request.context.AcsRequestContext;
+import com.ge.predix.acs.request.context.AcsRequestContextHolder;
 import com.ge.predix.acs.rest.AttributeConnector;
 import com.ge.predix.acs.rest.Zone;
+import com.ge.predix.acs.testutils.MockAcsRequestContext;
+import com.ge.predix.acs.testutils.MockMvcContext;
+import com.ge.predix.acs.testutils.MockSecurityContext;
+import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
+import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.utils.JsonUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
@@ -197,7 +197,7 @@ public class AttributeConnectorControllerIT extends AbstractTestNGSpringContextT
                 .andExpect(status().isCreated());
 
         MockSecurityContext.mockSecurityContext(zone);
-        MockAcsRequestContext.mockAcsRequestContext(zone);
+        MockAcsRequestContext.mockAcsRequestContext();
     }
 
     @DataProvider

@@ -20,14 +20,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import com.ge.predix.acs.request.context.AcsRequestContextHolder;
-import com.ge.predix.acs.rest.Zone;
 
 public final class MockAcsRequestContext {
     private MockAcsRequestContext() {
         // Prevents instantiation.
     }
 
-    public static void mockAcsRequestContext(final Zone zone) {
+    public static void mockAcsRequestContext() {
         try {
             Method method = AcsRequestContextHolder.class.getDeclaredMethod("initialize");
             method.setAccessible(true);

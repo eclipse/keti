@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ge.predix.acs.request.context.AcsRequestContext;
-import com.ge.predix.acs.request.context.AcsRequestContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpStatus;
@@ -38,6 +36,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -45,6 +44,8 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ge.predix.acs.privilege.management.PrivilegeManagementUtility;
+import com.ge.predix.acs.request.context.AcsRequestContext;
+import com.ge.predix.acs.request.context.AcsRequestContextHolder;
 import com.ge.predix.acs.rest.BaseResource;
 import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.acs.testutils.MockAcsRequestContext;
@@ -79,15 +80,12 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
 
     @BeforeClass
     public void setup() throws Exception {
-        this.testZone = TEST_UTILS.createTestZone("ResourceMgmtControllerIT");
-        this.testZone2 = TEST_UTILS.createTestZone("ResourceMgmtControllerIT2");
-        this.zoneService.upsertZone(this.testZone);
-        this.zoneService.upsertZone(this.testZone2);
-        MockSecurityContext.mockSecurityContext(this.testZone);
-        MockAcsRequestContext.mockAcsRequestContext(this.testZone);
+        this.testZone = TEST_UTILS.setupTestZone("ResourceMgmtControllerIT", zoneService);
+
     }
 
-    @Test
+
+  @Test
     public void testResourceInvalidMediaTypeResponseStatusCheck() throws Exception {
 
         String thisUri = RESOURCE_BASE_URL + "/%2Fservices%2Fsecured-api";
@@ -98,6 +96,27 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
                 .content("testString")).andExpect(status().isUnsupportedMediaType());
 
     }
+
+    @Test
+     public void resourceZoneDoesNotExistException() throws Exception {
+         // NOTE: To throw a ZoneDoesNotExistException, we must ensure that the AcsRequestContext in the
+        //       SpringSecurityZoneResolver class returns a null ZoneEntity
+         MockSecurityContext.mockSecurityContext(null);
+         MockAcsRequestContext.mockAcsRequestContext();
+         BaseResource resource = JSON_UTILS.deserializeFromFile("controller-test/a-resource.json",
+                 BaseResource.class);
+         String thisUri = RESOURCE_BASE_URL + "/%2Fservices%2Fsecured-api";
+         // create resource in first zone
+         MockMvcContext putContext =
+             TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone.getSubdomain(), thisUri);
+         ResultActions resultActions = putContext.getMockMvc().perform(putContext.getBuilder().
+                 contentType(MediaType.APPLICATION_JSON).content(OBJECT_MAPPER.writeValueAsString(resource)));
+         resultActions.andExpect(status().isBadRequest());
+         resultActions.andReturn().getResponse().getContentAsString().contentEquals("Zone not found");
+         MockSecurityContext.mockSecurityContext(this.testZone);
+         MockAcsRequestContext.mockAcsRequestContext();
+     }
+
 
     @Test
     public void testSameResourceDifferentZones() throws Exception {
@@ -111,8 +130,7 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
                 .content(OBJECT_MAPPER.writeValueAsString(resource))).andExpect(status().isCreated());
 
         // create resource in second zone
-        MockSecurityContext.mockSecurityContext(this.testZone2);
-        MockAcsRequestContext.mockAcsRequestContext(this.testZone2);
+        this.testZone2 = TEST_UTILS.setupTestZone("ResourceMgmtControllerIT2", zoneService);
         putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone2.getSubdomain(),
                                                                           thisUri);
         putContext.getMockMvc().perform(putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
@@ -214,7 +232,7 @@ public class ResourcePrivilegeManagementControllerIT extends AbstractTestNGSprin
                 .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_ERROR, is("Bad Request")))
                 .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_MESSAGE,
                         is("Zone not found")));
-        MockAcsRequestContext.mockAcsRequestContext(this.testZone);
+        MockAcsRequestContext.mockAcsRequestContext();
     }
 
     @Test

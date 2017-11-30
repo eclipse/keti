@@ -35,7 +35,9 @@ public final class MockSecurityContext {
 
     public static void mockSecurityContext(final Zone zone) {
         ZoneOAuth2Authentication acsZoneOAuth = Mockito.mock(ZoneOAuth2Authentication.class);
-        when(acsZoneOAuth.getZoneId()).thenReturn(zone.getSubdomain());
+        if (zone != null) {
+            when(acsZoneOAuth.getZoneId()).thenReturn(zone.getSubdomain());
+        }
         SecurityContextHolder.getContext().setAuthentication(acsZoneOAuth);
     }
 }

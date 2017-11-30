@@ -14,14 +14,11 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.ge.predix.acs;
+package com.ge.predix.acs.commons.web;
 
-import com.ge.predix.acs.attribute.connector.management.AttributeConnectorController;
-import com.ge.predix.acs.privilege.management.PrivilegeManagementUtility;
-import com.ge.predix.acs.privilege.management.ResourcePrivilegeManagementController;
-import com.ge.predix.acs.privilege.management.SubjectPrivilegeManagementController;
-import com.ge.predix.acs.privilege.management.ZoneDoesNotExistException;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -30,18 +27,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-
-@ControllerAdvice(basePackageClasses = { SubjectPrivilegeManagementController.class,
-        ResourcePrivilegeManagementController.class, AttributeConnectorController.class })
+@ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class ZoneDoesNotExistControllerAdvice {
+public class ZoneDoesNotExistExceptionHandler extends BaseRestApiControllerAdvice {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZoneDoesNotExistExceptionHandler.class);
+
+    public ZoneDoesNotExistExceptionHandler() {
+        super(LOGGER);
+    }
+
     @ExceptionHandler(ZoneDoesNotExistException.class)
-    public ResponseEntity<JSONObject> handleZoneDoesNotExist() {
+    public ResponseEntity<JSONObject> handleException(final ZoneDoesNotExistException e) {
+        LOGGER.error(e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                 .body(new JSONObject() {{
-                    put(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_ERROR,
+                    put("error",
                             HttpStatus.BAD_REQUEST.getReasonPhrase());
-                    put(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_MESSAGE,
+                    put("message",
                             "Zone not found");
                 }});
     }

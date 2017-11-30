@@ -32,27 +32,26 @@ public class BaseRestApiControllerAdviceTest {
     @Test
     public void testBaseRestApiControllerAdviceException() {
 
-        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+        RestApiExceptionHandler restApiExceptionHandler = new RestApiExceptionHandler();
         RestApiException e = new RestApiException("Internal server error");
 
-        ResponseEntity<RestApiErrorResponse> actualErrorResponse = baseRestApiControllerAdvice
-                .handleRestApiException(e);
+        ResponseEntity<RestApiErrorResponse> actualErrorResponse = restApiExceptionHandler.handleException(e);
 
         Assert.assertNotNull(actualErrorResponse);
         Assert.assertTrue(actualErrorResponse.getStatusCode().toString().equals("500"));
-        Assert.assertTrue(actualErrorResponse.getBody().getErrorDetails().getErrorMessage()
-                .equals("Internal server error"));
+        Assert.assertTrue(
+                actualErrorResponse.getBody().getErrorDetails().getErrorMessage().equals("Internal server error"));
     }
 
     @Test
     public void testBaseRestApiControllerAdviceHttpMediaTypeNotAcceptableException() {
 
-        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+        HttpMediaTypeNotAcceptableExceptionHandler httpMediaTypeNotAcceptableExceptionHandler = new
+                HttpMediaTypeNotAcceptableExceptionHandler();
 
         HttpMediaTypeNotAcceptableException e = new HttpMediaTypeNotAcceptableException("Media Type Not Supported");
 
-        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice
-                .handleHttpMediaTypeNotAcceptableException(e);
+        RestApiErrorResponse actualErrorResponse = httpMediaTypeNotAcceptableExceptionHandler.handleException(e);
 
         Assert.assertNotNull(actualErrorResponse);
         Assert.assertTrue(actualErrorResponse.getErrorDetails().getErrorMessage().equals("Not Acceptable"));
@@ -61,12 +60,12 @@ public class BaseRestApiControllerAdviceTest {
     @Test
     public void testBaseRestApiControllerAdviceHttpRequestMethodNotSupportedException() {
 
-        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+        HttpRequestMethodNotSupportedExceptionHandler httpRequestMethodNotSupportedExceptionHandler = new
+                HttpRequestMethodNotSupportedExceptionHandler();
 
         HttpRequestMethodNotSupportedException e = new HttpRequestMethodNotSupportedException("GET");
 
-        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice
-                .handleHttpRequestMethodNotSupportedException(e);
+        RestApiErrorResponse actualErrorResponse = httpRequestMethodNotSupportedExceptionHandler.handleException(e);
 
         Assert.assertNotNull(actualErrorResponse);
         Assert.assertTrue(actualErrorResponse.getErrorDetails().getErrorMessage().equals("Method Not Allowed"));
@@ -75,11 +74,11 @@ public class BaseRestApiControllerAdviceTest {
     @Test
     public void testBaseRestApiControllerAdviceIllegalArgumentException() {
 
-        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+        IllegalArgumentExceptionHandler illegalArgumentExceptionHandler = new IllegalArgumentExceptionHandler();
 
         IllegalArgumentException e = new IllegalArgumentException("Arguments passed are invalid");
 
-        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice.handleIllegalArgumentException(e);
+        RestApiErrorResponse actualErrorResponse = illegalArgumentExceptionHandler.handleException(e);
 
         Assert.assertNotNull(actualErrorResponse);
         Assert.assertTrue(
@@ -89,12 +88,25 @@ public class BaseRestApiControllerAdviceTest {
     @Test
     public void testBaseRestApiControllerAdviceUntrustedIssuerException() {
 
-        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+        UntrustedIssuerExceptionHandler untrustedIssuerExceptionHandler = new UntrustedIssuerExceptionHandler();
 
         UntrustedIssuerException e = new UntrustedIssuerException("Not a trusted Issuer");
 
-        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice
-                .handleUntrustedIssuerOrSecurityException(e);
+        RestApiErrorResponse actualErrorResponse = untrustedIssuerExceptionHandler.handleException(e);
+
+        Assert.assertNotNull(actualErrorResponse);
+        Assert.assertTrue(actualErrorResponse.getErrorDetails().getErrorMessage().equals("Not a trusted Issuer"));
+
+    }
+
+    @Test
+    public void testBaseRestApiControllerAdviceSecurityException() {
+
+        SecurityExceptionHandler securityExceptionHandler = new SecurityExceptionHandler();
+
+        SecurityException e = new SecurityException("Not a trusted Issuer");
+
+        RestApiErrorResponse actualErrorResponse = securityExceptionHandler.handleException(e);
 
         Assert.assertNotNull(actualErrorResponse);
         Assert.assertTrue(actualErrorResponse.getErrorDetails().getErrorMessage().equals("Not a trusted Issuer"));
@@ -104,10 +116,11 @@ public class BaseRestApiControllerAdviceTest {
     @Test
     public void testBaseRestApiControllerAdviceHttpMessageNotReadableException() {
 
-        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+        HttpMessageNotReadableExceptionHandler httpMessageNotReadableExceptionHandler = new
+                HttpMessageNotReadableExceptionHandler();
         HttpMessageNotReadableException e = new HttpMessageNotReadableException("{JSON}");
 
-        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice.handleHttpMessageNotReadableException(e);
+        RestApiErrorResponse actualErrorResponse = httpMessageNotReadableExceptionHandler.handleException(e);
 
         Assert.assertNotNull(actualErrorResponse);
         Assert.assertTrue(actualErrorResponse.getErrorDetails().getErrorCode().equals("FAILED"));
@@ -118,12 +131,12 @@ public class BaseRestApiControllerAdviceTest {
     @Test
     public void testBaseRestApiControllerAdviceHttpMediaTypeNotSupportedException() {
 
-        BaseRestApiControllerAdvice baseRestApiControllerAdvice = new BaseRestApiControllerAdvice();
+        HttpMediaTypeNotSupportedExceptionHandler httpMediaTypeNotSupportedExceptionHandler = new
+                HttpMediaTypeNotSupportedExceptionHandler();
 
         HttpMediaTypeNotSupportedException e = new HttpMediaTypeNotSupportedException("JSON");
 
-        RestApiErrorResponse actualErrorResponse = baseRestApiControllerAdvice
-                .handleHttpMediaTypeNotSupportedException(e);
+        RestApiErrorResponse actualErrorResponse = httpMediaTypeNotSupportedExceptionHandler.handleException(e);
 
         Assert.assertNotNull(actualErrorResponse);
         Assert.assertTrue(actualErrorResponse.getErrorDetails().getErrorMessage().equals("Unsupported Media Type"));

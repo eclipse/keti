@@ -16,6 +16,27 @@
 
 package com.ge.predix.controller.test;
 
+import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.POLICY_SET_URL;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.net.URI;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.context.WebApplicationContext;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -30,25 +51,6 @@ import com.ge.predix.acs.testutils.TestActiveProfilesResolver;
 import com.ge.predix.acs.testutils.TestUtils;
 import com.ge.predix.acs.utils.JsonUtils;
 import com.ge.predix.acs.zone.management.ZoneService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.web.context.WebApplicationContext;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import java.net.URI;
-
-import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.POLICY_SET_URL;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
@@ -77,12 +79,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
 
     @BeforeClass
     public void setup() throws Exception {
-        this.testZone = new TestUtils().createTestZone("PolicyMgmtControllerIT");
-        this.testZone2 = new TestUtils().createTestZone("PolicyMgmtControllerIT2");
-        this.zoneService.upsertZone(this.testZone);
-        this.zoneService.upsertZone(this.testZone2);
-        MockSecurityContext.mockSecurityContext(this.testZone);
-        MockAcsRequestContext.mockAcsRequestContext(this.testZone);
+        this.testZone = new TestUtils().setupTestZone("PolicyMgmtControllerIT", zoneService);
         this.policySet = this.jsonUtils.deserializeFromFile("controller-test/complete-sample-policy-set.json",
                 PolicySet.class);
         Assert.assertNotNull(this.policySet, "complete-sample-policy-set.json file not found or invalid");
@@ -99,6 +96,25 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
                 .andExpect(status().isUnsupportedMediaType());
     }
 
+    public void policyZoneDoesNotExistException() throws Exception {
+        // NOTE: To throw a ZoneDoesNotExistException, we must ensure that the AcsRequestContext in the
+        //       SpringSecurityZoneResolver class returns a null ZoneEntity
+        MockSecurityContext.mockSecurityContext(null);
+        MockAcsRequestContext.mockAcsRequestContext();
+        String thisUri = VERSION + "/policy-set/" + this.policySet.getName();
+        // create policy-set in first zone
+        MockMvcContext putContext = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
+                this.testZone.getSubdomain(), thisUri);
+        ResultActions resultActions = putContext.getMockMvc().perform(
+                putContext.getBuilder().contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectWriter.writeValueAsString(this.policySet)));
+        resultActions.andExpect(status().isUnprocessableEntity());
+        resultActions.andReturn().getResponse().getContentAsString().contains("zone 'null' does not exist");
+
+        MockSecurityContext.mockSecurityContext(this.testZone);
+        MockAcsRequestContext.mockAcsRequestContext();
+    }
+
     public void testCreateSamePolicyDifferentZones() throws Exception {
         String thisUri = VERSION + "/policy-set/" + this.policySet.getName();
         // create policy-set in first zone
@@ -108,6 +124,8 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
                 .content(this.objectWriter.writeValueAsString(this.policySet))).andExpect(status().isCreated());
 
         // create policy set in second zone
+        this.testZone2 = new TestUtils().createTestZone("PolicyMgmtControllerIT2");
+        this.zoneService.upsertZone(this.testZone2);
         MockSecurityContext.mockSecurityContext(this.testZone2);
         putContext = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac, this.testZone2.getSubdomain(),
                 thisUri);
@@ -116,7 +134,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
         // we expect both policy sets to be create in each zone
         // set security context back to first test zone
         MockSecurityContext.mockSecurityContext(this.testZone);
-        MockAcsRequestContext.mockAcsRequestContext(this.testZone);
+        MockAcsRequestContext.mockAcsRequestContext();
     }
 
     public void testCreatePolicy() throws Exception {

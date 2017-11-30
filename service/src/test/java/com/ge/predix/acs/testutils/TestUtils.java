@@ -26,13 +26,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testng.Assert;
 
 import com.ge.predix.acs.rest.Zone;
 import com.ge.predix.acs.zone.management.ZoneService;
 import com.ge.predix.acs.zone.management.dao.ZoneEntity;
 
 /**
- *
  * @author 212304931
  */
 public class TestUtils {
@@ -78,7 +78,7 @@ public class TestUtils {
         Zone testZone = createTestZone(testName);
         zoneService.upsertZone(testZone);
         MockSecurityContext.mockSecurityContext(testZone);
-        MockAcsRequestContext.mockAcsRequestContext(testZone);
+        MockAcsRequestContext.mockAcsRequestContext();
         return testZone;
     }
 
@@ -113,5 +113,24 @@ public class TestUtils {
         result.setBuilder(MockMvcRequestBuilders.post(new URI("http://" + subdomain + ".localhost/" + resourceURI)));
         result.setMockMvc(MockMvcBuilders.webAppContextSetup(wac).defaultRequest(result.getBuilder()).build());
         return result;
+    }
+
+    public static class TestAssertion {
+        public static void assertDoesNotThrow(final Class<?> unexpectedException, final Runnable executableCode) {
+
+            /*
+            TODO We should Start moving tests to use this assertDoesNotThrow method wherever we use the try { ...
+            } catch (Exception e) { Assert.fail(); }
+
+            */
+            try {
+                executableCode.run();
+            } catch (Exception e) {
+                if (e.getClass() == unexpectedException) {
+                    Assert.fail();
+                }
+                throw e;
+            }
+        }
     }
 }

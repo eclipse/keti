@@ -126,7 +126,7 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
         this.zoneService.upsertZone(this.testZone1);
         this.zoneService.upsertZone(this.testZone2);
         MockSecurityContext.mockSecurityContext(this.testZone1);
-        MockAcsRequestContext.mockAcsRequestContext(this.testZone1);
+        MockAcsRequestContext.mockAcsRequestContext();
         this.policySet = this.jsonUtils.deserializeFromFile("complete-sample-policy-set-2.json", PolicySet.class);
         Assert.assertNotNull(this.policySet, "complete-sample-policy-set-2.json file not found or invalid");
     }

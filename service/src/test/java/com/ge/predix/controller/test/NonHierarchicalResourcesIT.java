@@ -66,7 +66,7 @@ public final class NonHierarchicalResourcesIT extends AbstractTestNGSpringContex
 
         this.zoneService.upsertZone(TEST_ZONE);
         MockSecurityContext.mockSecurityContext(TEST_ZONE);
-        MockAcsRequestContext.mockAcsRequestContext(TEST_ZONE);
+        MockAcsRequestContext.mockAcsRequestContext();
     }
 
     @Test
