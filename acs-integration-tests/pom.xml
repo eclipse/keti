@@ -954,16 +954,6 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>${maven-failsafe.version}</version>
                         <configuration>
-                            <systemPropertyVariables>
-                                <ACS_DEFAULT_ISSUER_ID>https://${uaa.zone}${uaa.cf.domain}.${cf.base.domain}/oauth/token</ACS_DEFAULT_ISSUER_ID>
-                                <ACS_SERVICE_ID>${acs.service.id}</ACS_SERVICE_ID>
-                                <CF_BASE_DOMAIN>${cf.base.domain}</CF_BASE_DOMAIN>
-                                <NUREGO_API_URL>not-used</NUREGO_API_URL>
-                                <ZAC_UAA_URL>https://${uaa.cf.domain}.${cf.base.domain}</ZAC_UAA_URL>
-                                <ACS_UAA_URL>https://${uaa.cf.domain}.${cf.base.domain}</ACS_UAA_URL>
-                                <ZAC_URL>https://${zac.cf.domain}.${cf.base.domain}</ZAC_URL>
-                                <ZONE1_UAA_URL>https://${uaa.zone}${uaa.cf.domain}.${cf.base.domain}</ZONE1_UAA_URL>
-                            </systemPropertyVariables>
                             <includes>
                                 <include>**/ACSAcceptanceIT.java</include>
                             </includes>
