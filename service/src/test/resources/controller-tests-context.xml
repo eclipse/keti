@@ -31,9 +31,6 @@
         </property>
     </bean> -->
 
-    <bean name="acsRequestEnrichingFilter" class="com.ge.predix.acs.request.context.AcsRequestEnrichingFilter"/>
-    <bean class="com.ge.predix.acs.request.context.AcsRequestContextHolder"/>
-
     <bean
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
         xmlns="http://www.springframework.org/schema/beans">
