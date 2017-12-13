@@ -23,11 +23,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisConnectionUtils;
 import org.springframework.util.Assert;
 
+@Profile({ "cloud-redis", "redis" })
 public abstract class AbstractCacheHealthIndicator implements CacheHealthIndicator {
 
     static final String DESCRIPTION = "Health check performed by attempting to invoke the Redis INFO command";

@@ -52,6 +52,8 @@ public final class AcsApiUriTemplates {
 
     public static final String SUBJECT_CONNECTOR_URL = CONNECTOR_URL + "/subject";
 
+    public static final String HEALTH_URL = "/health";
+
     private AcsApiUriTemplates() {
     }
 
