@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.acs.commons.web;
@@ -21,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Used to provide error payload with code and message.
  *
- * @author 212360328
+ * @author acs-engineers@ge.com
  *
  */
 @SuppressWarnings({ "nls", "javadoc" })

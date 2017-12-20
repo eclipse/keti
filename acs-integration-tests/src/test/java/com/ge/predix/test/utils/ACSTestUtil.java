@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.test.utils;
@@ -28,7 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 
 /**
- * @author 212406427
+ * @author acs-engineers@ge.com
  */
 @Component
 @SuppressWarnings({ "nls", "javadoc" })

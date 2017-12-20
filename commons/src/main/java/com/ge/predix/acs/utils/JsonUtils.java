@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.acs.utils;
@@ -35,7 +37,7 @@ import com.github.fge.jackson.JsonNodeReader;
 /**
  * JSON utility methods convert from/to json files, objects and string.
  *
- * @author 212360328
+ * @author acs-engineers@ge.com
  */
 @SuppressWarnings("nls")
 public class JsonUtils {

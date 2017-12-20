@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.acs.zone.management;
@@ -45,7 +47,7 @@ import io.swagger.annotations.ApiOperation;
 
 /**
  *
- * @author 212319607
+ * @author acs-engineers@ge.com
  */
 @RestController
 @Api(value = ACSWebConstants.APP_ROOT_PATH, hidden = true)

@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.acs.commons.web;
@@ -22,7 +24,7 @@ import org.springframework.http.HttpStatus;
  * Controllers implementing the restful api of the acs, should throw this kind of exception which is handled by the
  * error handler to generate a json error response payload.
  *
- * @author 212360328
+ * @author acs-engineers@ge.com
  */
 @SuppressWarnings({ "javadoc", "nls" })
 public class RestApiException extends RuntimeException {

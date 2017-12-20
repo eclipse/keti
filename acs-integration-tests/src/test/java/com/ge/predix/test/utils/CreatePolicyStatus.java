@@ -12,13 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.test.utils;
 
 /**
  *
- * @author 212338046
+ * @author acs-engineers@ge.com
  */
 public enum CreatePolicyStatus {
     SUCCESS, JSON_ERROR, INVALID_POLICY_SET, ACS_ERROR

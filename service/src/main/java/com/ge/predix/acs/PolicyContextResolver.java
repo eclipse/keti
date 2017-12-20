@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.acs;
@@ -20,7 +22,7 @@ package com.ge.predix.acs;
  * Allows us to encapsulate the way we retrieve the origin, application id from the security context, as well as some
  * convenient behavior like failing when certain properties are not available.
  *
- * @author 212406427
+ * @author acs-engineers@ge.com
  */
 public interface PolicyContextResolver {
 

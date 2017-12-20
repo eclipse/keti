@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.acs.privilege.management;
@@ -26,7 +28,7 @@ import java.util.Set;
 /**
  * CRUD interface operations for privilege management.
  *
- * @author 212319607
+ * @author acs-engineers@ge.com
  */
 public interface PrivilegeManagementService {
 

@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.acs.model;
@@ -23,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
- * @author 212314537
+ * @author acs-engineers@ge.com
  */
 public final class PolicySets {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();

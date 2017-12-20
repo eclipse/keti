@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.acs.commons.policy.condition;
@@ -28,7 +30,7 @@ import com.ge.predix.acs.commons.attribute.AttributeType;
 import com.ge.predix.acs.model.Attribute;
 
 /**
- * @author 212314537
+ * @author acs-engineers@ge.com
  */
 @SuppressWarnings({ "nls", "javadoc" })
 public abstract class AbstractHandler {

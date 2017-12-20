@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.acs.request.context;
@@ -35,7 +37,7 @@ import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
 /**
  * A ThreadLocal store for the ACS Request Context.
  *
- * @author 212408019
+ * @author acs-engineers@ge.com
  */
 @Component
 public final class AcsRequestContextHolder implements ApplicationContextAware {
@@ -73,7 +75,7 @@ public final class AcsRequestContextHolder implements ApplicationContextAware {
     /**
      * The Fluent implementation to create the {@link AcsRequestContext} for the current AcsRequest...
      *
-     * @author 212408019
+     * @author acs-engineers@ge.com
      */
     private static final class AcsRequestContextBuilder {
         private static ZoneRepository zoneRepository;

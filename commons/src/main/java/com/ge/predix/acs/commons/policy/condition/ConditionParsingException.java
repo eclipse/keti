@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.acs.commons.policy.condition;
@@ -20,7 +22,7 @@ package com.ge.predix.acs.commons.policy.condition;
  * A condition shell may throw this exception when parsing a condition script if it is invalid or has other errors
  * that result in a script compilation failure.
  *
- * @author 212314537
+ * @author acs-engineers@ge.com
  */
 public class ConditionParsingException extends Exception {
     /**

@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
 package com.ge.predix.acs.service.policy.validation;
@@ -24,7 +26,7 @@ import com.ge.predix.acs.model.PolicySet;
 
 /**
  *
- * @author 212406427
+ * @author acs-engineers@ge.com
  */
 public interface PolicySetValidator {
 
