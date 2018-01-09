@@ -1,0 +1,29 @@
+{
+    "name" : "alarmsPolicySet",
+    "policies" : [
+        {
+            "name" : "assetAlarmsPolicy",
+            "target" : {
+                "name" : "getAssetAlarms",
+                "resource" : {
+                    "name" : "site",
+                    "uriTemplate" : "/alarm/site/{site_id}/asset/{asset_id}"
+                 }
+             },
+            "effect" : "PERMIT"
+        }
+        ,
+        {
+            "name" : "siteAlarmsPolicy",
+            "target" : {
+                "name" : "getSiteAlarms",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/alarm/site/{site_id}"
+                }
+            },
+            "effect" : "DENY"
+        }
+
+    ]
+}

@@ -1,0 +1,47 @@
+{
+  "name": "test-policy-set-with-asset-attributes",
+  "policies": [
+    {
+      "name": "Policy for a part",
+      "conditions": [
+        {
+          "name": "has a specific id",
+          "condition": "match.single(resource.attributes('https://not/set/yet', 'id'), '03f95db1-4255-4265-a509-f7bca3e1fee4')"
+        },
+        {
+          "name": "is part of a specific collection",
+          "condition": "match.single(resource.attributes('https://not/set/yet', 'collection'), 'part')"
+        },
+        {
+          "name": "belongs to a specific model",
+          "condition": "match.single(resource.attributes('https://not/set/yet', 'partModel'), '/partmodels/9a92831d-42f1-4f9e-86bf-4c0914f481e4')"
+        },
+        {
+          "name": "belongs to a specific structural model",
+          "condition": "match.single(resource.attributes('https://not/set/yet', 'structureModel'), '/structureModels/8c787978-bd8b-417a-b759-f63a8a6d43ee')"
+        },
+        {
+          "name": "has a specific serial number",
+          "condition": "match.single(resource.attributes('https://not/set/yet', 'serialNumber'), '775277328')"
+        },
+        {
+          "name": "has a specific parent",
+          "condition": "match.single(resource.attributes('https://not/set/yet', 'parent'), '/part/01af94ed-5425-44e4-9f6e-2a58cba7b559')"
+        },
+        {
+          "name": "belongs to a specific aircraft part",
+          "condition": "match.single(resource.attributes('https://not/set/yet', 'aircraftPart'), '/aircraftPart/13a71359-db68-4602-aac5-a8fa401c3194')"
+        },
+        {
+          "name": "belongs to a specific aircraft part model",
+          "condition": "match.single(resource.attributes('https://not/set/yet', 'aircraftPartModel'), '/aircraftPartModels/1dc6a36d-a24e-4fec-a181-f576c95a8104')"
+        },
+        {
+          "name": "has a specific uri",
+          "condition": "match.single(resource.attributes('https://not/set/yet', 'uri'), '/part/03f95db1-4255-4265-a509-f7bca3e1fee4')"
+        }
+      ],
+      "effect": "PERMIT"
+    }
+  ]
+}

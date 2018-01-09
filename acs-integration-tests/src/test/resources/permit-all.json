@@ -1,0 +1,9 @@
+{
+    "name" : "permit-all",
+    "policies" : [
+        {
+            "name" : "Access to everyone to everything",
+            "effect" : "PERMIT"
+        }
+    ]
+}

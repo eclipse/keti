@@ -1,0 +1,14 @@
+/build
+/bin
+/target
+.classpath
+.project
+.settings
+/test-output/
+.DS_Store
+.springBeans
+.idea
+*.ipr
+*.iml
+/target/
+/failsafe-reports*/

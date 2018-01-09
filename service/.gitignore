@@ -1,0 +1,15 @@
+/build
+/bin
+/target
+.classpath
+.project
+.settings
+target
+/test-output/
+/surefire-reports*/
+.DS_Store
+.springBeans
+.idea
+*.ipr
+*.iml
+.checkstyle

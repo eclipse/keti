@@ -1,0 +1,34 @@
+{
+    "name" : "permit-admin-with-site-access-matcher-and-condition",
+    "policies" : [
+        {
+            "name" : "Subject with role Administrator and site access has access to the site",
+             "target" : {
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/site/{site_id}"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "subject1",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "role",
+                          "value" : "administrator" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { 
+                  "name":"",
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'site'), resource.uriVariable('site_id'))" 
+                }
+            ],
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "DENY to everyone else",
+            "effect" : "DENY"
+        }
+    ]
+}

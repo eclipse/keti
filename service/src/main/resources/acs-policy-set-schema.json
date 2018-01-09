@@ -1,0 +1,114 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "http://jsonschema.net",
+    "type": "object",	
+    "properties": {
+        "name": {
+            "id": "http://jsonschema.net/name",
+            "type": "string"
+        },
+        "policies": {
+            "id": "http://jsonschema.net/policies",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "id": "http://jsonschema.net/policies/0",
+                "type": "object",
+                "required": ["effect"],
+                "properties": {
+                    "target": {
+                        "id": "http://jsonschema.net/policies/0/target",
+                        "type": "object",
+                        "required": ["resource"],
+                        "properties": {
+                            "name": {
+                                "id": "http://jsonschema.net/policies/0/target/name",
+                                "type": "string"
+                            },
+                            "resource": {
+                                "id": "http://jsonschema.net/policies/0/target/resource",
+                                "type": "object",
+                                "required": ["uriTemplate"],
+                                "properties": {
+                                    "name": {
+                                        "id": "http://jsonschema.net/policies/0/target/resource/name",
+                                        "type": "string"
+                                    },
+                                    "uriTemplate": {
+                                        "id": "http://jsonschema.net/policies/0/target/resource/uriTemplate",
+                                        "type": "string"
+                                    },
+                                    "attributeUriTemplate": {
+                                        "id": "http://jsonschema.net/policies/0/target/resource/attributeUriTemplate",
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "action": {
+                                "id": "http://jsonschema.net/policies/0/target/action",
+                                "type": "string"
+                            },
+                            "subject": {
+                                "id": "http://jsonschema.net/policies/0/target/subject",
+                                "type": "object",
+                                "required": ["attributes"],
+                                "properties": {
+                                    "name": {
+                                        "id": "http://jsonschema.net/policies/0/target/subject/name",
+                                        "type": "string"
+                                    },
+                                    "attributes": {
+                                        "id": "http://jsonschema.net/policies/0/target/subject/attributes",
+                                        "type": "array",
+                                        "items": {
+                                            "id": "http://jsonschema.net/policies/0/target/subject/attributes/0",
+                                            "type": "object",
+                                            "properties": {
+                                                "issuer": {
+                                                    "id": "http://jsonschema.net/policies/0/target/subject/attributes/0/issuer",
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "id": "http://jsonschema.net/policies/0/target/subject/attributes/0/name",
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "name": {
+                        "id": "http://jsonschema.net/policies/0/name",
+                        "type": "string"
+                    },
+                    "conditions": {
+                        "id": "http://jsonschema.net/policies/0/conditions",
+                        "type": "array",
+                        "items": {
+                            "id": "http://jsonschema.net/policies/0/conditions/0",
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "id": "http://jsonschema.net/policies/0/conditions/0/name",
+                                    "type": "string"
+                                },
+                                "condition": {
+                                    "id": "http://jsonschema.net/policies/0/conditions/0/condition",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["condition"]
+                        }
+                    },
+                    "effect": {
+                        "id": "http://jsonschema.net/policies/0/effect",
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "required": ["policies", "name"]    
+}

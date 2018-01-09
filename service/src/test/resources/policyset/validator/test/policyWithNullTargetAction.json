@@ -1,0 +1,24 @@
+{
+    "name" : "Operator policy set",
+    "policies" : [
+        {
+            "name" : "PolicyMatcher MUST match this policy during this test.",
+            "target" : {
+                "name" : "When an operator reads an asset",
+                "resource" : {
+                    "name" : "Asset",
+                    "uriTemplate" : "/assets/{asset_id}"
+                },
+                "action" : null,
+                "subject" : {
+                    "name" : "Operator"
+                }
+            },
+            "conditions" : [
+                { "name" : "is member of group",
+                  "condition" : "match.any(subject.attributes('https://acs.attributes.int', 'group'), resource.attributes('https://acs.attributes.int', 'group'))" }
+            ],
+            "effect" : "PERMIT"
+        }
+    ]
+}

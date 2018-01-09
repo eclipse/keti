@@ -1,0 +1,17 @@
+{
+    "name" : "multiple-actions-with-single-invalid-action-defined-policy-set",
+    "policies" : [
+        {
+            "name" : "PolicyMatcher_MUST_match_this_policy_during_this_test",
+            "target" : {
+                "name" : "When an operator reads an asset",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "any"
+                },
+                "action" : "GET , PUT,POST1, DELETE"
+            },
+            "effect" : "PERMIT"
+        }
+    ]
+}

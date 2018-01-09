@@ -1,0 +1,16 @@
+{
+    "name" : "Operator policy set",
+    "policies" : [
+        {
+            "name" : "resourceURIPolicy",
+            "target" : {
+                "name" : "When an operator reads a site",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/sites/{site_id}"
+                }
+             },
+            "effect" : "PERMIT"
+        }
+   ]
+}

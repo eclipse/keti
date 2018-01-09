@@ -1,0 +1,9 @@
+{
+    "name" : "deny-policy-set",
+    "policies" : [
+        {
+            "name" : "This policy should always return DENY.",
+            "effect" : "DENY"
+        }
+    ]
+}

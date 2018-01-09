@@ -1,0 +1,25 @@
+{
+    "name" : "policy-set-with-one-policy-nocondition",
+    "policies" : [
+        {
+            "name" : "Operators assigned to a site are denied access to resources from any site.",
+            "target" : {
+                "name" : "When an operator reads a site",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/sites/{site_id}"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "site" }
+                    ]
+                }
+            },
+            
+            "effect" : "DENY"
+        }
+    ]
+}

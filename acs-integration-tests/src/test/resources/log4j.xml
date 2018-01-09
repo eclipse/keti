@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ - Copyright 2017 General Electric Company
+ -
+ - Licensed under the Apache License, Version 2.0 (the "License");
+ - you may not use this file except in compliance with the License.
+ - You may obtain a copy of the License at
+ -
+ -     http://www.apache.org/licenses/LICENSE-2.0
+ -
+ - Unless required by applicable law or agreed to in writing, software
+ - distributed under the License is distributed on an "AS IS" BASIS,
+ - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ - See the License for the specific language governing permissions and
+ - limitations under the License.
+ -
+ - SPDX-License-Identifier: Apache-2.0
+ -->
+
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<!-- Introducing logback.xml for acs-int-tests package. Adding log level
+    control for class ResourceOwnerPasswordAccessTokenProvider to avoid printing
+    password details in log file -->
+<log4j:configuration debug="false"
+    xmlns:log4j='http://jakarta.apache.org/log4j/'>
+    <appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+        <param name="ConversionPattern" value="%d{YYYY-MM-dd HH:mm:ss} %p [%t] %c [%F:%L] %m%n"/>
+        </layout>
+    </appender>
+
+    <logger name="java">
+        <level value="warn" />
+    </logger>
+
+    <!-- To avoid printing UAA password credentials info in log file, changing
+        the log level for the following class to INFO. -->
+    <!--     <logger
+        name="org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider"
+        level="INFO" /> -->
+
+    <logger name="org.springframework.security">
+        <level value ="info" />
+    </logger>
+
+    <logger name="com.ge.predix">
+        <level value ="debug" />
+    </logger>
+
+    <logger name="org.apache.http.wire">
+        <level value ="debug" />
+    </logger>
+
+    <logger name="http.wire">
+        <level value ="debug" />
+    </logger>
+
+    <logger name="com.ge.predix.test.TestNameLogger">
+        <level value="DEBUG"/>
+    </logger>
+
+    <logger name="com.ge.predix.test.TestNamePredixLogger">
+        <level value="DEBUG"/>
+    </logger>
+
+    <!-- Uncomment to debug Cloud-Foundry-related operations -->
+    <!--<logger name="cloudfoundry-client">-->
+        <!--<level value="DEBUG"/>-->
+    <!--</logger>-->
+
+    <root>
+        <level value = "INFO" />
+        <appender-ref ref="console" />
+    </root>
+
+</log4j:configuration>

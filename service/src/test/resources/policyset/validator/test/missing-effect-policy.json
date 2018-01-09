@@ -1,0 +1,27 @@
+{
+    "name" : "set-with-1-policy",
+    "policies" : [
+        {
+            "name" : "Operators can read a site if they are assigned to the site.",
+            "target" : {
+                "name" : "When an operator reads a site",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/secured-by-value/sites/sanramon"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "subject1",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "site" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "is assigned to site",
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'site'), 'sanramon')" }
+            ]
+        }
+    ]
+}

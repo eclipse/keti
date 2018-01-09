@@ -1,0 +1,8 @@
+{
+    "name": "my policy set",
+    "policies" : [
+        {
+            "effect" : "PERMIT"
+        }
+    ]
+}

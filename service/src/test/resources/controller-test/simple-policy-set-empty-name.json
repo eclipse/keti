@@ -1,0 +1,9 @@
+{
+    "name" : "",
+    "policies" : [
+        {
+            "name" : "deny-everything",
+            "effect" : "DENY"
+        }
+    ]
+}

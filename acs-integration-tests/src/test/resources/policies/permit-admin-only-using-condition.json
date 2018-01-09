@@ -1,0 +1,19 @@
+{
+    "name" : "permit-admin-only-using-condition",
+    "policies" : [
+        {
+            "name" : "Subject with role Administrator has access to everything",
+            "conditions" : [
+                { 
+                  "name":"",
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'role'), 'administrator')" 
+                }
+            ],
+            "effect" : "PERMIT"
+        },
+        {
+            "name" : "DENY to everyone else",
+            "effect" : "DENY"
+        }
+    ]
+}

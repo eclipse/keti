@@ -1,0 +1,16 @@
+[
+	{
+		"subjectIdentifier" : " ",
+		"attributes" : [
+		    { "issuer" : "https://acs.attributes.int",
+		      "name" : "group",
+		      "value": "admin" 
+		    }
+		    ,
+		    { "issuer" : "https://acs.attributes.int",
+		      "name" : "department",
+		       "value": "sales" 
+		    }
+		]
+	}
+]

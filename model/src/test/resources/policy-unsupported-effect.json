@@ -1,0 +1,9 @@
+{
+    "name" : "Test parsing validation of policy effect.",
+    "policies" : [
+        {
+            "name" : "This effect should cause a parsing error.",
+            "effect" : "FAIL!!!"
+        }
+    ]
+}

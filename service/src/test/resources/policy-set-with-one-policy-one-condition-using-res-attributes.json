@@ -1,0 +1,30 @@
+{
+    "name" : "test-policy-set",
+    "policies" : [
+        {
+            "name" : "Operators can read a site if they are assigned to the site.",
+            "target" : {
+                "name" : "When an operator reads a site",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/sites/{site_id}"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "role" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "has role analyst",
+                  "condition" : "match.single(resource.attributes('https://acs.attributes.int', 'location'), 'sanramon')" },
+                { "name" : "has role administrator",
+                  "condition" : "match.any(subject.attributes('https://acs.attributes.int', 'role'), resource.attributes('https://acs.attributes.int', 'role_required'))" }
+            ],
+            "effect" : "PERMIT"
+        }
+    ]
+}

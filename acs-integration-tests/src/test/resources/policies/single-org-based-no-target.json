@@ -1,0 +1,15 @@
+{
+    "name" : "default",
+    "policies" : [
+        {
+            "name" : "Operators can read a site if they belong to the site organization.",
+            "conditions" : [
+                { 
+                  "name":"",
+                  "condition" : "match.single(resource.attributes('https://acs.attributes.int', 'org'), 'alliance')"
+                }
+            ],
+            "effect" : "PERMIT"
+        }
+    ]
+}

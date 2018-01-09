@@ -1,0 +1,14 @@
+{
+	"resourceIdentifier" : "/services/secured-api/subresource",
+	"attributes" : [
+	    { "issuer" : "https://acs.attributes.int",
+	      "name" : "group",
+	      "value": "supervisor" 
+	    }
+	    ,
+	    { "issuer" : "https://acs.attributes.int",
+	      "name" : "department",
+	       "value": "it" 
+	    }
+	]
+}

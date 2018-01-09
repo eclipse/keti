@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ - Copyright 2017 General Electric Company
+ -
+ - Licensed under the Apache License, Version 2.0 (the "License");
+ - you may not use this file except in compliance with the License.
+ - You may obtain a copy of the License at
+ -
+ -     http://www.apache.org/licenses/LICENSE-2.0
+ -
+ - Unless required by applicable law or agreed to in writing, software
+ - distributed under the License is distributed on an "AS IS" BASIS,
+ - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ - See the License for the specific language governing permissions and
+ - limitations under the License.
+ -
+ - SPDX-License-Identifier: Apache-2.0
+ -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:redis="http://www.springframework.org/schema/redis"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+        http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
+
+    <!-- Register Oauth AuthN Manager -->
+    <sec:authentication-manager />
+
+    <bean
+        class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+        <property name="order" value="-1"></property>
+        <property name="urlPathHelper">
+            <bean class="com.ge.predix.acs.config.UrlPathHelperNonDecoding"></bean>
+        </property>
+    </bean>
+
+    <context:component-scan base-package="com.ge.predix.web.cors"/>
+
+    <!-- Correlation Log Filter -->
+    <bean id="logFilter" class="com.ge.predix.log.filter.LogFilter">
+       <constructor-arg>
+            <set value-type="java.lang.String">
+                <value>${ACS_BASE_DOMAIN:localhost}</value>
+            </set>
+        </constructor-arg>
+        <constructor-arg>
+            <set value-type="java.lang.String">
+                <value>Predix-Zone-Id</value>
+                <value>ACS-Zone-Subdomain</value>
+            </set>
+        </constructor-arg>
+        <constructor-arg value="acs" />
+    </bean>
+
+    <!-- Authentication Filter -->
+    <bean id="preAuthenticationEntryPoint"
+        class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint" />
+
+    <!-- Filter for Oauth Token Validation -->
+    <oauth:resource-server id="oauth2remoteTokenFilter"
+        token-services-ref="tokenService" />
+
+    <!-- Authorization Configuration For V1 policy-set APIS -->
+    <http pattern="/v1/policy-set/**" request-matcher="ant" create-session="stateless"
+        xmlns="http://www.springframework.org/schema/security"
+        disable-url-rewriting="true" use-expressions="true"
+        entry-point-ref="preAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
+        <intercept-url pattern="/v1/policy-set/**" method="GET"
+            access="hasAnyAuthority('acs.policies.read') " />
+        <intercept-url pattern="/v1/policy-set/**" method="HEAD"
+            access="hasAnyAuthority('acs.policies.read') " />
+        <intercept-url pattern="/v1/policy-set/**" method="OPTIONS"
+            access="hasAnyAuthority('acs.policies.read') " />
+
+        <intercept-url pattern="/v1/policy-set/**" method="PUT"
+            access="hasAnyAuthority('acs.policies.write') " />
+        <intercept-url pattern="/v1/policy-set/**" method="POST"
+            access="hasAnyAuthority('acs.policies.write') " />
+        <intercept-url pattern="/v1/policy-set/**" method="DELETE"
+            access="hasAnyAuthority('acs.policies.write') " />
+        <intercept-url pattern="/v1/policy-set/**" method="PATCH"
+            access="hasAnyAuthority('acs.policies.write') " />
+
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="policyHttpMethodsFilter" before="FIRST"/>
+        <custom-filter ref="oauth2remoteTokenFilter"
+            position="PRE_AUTH_FILTER" />
+        <custom-filter ref="acsRequestEnrichingFilter"
+                after="BASIC_AUTH_FILTER" />
+    </http>
+
+    <!-- Authorization Configuration For V1 policy-evaluation APIS -->
+    <http pattern="/v1/policy-evaluation/**" request-matcher="ant" create-session="stateless"
+        xmlns="http://www.springframework.org/schema/security"
+        disable-url-rewriting="true" use-expressions="true"
+        entry-point-ref="preAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
+        <intercept-url pattern="/v1/policy-evaluation"
+            access="isFullyAuthenticated() " />
+
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="evaluationHttpMethodsFilter" before="FIRST"/>
+        <custom-filter ref="oauth2remoteTokenFilter"
+            position="PRE_AUTH_FILTER" />
+        <custom-filter ref="acsRequestEnrichingFilter"
+            after="BASIC_AUTH_FILTER" />
+    </http>
+
+    <!-- Authorization Configuration For V1 resource APIS -->
+    <http pattern="/v1/resource/**" request-matcher="ant" create-session="stateless"
+        xmlns="http://www.springframework.org/schema/security"
+        disable-url-rewriting="true" use-expressions="true"
+        entry-point-ref="preAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
+        <intercept-url pattern="/v1/resource/**" method="GET"
+            access="hasAnyAuthority('acs.attributes.read') " />
+        <intercept-url pattern="/v1/resource/**" method="HEAD"
+            access="hasAnyAuthority('acs.attributes.read') " />
+        <intercept-url pattern="/v1/resource/**" method="OPTIONS"
+            access="hasAnyAuthority('acs.attributes.read') " />
+
+        <intercept-url pattern="/v1/resource/**" method="PUT"
+            access="hasAnyAuthority('acs.attributes.write') " />
+        <intercept-url pattern="/v1/resource/**" method="POST"
+            access="hasAnyAuthority('acs.attributes.write') " />
+        <intercept-url pattern="/v1/resource/**" method="DELETE"
+            access="hasAnyAuthority('acs.attributes.write') " />
+        <intercept-url pattern="/v1/resource/**" method="PATCH"
+            access="hasAnyAuthority('acs.attributes.write') "/>
+
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="resourceHttpMethodsFilter" before="FIRST"/>
+        <custom-filter ref="oauth2remoteTokenFilter"
+            position="PRE_AUTH_FILTER" />
+        <custom-filter ref="acsRequestEnrichingFilter"
+                after="BASIC_AUTH_FILTER" />
+    </http>
+
+    <!-- Authorization Configuration For V1 subject APIS -->
+    <http pattern="/v1/subject/**" request-matcher="ant" create-session="stateless"
+        xmlns="http://www.springframework.org/schema/security"
+        disable-url-rewriting="true" use-expressions="true"
+        entry-point-ref="preAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
+        <intercept-url pattern="/v1/subject/**" method="GET"
+            access="hasAnyAuthority('acs.attributes.read') " />
+        <intercept-url pattern="/v1/subject/**" method="HEAD"
+            access="hasAnyAuthority('acs.attributes.read') " />
+        <intercept-url pattern="/v1/subject/**" method="OPTIONS"
+            access="hasAnyAuthority('acs.attributes.read') " />
+
+        <intercept-url pattern="/v1/subject/**" method="PUT"
+            access="hasAnyAuthority('acs.attributes.write') " />
+        <intercept-url pattern="/v1/subject/**" method="POST"
+            access="hasAnyAuthority('acs.attributes.write') " />
+        <intercept-url pattern="/v1/subject/**" method="DELETE"
+            access="hasAnyAuthority('acs.attributes.write') " />
+        <intercept-url pattern="/v1/subject/**" method="PATCH"
+            access="hasAnyAuthority('acs.attributes.write') "/>
+
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="subjectHttpMethodsFilter" before="FIRST"/>
+        <custom-filter ref="oauth2remoteTokenFilter"
+            position="PRE_AUTH_FILTER" />
+        <custom-filter ref="acsRequestEnrichingFilter"
+                after="BASIC_AUTH_FILTER" />
+    </http>
+
+    <!-- Authorization Configuration For V1 connector APIS -->
+    <http pattern="/v1/connector/*" request-matcher="ant" create-session="stateless"
+        xmlns="http://www.springframework.org/schema/security"
+        disable-url-rewriting="true" use-expressions="true"
+        entry-point-ref="preAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
+        <intercept-url pattern="/v1/connector/*" method="GET"
+            access="hasAnyAuthority('acs.connectors.read') " />
+        <intercept-url pattern="/v1/connector/*" method="HEAD"
+            access="hasAnyAuthority('acs.connectors.read') " />
+        <intercept-url pattern="/v1/connector/*" method="OPTIONS"
+            access="hasAnyAuthority('acs.connectors.read') " />
+
+        <intercept-url pattern="/v1/connector/*" method="PUT"
+            access="hasAnyAuthority('acs.connectors.write') " />
+        <intercept-url pattern="/v1/connector/*" method="POST"
+            access="hasAnyAuthority('acs.connectors.write') " />
+        <intercept-url pattern="/v1/connector/*" method="DELETE"
+            access="hasAnyAuthority('acs.connectors.write') " />
+        <intercept-url pattern="/v1/connector/*" method="PATCH"
+            access="hasAnyAuthority('acs.connectors.write') "/>
+
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="connectorHttpMethodsFilter" before="FIRST"/>
+        <custom-filter ref="oauth2remoteTokenFilter"
+            position="PRE_AUTH_FILTER" />
+        <custom-filter ref="acsRequestEnrichingFilter"
+                after="BASIC_AUTH_FILTER" />
+    </http>
+
+    <!-- Authorization Configuration For V1 APIS -->
+    <http pattern="/v1/zone/**" request-matcher="ant" create-session="stateless"
+        xmlns="http://www.springframework.org/schema/security"
+        disable-url-rewriting="true" use-expressions="true"
+        entry-point-ref="preAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
+        <!-- TokenService will only verify the token against defaultTrustedIssuerId
+            for requests with no zone. Additional scope acs.zones.admin needs to be asserted
+            here. -->
+        <intercept-url pattern="/v1/zone/**"
+            access="isFullyAuthenticated() and hasAnyAuthority('acs.zones.admin')" />
+
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="zoneHttpMethodsFilter" before="FIRST"/>
+        <custom-filter ref="oauth2remoteTokenFilter"
+            position="PRE_AUTH_FILTER" />
+    </http>
+
+    <!-- Authorization Configuration For Monitoring APIs -->
+    <bean id="noAuthenticationEntryPoint" class="com.ge.predix.acs.security.NoAuthenticationEntryPoint" />
+    <http pattern="/monitoring/heartbeat*" request-matcher="ant" create-session="stateless"
+          xmlns="http://www.springframework.org/schema/security"
+          disable-url-rewriting="true" use-expressions="true"
+          entry-point-ref="noAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
+        <intercept-url pattern="/monitoring/heartbeat*" access="permitAll()"/>
+
+        <!-- This filter must always be first in the Spring Security filter chain for this URI pattern -->
+        <custom-filter ref="monitoringHttpMethodsFilter" before="FIRST"/>
+    </http>
+
+    <http pattern="/health*" request-matcher="ant" create-session="stateless"
+          xmlns="http://www.springframework.org/schema/security"
+          disable-url-rewriting="true" use-expressions="true"
+          entry-point-ref="preAuthenticationEntryPoint">
+        <csrf disabled="true"/>
+
+        <intercept-url pattern="/health*" access="isAnonymous() or hasAnyAuthority('acs.monitoring')"/>
+        <custom-filter ref="oauth2remoteTokenFilter" position="PRE_AUTH_FILTER"/>
+        <custom-filter ref="managementSecurityRoleFilter" after="BASIC_AUTH_FILTER"/>
+    </http>
+
+    <beans profile="httpValidation">
+        <bean id="policyHttpMethodsFilter" class="com.ge.predix.acs.service.policy.admin.PolicyHttpMethodsFilter"/>
+        <bean id="evaluationHttpMethodsFilter" class="com.ge.predix.acs.service.policy.evaluation.EvaluationHttpMethodsFilter"/>
+        <bean id="resourceHttpMethodsFilter" class="com.ge.predix.acs.privilege.management.ResourceHttpMethodsFilter"/>
+        <bean id="subjectHttpMethodsFilter" class="com.ge.predix.acs.privilege.management.SubjectHttpMethodsFilter"/>
+        <bean id="connectorHttpMethodsFilter" class="com.ge.predix.acs.attribute.connector.ConnectorHttpMethodsFilter"/>
+        <bean id="zoneHttpMethodsFilter" class="com.ge.predix.acs.zone.management.ZoneHttpMethodsFilter"/>
+        <bean id="monitoringHttpMethodsFilter" class="com.ge.predix.acs.monitoring.MonitoringHttpMethodsFilter"/>
+    </beans>
+
+    <beans profile="!httpValidation">
+        <bean id="policyHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="evaluationHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="resourceHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="subjectHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="connectorHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="zoneHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="monitoringHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+    </beans>
+</beans>

@@ -1,0 +1,30 @@
+{
+    "name" : "policy-set-with-one-policy-one-condition-using-attributes",
+    "policies" : [
+        {
+            "name" : "Operators can read a site if they have appropriate role.",
+            "target" : {
+                "name" : "When an operator reads a site",
+                "resource" : {
+                    "name" : "Site",
+                    "uriTemplate" : "/sites/{site_id}"
+                },
+                "action" : "GET",
+                "subject" : {
+                    "name" : "Operator",
+                    "attributes" : [
+                        { "issuer" : "https://acs.attributes.int",
+                          "name" : "role" }
+                    ]
+                }
+            },
+            "conditions" : [
+                { "name" : "has role analyst",
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'role'), 'analyst')" },
+                { "name" : "has role administrator",
+                  "condition" : "match.single(subject.attributes('https://acs.attributes.int', 'role'), 'administrator')" }
+            ],
+            "effect" : "PERMIT"
+        }
+    ]
+}

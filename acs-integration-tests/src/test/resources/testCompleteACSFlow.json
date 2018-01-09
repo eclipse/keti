@@ -1,0 +1,34 @@
+{
+    "name" : "testCompleteACSFlow",
+    "policies" : [
+        {
+            "target" : {
+                "resource" : {
+                    "uriTemplate" : "/alarms/sites/{site_id}",
+                     "attributes" : [
+                     	{
+                     	"issuer":"issuerId1",
+                     	"name":"region"
+                     	}
+                     ]
+                },
+                "action" : "GET",
+                "subject" : {
+                     "attributes" : [
+                     	{
+                     	"issuer":"issuerId1",
+                     	"name":"site"
+                     	}
+                     ]
+                }
+            },
+            "conditions" : [
+                { 
+                  "condition" : 
+                  "match.single(subject.attributes('issuerId1', 'site'), resource.uriVariable('site_id')) & resource.attributes('issuerId1','region').contains('testregion')" 
+                }
+            ],
+            "effect" : "PERMIT"
+        }
+    ]
+}
