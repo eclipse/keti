@@ -81,7 +81,7 @@
         <spring-security.version>4.2.0.RELEASE</spring-security.version>
         <titandb.version>1.1.0-SNAPSHOT</titandb.version>
         <openjpa.version>2.4.2</openjpa.version>
-        <uaa-token-lib.version>3.3.3-SNAPSHOT</uaa-token-lib.version>
+        <uaa-token-lib.version>3.3.2</uaa-token-lib.version>
         <audit-sdk.version>0.0.10</audit-sdk.version>
 
         <!-- Test Dependency Version -->
@@ -92,7 +92,7 @@
         <groovy-all.version>2.4.12</groovy-all.version>
         <maven-surefire.version>2.20</maven-surefire.version>
         <maven-failsafe.version>2.20</maven-failsafe.version>
-        <custom-argline>-Xms512m -Xmx1024m -XX:MaxMetaspaceSize=512m</custom-argline>
+        <argLine>-Xms512m -Xmx1024m -XX:MaxMetaspaceSize=512m</argLine>
 
     </properties>
 
@@ -326,7 +326,7 @@
                 </property>
             </activation>
             <properties>
-                <jacoco.version>0.7.2.201409121644</jacoco.version>
+                <jacoco.version>0.8.0</jacoco.version>
                 <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
                 <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
                 <sonar.jacoco.reportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.reportPath>

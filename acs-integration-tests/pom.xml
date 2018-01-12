@@ -50,7 +50,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire.version}</version>
                 <configuration>
-                    <!-- All tests in this project are run using failsafe. 
+                    <!-- All tests in this project are run using failsafe.
                         Skip test phase -->
                     <skip>true</skip>
                 </configuration>
@@ -91,7 +91,6 @@
                 <configuration>
                     <skipTests>false</skipTests>
                     <parallel>false</parallel>
-                    <argLine>${custom-argline}</argLine>
                     <properties>
                         <property>
                             <name>listener</name>
@@ -183,7 +182,7 @@
         <dependency>
             <groupId>org.springframework.security.oauth</groupId>
             <artifactId>spring-security-oauth2</artifactId>
-            <!-- These transitive dependencies are incompatible with spring 
+            <!-- These transitive dependencies are incompatible with spring
                 core dependencies pulled in by spring boot -->
             <exclusions>
                 <exclusion>
@@ -478,8 +477,8 @@
                                     <value>com.ge.predix.test.TestNamePredixLogger,com.ge.predix.test.TestAnnotationTransformer</value>
                                 </property>
                             </properties>
-                            <!-- us32088: Place test reports outside of target 
-                                directory so reports are not removed by 'mvn clean' and retained by Jenkins 
+                            <!-- us32088: Place test reports outside of target
+                                directory so reports are not removed by 'mvn clean' and retained by Jenkins
                                 for each profile -->
                             <reportsDirectory>${basedir}/failsafe-reports-predix-cloud</reportsDirectory>
                             <summaryFile>${basedir}/failsafe-reports-predix-cloud/failsafe-summary.xml</summaryFile>
@@ -598,8 +597,8 @@
                                     <value>com.ge.predix.test.TestNamePredixLogger,com.ge.predix.test.TestAnnotationTransformer</value>
                                 </property>
                             </properties>
-                            <!-- us32088: Place test reports outside of target 
-                                directory so reports are not removed by 'mvn clean' and retained by Jenkins 
+                            <!-- us32088: Place test reports outside of target
+                                directory so reports are not removed by 'mvn clean' and retained by Jenkins
                                 for each profile -->
                             <reportsDirectory>${basedir}/failsafe-reports-predix-cloud-titan</reportsDirectory>
                             <summaryFile>${basedir}/failsafe-reports-predix-cloud-titan/failsafe-summary.xml</summaryFile>
@@ -770,9 +769,6 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>${maven-failsafe.version}</version>
                         <configuration>
-                            <forkCount>0</forkCount>
-                            <parallel>methods</parallel>
-                            <argLine/>
                             <systemPropertyVariables>
                                 <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
@@ -863,9 +859,6 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>${maven-failsafe.version}</version>
                         <configuration>
-                            <forkCount>0</forkCount>
-                            <parallel>methods</parallel>
-                            <argLine/>
                             <systemPropertyVariables>
                                 <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
                                 <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
@@ -955,6 +948,9 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>${maven-failsafe.version}</version>
                         <configuration>
+                            <systemPropertyVariables>
+                                <ACS_SERVICE_ID>${ACS_SERVICE_ID}</ACS_SERVICE_ID>
+                            </systemPropertyVariables>
                             <includes>
                                 <include>**/ACSAcceptanceIT.java</include>
                             </includes>
