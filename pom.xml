@@ -79,7 +79,7 @@
         <spring-security.version>4.2.0.RELEASE</spring-security.version>
         <titandb.version>1.1.0-SNAPSHOT</titandb.version>
         <openjpa.version>2.4.2</openjpa.version>
-        <uaa-token-lib.version>3.3.3-SNAPSHOT</uaa-token-lib.version>
+        <uaa-token-lib.version>3.3.2</uaa-token-lib.version>
 
         <!-- Test Dependency Version -->
         <mockito.version>1.10.19</mockito.version>
@@ -91,6 +91,22 @@
         <maven-failsafe.version>2.20</maven-failsafe.version>
         <custom-argline>-Xms512m -Xmx1024m -XX:MaxMetaspaceSize=512m</custom-argline>
     </properties>
+
+    <!-- This defines additional repositories to download dependencies that are not available
+         in Maven Central used by default. For example, titan 1.1.0-SNAPSHOT-->
+    <repositories>
+        <repository>
+            <id>staging</id>
+            <name>Maven Staging Repo</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <distributionManagement>
         <repository>
