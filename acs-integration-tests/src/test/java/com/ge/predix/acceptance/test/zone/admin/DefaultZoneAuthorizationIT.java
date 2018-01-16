@@ -34,8 +34,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.rest.BaseResource;
-import com.ge.predix.acs.rest.Zone;
+import org.eclipse.keti.rest.BaseResource;
+import org.eclipse.keti.rest.Zone;
 import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;

@@ -39,7 +39,7 @@
         class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
         <property name="order" value="-1"></property>
         <property name="urlPathHelper">
-            <bean class="com.ge.predix.acs.config.UrlPathHelperNonDecoding"></bean>
+            <bean class="org.eclipse.keti.config.UrlPathHelperNonDecoding"></bean>
         </property>
     </bean>
 
@@ -231,7 +231,7 @@
     </http>
 
     <!-- Authorization Configuration For Monitoring APIs -->
-    <bean id="noAuthenticationEntryPoint" class="com.ge.predix.acs.security.NoAuthenticationEntryPoint" />
+    <bean id="noAuthenticationEntryPoint" class="org.eclipse.keti.security.NoAuthenticationEntryPoint" />
     <http pattern="/monitoring/heartbeat*" request-matcher="ant" create-session="stateless"
           xmlns="http://www.springframework.org/schema/security"
           disable-url-rewriting="true" use-expressions="true"
@@ -256,22 +256,22 @@
     </http>
 
     <beans profile="httpValidation">
-        <bean id="policyHttpMethodsFilter" class="com.ge.predix.acs.service.policy.admin.PolicyHttpMethodsFilter"/>
-        <bean id="evaluationHttpMethodsFilter" class="com.ge.predix.acs.service.policy.evaluation.EvaluationHttpMethodsFilter"/>
-        <bean id="resourceHttpMethodsFilter" class="com.ge.predix.acs.privilege.management.ResourceHttpMethodsFilter"/>
-        <bean id="subjectHttpMethodsFilter" class="com.ge.predix.acs.privilege.management.SubjectHttpMethodsFilter"/>
-        <bean id="connectorHttpMethodsFilter" class="com.ge.predix.acs.attribute.connector.ConnectorHttpMethodsFilter"/>
-        <bean id="zoneHttpMethodsFilter" class="com.ge.predix.acs.zone.management.ZoneHttpMethodsFilter"/>
-        <bean id="monitoringHttpMethodsFilter" class="com.ge.predix.acs.monitoring.MonitoringHttpMethodsFilter"/>
+        <bean id="policyHttpMethodsFilter" class="org.eclipse.keti.service.policy.admin.PolicyHttpMethodsFilter"/>
+        <bean id="evaluationHttpMethodsFilter" class="org.eclipse.keti.service.policy.evaluation.EvaluationHttpMethodsFilter"/>
+        <bean id="resourceHttpMethodsFilter" class="org.eclipse.keti.privilege.management.ResourceHttpMethodsFilter"/>
+        <bean id="subjectHttpMethodsFilter" class="org.eclipse.keti.privilege.management.SubjectHttpMethodsFilter"/>
+        <bean id="connectorHttpMethodsFilter" class="org.eclipse.keti.attribute.connector.ConnectorHttpMethodsFilter"/>
+        <bean id="zoneHttpMethodsFilter" class="org.eclipse.keti.zone.management.ZoneHttpMethodsFilter"/>
+        <bean id="monitoringHttpMethodsFilter" class="org.eclipse.keti.monitoring.MonitoringHttpMethodsFilter"/>
     </beans>
 
     <beans profile="!httpValidation">
-        <bean id="policyHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
-        <bean id="evaluationHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
-        <bean id="resourceHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
-        <bean id="subjectHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
-        <bean id="connectorHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
-        <bean id="zoneHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
-        <bean id="monitoringHttpMethodsFilter" class="com.ge.predix.acs.security.EmptyHttpMethodsFilter"/>
+        <bean id="policyHttpMethodsFilter" class="org.eclipse.keti.security.EmptyHttpMethodsFilter"/>
+        <bean id="evaluationHttpMethodsFilter" class="org.eclipse.keti.security.EmptyHttpMethodsFilter"/>
+        <bean id="resourceHttpMethodsFilter" class="org.eclipse.keti.security.EmptyHttpMethodsFilter"/>
+        <bean id="subjectHttpMethodsFilter" class="org.eclipse.keti.security.EmptyHttpMethodsFilter"/>
+        <bean id="connectorHttpMethodsFilter" class="org.eclipse.keti.security.EmptyHttpMethodsFilter"/>
+        <bean id="zoneHttpMethodsFilter" class="org.eclipse.keti.security.EmptyHttpMethodsFilter"/>
+        <bean id="monitoringHttpMethodsFilter" class="org.eclipse.keti.security.EmptyHttpMethodsFilter"/>
     </beans>
 </beans>

@@ -56,12 +56,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.model.Effect;
-import com.ge.predix.acs.rest.AttributeAdapterConnection;
-import com.ge.predix.acs.rest.AttributeConnector;
-import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
-import com.ge.predix.acs.rest.PolicyEvaluationResult;
-import com.ge.predix.acs.rest.Zone;
+import org.eclipse.keti.model.Effect;
+import org.eclipse.keti.rest.AttributeAdapterConnection;
+import org.eclipse.keti.rest.AttributeConnector;
+import org.eclipse.keti.rest.PolicyEvaluationRequestV1;
+import org.eclipse.keti.rest.PolicyEvaluationResult;
+import org.eclipse.keti.rest.Zone;
 import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.ACSTestUtil;
 import com.ge.predix.test.utils.PolicyHelper;

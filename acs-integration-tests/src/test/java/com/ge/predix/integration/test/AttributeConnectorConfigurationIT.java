@@ -18,9 +18,9 @@
 
 package com.ge.predix.integration.test;
 
-import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.RESOURCE_CONNECTOR_URL;
-import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.SUBJECT_CONNECTOR_URL;
-import static com.ge.predix.acs.commons.web.AcsApiUriTemplates.V1;
+import static org.eclipse.keti.commons.web.AcsApiUriTemplates.RESOURCE_CONNECTOR_URL;
+import static org.eclipse.keti.commons.web.AcsApiUriTemplates.SUBJECT_CONNECTOR_URL;
+import static org.eclipse.keti.commons.web.AcsApiUriTemplates.V1;
 
 import java.util.Collections;
 
@@ -42,8 +42,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.rest.AttributeAdapterConnection;
-import com.ge.predix.acs.rest.AttributeConnector;
+import org.eclipse.keti.rest.AttributeAdapterConnection;
+import org.eclipse.keti.rest.AttributeConnector;
 import com.ge.predix.test.utils.ACSITSetUpFactory;
 
 @ContextConfiguration("classpath:integration-test-spring-context.xml")

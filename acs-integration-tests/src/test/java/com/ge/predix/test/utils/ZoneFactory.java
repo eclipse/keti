@@ -34,7 +34,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.ge.predix.acs.rest.Zone;
+import org.eclipse.keti.rest.Zone;
 
 @Component
 @Profile({ "public", "public-titan" })

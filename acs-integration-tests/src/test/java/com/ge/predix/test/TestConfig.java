@@ -21,7 +21,7 @@ package com.ge.predix.test;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.BeforeSuite;
 
-import com.ge.predix.acs.AccessControlService;
+import org.eclipse.keti.AccessControlService;
 
 public final class TestConfig {
 

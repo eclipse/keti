@@ -42,11 +42,11 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.model.PolicySet;
-import com.ge.predix.acs.rest.BaseSubject;
-import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
-import com.ge.predix.acs.rest.PolicyEvaluationResult;
+import org.eclipse.keti.model.Attribute;
+import org.eclipse.keti.model.PolicySet;
+import org.eclipse.keti.rest.BaseSubject;
+import org.eclipse.keti.rest.PolicyEvaluationRequestV1;
+import org.eclipse.keti.rest.PolicyEvaluationResult;
 
 @Component
 public class PolicyHelper {

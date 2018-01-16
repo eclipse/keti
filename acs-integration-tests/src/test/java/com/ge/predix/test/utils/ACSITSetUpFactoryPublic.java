@@ -29,7 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Component;
 
-import com.ge.predix.acs.rest.Zone;
+import org.eclipse.keti.rest.Zone;
 
 @Component
 @Scope("prototype")

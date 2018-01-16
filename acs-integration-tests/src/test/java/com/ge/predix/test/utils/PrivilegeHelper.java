@@ -38,9 +38,9 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.rest.BaseResource;
-import com.ge.predix.acs.rest.BaseSubject;
+import org.eclipse.keti.model.Attribute;
+import org.eclipse.keti.rest.BaseResource;
+import org.eclipse.keti.rest.BaseSubject;
 
 @Component
 public class PrivilegeHelper {

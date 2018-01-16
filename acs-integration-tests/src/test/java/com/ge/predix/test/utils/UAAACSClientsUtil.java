@@ -41,7 +41,7 @@ import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import com.ge.predix.acs.utils.JsonUtils;
+import org.eclipse.keti.utils.JsonUtils;
 
 public class UAAACSClientsUtil {
 

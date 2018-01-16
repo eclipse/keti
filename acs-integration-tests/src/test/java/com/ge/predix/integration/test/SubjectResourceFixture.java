@@ -18,8 +18,8 @@
 
 package com.ge.predix.integration.test;
 
-import com.ge.predix.acs.rest.BaseResource;
-import com.ge.predix.acs.rest.BaseSubject;
+import org.eclipse.keti.rest.BaseResource;
+import org.eclipse.keti.rest.BaseSubject;
 
 public final class SubjectResourceFixture {
     

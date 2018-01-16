@@ -60,9 +60,9 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.rest.BaseResource;
-import com.ge.predix.acs.rest.BaseSubject;
+import org.eclipse.keti.model.Attribute;
+import org.eclipse.keti.rest.BaseResource;
+import org.eclipse.keti.rest.BaseSubject;
 import com.ge.predix.test.TestConfig;
 import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.ACSTestUtil;

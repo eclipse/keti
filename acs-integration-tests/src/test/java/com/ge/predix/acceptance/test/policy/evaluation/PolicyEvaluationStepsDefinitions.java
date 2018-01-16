@@ -41,9 +41,9 @@ import org.testng.Assert;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.model.Effect;
-import com.ge.predix.acs.rest.PolicyEvaluationResult;
+import org.eclipse.keti.model.Attribute;
+import org.eclipse.keti.model.Effect;
+import org.eclipse.keti.rest.PolicyEvaluationResult;
 import com.ge.predix.test.utils.ACSITSetUpFactory;
 import com.ge.predix.test.utils.PolicyHelper;
 import com.ge.predix.test.utils.PrivilegeHelper;

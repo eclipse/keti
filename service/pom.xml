@@ -423,7 +423,7 @@
     </dependencies>
 
     <properties>
-        <start-class>com.ge.predix.acs.AccessControlService</start-class>
+        <start-class>org.eclipse.keti.AccessControlService</start-class>
         <jenkins.build.number>dev</jenkins.build.number>
     </properties>
 

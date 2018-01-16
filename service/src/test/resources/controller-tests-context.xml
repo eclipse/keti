@@ -24,12 +24,12 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="com.ge.predix.acs" />
+    <context:component-scan base-package="org.eclipse.keti" />
 <!--     <bean
         class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
         <property name="order" value="-1"></property>
         <property name="urlPathHelper">
-            <bean class="com.ge.predix.acs.config.UrlPathHelperNonDecoding"></bean>
+            <bean class="org.eclipse.keti.config.UrlPathHelperNonDecoding"></bean>
         </property>
     </bean> -->
 
