@@ -133,7 +133,7 @@
                     <properties>
                         <property>
                             <name>listener</name>
-                            <value>com.ge.predix.test.TestNameLogger</value>
+                            <value>org.eclipse.test.TestNameLogger</value>
                         </property>
                     </properties>
                     <environmentVariables>

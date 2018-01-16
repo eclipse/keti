@@ -44,7 +44,7 @@
         <level value ="info" />
     </logger>
 
-    <logger name="com.ge.predix">
+    <logger name="org.eclipse">
         <level value ="debug" />
     </logger>
 
@@ -56,11 +56,11 @@
         <level value ="debug" />
     </logger>
 
-    <logger name="com.ge.predix.test.TestNameLogger">
+    <logger name="org.eclipse.test.TestNameLogger">
         <level value="DEBUG"/>
     </logger>
 
-    <logger name="com.ge.predix.test.TestNamePredixLogger">
+    <logger name="org.eclipse.test.TestNamePredixLogger">
         <level value="DEBUG"/>
     </logger>
 

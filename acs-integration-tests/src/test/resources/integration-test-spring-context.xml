@@ -25,9 +25,9 @@
 
     <import resource="classpath:shared-test-spring-context.xml" />
 
-    <!-- <context:component-scan base-package="com.ge.predix.integration.test"/> -->
+    <!-- <context:component-scan base-package="org.eclipse.integration.test"/> -->
 
     <beans profile="integration">
-        <context:component-scan base-package="com.ge.predix.cloudfoundry,com.ge.predix.acs.cloudfoundry"/>
+        <context:component-scan base-package="org.eclipse.cloudfoundry,org.eclipse.acs.cloudfoundry"/>
     </beans>
 </beans>
