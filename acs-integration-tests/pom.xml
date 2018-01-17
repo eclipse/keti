@@ -23,8 +23,8 @@
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>com.ge.predix</groupId>
-        <artifactId>acs</artifactId>
+        <groupId>org.eclipse</groupId>
+        <artifactId>keti</artifactId>
         <version>5.0.3-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
@@ -133,7 +133,7 @@
                     <properties>
                         <property>
                             <name>listener</name>
-                            <value>com.ge.predix.test.TestNameLogger</value>
+                            <value>org.eclipse.test.TestNameLogger</value>
                         </property>
                     </properties>
                     <environmentVariables>
@@ -176,7 +176,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.ge.predix</groupId>
+            <groupId>org.eclipse.keti</groupId>
             <artifactId>acs-commons</artifactId>
             <exclusions>
                 <exclusion>
@@ -194,7 +194,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.ge.predix</groupId>
+            <groupId>org.eclipse.keti</groupId>
             <artifactId>acs-model</artifactId>
             <exclusions>
                 <exclusion>
@@ -212,7 +212,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.ge.predix</groupId>
+            <groupId>org.eclipse.keti</groupId>
             <artifactId>acs-service</artifactId>
             <version>5.0.3-SNAPSHOT</version>
             <exclusions>

@@ -22,7 +22,9 @@
 <suite name="unit-tests">
     <test name="unit-test">
         <packages>
-            <package name="com.ge.predix.acs.*" />
+            <package name="org.eclipse.keti.*">
+                <exclude name="org.eclipse.keti.controller.test"/>
+            </package>>
         </packages>
     </test>
 </suite>
