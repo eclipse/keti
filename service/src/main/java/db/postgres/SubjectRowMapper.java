@@ -21,9 +21,8 @@ package db.postgres;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.eclipse.keti.privilege.management.dao.SubjectEntity;
 import org.springframework.jdbc.core.RowMapper;
-
-import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
 
 public class SubjectRowMapper implements RowMapper<SubjectEntity> {
 
