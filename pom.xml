@@ -107,12 +107,12 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.eclipse.keti</groupId>
+                <groupId>org.eclipse</groupId>
                 <artifactId>acs-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.keti</groupId>
+                <groupId>org.eclipse</groupId>
                 <artifactId>acs-commons</artifactId>
                 <version>${project.version}</version>
             </dependency>

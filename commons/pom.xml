@@ -69,7 +69,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.keti</groupId>
+            <groupId>org.eclipse</groupId>
             <artifactId>acs-model</artifactId>
         </dependency>
         <dependency>
