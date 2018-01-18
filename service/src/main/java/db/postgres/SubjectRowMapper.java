@@ -23,7 +23,7 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
+import org.eclipse.keti.acs.privilege.management.dao.SubjectEntity;
 
 public class SubjectRowMapper implements RowMapper<SubjectEntity> {
 

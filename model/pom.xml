@@ -20,7 +20,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.ge.predix</groupId>
+        <groupId>org.eclipse.keti</groupId>
         <artifactId>acs</artifactId>
         <version>5.0.3-SNAPSHOT</version>
         <relativePath>../</relativePath>

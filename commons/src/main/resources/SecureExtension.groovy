@@ -15,12 +15,10 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
-
-import org.codehaus.groovy.ast.ClassHelper
 import org.codehaus.groovy.transform.stc.GroovyTypeCheckingExtensionSupport
-import com.ge.predix.acs.commons.policy.condition.groovy.AttributeMatcher
-import com.ge.predix.acs.commons.policy.condition.ResourceHandler;
-import com.ge.predix.acs.commons.policy.condition.SubjectHandler;
+import org.eclipse.keti.acs.commons.policy.condition.ResourceHandler
+import org.eclipse.keti.acs.commons.policy.condition.SubjectHandler
+import org.eclipse.keti.acs.commons.policy.condition.groovy.AttributeMatcher
 
 class SecureExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL {
     @Override
@@ -30,10 +28,10 @@ class SecureExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL
             //System.out.println("***** onMethodSelection *****")
 
             // First the white list.
-            if ((methodNode.declaringClass.name != 'com.ge.predix.acs.commons.policy.condition.AbstractHandler')
-                && (methodNode.declaringClass.name != 'com.ge.predix.acs.commons.policy.condition.ResourceHandler')
-                && (methodNode.declaringClass.name != 'com.ge.predix.acs.commons.policy.condition.SubjectHandler')
-                && (methodNode.declaringClass.name != 'com.ge.predix.acs.commons.policy.condition.groovy.AttributeMatcher')
+            if ((methodNode.declaringClass.name != 'org.eclipse.keti.acs.commons.policy.condition.AbstractHandler')
+                && (methodNode.declaringClass.name != 'org.eclipse.keti.acs.commons.policy.condition.ResourceHandler')
+                && (methodNode.declaringClass.name != 'org.eclipse.keti.acs.commons.policy.condition.SubjectHandler')
+                && (methodNode.declaringClass.name != 'org.eclipse.keti.acs.commons.policy.condition.groovy.AttributeMatcher')
                 && (methodNode.declaringClass.name != 'java.lang.Boolean')
                 && (methodNode.declaringClass.name != 'java.lang.Integer')
                 && (methodNode.declaringClass.name != 'java.lang.Iterable')
@@ -45,7 +43,7 @@ class SecureExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL
                 && (methodNode.declaringClass.name != 'java.util.Set')) {
                 addStaticTypeError("Method call for '" + methodNode.declaringClass.name + "' class is not allowed!", expr)
             }
-        
+
             // Then the black list.
             if (methodNode.declaringClass.name == 'java.lang.System') {
                 addStaticTypeError("Method call for 'java.lang.System' class is not allowed!", expr)
