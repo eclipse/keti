@@ -23,7 +23,7 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import com.ge.predix.acs.service.policy.admin.dao.PolicySetEntity;
+import org.eclipse.keti.acs.service.policy.admin.dao.PolicySetEntity;
 
 public class PolicySetRowMapper implements RowMapper<PolicySetEntity> {
 

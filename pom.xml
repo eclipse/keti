@@ -23,7 +23,7 @@
     </organization>
 
     <!-- Project information necessary to deploy to Maven Central (see: http://central.sonatype.org/pages/requirements.html) -->
-    <groupId>com.ge.predix</groupId>
+    <groupId>org.eclipse.keti</groupId>
     <artifactId>acs</artifactId>
     <version>5.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -111,12 +111,12 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.ge.predix</groupId>
+                <groupId>org.eclipse.keti</groupId>
                 <artifactId>acs-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.ge.predix</groupId>
+                <groupId>org.eclipse.keti</groupId>
                 <artifactId>acs-commons</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -342,25 +342,25 @@
                             <destFile>${sonar.jacoco.reportPath}</destFile>
                             <append>true</append>
                             <excludes>
-                                <exclude>com/ge/predix/acs/model/*.class</exclude>
-                                <exclude>com/ge/predix/acs/rest/*.class</exclude>
-                                <exclude>com/ge/predix/acs/privilege/management/dao/*.class</exclude>
-                                <exclude>com/ge/predix/acs/issuer/management/dao/*.class</exclude>
-                                <exclude>com/ge/predix/acs/zone/management/dao/*.class</exclude>
-                                <exclude>com/ge/predix/acs/service/policy/admin/dao/*.class</exclude>
-                                <exclude>com/ge/predix/acs/jmx/*.class</exclude>
-                                <exclude>com/ge/predix/acs/AccessControlService.class</exclude>
+                                <exclude>org/eclipse/keti/acs/model/*.class</exclude>
+                                <exclude>org/eclipse/keti/acs/rest/*.class</exclude>
+                                <exclude>org/eclipse/keti/acs/privilege/management/dao/*.class</exclude>
+                                <exclude>org/eclipse/keti/acs/issuer/management/dao/*.class</exclude>
+                                <exclude>org/eclipse/keti/acs/zone/management/dao/*.class</exclude>
+                                <exclude>org/eclipse/keti/acs/service/policy/admin/dao/*.class</exclude>
+                                <exclude>org/eclipse/keti/acs/jmx/*.class</exclude>
+                                <exclude>org/eclipse/keti/acs/AccessControlService.class</exclude>
                                 <exclude>db/postgres/*.class</exclude>
                                 <!-- The below classes are covered in integration
                                     tests and these can be commented back in to get the actual code coverage
                                     report -->
-                                <!-- <exclude>com/ge/predix/acs/privilege/management/ResourcePrivilegeManagementController.class</exclude>
-                                    <exclude>com/ge/predix/acs/monitoring/AcsMonitoringController.class</exclude>
-                                    <exclude>com/ge/predix/acs/privilege/management/SubjectPrivilegeManagementController.class</exclude>
-                                    <exclude>com/ge/predix/acs/service/policy/admin/PolicyManagementController.class</exclude>
-                                    <exclude>com/ge/predix/acs/service/policy/evaluation/PolicyEvaluationController.class</exclude>
-                                    <exclude>com/ge/predix/acs/zone/management/ZoneController.class</exclude>
-                                    <exclude>com/ge/predix/acs/config/CloudDataSourceConfig.class </exclude> -->
+                                <!-- <exclude>org/eclipse/keti/acs/privilege/management/ResourcePrivilegeManagementController.class</exclude>
+                                    <exclude>org/eclipse/keti/acs/monitoring/AcsMonitoringController.class</exclude>
+                                    <exclude>org/eclipse/keti/acs/privilege/management/SubjectPrivilegeManagementController.class</exclude>
+                                    <exclude>org/eclipse/keti/acs/service/policy/admin/PolicyManagementController.class</exclude>
+                                    <exclude>org/eclipse/keti/acs/service/policy/evaluation/PolicyEvaluationController.class</exclude>
+                                    <exclude>org/eclipse/keti/acs/zone/management/ZoneController.class</exclude>
+                                    <exclude>org/eclipse/keti/acs/config/CloudDataSourceConfig.class </exclude> -->
                             </excludes>
                         </configuration>
                         <executions>
