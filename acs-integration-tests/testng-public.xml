@@ -23,16 +23,16 @@
 <suite name="testAll">
     <test name="public">
         <classes>
-            <class name="com.ge.predix.test.TestConfig"/>
-            <class name="com.ge.predix.integration.test.AttributeConnectorConfigurationIT" />
-            <class name="com.ge.predix.acceptance.test.ACSAcceptanceIT"/>
-            <class name="com.ge.predix.integration.test.AccessControlServiceIT"/>
-            <class name="com.ge.predix.integration.test.PrivilegeManagementAccessControlServiceIT"/>
-            <class name="com.ge.predix.integration.test.PolicyEvaluationCachingIT"/>
-            <class name="com.ge.predix.integration.test.ACSCorsFilterIT" />
-            <class name="com.ge.predix.acceptance.test.policy.admin.PolicyCreationCucumberTest" />
-            <class name="com.ge.predix.acceptance.test.policy.evaluation.PolicyEvaluationCucumberTest" />
-            <class name="com.ge.predix.acceptance.test.zone.admin.ZoneEnforcementCucumberTest" />
+            <class name="org.eclipse.keti.test.TestConfig"/>
+            <class name="org.eclipse.keti.integration.test.AttributeConnectorConfigurationIT" />
+            <class name="org.eclipse.keti.acceptance.test.ACSAcceptanceIT"/>
+            <class name="org.eclipse.keti.integration.test.AccessControlServiceIT"/>
+            <class name="org.eclipse.keti.integration.test.PrivilegeManagementAccessControlServiceIT"/>
+            <class name="org.eclipse.keti.integration.test.PolicyEvaluationCachingIT"/>
+            <class name="org.eclipse.keti.integration.test.ACSCorsFilterIT" />
+            <class name="org.eclipse.keti.acceptance.test.policy.admin.PolicyCreationCucumberTest" />
+            <class name="org.eclipse.keti.acceptance.test.policy.evaluation.PolicyEvaluationCucumberTest" />
+            <class name="org.eclipse.keti.acceptance.test.zone.admin.ZoneEnforcementCucumberTest" />
         </classes>
     </test>
 </suite>

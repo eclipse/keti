@@ -55,7 +55,7 @@
         <level value="error"/>
     </logger>
 
-    <logger name="com.ge.predix.acs">
+    <logger name="org.eclipse.keti.acs">
         <level value="info"/>
     </logger>
 

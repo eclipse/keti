@@ -32,10 +32,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-import com.ge.predix.acs.privilege.management.dao.ResourceEntity;
-import com.ge.predix.acs.privilege.management.dao.SubjectEntity;
-import com.ge.predix.acs.service.policy.admin.dao.PolicySetEntity;
-import com.ge.predix.acs.zone.management.dao.ZoneClientEntity;
+import org.eclipse.keti.acs.privilege.management.dao.ResourceEntity;
+import org.eclipse.keti.acs.privilege.management.dao.SubjectEntity;
+import org.eclipse.keti.acs.service.policy.admin.dao.PolicySetEntity;
+import org.eclipse.keti.acs.zone.management.dao.ZoneClientEntity;
 
 //CHECKSTYLE:OFF
 //Naming convention for the class name is being enforced by spring

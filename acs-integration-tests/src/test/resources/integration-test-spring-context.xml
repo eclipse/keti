@@ -28,6 +28,6 @@
     <!-- <context:component-scan base-package="com.ge.predix.integration.test"/> -->
 
     <beans profile="integration">
-        <context:component-scan base-package="com.ge.predix.cloudfoundry,com.ge.predix.acs.cloudfoundry"/>
+        <context:component-scan base-package="org.eclipse.keti.cloudfoundry,org.eclipse.keti.acs.cloudfoundry"/>
     </beans>
 </beans>

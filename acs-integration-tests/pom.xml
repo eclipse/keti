@@ -23,7 +23,7 @@
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>com.ge.predix</groupId>
+        <groupId>org.eclipse.keti</groupId>
         <artifactId>acs</artifactId>
         <version>5.0.3-SNAPSHOT</version>
         <relativePath>../</relativePath>
@@ -36,7 +36,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire.version}</version>
                 <configuration>
-                    <!-- All tests in this project are run using failsafe. 
+                    <!-- All tests in this project are run using failsafe.
                         Skip test phase -->
                     <skip>true</skip>
                 </configuration>
@@ -133,7 +133,7 @@
                     <properties>
                         <property>
                             <name>listener</name>
-                            <value>com.ge.predix.test.TestNameLogger</value>
+                            <value>org.eclipse.keti.test.TestNameLogger</value>
                         </property>
                     </properties>
                     <environmentVariables>
@@ -176,7 +176,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.ge.predix</groupId>
+            <groupId>org.eclipse.keti</groupId>
             <artifactId>acs-commons</artifactId>
             <exclusions>
                 <exclusion>
@@ -194,7 +194,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.ge.predix</groupId>
+            <groupId>org.eclipse.keti</groupId>
             <artifactId>acs-model</artifactId>
             <exclusions>
                 <exclusion>
@@ -212,7 +212,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.ge.predix</groupId>
+            <groupId>org.eclipse.keti</groupId>
             <artifactId>acs-service</artifactId>
             <version>5.0.3-SNAPSHOT</version>
             <exclusions>
@@ -230,7 +230,7 @@
         <dependency>
             <groupId>org.springframework.security.oauth</groupId>
             <artifactId>spring-security-oauth2</artifactId>
-            <!-- These transitive dependencies are incompatible with spring 
+            <!-- These transitive dependencies are incompatible with spring
                 core dependencies pulled in by spring boot -->
             <exclusions>
                 <exclusion>
