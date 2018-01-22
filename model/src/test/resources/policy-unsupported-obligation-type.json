@@ -1,0 +1,15 @@
+{
+  "name": "set-with-obligations",
+  "policies": [
+    {
+      "name": "Default",
+      "effect": "PERMIT"
+    }
+  ],
+  "obligationExpressions": [
+    {
+      "id": "one",
+      "type": "UNSUPPORTED"
+    }
+  ]
+}

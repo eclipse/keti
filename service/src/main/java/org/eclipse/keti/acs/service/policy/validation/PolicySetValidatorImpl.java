@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
+import org.eclipse.keti.acs.model.ActionArgument;
 import org.eclipse.keti.acs.model.Condition;
+import org.eclipse.keti.acs.model.ObligationExpression;
 import org.eclipse.keti.acs.model.Policy;
 import org.eclipse.keti.acs.model.PolicySet;
 import org.eclipse.keti.acs.utils.JsonUtils;
@@ -85,9 +88,59 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
     @Override
     public void validatePolicySet(final PolicySet policySet) {
         validateSchema(policySet);
+        List<String> availableObligationIds = validateObligationsAndGetIds(policySet.getObligationExpressions());
         for (Policy p : policySet.getPolicies()) {
             validatePolicyConditions(p.getConditions());
             validatePolicyActions(p);
+            vaLidatePolicyObligations(availableObligationIds, p);
+        }
+    }
+
+    private List<String> validateObligationsAndGetIds(final List<ObligationExpression> obligationExps) {
+        List<String> ids = new ArrayList<>();
+        List<String> repeatedIds = new ArrayList<>();
+
+        for (ObligationExpression obligationExp : obligationExps) {
+            
+            if (ids.contains(obligationExp.getId())) {
+                repeatedIds.add(obligationExp.getId());
+            }
+
+            JsonNode node = JSONUTILS.readJsonNodeFromObject(obligationExp.getActionTemplate());
+            if (!node.fields().hasNext()) {
+                throw new PolicySetValidationException(String.format(
+                        PolicySetValidationMessages.EXCEP_OBL_ACTION_TEMPLATE_NULL_EMPTY, obligationExp.getId()));
+            }
+            
+            validateObligationsActionArguments(obligationExp.getId(), obligationExp.getActionArguments());
+            ids.add(obligationExp.getId());
+        }
+        if (!CollectionUtils.isEmpty(repeatedIds)) {
+            throw new PolicySetValidationException(
+                    String.format(PolicySetValidationMessages.EXCEP_OBL_EXPRESSIONS_DUPLICATED,
+                            Arrays.toString(repeatedIds.toArray())));
+        }
+        return ids;
+    }
+
+    private void validateObligationsActionArguments(final String obligationId,
+            final List<ActionArgument> actionArguments) {
+        if (CollectionUtils.isEmpty(actionArguments)) {
+            return;
+        }
+
+        List<String> iteratedActionArguments = new ArrayList<>();
+        List<String> duplicatedActionArguments = new ArrayList<>();
+        for (ActionArgument actionArgument : actionArguments) {
+            if (iteratedActionArguments.contains(actionArgument.getName())) {
+                duplicatedActionArguments.add(actionArgument.getName());
+            }
+            iteratedActionArguments.add(actionArgument.getName());
+        }
+        if (!CollectionUtils.isEmpty(duplicatedActionArguments)) {
+            throw new PolicySetValidationException(
+                    String.format(PolicySetValidationMessages.EXCEP_OBL_ACTION_ARG_DUPLICATED, obligationId,
+                            Arrays.toString(duplicatedActionArguments.toArray())));
         }
     }
 
@@ -104,11 +157,31 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
             }
             for (String action : policyActions.split("\\s*,\\s*")) {
                 if (!this.validAcsPolicyHttpActionsSet.contains(action)) {
-                    throw new PolicySetValidationException(String.format("Policy Action validation failed: "
-                                    + "the action: [%s] is not contained in the allowed set of actions: [%s]", action,
-                            this.validAcsPolicyHttpActions));
+                    throw new PolicySetValidationException(String.format(
+                            "Policy Action validation failed: "
+                                    + "the action: [%s] is not contained in the allowed set of actions: [%s]",
+                            action, this.validAcsPolicyHttpActions));
                 }
             }
+        }
+    }
+
+    private void vaLidatePolicyObligations(final List<String> availableObligationIds, final Policy policy) {
+        List<String> policyObligationIds = policy.getObligationIds();
+        if (CollectionUtils.isEmpty(policyObligationIds)) {
+            return;
+        }
+
+        List<String> notFound = new ArrayList<>();
+        for (String obligationId : policyObligationIds) {
+            if (!availableObligationIds.contains(obligationId)) {
+                notFound.add(obligationId);
+            }
+        }
+        if (!notFound.isEmpty()) {
+            throw new PolicySetValidationException(
+                    String.format(PolicySetValidationMessages.EXCEP_POLICY_OBL_IDS_NOT_FOUND, policy.getName(),
+                            Arrays.toString(notFound.toArray())));
         }
     }
 
@@ -142,7 +215,7 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
     public List<ConditionScript> validatePolicyConditions(final List<Condition> conditions) {
         List<ConditionScript> conditionScripts = new ArrayList<>();
         try {
-            if ((conditions == null) || conditions.isEmpty()) {
+            if (CollectionUtils.isEmpty(conditions)) {
                 return conditionScripts;
             }
             for (Condition condition : conditions) {

@@ -1,0 +1,38 @@
+{
+  "name": "set-with-obligations",
+  "policies": [
+    {
+      "name": "Default",
+      "effect": "PERMIT",
+      "obligationIds": [
+        "one",
+        "two"
+      ]
+    }
+  ],
+  "obligationExpressions": [
+    {
+      "id": "one",
+      "actionTemplate": {
+        "sqlStatement": "SELECT * FROM employee_records where site = '$resource_site' AND id='$record_id'"
+      },
+      "actionArguments": [
+        {
+          "name": "resource_site",
+          "value": "resource.uriVariable('site_id')"
+        },
+        {
+          "name": "record_id",
+          "value": "resource.uriVariable('record_id')"
+        }
+      ]
+    },
+    {
+      "id": "two",
+      "type": "CUSTOM",
+      "actionTemplate": {
+        "sqlStatement": "SELECT * FROM employee_records LIMIT 100"
+      }
+    }
+  ]
+}

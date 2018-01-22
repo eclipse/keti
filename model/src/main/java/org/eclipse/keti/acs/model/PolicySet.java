@@ -19,6 +19,7 @@
 package org.eclipse.keti.acs.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.swagger.annotations.ApiModel;
@@ -27,11 +28,14 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * @author acs-engineers@ge.com
  */
-@ApiModel(description = "A collection of access control policies evaluated in order. The first applicable policy"
-        + " determines the access control effect.")
+@ApiModel(
+        description = "A collection of access control policies evaluated in order. The first applicable policy"
+                + " determines the access control effect.")
 @SuppressWarnings("javadoc")
 public class PolicySet {
     private List<Policy> policies = new ArrayList<>();
+    private List<ObligationExpression> obligationExpressions = Collections.emptyList();
+
     private String name;
 
     public PolicySet() {
@@ -45,21 +49,35 @@ public class PolicySet {
     /**
      * @return All policies in this policy set.
      */
-    @ApiModelProperty(value = "A non empty list of Policies that define the Policy set",
-            required = true)
+    @ApiModelProperty(value = "A non empty list of Policies that define the Policy set", required = true)
     public List<Policy> getPolicies() {
         return this.policies;
     }
 
     /**
-     * @param policies the policies to set
+     * @param policies
+     *            the policies to set
      */
     public void setPolicies(final List<Policy> policies) {
         this.policies = policies;
     }
 
-    @ApiModelProperty(value = "User defined name for the Policy set",
-            required = false)
+    /**
+     * @return the obligationExpressions
+     */
+    public List<ObligationExpression> getObligationExpressions() {
+        return this.obligationExpressions;
+    }
+
+    /**
+     * @param obligationExpressions
+     *            the obligationExpressions to set
+     */
+    public void setObligationExpressions(final List<ObligationExpression> obligationExpressions) {
+        this.obligationExpressions = obligationExpressions;
+    }
+
+    @ApiModelProperty(value = "User defined name for the Policy set", required = false)
     public String getName() {
         return this.name;
     }
@@ -71,7 +89,8 @@ public class PolicySet {
     @SuppressWarnings("nls")
     @Override
     public String toString() {
-        return "PolicySet [policies=" + this.policies + ", name=" + this.name + "]";
+        return "PolicySet [policies=" + this.policies + ", obligations=" + this.obligationExpressions + ", name="
+                + this.name + "]";
     }
 
 }

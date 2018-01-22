@@ -25,6 +25,7 @@ import static org.eclipse.keti.integration.test.SubjectResourceFixture.PETE_V1;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -45,7 +46,9 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.eclipse.keti.acs.model.Effect;
+import org.eclipse.keti.acs.model.ObligationExpression;
 import org.eclipse.keti.acs.model.PolicySet;
 import org.eclipse.keti.acs.rest.BaseResource;
 import org.eclipse.keti.acs.rest.BaseSubject;
@@ -211,7 +214,33 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     }
 
     @Test(dataProvider = "endpointProvider")
-    public void testPolicyCreationInValidPolicy(final String endpoint) throws Exception {
+    public void testCreationOfValidPolicyWithObligations(final String endpoint) throws Exception {
+        String policyName = null;
+        try {
+            String policyFile = "src/test/resources/set-with-obligation-expressions.json";
+            PolicySet policySet = this.policyHelper.putPolicySet(this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(),
+                    this.acsitSetUpFactory.getZone1Headers(), endpoint, policyFile);
+
+            policyName = policySet.getName();
+
+            PolicySet policySetSaved = this.getPolicySet(this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(),
+                    policyName, this.acsitSetUpFactory.getZone1Headers(), endpoint);
+            Assert.assertEquals(policyName, policySetSaved.getName());
+    
+            List<ObligationExpression> expectedObligationExpressions = policySet.getObligationExpressions();
+            List<ObligationExpression> actualObligationExpressions = policySetSaved.getObligationExpressions();
+            Assert.assertEquals(actualObligationExpressions.size(), expectedObligationExpressions.size());
+            Assert.assertTrue(actualObligationExpressions.containsAll(expectedObligationExpressions));
+        } finally {
+            if (policyName != null) {
+                this.policyHelper.deletePolicySet(this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(),
+                        this.acsitSetUpFactory.getAcsUrl(), policyName, this.acsitSetUpFactory.getZone1Headers());
+            }
+        }
+    }
+
+    @Test(dataProvider = "endpointProvider")
+    public void testCreationOfInvalidPolicy(final String endpoint) throws Exception {
         String testPolicyName = "";
         try {
             String policyFile = "src/test/resources/missing-policy-set-name-policy.json";
@@ -226,9 +255,27 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
                 this.acsitSetUpFactory.getAcsUrl(), testPolicyName, this.acsitSetUpFactory.getZone1Headers());
         Assert.fail("testPolicyCreationInValidPolicy should have failed");
     }
+    
+    @Test(dataProvider = "endpointProvider")
+    public void testCreationOfInvalidObligationPolicy(final String endpoint) throws Exception {
+        String testPolicyName = "";
+        try {
+            String policyFile = "src/test/resources/missing-obligation-id-policy-set.json";
+            testPolicyName = this.policyHelper.setTestPolicy(this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(),
+                    this.acsitSetUpFactory.getZone1Headers(), endpoint, policyFile);
+        } catch (HttpClientErrorException e) {
+            this.acsTestUtil.assertExceptionResponseBody(e,
+                    "JSON Schema validation  error: object has missing required properties ([\\\"id\\\"])");
+            Assert.assertEquals(e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
+            return;
+        }
+        this.policyHelper.deletePolicySet(this.acsitSetUpFactory.getAcsZoneAdminRestTemplate(),
+                this.acsitSetUpFactory.getAcsUrl(), testPolicyName, this.acsitSetUpFactory.getZone1Headers());
+        Assert.fail("testPolicyCreationInValidPolicy should have failed");
+    }
 
     @Test(dataProvider = "endpointProvider")
-    public void testPolicyCreationInValidWithBadPolicySetNamePolicy(final String endpoint) throws Exception {
+    public void testCreationOfPolicySetWithBadName(final String endpoint) throws Exception {
         String testPolicyName = "";
         try {
             String policyFile = "src/test/resources/policy-set-with-only-name-effect.json";
@@ -245,7 +292,7 @@ public class AccessControlServiceIT extends AbstractTestNGSpringContextTests {
     }
 
     @Test(dataProvider = "endpointProvider")
-    public void testPolicyCreationJsonSchemaInvalidPolicySet(final String endpoint) throws Exception {
+    public void testCreationOfPolicySetWithInvalidJsonSchema(final String endpoint) throws Exception {
         String testPolicyName = "";
         try {
             String policyFile = "src/test/resources/invalid-json-schema-policy-set.json";

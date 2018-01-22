@@ -34,6 +34,8 @@ public class Policy {
     private String name;
     private Target target;
     private List<Condition> conditions = Collections.emptyList();
+    private List<String> obligationIds = Collections.emptyList();
+
     private Effect effect;
 
     public String getName() {
@@ -69,6 +71,21 @@ public class Policy {
         this.conditions = conditions;
     }
 
+    /**
+     * @return the obligationIds
+     */
+    public List<String> getObligationIds() {
+        return this.obligationIds;
+    }
+
+    /**
+     * @param obligationIds
+     *            the obligationIds to set
+     */
+    public void setObligationIds(final List<String> obligationIds) {
+        this.obligationIds = obligationIds;
+    }
+
     @ApiModelProperty(required = true)
     public Effect getEffect() {
         return this.effect;
@@ -81,8 +98,8 @@ public class Policy {
     @SuppressWarnings("nls")
     @Override
     public String toString() {
-        return "Policy [name=" + this.name + ", target=" + this.target + ", conditions=" + this.conditions + ", effect="
-                + this.effect + "]";
+        return "Policy [name=" + this.name + ", target=" + this.target + ", conditions=" + this.conditions
+                + ", obligationIds=" + this.obligationIds + ", effect=" + this.effect + "]";
     }
 
 }

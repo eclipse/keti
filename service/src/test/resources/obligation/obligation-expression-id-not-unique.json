@@ -1,0 +1,23 @@
+{
+   "name": "set-obligation-expressions-id-not-unique",
+    "policies": [
+        {
+            "name": "Default",
+            "effect": "PERMIT"
+        }
+    ],
+    "obligationExpressions": [
+        {
+            "id": "obligation1",
+            "actionTemplate": {
+                "sqlStatement": "some SQL statement"
+            }
+        },
+        {
+            "id": "obligation1",
+            "actionTemplate": {
+                "filter": "some where clause"
+            }
+        }
+    ]
+} 

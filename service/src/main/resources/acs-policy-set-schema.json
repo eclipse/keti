@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "id": "http://jsonschema.net",
     "type": "object",	
     "properties": {
@@ -105,10 +105,65 @@
                     "effect": {
                         "id": "http://jsonschema.net/policies/0/effect",
                         "type": "string"
+                    },
+                    "obligationIds": {
+                        "id": "http://jsonschema.net/policies/0/obligationIds",
+                        "type": "array",
+                        "uniqueItems": true,
+                        "items": {
+                            "type": "string",
+                            "minLength":1
+                        }
+                    }
+                }
+            }
+        },
+        "obligationExpressions": {
+            "id": "http://jsonschema.net/obligationExpressions",
+            "type": "array",
+            "items": {
+                "id": "http://jsonschema.net/obligationExpressions/0",
+                "type": "object",
+                "required": ["id", "actionTemplate"],
+                "properties": {
+                    "id": {
+                        "id": "http://jsonschema.net/obligationExpressions/0/id",
+                        "type": "string",
+                        "minLength":1
+                    },
+                    "type": {
+                        "type": "http://jsonschema.net/obligationExpressions/0/type",
+                        "type": "string",
+                        "enum": ["CUSTOM"]
+                    },
+                    "actionTemplate": {
+                        "type": "http://jsonschema.net/obligationExpressions/0/actionTemplate",
+                        "type": "object"
+                    },
+                    "actionArguments": {
+                        "id": "http://jsonschema.net/obligationExpressions/0/actionArguments",
+                        "type": "array",
+                        "items": {
+                            "id": "http://jsonschema.net/obligationExpressions/0/actionArguments/0",
+                            "type": "object",
+                            "required": ["name", "value"],
+                            "properties": {
+                                "name": {
+                                    "id": "http://jsonschema.net/obligationExpressions/0/actionArguments/0/name",
+                                    "type": "string",
+                                    "minLength":1
+                                },
+                                "value": {
+                                    "id": "http://jsonschema.net/obligationExpressions/0/actionArguments/0/value",
+                                    "type": "string",
+                                    "minLength":1
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     },
-    "required": ["policies", "name"]    
+    "required": ["policies", "name"]
 }

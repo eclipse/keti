@@ -1,0 +1,14 @@
+{
+    "name": "set-obligation-expression-action-template-missing",
+    "policies": [
+        {
+            "name": "policy with obligationIds",
+            "effect": "PERMIT"
+        }
+    ],
+    "obligationExpressions": [
+        {
+            "id": "obligation1"
+        }
+    ]
+} 
