@@ -81,7 +81,7 @@
         <spring-security.version>4.2.0.RELEASE</spring-security.version>
         <titandb.version>1.1.0-SNAPSHOT</titandb.version>
         <openjpa.version>2.4.2</openjpa.version>
-        <uaa-token-lib.version>3.3.2</uaa-token-lib.version>
+        <uaa-token-lib.version>3.3.6</uaa-token-lib.version>
         <audit-sdk.version>0.0.10</audit-sdk.version>
 
         <!-- Test Dependency Version -->
