@@ -119,8 +119,8 @@ public class PolicyEvalWithGraphDbControllerIT extends AbstractTestNGSpringConte
 
     @BeforeClass
     public void setup() throws Exception {
-        if (!Arrays.asList(this.env.getActiveProfiles()).contains("titan")) {
-            throw new SkipException("This test only applies when using titan profile.");
+        if (!Arrays.asList(this.env.getActiveProfiles()).contains("graph")) {
+            throw new SkipException("This test only applies when using graph profile.");
         }
 
         this.testZone1 = new TestUtils().createTestZone("PolicyEvalWithGraphDbControllerIT1");

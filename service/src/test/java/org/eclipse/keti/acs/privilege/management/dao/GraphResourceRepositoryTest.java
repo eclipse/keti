@@ -64,9 +64,9 @@ import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.rest.Parent;
 import org.eclipse.keti.acs.utils.JsonUtils;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
-import com.thinkaurelius.titan.core.SchemaViolationException;
-import com.thinkaurelius.titan.core.TitanException;
-import com.thinkaurelius.titan.core.TitanFactory;
+import org.janusgraph.core.SchemaViolationException;
+import org.janusgraph.core.JanusGraphException;
+import org.janusgraph.core.JanusGraphFactory;
 
 public class GraphResourceRepositoryTest {
     private static final JsonUtils JSON_UTILS = new JsonUtils();
@@ -82,7 +82,7 @@ public class GraphResourceRepositoryTest {
     @BeforeClass
     public void setup() throws Exception {
         this.resourceRepository = new GraphResourceRepository();
-        setupTitanGraph();
+        setupGraph();
         this.resourceRepository.setGraphTraversal(this.graphTraversalSource);
     }
 
@@ -91,8 +91,8 @@ public class GraphResourceRepositoryTest {
         this.dropAllResources();
     }
 
-    private void setupTitanGraph() throws InterruptedException, ExecutionException {
-        Graph graph = TitanFactory.build().set("storage.backend", "inmemory").open();
+    private void setupGraph() throws InterruptedException, ExecutionException {
+        Graph graph = JanusGraphFactory.build().set("storage.backend", "inmemory").open();
         GraphConfig.createSchemaElements(graph);
         this.graphTraversalSource = graph.traversal();
         this.dropAllResources();
@@ -639,10 +639,10 @@ public class GraphResourceRepositoryTest {
      * GraphSubjectRepositoryTest.java:71)
      */
     static <E extends ZonableEntity> E saveWithRetry(final GraphGenericRepository<E> repository,
-            final E zonableEntity, final int retryCount) throws TitanException {
+            final E zonableEntity, final int retryCount) throws JanusGraphException {
         try {
             repository.save(zonableEntity);
-        } catch (TitanException te) {
+        } catch (JanusGraphException te) {
             if (te.getCause().getCause().getMessage().contains("Local lock") && retryCount > 0) {
                 try {
                     Thread.sleep(250);

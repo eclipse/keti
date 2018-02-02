@@ -37,7 +37,7 @@ import org.springframework.web.client.RestTemplate;
 import org.eclipse.keti.acs.rest.Zone;
 
 @Component
-@Profile({ "public", "public-titan" })
+@Profile({ "public", "public-graph" })
 public class ZoneFactory {
 
     @Value("${ACS_URL}")

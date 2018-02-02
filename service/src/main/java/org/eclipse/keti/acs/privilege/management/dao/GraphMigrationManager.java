@@ -29,11 +29,11 @@ import javax.annotation.PostConstruct;
 import java.util.concurrent.Executors;
 
 @Component
-@Profile("titan")
-public final class TitanMigrationManager {
+@Profile("graph")
+public final class GraphMigrationManager {
     public static final int INITIAL_ATTRIBUTE_GRAPH_VERSION = 1;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TitanMigrationManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GraphMigrationManager.class);
 
     @Autowired
     @Qualifier("resourceRepository")
@@ -70,7 +70,7 @@ public final class TitanMigrationManager {
                 @Override
                 public void run() {
                     try {
-                        LOGGER.info("Starting attribute migration process to Titan.");
+                        LOGGER.info("Starting attribute migration process to graph.");
 
                         //Rollback in the beginning to start with a clean state
                         resourceMigrationManager.rollbackMigratedData(resourceHierarchicalRepository);
@@ -86,7 +86,7 @@ public final class TitanMigrationManager {
                         resourceHierarchicalRepository.createVersionVertex(INITIAL_ATTRIBUTE_GRAPH_VERSION);
                         isMigrationComplete = true;
 
-                        LOGGER.info("Titan attribute migration complete. Created version: "
+                        LOGGER.info("Graph attribute migration complete. Created version: "
                                 + INITIAL_ATTRIBUTE_GRAPH_VERSION);
                     } catch (Exception e) {
                         LOGGER.error("Exception during attribute migration: ", e);

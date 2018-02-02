@@ -65,18 +65,18 @@ public class ResourcePrivilegeManagementController extends BaseRestApi {
     @Autowired
     private PrivilegeManagementService service;
 
-    private Boolean titanProfileActive = null;
+    private Boolean graphProfileActive = null;
 
-    private Boolean getTitanProfileActive() {
-        if (this.titanProfileActive == null) {
-            this.titanProfileActive = Arrays.asList(this.getEnvironment().getActiveProfiles()).contains("titan");
+    private Boolean getGraphProfileActive() {
+        if (this.graphProfileActive == null) {
+            this.graphProfileActive = Arrays.asList(this.getEnvironment().getActiveProfiles()).contains("graph");
         }
 
-        return this.titanProfileActive;
+        return this.graphProfileActive;
     }
 
     private void failIfParentsSpecified(final List<BaseResource> resources) {
-        if (this.getTitanProfileActive()) {
+        if (this.getGraphProfileActive()) {
             return;
         }
 

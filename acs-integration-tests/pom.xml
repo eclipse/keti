@@ -319,7 +319,7 @@
         </profile>
 
         <profile>
-            <id>public-titan</id>
+            <id>public-graph</id>
             <build>
                 <plugins>
                     <plugin>
@@ -328,12 +328,12 @@
                         <version>${maven-failsafe.version}</version>
                         <configuration>
                             <environmentVariables>
-                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan,httpValidation</SPRING_PROFILES_ACTIVE>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,graph,httpValidation</SPRING_PROFILES_ACTIVE>
                             </environmentVariables>
-                            <reportsDirectory>${basedir}/failsafe-reports-public-titan</reportsDirectory>
-                            <summaryFile>${basedir}/failsafe-reports-public-titan/failsafe-summary.xml</summaryFile>
+                            <reportsDirectory>${basedir}/failsafe-reports-public-graph</reportsDirectory>
+                            <summaryFile>${basedir}/failsafe-reports-public-graph/failsafe-summary.xml</summaryFile>
                             <suiteXmlFiles>
-                                <suiteXmlFile>testng-public-titan.xml</suiteXmlFile>
+                                <suiteXmlFile>testng-public-graph.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>
                     </plugin>

@@ -39,9 +39,9 @@
             <artifactId>spring-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.thinkaurelius.titan</groupId>
-            <artifactId>titan-core</artifactId>
-            <version>${titandb.version}</version>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-core</artifactId>
+            <version>${janusgraph.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -66,9 +66,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.thinkaurelius.titan</groupId>
-            <artifactId>titan-cassandra</artifactId>
-            <version>${titandb.version}</version>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-cassandra</artifactId>
+            <version>${janusgraph.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -183,6 +183,10 @@
                 <exclusion>
                     <groupId>io.netty</groupId>
                     <artifactId>netty-all</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mindrot</groupId>
+                    <artifactId>jbcrypt</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -587,7 +591,7 @@
         </profile>
 
         <profile>
-            <id>public-titan</id>
+            <id>public-graph</id>
             <build>
                 <plugins>
                     <plugin>
@@ -596,9 +600,9 @@
                         <version>${maven-surefire.version}</version>
                         <configuration>
                             <environmentVariables>
-                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan</SPRING_PROFILES_ACTIVE>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,graph</SPRING_PROFILES_ACTIVE>
                             </environmentVariables>
-                            <reportsDirectory>${basedir}/surefire-reports-titan</reportsDirectory>
+                            <reportsDirectory>${basedir}/surefire-reports-graph</reportsDirectory>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -607,10 +611,10 @@
                         <version>${maven-failsafe.version}</version>
                         <configuration>
                             <environmentVariables>
-                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan</SPRING_PROFILES_ACTIVE>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,graph</SPRING_PROFILES_ACTIVE>
                             </environmentVariables>
-                            <reportsDirectory>${basedir}/surefire-reports-titan/controller-tests</reportsDirectory>
-                            <summaryFile>${basedir}/surefire-reports-titan/controller-tests/failsafe-summary.xml</summaryFile>
+                            <reportsDirectory>${basedir}/surefire-reports-graph/controller-tests</reportsDirectory>
+                            <summaryFile>${basedir}/surefire-reports-graph/controller-tests/failsafe-summary.xml</summaryFile>
                             <excludes>
                                 <exclude>**/NonHierarchical*IT.java</exclude>
                             </excludes>

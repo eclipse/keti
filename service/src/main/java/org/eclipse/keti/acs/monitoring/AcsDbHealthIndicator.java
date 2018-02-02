@@ -29,7 +29,7 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookupFailureException;
 import org.springframework.stereotype.Component;
 
-import org.eclipse.keti.acs.privilege.management.dao.TitanMigrationManager;
+import org.eclipse.keti.acs.privilege.management.dao.GraphMigrationManager;
 
 @Component
 public class AcsDbHealthIndicator implements HealthIndicator {
@@ -40,7 +40,7 @@ public class AcsDbHealthIndicator implements HealthIndicator {
             + "sets stored in the database";
 
     private final AcsMonitoringRepository acsMonitoringRepository;
-    private TitanMigrationManager migrationManager;
+    private GraphMigrationManager migrationManager;
 
     @Autowired
     public AcsDbHealthIndicator(final AcsMonitoringRepository acsMonitoringRepository) {
@@ -48,7 +48,7 @@ public class AcsDbHealthIndicator implements HealthIndicator {
     }
 
     @Autowired(required = false)
-    void setMigrationManager(final TitanMigrationManager migrationManager) {
+    void setMigrationManager(final GraphMigrationManager migrationManager) {
         this.migrationManager = migrationManager;
     }
 

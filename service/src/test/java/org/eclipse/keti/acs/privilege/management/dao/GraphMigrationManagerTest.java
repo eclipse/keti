@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 
-public class TitanMigrationManagerTest {
+public class GraphMigrationManagerTest {
 
     private ResourceRepository resourceRepository;
     private GraphResourceRepository resourceHierarchicalRepository;
@@ -138,9 +138,9 @@ public class TitanMigrationManagerTest {
                 });
 
         new ResourceMigrationManager().doResourceMigration(resourceRepository,
-                resourceHierarchicalRepository, TitanMigrationManager.PAGE_SIZE);
+                resourceHierarchicalRepository, GraphMigrationManager.PAGE_SIZE);
         new SubjectMigrationManager().doSubjectMigration(subjectRepository,
-                subjectHierarchicalRepository, TitanMigrationManager.PAGE_SIZE);
+                subjectHierarchicalRepository, GraphMigrationManager.PAGE_SIZE);
 
         // Verify that the data from non-graph repo has been copied over to graph-repo, post-migration.
         assertThat(this.resourceRepository.findAll().size(), equalTo(2));

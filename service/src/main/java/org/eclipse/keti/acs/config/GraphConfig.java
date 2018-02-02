@@ -45,20 +45,20 @@ import org.springframework.util.Assert;
 import org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepository;
 import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
 import org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepository;
-import com.thinkaurelius.titan.core.EdgeLabel;
-import com.thinkaurelius.titan.core.PropertyKey;
-import com.thinkaurelius.titan.core.TitanFactory;
-import com.thinkaurelius.titan.core.TitanFactory.Builder;
-import com.thinkaurelius.titan.core.TitanGraph;
-import com.thinkaurelius.titan.core.VertexLabel;
-import com.thinkaurelius.titan.core.schema.SchemaAction;
-import com.thinkaurelius.titan.core.schema.SchemaStatus;
-import com.thinkaurelius.titan.core.schema.TitanManagement;
-import com.thinkaurelius.titan.core.schema.TitanManagement.IndexBuilder;
-import com.thinkaurelius.titan.graphdb.database.management.ManagementSystem;
+import org.janusgraph.core.EdgeLabel;
+import org.janusgraph.core.PropertyKey;
+import org.janusgraph.core.JanusGraphFactory;
+import org.janusgraph.core.JanusGraphFactory.Builder;
+import org.janusgraph.core.JanusGraph;
+import org.janusgraph.core.VertexLabel;
+import org.janusgraph.core.schema.SchemaAction;
+import org.janusgraph.core.schema.SchemaStatus;
+import org.janusgraph.core.schema.JanusGraphManagement;
+import org.janusgraph.core.schema.JanusGraphManagement.IndexBuilder;
+import org.janusgraph.graphdb.database.management.ManagementSystem;
 
 @Configuration
-@Profile({ "titan" })
+@Profile({ "graph" })
 public class GraphConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphConfig.class);
 
@@ -70,26 +70,26 @@ public class GraphConfig {
     public static final String BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME = "byZoneAndResourceUnique";
     public static final String BY_ZONE_AND_SUBJECT_UNIQUE_INDEX_NAME = "byZoneAndSubjectUnique";
 
-    @Value("${TITAN_ENABLE_CASSANDRA:false}")
+    @Value("${GRAPH_ENABLE_CASSANDRA:false}")
     private boolean cassandraEnabled;
-    @Value("${TITAN_STORAGE_CASSANDRA_KEYSPACE:titan}")
+    @Value("${GRAPH_STORAGE_CASSANDRA_KEYSPACE:graph}")
     private String cassandraKeyspace;
-    @Value("${TITAN_STORAGE_HOSTNAME:localhost}")
+    @Value("${GRAPH_STORAGE_HOSTNAME:localhost}")
     private String hostname;
-    @Value("${TITAN_STORAGE_USERNAME:}")
+    @Value("${GRAPH_STORAGE_USERNAME:}")
     private String username;
-    @Value("${TITAN_STORAGE_PASSWORD:}")
+    @Value("${GRAPH_STORAGE_PASSWORD:}")
     private String password;
-    @Value("${TITAN_STORAGE_PORT:9160}")
+    @Value("${GRAPH_STORAGE_PORT:9160}")
     private int port;
-    @Value("${TITAN_ENABLE_CACHE:true}")
+    @Value("${GRAPH_ENABLE_CACHE:true}")
     private boolean cacheEnabled;
-    @Value("${TITAN_CACHE_CLEAN_WAIT:50}")
-    private int titanCacheCleanWait;
-    @Value("${TITAN_CACHE_TIME:1000}")
-    private int titanCacheTime;
-    @Value("${TITAN_CACHE_SIZE:0.25}")
-    private double titanCacheSize;
+    @Value("${GRAPH_CACHE_CLEAN_WAIT:50}")
+    private int graphCacheCleanWait;
+    @Value("${GRAPH_CACHE_TIME:1000}")
+    private int graphCacheTime;
+    @Value("${GRAPH_CACHE_SIZE:0.25}")
+    private double graphCacheSize;
 
     private Graph graph;
 
@@ -101,23 +101,23 @@ public class GraphConfig {
     public Graph createGraph() throws InterruptedException {
         Graph newGraph;
         if (this.cassandraEnabled) {
-            Builder titanBuilder = TitanFactory.build().set("storage.backend", "cassandra")
+            Builder graphBuilder = JanusGraphFactory.build().set("storage.backend", "cassandra")
                     .set("storage.cassandra.keyspace", this.cassandraKeyspace)
                     .set("storage.hostname", Arrays.asList(hostname.split(","))).set("storage.port", this.port)
-                    .set("cache.db-cache", this.cacheEnabled).set("cache.db-cache-clean-wait", this.titanCacheCleanWait)
-                    .set("cache.db-cache-time", this.titanCacheTime).set("cache.db-cache-size", this.titanCacheSize);
+                    .set("cache.db-cache", this.cacheEnabled).set("cache.db-cache-clean-wait", this.graphCacheCleanWait)
+                    .set("cache.db-cache-time", this.graphCacheTime).set("cache.db-cache-size", this.graphCacheSize);
             if (StringUtils.isNotEmpty(this.username)) {
-                titanBuilder = titanBuilder.set("storage.username", this.username);
+                graphBuilder = graphBuilder.set("storage.username", this.username);
             }
             if (StringUtils.isNotEmpty(this.password)) {
-                titanBuilder = titanBuilder.set("storage.password", this.password);
+                graphBuilder = graphBuilder.set("storage.password", this.password);
             }
-            newGraph = titanBuilder.open();
+            newGraph = graphBuilder.open();
         } else {
-            newGraph = TitanFactory.build().set("storage.backend", "inmemory").open();
+            newGraph = JanusGraphFactory.build().set("storage.backend", "inmemory").open();
         }
         createSchemaElements(newGraph);
-        LOGGER.info("Initialized titan db.");
+        LOGGER.info("Initialized graph db.");
         return newGraph;
     }
 
@@ -142,20 +142,20 @@ public class GraphConfig {
     public static void createIndex(final Graph newGraph, final String indexName, final String indexKey)
             throws InterruptedException {
         newGraph.tx().rollback(); // Never create new indexes while a transaction is active
-        TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
+        JanusGraphManagement mgmt = ((JanusGraph) newGraph).openManagement();
         if (!mgmt.containsGraphIndex(indexName)) {
             PropertyKey indexPropertyKey = mgmt.makePropertyKey(indexKey).dataType(String.class).make();
             mgmt.buildIndex(indexName, Vertex.class).addKey(indexPropertyKey).buildCompositeIndex();
         }
         mgmt.commit();
         // Wait for the index to become available
-        ManagementSystem.awaitGraphIndexStatus((TitanGraph) newGraph, indexName).status(SchemaStatus.ENABLED).call();
+        ManagementSystem.awaitGraphIndexStatus((JanusGraph) newGraph, indexName).status(SchemaStatus.ENABLED).call();
     }
 
     public static void createUniqueIndexForLabel(final Graph newGraph, final String indexName, final String indexKey,
             final String label) throws InterruptedException {
         newGraph.tx().rollback(); // Never create new indexes while a transaction is active
-        TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
+        JanusGraphManagement mgmt = ((JanusGraph) newGraph).openManagement();
         if (!mgmt.containsGraphIndex(indexName)) {
             PropertyKey indexPropertyKey = mgmt.makePropertyKey(indexKey).dataType(Integer.class).make();
             VertexLabel versionLabel = mgmt.makeVertexLabel(label).make();
@@ -165,7 +165,7 @@ public class GraphConfig {
         }
         mgmt.commit();
         // Wait for the index to become available
-        ManagementSystem.awaitGraphIndexStatus((TitanGraph) newGraph, indexName).status(SchemaStatus.ENABLED).call();
+        ManagementSystem.awaitGraphIndexStatus((JanusGraph) newGraph, indexName).status(SchemaStatus.ENABLED).call();
     }
 
     private static void createUniqueCompositeIndex(final Graph newGraph, final String indexName,
@@ -178,7 +178,7 @@ public class GraphConfig {
 
         Assert.notEmpty(propertyKeyNames);
         newGraph.tx().rollback(); // Never create new indexes while a transaction is active
-        TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
+        JanusGraphManagement mgmt = ((JanusGraph) newGraph).openManagement();
         IndexBuilder indexBuilder = mgmt.buildIndex(indexName, Vertex.class);
         if (!mgmt.containsGraphIndex(indexName)) {
             for (String propertyKeyName : propertyKeyNames) {
@@ -189,11 +189,11 @@ public class GraphConfig {
         }
         mgmt.commit();
         // Wait for the index to become available
-        ManagementSystem.awaitGraphIndexStatus((TitanGraph) newGraph, indexName).status(SchemaStatus.ENABLED).call();
+        ManagementSystem.awaitGraphIndexStatus((JanusGraph) newGraph, indexName).status(SchemaStatus.ENABLED).call();
     }
 
     private static PropertyKey getOrCreatePropertyKey(final String keyName, final Class<?> keyType,
-            final TitanManagement mgmt) {
+            final JanusGraphManagement mgmt) {
         PropertyKey propertyKey = mgmt.getPropertyKey(keyName);
         if (null == propertyKey) {
             propertyKey = mgmt.makePropertyKey(keyName).dataType(keyType).make();
@@ -204,7 +204,7 @@ public class GraphConfig {
     public static void createEdgeIndex(final Graph newGraph, final String indexName, final String label,
             final String indexKey) throws InterruptedException {
         newGraph.tx().rollback(); // Never create new indexes while a transaction is active
-        TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
+        JanusGraphManagement mgmt = ((JanusGraph) newGraph).openManagement();
         EdgeLabel edgeLabel = mgmt.getOrCreateEdgeLabel(label);
         if (!mgmt.containsRelationIndex(edgeLabel, indexName)) {
             PropertyKey indexPropertyKey = getOrCreatePropertyKey(indexKey, String.class, mgmt);
@@ -212,20 +212,20 @@ public class GraphConfig {
         }
         mgmt.commit();
         // Wait for the index to become available
-        ManagementSystem.awaitRelationIndexStatus((TitanGraph) newGraph, indexName, label).status(SchemaStatus.ENABLED)
+        ManagementSystem.awaitRelationIndexStatus((JanusGraph) newGraph, indexName, label).status(SchemaStatus.ENABLED)
                 .call();
     }
 
     public static void createVertexLabel(final Graph newGraph, final String vertexLabel) throws InterruptedException {
         newGraph.tx().rollback();
-        TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
+        JanusGraphManagement mgmt = ((JanusGraph) newGraph).openManagement();
         mgmt.getOrCreateVertexLabel(vertexLabel);
         mgmt.commit();
     }
 
     public static void reIndex(final Graph newGraph, final String indexName)
             throws InterruptedException, ExecutionException {
-        TitanManagement mgmt = ((TitanGraph) newGraph).openManagement();
+        JanusGraphManagement mgmt = ((JanusGraph) newGraph).openManagement();
         mgmt.updateIndex(mgmt.getGraphIndex(indexName), SchemaAction.REINDEX).get();
         newGraph.tx().commit();
     }

@@ -16,7 +16,7 @@
    
    The ACS attribute store is a graph database built on:
    - [[http://tinkerpop.apache.org/][Apache TinkerPop]]
-   - [[http://titan.thinkaurelius.com/][Titan]]
+   - [[http://janusgraph.org/][JanusGraph]]
 
    Persistence storage includes:
    - [[https://www.postgresql.org/][PostgreSQL]]
@@ -32,7 +32,7 @@
 | postgres +-----+ spring data JPA   | apache tinkerpop  +-----+ cassandra|
 |          |     +-------------------+-------------------+     |          |
 +----------+     | cGRE              | cBLU              |     +----------+
-                 | spring boot       | titan db          |
+                 | spring boot       | graph db          |
                  +-------------------+-------------------+
                  | cPNK             java                 |
                  \---------------------------------------/
@@ -156,7 +156,7 @@ Content-Type: application/json
 ** Running ACS
   - Start ACS
 #+BEGIN_SRC sh
-service/start-acs-public-titan.sh
+service/start-acs-public-graph.sh
 #+END_SRC
 
 ** Creating an ACS zone
@@ -214,7 +214,7 @@ X-XSS-Protection: 1; mode=block
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Correlation-Id: 7c4b28d6-c252-4a7e-bf8f-1594e9a9efe3
-X-Application-Context: application:h2,public,simple-cache,titan:8181
+X-Application-Context: application:h2,public,simple-cache,graph:8181
 Content-Length: 0
 Server: Jetty(9.2.15.v20160210)
 
@@ -265,7 +265,7 @@ X-XSS-Protection: 1; mode=block
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Correlation-Id: 623880ec-dc83-4616-8aed-d82c48504ebe
-X-Application-Context: application:h2,public,simple-cache,titan:8181
+X-Application-Context: application:h2,public,simple-cache,graph:8181
 Location: /subject/tom@ge.com
 Content-Length: 0
 Server: Jetty(9.2.15.v20160210)
@@ -311,7 +311,7 @@ X-XSS-Protection: 1; mode=block
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Correlation-Id: 8371bd64-9562-430e-b60a-8ef7292154f5
-X-Application-Context: application:h2,public,simple-cache,titan:8181
+X-Application-Context: application:h2,public,simple-cache,graph:8181
 Location: /resource//engines/9
 Content-Length: 0
 Server: Jetty(9.2.15.v20160210)
@@ -377,7 +377,7 @@ X-XSS-Protection: 1; mode=block
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Correlation-Id: 14a07d7b-41e7-43c0-b79d-77e3927d0294
-X-Application-Context: application:h2,public,simple-cache,titan:8181
+X-Application-Context: application:h2,public,simple-cache,graph:8181
 Location: /policy-set/default
 Content-Length: 0
 Server: Jetty(9.2.15.v20160210)
@@ -479,7 +479,7 @@ X-XSS-Protection: 1; mode=block
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Correlation-Id: 1d06af08-3d01-4892-8957-5d455002441e
-X-Application-Context: application:h2,public,simple-cache,titan:8181
+X-Application-Context: application:h2,public,simple-cache,graph:8181
 Location: /subject/role-analyst
 Content-Length: 0
 Server: Jetty(9.2.15.v20160210)
@@ -526,7 +526,7 @@ X-XSS-Protection: 1; mode=block
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Correlation-Id: 92053b82-9458-49ca-8b0e-aba3ba18c84c
-X-Application-Context: application:h2,public,simple-cache,titan:8181
+X-Application-Context: application:h2,public,simple-cache,graph:8181
 Location: /subject/tom@ge.com
 Server: Jetty(9.2.15.v20160210)
 
@@ -566,7 +566,7 @@ X-XSS-Protection: 1; mode=block
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Correlation-Id: 03febd4b-ef28-43b7-9c76-37663cd393b1
-X-Application-Context: application:h2,public,simple-cache,titan:8181
+X-Application-Context: application:h2,public,simple-cache,graph:8181
 Location: /resource//sites/san-ramon
 Content-Length: 0
 Server: Jetty(9.2.15.v20160210)
@@ -605,7 +605,7 @@ X-XSS-Protection: 1; mode=block
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Correlation-Id: ca036e30-2f17-4287-981c-0ca5731999bc
-X-Application-Context: application:h2,public,simple-cache,titan:8181
+X-Application-Context: application:h2,public,simple-cache,graph:8181
 Location: /resource//engines/9
 Server: Jetty(9.2.15.v20160210)
 
@@ -638,7 +638,7 @@ X-XSS-Protection: 1; mode=block
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Correlation-Id: 2fcb9168-ee4f-4953-aa3d-fcd944de1a44
-X-Application-Context: application:h2,public,simple-cache,titan:8181
+X-Application-Context: application:h2,public,simple-cache,graph:8181
 Location: /resource//engines/11
 Content-Length: 0
 Server: Jetty(9.2.15.v20160210)
@@ -704,7 +704,7 @@ X-XSS-Protection: 1; mode=block
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Correlation-Id: c22d3f09-4f0a-4b3c-a38d-0286f4eb4780
-X-Application-Context: application:h2,public,simple-cache,titan:8181
+X-Application-Context: application:h2,public,simple-cache,graph:8181
 Location: /policy-set/default
 Content-Length: 0
 Server: Jetty(9.2.15.v20160210)

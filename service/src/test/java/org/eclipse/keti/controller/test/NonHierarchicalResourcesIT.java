@@ -62,8 +62,8 @@ public final class NonHierarchicalResourcesIT extends AbstractTestNGSpringContex
 
     @BeforeClass
     public void beforeClass() throws Exception {
-        if (Arrays.asList(this.configurableEnvironment.getActiveProfiles()).contains("titan")) {
-            throw new SkipException("This test only applies when NOT using the \"titan\" profile");
+        if (Arrays.asList(this.configurableEnvironment.getActiveProfiles()).contains("graph")) {
+            throw new SkipException("This test only applies when NOT using the \"graph\" profile");
         }
 
         this.zoneService.upsertZone(TEST_ZONE);
@@ -72,7 +72,7 @@ public final class NonHierarchicalResourcesIT extends AbstractTestNGSpringContex
     }
 
     @Test
-    public void testResourceWithParentsFailWhenNotUsingTitan() throws Exception {
+    public void testResourceWithParentsFailWhenNotUsingGraph() throws Exception {
         BaseResource resource = ResourcePrivilegeManagementControllerIT.JSON_UTILS.deserializeFromFile(
             "controller-test/a-resource-with-parents.json", BaseResource.class);
         Assert.assertNotNull(resource);
