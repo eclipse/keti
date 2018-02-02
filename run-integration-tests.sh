@@ -19,19 +19,19 @@
 #!/usr/bin/env bash
 
 function usage {
-    echo "Usage: source ./$( basename "$( python -c "import os; print os.path.abspath('${BASH_SOURCE[0]}')" )" ) [-t] [-s <maven_settings_file>]"
+    echo "Usage: source ./$( basename "$( python -c "import os; print os.path.abspath('${BASH_SOURCE[0]}')" )" ) [-g] [-s <maven_settings_file>]"
 }
 
 unset MVN_SETTINGS_FILE_LOC
-unset TITAN_SUFFIX
+unset GRAPH_SUFFIX
 
-while getopts ':s:t' option; do
+while getopts ':s:g' option; do
     case "$option" in
         s)
             export MVN_SETTINGS_FILE_LOC="$OPTARG"
             ;;
-        t)
-            export TITAN_SUFFIX='-titan'
+        g)
+            export GRAPH_SUFFIX='-graph'
             ;;            
         '?' | ':')
             usage
@@ -44,13 +44,13 @@ unset PORT_OFFSET
 source ./set-env-local.sh
 
 if [ -z "$MVN_SETTINGS_FILE_LOC" ]; then
-    mvn clean package -P "public${TITAN_SUFFIX}" -D skipTests
+    mvn clean package -P "public${GRAPH_SUFFIX}" -D skipTests
     cd acs-integration-tests
-    mvn clean verify -P "public${TITAN_SUFFIX}"
+    mvn clean verify -P "public${GRAPH_SUFFIX}"
     cd -
 else
-    mvn clean package -P "public${TITAN_SUFFIX}" -D skipTests -s "$MVN_SETTINGS_FILE_LOC"
+    mvn clean package -P "public${GRAPH_SUFFIX}" -D skipTests -s "$MVN_SETTINGS_FILE_LOC"
     cd acs-integration-tests
-    mvn clean verify -P "public${TITAN_SUFFIX}" -s "../${MVN_SETTINGS_FILE_LOC}"
+    mvn clean verify -P "public${GRAPH_SUFFIX}" -s "../${MVN_SETTINGS_FILE_LOC}"
     cd -
 fi

@@ -62,8 +62,8 @@ import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.rest.Parent;
 import org.eclipse.keti.acs.utils.JsonUtils;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
-import com.thinkaurelius.titan.core.TitanException;
-import com.thinkaurelius.titan.core.TitanFactory;
+import org.janusgraph.core.JanusGraphException;
+import org.janusgraph.core.JanusGraphFactory;
 
 public class GraphSubjectRepositoryTest {
     private static final JsonUtils JSON_UTILS = new JsonUtils();
@@ -79,7 +79,7 @@ public class GraphSubjectRepositoryTest {
     @BeforeClass
     public void setup() throws Exception {
         this.subjectRepository = new GraphSubjectRepository();
-        Graph graph = TitanFactory.build().set("storage.backend", "inmemory").open();
+        Graph graph = JanusGraphFactory.build().set("storage.backend", "inmemory").open();
         GraphConfig.createSchemaElements(graph);
         this.graphTraversalSource = graph.traversal();
         this.subjectRepository.setGraphTraversal(this.graphTraversalSource);
@@ -313,7 +313,7 @@ public class GraphSubjectRepositoryTest {
         return this.subjectRepository.save(agentMulder);
     }
 
-    private SubjectEntity saveWithRetry(final SubjectEntity subject, final int retryCount) throws TitanException {
+    private SubjectEntity saveWithRetry(final SubjectEntity subject, final int retryCount) throws JanusGraphException {
         return GraphResourceRepositoryTest.saveWithRetry(this.subjectRepository, subject, retryCount);
     }
 

@@ -21,7 +21,7 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="testAll">
-    <test name="public-titan">
+    <test name="public-graph">
         <classes>
             <class name="org.eclipse.keti.test.TestConfig"/>
             <class name="org.eclipse.keti.integration.test.AttributeConnectorConfigurationIT" />

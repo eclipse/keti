@@ -71,8 +71,8 @@ public class HierarchicalResourcesIT extends AbstractTestNGSpringContextTests {
 
     @BeforeClass
     public void beforeClass() throws Exception {
-        if (!Arrays.asList(this.configurableEnvironment.getActiveProfiles()).contains("titan")) {
-            throw new SkipException("This test only applies when using the \"titan\" profile");
+        if (!Arrays.asList(this.configurableEnvironment.getActiveProfiles()).contains("graph")) {
+            throw new SkipException("This test only applies when using the \"graph\" profile");
         }
 
         this.zoneService.upsertZone(TEST_ZONE);

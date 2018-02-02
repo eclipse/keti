@@ -59,7 +59,7 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (Arrays.asList(this.environment.getActiveProfiles()).contains("titan")) {
+        if (Arrays.asList(this.environment.getActiveProfiles()).contains("graph")) {
             this.activeRepository = this.graphRepository;
             LOGGER.info("Subject hierarchical repository enabled.");
         } else {
@@ -187,7 +187,7 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
     @Override
     public SubjectEntity getSubjectWithInheritedAttributesForScopes(final ZoneEntity zone,
             final String subjectIdentifier, final Set<Attribute> scopes) {
-        if (this.activeRepository == this.graphRepository) { // i.e. titan is enabled
+        if (this.activeRepository == this.graphRepository) { // i.e. graph is enabled
             return this.graphRepository.getSubjectWithInheritedAttributesForScopes(zone, subjectIdentifier, scopes);
         } else {
             return this.nonGraphRepository.getByZoneAndSubjectIdentifier(zone, subjectIdentifier);
@@ -196,7 +196,7 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
 
     @Override
     public SubjectEntity getSubjectWithInheritedAttributes(final ZoneEntity zone, final String subjectIdentifier) {
-        if (this.activeRepository == this.graphRepository) { // i.e. titan is enabled
+        if (this.activeRepository == this.graphRepository) { // i.e. graph is enabled
             return this.graphRepository.getSubjectWithInheritedAttributes(zone, subjectIdentifier);
         } else {
             return this.nonGraphRepository.getByZoneAndSubjectIdentifier(zone, subjectIdentifier);
@@ -215,7 +215,7 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
 
     @Override
     public Set<String> getSubjectEntityAndDescendantsIds(final SubjectEntity entity) {
-        if (this.activeRepository == this.graphRepository) { // i.e. titan is enabled
+        if (this.activeRepository == this.graphRepository) { // i.e. graph is enabled
             return this.graphRepository.getSubjectEntityAndDescendantsIds(entity);
         } else {
             return Collections.singleton(entity.getSubjectIdentifier());

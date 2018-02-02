@@ -54,7 +54,7 @@ import org.eclipse.keti.acs.rest.Parent;
 import org.eclipse.keti.acs.utils.JsonUtils;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import com.google.common.collect.Sets;
-import com.thinkaurelius.titan.core.SchemaViolationException;
+import org.janusgraph.core.SchemaViolationException;
 
 public abstract class GraphGenericRepository<E extends ZonableEntity> implements JpaRepository<E, Long> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenericRepository.class);
@@ -71,7 +71,7 @@ public abstract class GraphGenericRepository<E extends ZonableEntity> implements
     @Autowired
     private GraphTraversalSource graphTraversal;
 
-    @Value("${TITAN_TRAVERSAL_LIMIT:256}")
+    @Value("${GRAPH_TRAVERSAL_LIMIT:256}")
     private long traversalLimit = 256;
 
     @Override

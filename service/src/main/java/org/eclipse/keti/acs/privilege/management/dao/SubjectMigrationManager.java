@@ -30,7 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("titan")
+@Profile("graph")
 public class SubjectMigrationManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubjectMigrationManager.class);
@@ -58,7 +58,7 @@ public class SubjectMigrationManager {
         } while (pageOfSubjects.hasNext());
 
         LOGGER.info("Number of subject entities migrated: {}", numOfSubjectsSaved);
-        LOGGER.info("Subject migration to Titan completed.");
+        LOGGER.info("Subject migration to graph completed.");
     }
 
     public void rollbackMigratedData(final GraphSubjectRepository subjectHierarchicalRepository) {

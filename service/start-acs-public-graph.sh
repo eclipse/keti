@@ -21,7 +21,7 @@
 unset PROXY_OPTS
 
 if [[ -z "$SPRING_PROFILES_ACTIVE" ]]; then
-    export SPRING_PROFILES_ACTIVE='h2,public,simple-cache,titan'
+    export SPRING_PROFILES_ACTIVE='h2,public,simple-cache,graph'
 fi
 export DIR=$( dirname "$( python -c "import os; print os.path.abspath('${BASH_SOURCE[0]}')" )" )
 source "${DIR}/start-acs.sh" "$@"

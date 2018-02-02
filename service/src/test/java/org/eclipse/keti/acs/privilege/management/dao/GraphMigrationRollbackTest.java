@@ -27,13 +27,13 @@ import org.mockito.internal.util.reflection.Whitebox;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class TitanMigrationRollbackTest {
+public class GraphMigrationRollbackTest {
 
     private final GraphResourceRepository resourceHierarchicalRepository = mock(
             GraphResourceRepository.class);
     private final SubjectHierarchicalRepository subjectHierarchicalRepository = mock(GraphSubjectRepository.class);
     private ResourceMigrationManager resourceMigrationManager;
-    private TitanMigrationManager titanMigrationManager = new TitanMigrationManager();
+    private GraphMigrationManager graphMigrationManager = new GraphMigrationManager();
     private SubjectMigrationManager subjectMigrationManager;
 
     @BeforeMethod
@@ -41,23 +41,23 @@ public class TitanMigrationRollbackTest {
         this.resourceMigrationManager = Mockito.mock(ResourceMigrationManager.class);
         this.subjectMigrationManager = Mockito.mock(SubjectMigrationManager.class);
 
-        Whitebox.setInternalState(this.titanMigrationManager, "resourceHierarchicalRepository",
+        Whitebox.setInternalState(this.graphMigrationManager, "resourceHierarchicalRepository",
                 this.resourceHierarchicalRepository);
-        Whitebox.setInternalState(this.titanMigrationManager, "subjectHierarchicalRepository",
+        Whitebox.setInternalState(this.graphMigrationManager, "subjectHierarchicalRepository",
                 this.subjectHierarchicalRepository);
 
-        Whitebox.setInternalState(this.titanMigrationManager, "resourceMigrationManager",
+        Whitebox.setInternalState(this.graphMigrationManager, "resourceMigrationManager",
                 this.resourceMigrationManager);
-        Whitebox.setInternalState(this.titanMigrationManager, "subjectMigrationManager",
+        Whitebox.setInternalState(this.graphMigrationManager, "subjectMigrationManager",
                 this.subjectMigrationManager);
     }
 
     @Test
     public void testMigrationRollbackCalled() throws InterruptedException {
         Mockito.when(this.resourceHierarchicalRepository.checkVersionVertexExists(1)).thenReturn(false);
-        this.titanMigrationManager.doMigration();
+        this.graphMigrationManager.doMigration();
 
-        // This sleep is because TitanMigrationManager invokes resourceMigrationManager asynchronously
+        // This sleep is because we invoke resourceMigrationManager asynchronously
         Thread.sleep(100);
 
         Mockito.verify(this.subjectMigrationManager).rollbackMigratedData(anyObject());
@@ -67,9 +67,9 @@ public class TitanMigrationRollbackTest {
     @Test
     public void testMigrationRollbackNotCalled() throws InterruptedException {
         Mockito.when(this.resourceHierarchicalRepository.checkVersionVertexExists(1)).thenReturn(true);
-        this.titanMigrationManager.doMigration();
+        this.graphMigrationManager.doMigration();
 
-        // This sleep is because TitanMigrationManager invokes resourceMigrationManager asynchronously
+        // This sleep is because we invoke resourceMigrationManager asynchronously
         Thread.sleep(100);
 
         Mockito.verify(this.subjectMigrationManager, times(0)).rollbackMigratedData(anyObject());
