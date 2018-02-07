@@ -107,6 +107,6 @@ public class AccessControlService {
 
     private static ApiInfo apiInfo() {
         return new ApiInfoBuilder().title("Access Control").description("Access Control Services (ACS). ").version("v1")
-                .license("Apache 2.0").licenseUrl("https://github.com/predix/acs/blob/develop/LICENSE").build();
+                .license("Apache 2.0").licenseUrl("https://github.com/eclipse/keti/blob/master/LICENSE").build();
     }
 }
