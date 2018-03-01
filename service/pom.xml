@@ -39,9 +39,9 @@
             <artifactId>spring-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.thinkaurelius.titan</groupId>
-            <artifactId>titan-core</artifactId>
-            <version>${titandb.version}</version>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-core</artifactId>
+            <version>${janusgraph.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -66,9 +66,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.thinkaurelius.titan</groupId>
-            <artifactId>titan-cassandra</artifactId>
-            <version>${titandb.version}</version>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-cassandra</artifactId>
+            <version>${janusgraph.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -183,6 +183,10 @@
                 <exclusion>
                     <groupId>io.netty</groupId>
                     <artifactId>netty-all</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mindrot</groupId>
+                    <artifactId>jbcrypt</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -506,12 +510,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire.version}</version>
                 <configuration>
-                    <environmentVariables>
-                        <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan</SPRING_PROFILES_ACTIVE>
-                    </environmentVariables>
-                    <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
-                         and retained by Jenkins for each profile -->
-                    <reportsDirectory>${basedir}/surefire-reports-titan</reportsDirectory>
+                    <argLine>${custom-argline}</argLine>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/unit-tests.xml</suiteXmlFile>
                     </suiteXmlFiles>
@@ -523,16 +522,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${maven-failsafe.version}</version>
                 <configuration>
-                    <environmentVariables>
-                        <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,titan</SPRING_PROFILES_ACTIVE>
-                    </environmentVariables>
-                    <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
-                         and retained by Jenkins for each profile -->
-                    <reportsDirectory>${basedir}/surefire-reports-titan/controller-tests</reportsDirectory>
-                    <summaryFile>${basedir}/surefire-reports-titan/controller-tests/failsafe-summary.xml</summaryFile>
-                    <excludes>
-                        <exclude>**/NonHierarchical*IT.java</exclude>
-                    </excludes>
+                    <argLine>${custom-argline}</argLine>
                 </configuration>
                 <executions>
                     <execution>
@@ -596,8 +586,6 @@
             </activation>
             <build>
                 <plugins>
-                    <!-- TODO: Once we isolate predix related files (including audit) into predix branch, -->
-                    <!-- compiler plugin configuration that explicitly excludes audit files could be removed -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
@@ -620,12 +608,7 @@
                             <environmentVariables>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
                             </environmentVariables>
-                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
-                                 and retained by Jenkins for each profile -->
                             <reportsDirectory>${basedir}/surefire-reports</reportsDirectory>
-                            <suiteXmlFiles>
-                                <suiteXmlFile>src/test/resources/unit-tests.xml</suiteXmlFile>
-                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -633,11 +616,9 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>${maven-failsafe.version}</version>
                         <configuration>
-                            <environmentVariables>
+                             <environmentVariables>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache</SPRING_PROFILES_ACTIVE>
                             </environmentVariables>
-                            <!-- us32088: Place test reports outside of target directory so reports are not removed by 'mvn clean'
-                                 and retained by Jenkins for each profile -->
                             <reportsDirectory>${basedir}/surefire-reports/controller-tests</reportsDirectory>
                             <summaryFile>${basedir}/surefire-reports/controller-tests/failsafe-summary.xml</summaryFile>
                             <excludes>
@@ -646,31 +627,15 @@
                                 <exclude>**/Hierarchical*IT.java</exclude>
                             </excludes>
                         </configuration>
-                        <executions>
-                            <execution>
-                                <id>integration-test</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify</id>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>
         </profile>
 
         <profile>
-            <id>public-titan</id>
+            <id>public-graph</id>
             <build>
                 <plugins>
-                    <!-- TODO: Once we isolate predix related files (including audit) into predix branch, -->
-                    <!-- compiler plugin configuration that explicitly excludes audit files could be removed -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
@@ -685,12 +650,38 @@
                             </testExcludes>
                         </configuration>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire.version}</version>
+                        <configuration>
+                            <environmentVariables>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,graph</SPRING_PROFILES_ACTIVE>
+                            </environmentVariables>
+                            <reportsDirectory>${basedir}/surefire-reports-graph</reportsDirectory>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
+                        <configuration>
+                            <environmentVariables>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,graph</SPRING_PROFILES_ACTIVE>
+                            </environmentVariables>
+                            <reportsDirectory>${basedir}/surefire-reports-graph/controller-tests</reportsDirectory>
+                            <summaryFile>${basedir}/surefire-reports-graph/controller-tests/failsafe-summary.xml</summaryFile>
+                            <excludes>
+                                <exclude>**/NonHierarchical*IT.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
 
         <profile>
-            <id>predix-titan</id>
+            <id>predix-graph</id>
             <dependencies>
                 <dependency>
                     <groupId>com.ge.predix.audit</groupId>

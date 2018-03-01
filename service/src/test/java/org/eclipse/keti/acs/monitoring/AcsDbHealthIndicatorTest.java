@@ -18,7 +18,7 @@
 
 package org.eclipse.keti.acs.monitoring;
 
-import org.eclipse.keti.acs.privilege.management.dao.TitanMigrationManager;
+import org.eclipse.keti.acs.privilege.management.dao.GraphMigrationManager;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.springframework.boot.actuate.health.Status;
@@ -37,10 +37,10 @@ public class AcsDbHealthIndicatorTest {
 
     @Test(dataProvider = "statuses")
     public void testHealth(final AcsMonitoringRepository acsMonitoringRepository, final Status status,
-            final AcsMonitoringUtilities.HealthCode healthCode, final TitanMigrationManager titanMigrationManager)
+            final AcsMonitoringUtilities.HealthCode healthCode, final GraphMigrationManager graphMigrationManager)
             throws Exception {
         AcsDbHealthIndicator acsDbHealthIndicator = new AcsDbHealthIndicator(acsMonitoringRepository);
-        acsDbHealthIndicator.setMigrationManager(titanMigrationManager);
+        acsDbHealthIndicator.setMigrationManager(graphMigrationManager);
         Assert.assertEquals(status, acsDbHealthIndicator.health().getStatus());
         Assert.assertEquals(AcsDbHealthIndicator.DESCRIPTION,
                 acsDbHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.DESCRIPTION_KEY));
@@ -54,8 +54,8 @@ public class AcsDbHealthIndicatorTest {
 
     @DataProvider
     public Object[][] statuses() {
-        TitanMigrationManager happyMigrationManager = new TitanMigrationManager();
-        TitanMigrationManager sadMigrationManager = new TitanMigrationManager();
+        GraphMigrationManager happyMigrationManager = new GraphMigrationManager();
+        GraphMigrationManager sadMigrationManager = new GraphMigrationManager();
         Whitebox.setInternalState(happyMigrationManager, IS_MIGRATION_COMPLETE_FIELD_NAME, true);
         Whitebox.setInternalState(sadMigrationManager, IS_MIGRATION_COMPLETE_FIELD_NAME, false);
 

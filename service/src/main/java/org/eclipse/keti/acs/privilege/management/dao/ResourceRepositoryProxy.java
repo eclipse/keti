@@ -58,7 +58,7 @@ public class ResourceRepositoryProxy implements ResourceRepository, ResourceHier
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (Arrays.asList(this.environment.getActiveProfiles()).contains("titan")) {
+        if (Arrays.asList(this.environment.getActiveProfiles()).contains("graph")) {
             this.activeRepository = this.graphRepository;
             LOGGER.info("Resource hierarchical repository enabled.");
         } else {
@@ -190,7 +190,7 @@ public class ResourceRepositoryProxy implements ResourceRepository, ResourceHier
 
     @Override
     public ResourceEntity getResourceWithInheritedAttributes(final ZoneEntity zone, final String resourceIdentifier) {
-        if (this.activeRepository == this.graphRepository) { // i.e. titan is enabled
+        if (this.activeRepository == this.graphRepository) { // i.e. graph is enabled
             return this.graphRepository.getResourceWithInheritedAttributes(zone, resourceIdentifier);
         } else {
             return this.nonGraphRepository.getByZoneAndResourceIdentifier(zone, resourceIdentifier);
@@ -209,7 +209,7 @@ public class ResourceRepositoryProxy implements ResourceRepository, ResourceHier
 
     @Override
     public Set<String> getResourceEntityAndDescendantsIds(final ResourceEntity entity) {
-        if (this.activeRepository == this.graphRepository) { // i.e. titan is enabled
+        if (this.activeRepository == this.graphRepository) { // i.e. graph is enabled
             return this.graphRepository.getResourceEntityAndDescendantsIds(entity);
         } else {
             return Collections.singleton(entity.getResourceIdentifier());

@@ -26,7 +26,7 @@ public class TestActiveProfilesResolver implements ActiveProfilesResolver {
     @Override
     public String[] resolve(final Class<?> arg0) {
         String envSpringProfilesActive = System.getenv("SPRING_PROFILES_ACTIVE");
-        String[] profiles = new String[] { "h2", "public", "simple-cache", "titan" };
+        String[] profiles = new String[] { "h2", "public", "simple-cache", "graph" };
         if (StringUtils.isNotEmpty(envSpringProfilesActive)) {
             profiles = StringUtils.split(envSpringProfilesActive, ',');
         }

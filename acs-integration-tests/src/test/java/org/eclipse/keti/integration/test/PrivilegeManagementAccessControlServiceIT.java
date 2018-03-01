@@ -91,9 +91,6 @@ public class PrivilegeManagementAccessControlServiceIT extends AbstractTestNGSpr
     @Autowired
     private ACSITSetUpFactory acsitSetUpFactory;
 
-    @Value("${ACS_UAA_URL}")
-    private String uaaUrl;
-
     private String acsUrl;
     private HttpHeaders zone1Headers;
     private HttpHeaders zone3Headers;

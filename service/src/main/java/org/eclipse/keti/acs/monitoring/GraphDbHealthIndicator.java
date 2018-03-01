@@ -29,13 +29,13 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
-import org.eclipse.keti.acs.privilege.management.dao.TitanMigrationManager;
-import com.thinkaurelius.titan.core.QueryException;
-import com.thinkaurelius.titan.core.TitanConfigurationException;
-import com.thinkaurelius.titan.diskstorage.ResourceUnavailableException;
+import org.eclipse.keti.acs.privilege.management.dao.GraphMigrationManager;
+import org.janusgraph.core.QueryException;
+import org.janusgraph.core.JanusGraphConfigurationException;
+import org.janusgraph.diskstorage.ResourceUnavailableException;
 
 @Component
-@Profile({ "titan" })
+@Profile({ "graph" })
 public class GraphDbHealthIndicator implements HealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphDbHealthIndicator.class);
@@ -45,7 +45,7 @@ public class GraphDbHealthIndicator implements HealthIndicator {
 
     private final GraphResourceRepository resourceHierarchicalRepository;
 
-    @Value("${TITAN_ENABLE_CASSANDRA:false}")
+    @Value("${GRAPH_ENABLE_CASSANDRA:false}")
     private boolean cassandraEnabled;
 
     @Autowired
@@ -69,7 +69,7 @@ public class GraphDbHealthIndicator implements HealthIndicator {
         try {
             LOGGER.debug("Checking graph database status");
             if (this.resourceHierarchicalRepository
-                    .checkVersionVertexExists(TitanMigrationManager.INITIAL_ATTRIBUTE_GRAPH_VERSION)) {
+                    .checkVersionVertexExists(GraphMigrationManager.INITIAL_ATTRIBUTE_GRAPH_VERSION)) {
                 healthCode = AcsMonitoringUtilities.HealthCode.AVAILABLE;
             }
         } catch (QueryException e) {
@@ -78,7 +78,7 @@ public class GraphDbHealthIndicator implements HealthIndicator {
         } catch (ResourceUnavailableException e) {
             healthCode = AcsMonitoringUtilities.logError(AcsMonitoringUtilities.HealthCode.UNAVAILABLE, LOGGER,
                     ERROR_MESSAGE_FORMAT, e);
-        } catch (TitanConfigurationException e) {
+        } catch (JanusGraphConfigurationException e) {
             healthCode = AcsMonitoringUtilities.logError(AcsMonitoringUtilities.HealthCode.MISCONFIGURATION, LOGGER,
                     ERROR_MESSAGE_FORMAT, e);
         } catch (Exception e) {

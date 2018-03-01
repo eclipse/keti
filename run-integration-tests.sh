@@ -19,16 +19,20 @@
 #!/usr/bin/env bash
 
 function usage {
-    echo "Usage: source ./$( basename "$( python -c "import os; print os.path.abspath('${BASH_SOURCE[0]}')" )" ) [-s <maven_settings_file>]"
+    echo "Usage: source ./$( basename "$( python -c "import os; print os.path.abspath('${BASH_SOURCE[0]}')" )" ) [-g] [-s <maven_settings_file>]"
 }
 
 unset MVN_SETTINGS_FILE_LOC
+unset GRAPH_SUFFIX
 
-while getopts ':s:' option; do
+while getopts ':s:g' option; do
     case "$option" in
         s)
             export MVN_SETTINGS_FILE_LOC="$OPTARG"
             ;;
+        g)
+            export GRAPH_SUFFIX='-graph'
+            ;;            
         '?' | ':')
             usage
             return 2
@@ -40,13 +44,13 @@ unset PORT_OFFSET
 source ./set-env-local.sh
 
 if [ -z "$MVN_SETTINGS_FILE_LOC" ]; then
-    mvn clean package -D skipTests
+    mvn clean package -P "public${GRAPH_SUFFIX}" -D skipTests
     cd acs-integration-tests
-    mvn clean verify -P public
+    mvn clean verify -P "public${GRAPH_SUFFIX}"
     cd -
 else
-    mvn clean package -D skipTests -s "$MVN_SETTINGS_FILE_LOC"
+    mvn clean package -P "public${GRAPH_SUFFIX}" -D skipTests -s "$MVN_SETTINGS_FILE_LOC"
     cd acs-integration-tests
-    mvn clean verify -P public -s "../${MVN_SETTINGS_FILE_LOC}"
+    mvn clean verify -P "public${GRAPH_SUFFIX}" -s "../${MVN_SETTINGS_FILE_LOC}"
     cd -
 fi

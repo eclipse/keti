@@ -19,10 +19,10 @@
 package org.eclipse.keti.acs.monitoring;
 
 import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
-import com.thinkaurelius.titan.core.QueryException;
-import com.thinkaurelius.titan.core.TitanConfigurationException;
-import com.thinkaurelius.titan.diskstorage.ResourceUnavailableException;
-import com.thinkaurelius.titan.graphdb.database.idassigner.IDPoolExhaustedException;
+import org.janusgraph.core.QueryException;
+import org.janusgraph.core.JanusGraphConfigurationException;
+import org.janusgraph.diskstorage.ResourceUnavailableException;
+import org.janusgraph.graphdb.database.idassigner.IDPoolExhaustedException;
 import org.mockito.Mockito;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -62,7 +62,7 @@ public class GraphDbHealthIndicatorTest {
                 { mockGraphDbWithExceptionWhileCheckingVersion(new ResourceUnavailableException("")), Status.DOWN,
                         AcsMonitoringUtilities.HealthCode.UNAVAILABLE, true },
 
-                { mockGraphDbWithExceptionWhileCheckingVersion(new TitanConfigurationException("")), Status.DOWN,
+                { mockGraphDbWithExceptionWhileCheckingVersion(new JanusGraphConfigurationException("")), Status.DOWN,
                         AcsMonitoringUtilities.HealthCode.MISCONFIGURATION, true },
 
                 { mockGraphDbWithExceptionWhileCheckingVersion(new IDPoolExhaustedException("")), Status.DOWN,

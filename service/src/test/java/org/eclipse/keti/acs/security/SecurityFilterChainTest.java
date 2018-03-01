@@ -90,7 +90,7 @@ public final class SecurityFilterChainTest extends AbstractTestNGSpringContextTe
                 .alwaysDo(print()).build();
     }
 
-    @Test(dataProvider = "anonymousRequestBuilder", enabled = false)
+    @Test(dataProvider = "anonymousRequestBuilder")
     public void testAnonymousAccess(final RequestBuilder request, final ResultMatcher expectedStatus,
             final ResultMatcher expectedContent) throws Exception {
         this.mockMvc.perform(request).andExpect(expectedStatus).andExpect(expectedContent);

@@ -62,8 +62,8 @@ public final class NonHierarchicalSubjectsIT extends AbstractTestNGSpringContext
 
     @BeforeClass
     public void beforeClass() throws Exception {
-        if (Arrays.asList(this.configurableEnvironment.getActiveProfiles()).contains("titan")) {
-            throw new SkipException("This test only applies when NOT using the \"titan\" profile");
+        if (Arrays.asList(this.configurableEnvironment.getActiveProfiles()).contains("graph")) {
+            throw new SkipException("This test only applies when NOT using the \"graph\" profile");
         }
 
         this.zoneService.upsertZone(TEST_ZONE);
@@ -72,7 +72,7 @@ public final class NonHierarchicalSubjectsIT extends AbstractTestNGSpringContext
     }
 
     @Test
-    public void testSubjectWithParentsFailWhenNotUsingTitan() throws Exception {
+    public void testSubjectWithParentsFailWhenNotUsingGraph() throws Exception {
         BaseSubject subject = SubjectPrivilegeManagementControllerIT.JSON_UTILS.deserializeFromFile(
             "controller-test/a-subject-with-parents.json", BaseSubject.class);
         Assert.assertNotNull(subject);

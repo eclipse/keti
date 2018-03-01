@@ -36,7 +36,7 @@
             </list>
         </property>
     </bean>
-
+    
     <!-- Begin constructing Apache HttpClient request factory for REST template. -->
 
     <bean id="httpRequestFactory"
@@ -79,5 +79,3 @@
 </beans>
 
         <!-- End constructing Apache HttpClient request factory for REST template. -->
-
-

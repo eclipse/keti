@@ -1,0 +1,106 @@
+#!/usr/bin/env groovy
+
+pipeline {
+
+	agent any
+	options {
+		buildDiscarder(logRotator(numToKeepStr:'10'))
+		skipDefaultCheckout()
+	}
+	tools{
+		maven 'apache-maven-latest' 
+		jdk 'jdk1.8.0-latest' 
+	}
+	stages {
+
+		stage('Checkout git repository') {
+			steps {
+				echo 'Cleaning Workspace'
+				cleanWs()
+				echo 'Checking out keti repo'
+				dir ('keti') {
+					checkout scm
+				}
+				sh 'mkdir public && cp -frp keti public/keti'
+				sh 'mkdir public-graph &&  cp -frp keti public-graph/keti'
+			}
+			post {
+				success {
+					echo 'Checkout of the Git repository succeeded'
+				}
+				failure {
+					echo 'Checkout of the Git repository failed'
+				}
+			}
+		}
+
+		stage('Build Public Profile') {
+			steps {
+				sh 'cd public/keti && mvn clean install -P public' 
+			}
+			post {
+				success {
+					echo 'Build Public profile succeeded'
+				}
+				failure {
+					echo 'Build Public profile failed'
+				}
+			always {
+					junit '**/public/**/surefire-reports*/junitreports/TEST*.xml, **/public/**/surefire-reports*/**/junitreports/TEST*.xml'
+				}
+			}
+		}
+
+		stage('Build Public Graph Profile') {
+			steps {
+				sh 'cd public-graph/keti && mvn clean install -P public-graph' 
+			}
+			post {
+				success {
+					echo 'Build Public Graph Profile succeeded'
+				}
+				failure {
+					echo 'Build Public Graph Profile failed'
+				}
+				always {
+					junit '**/public-graph/**/surefire-reports*/junitreports/TEST*.xml, **/public-graph/**/surefire-reports*/**/junitreports/TEST*.xml'
+				}
+			}
+		}
+
+		stage('Run Integration tests using Public Profile') {
+			steps {
+				sh "cd public/keti && ./run-integration-tests.sh"
+			}
+			post {
+				success {
+					echo 'Run Integration tests using Public Profile succeeded'
+				}
+				failure {
+					echo 'Run Integration tests using Public Profile failed'
+				}
+				always {
+					junit '**/public/**/failsafe-reports*/junitreports/TEST*.xml, **/public/**/failsafe-reports*/**/junitreports/TEST*.xml'
+				}
+			}
+		}
+
+		stage('Run Integration tests using Public Graph Profile') {
+			steps {
+
+				sh "cd public-graph/keti && ./run-integration-tests.sh -g"
+			}
+			post {
+				success {
+					echo 'Run Integration tests using Public Graph Profile succeeded'
+				}
+				failure {
+					echo 'Run Integration tests using Public Graph Profile failed'
+				}
+				always {
+					junit '**/public-graph/**/failsafe-reports*/junitreports/TEST*.xml, **/public-graph/**/failsafe-reports*/**/junitreports/TEST*.xml'
+				}
+			}
+		}
+	}
+}

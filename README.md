@@ -1,36 +1,54 @@
-## Access Control Service (ACS)
+## Keti - Access Control Service
 
-For more information about Access Control Services, please read the following documentation:
-https://www.predix.io/docs#IGyNp2eM
+*Note: Keti was earlier called ACS. This repository still has references to artifacts with that name and can be treated as synonymous to Keti.*
 
-### LICENSE
+### License
+
 This project is licensed under Apache v2.
 
-### How to run ACS locally
-To run the service locally, go to service/ directory
+### How to build and run unit tests
 
-```
-source ./service/start-acs-public.sh
-```
-The ACS service requires a UAA (User Account and Authentication: https://github.com/cloudfoundry/uaa) service to manage OAuth clients and users used in conjunction with ACS.
-When running ACS locally, by default the service is configured to trust the local UAA. You can modify the environment variable `ACS_DEFAULT_ISSUER_ID` and `UAA_CHECK_HEALTH_URL` to correspond to your existing UAA.
+To build Keti without support for hierarchical attributes and run unit tests:
 
-### How to run UAA locally
-
-Clone the UAA repository from the following url and checkout the 3.2.1 branch.
-
-```
-git clone https://github.com/cloudfoundry/uaa.git
-cd uaa
-git checkout releases/3.2.1
-./gradlew assemble -x javadoc
-./gradlew run -x javadoc --info
+```bash
+$ mvn clean install [-P public-graph] [-s <maven_settings_file>]
 ```
 
-### Run ACS integration tests
+Specify the `public-graph` profile to build Keti with support for hierarchical attributes.
 
-The public profile starts UAA and ACS, runs the tests, then stops the ACS and UAA services.
+### Start Keti locally
 
+To run the service locally without support for hierarchical attributes:
+
+```bash
+$ ./service/start-acs-public.sh
 ```
-source ./run-integration-tests.sh [-s <maven_settings_file>]
+
+To run the service locally with support for hierarchical attributes:
+
+```bash
+$ ./service/start-acs-public-graph.sh
 ```
+
+The Keti service requires a UAA (User Account and Authentication: https://github.com/cloudfoundry/uaa) service to manage OAuth clients and users that are authorized to access it. When running Keti locally, by default the service is configured to trust the local UAA. You can modify the environment variable `ACS_DEFAULT_ISSUER_ID` and `UAA_CHECK_HEALTH_URL` to correspond to your existing UAA.
+
+### Running UAA locally
+
+Clone the UAA repository from the following url:
+
+```bash
+$ git clone https://github.com/cloudfoundry/uaa.git
+$ cd uaa
+$ ./gradlew assemble -x javadoc
+$ ./gradlew run -x javadoc --info
+```
+
+### How to run integration tests
+
+The script below starts UAA and Keti, runs the tests, then stops the Keti and UAA services:
+
+```bash
+$ ./run-integration-tests.sh [-g] [-s <maven_settings_file>]
+```
+
+Specify the `-g` option to run integration tests against Keti that supports hierarchical attributes.

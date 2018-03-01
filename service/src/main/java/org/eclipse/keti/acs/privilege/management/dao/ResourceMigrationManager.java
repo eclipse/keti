@@ -57,7 +57,7 @@ public class ResourceMigrationManager {
         } while (pageOfResources.hasNext());
 
         LOGGER.info("Number of resource entities migrated: {}", numOfResourcesSaved);
-        LOGGER.info("Resource migration to Titan completed.");
+        LOGGER.info("Resource migration to graph completed.");
     }
 
     public void rollbackMigratedData(final GraphResourceRepository resourceHierarchicalRepository) {

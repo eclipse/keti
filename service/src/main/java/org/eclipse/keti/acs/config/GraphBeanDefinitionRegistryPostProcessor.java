@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
 import org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepository;
 
-@Profile("titan")
+@Profile("graph")
 @Component
 public class GraphBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
