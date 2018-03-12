@@ -33,7 +33,7 @@ public final class AcsMonitoringUtilities {
         UNAVAILABLE,
         UNREACHABLE,
         MISCONFIGURATION,
-        MIGRATION_INCOMPLETE,
+        STARTUP_INCOMPLETE,
         INVALID_QUERY,
         INVALID_JSON,
         DEGRADED,
@@ -52,7 +52,7 @@ public final class AcsMonitoringUtilities {
         throw new UnsupportedOperationException();
     }
 
-    static Health health(final Status status, final HealthCode healthCode, final String description) {
+    public static Health health(final Status status, final HealthCode healthCode, final String description) {
         Health.Builder healthBuilder = Health.status(status);
         if (healthCode != HealthCode.AVAILABLE) {
             healthBuilder.withDetail(CODE_KEY, healthCode);
@@ -61,7 +61,7 @@ public final class AcsMonitoringUtilities {
         return healthBuilder.build();
     }
 
-    static Health health(final Supplier<HealthCode> check, final String description) {
+    public static Health health(final Supplier<HealthCode> check, final String description) {
         try {
             HealthCode healthCode = check.get();
             if (healthCode == HealthCode.AVAILABLE) {
@@ -74,7 +74,7 @@ public final class AcsMonitoringUtilities {
         }
     }
 
-    static HealthCode logError(final HealthCode healthCode, final Logger logger, final String format,
+    public static HealthCode logError(final HealthCode healthCode, final Logger logger, final String format,
             final Throwable throwable) {
         logger.error(format, healthCode, throwable);
         return healthCode;

@@ -22,3 +22,4 @@ commons/pom.xml.versionsBackup
 **/gotty-client*
 .acs.*
 xmlstarlet*
+/.metadata/

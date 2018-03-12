@@ -30,77 +30,49 @@ import java.util.concurrent.Executors;
 
 @Component
 @Profile("graph")
-public final class GraphMigrationManager {
+public final class GraphStartupManager {
     public static final int INITIAL_ATTRIBUTE_GRAPH_VERSION = 1;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GraphMigrationManager.class);
-
-    @Autowired
-    @Qualifier("resourceRepository")
-    private ResourceRepository resourceRepository;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GraphStartupManager.class);
 
     @Autowired
     @Qualifier("resourceHierarchicalRepository")
     private GraphResourceRepository resourceHierarchicalRepository;
 
-    @Autowired
-    @Qualifier("subjectRepository")
-    private SubjectRepository subjectRepository;
+    private Boolean isStartupComplete = false;
 
-    @Autowired
-    @Qualifier("subjectHierarchicalRepository")
-    private GraphSubjectRepository subjectHierarchicalRepository;
-
-    private Boolean isMigrationComplete = false;
-
-    static final int PAGE_SIZE = 1024;
-
-    private final ResourceMigrationManager resourceMigrationManager = new ResourceMigrationManager();
-    private final SubjectMigrationManager subjectMigrationManager = new SubjectMigrationManager();
 
     @PostConstruct
-    public void doMigration() {
+    public void doStartup() {
         // This version vertex is common to both subject and resource repositories. So this check is sufficient to
-        // trigger migrations in both repos.
+        // trigger startups in both repos.
         if (!this.resourceHierarchicalRepository.checkVersionVertexExists(INITIAL_ATTRIBUTE_GRAPH_VERSION)) {
 
-            // Migration needs to be performed in a separate thread to prevent cloud-foundry health check timeout,
+            // Startup needs to be performed in a separate thread to prevent cloud-foundry health check timeout,
             // which restarts the service. (Max timeout is 180 seconds which is not enough)
             Executors.newSingleThreadExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        LOGGER.info("Starting attribute migration process to graph.");
-
-                        //Rollback in the beginning to start with a clean state
-                        resourceMigrationManager.rollbackMigratedData(resourceHierarchicalRepository);
-                        subjectMigrationManager.rollbackMigratedData(subjectHierarchicalRepository);
-
-                        //Run migration
-                        resourceMigrationManager.doResourceMigration(resourceRepository,
-                                resourceHierarchicalRepository, PAGE_SIZE);
-                        subjectMigrationManager.doSubjectMigration(subjectRepository,
-                                subjectHierarchicalRepository, PAGE_SIZE);
-
+                        LOGGER.info("Starting attribute startup process to graph.");
                         //Create version vertex, to record completion.
                         resourceHierarchicalRepository.createVersionVertex(INITIAL_ATTRIBUTE_GRAPH_VERSION);
-                        isMigrationComplete = true;
-
-                        LOGGER.info("Graph attribute migration complete. Created version: "
+                        isStartupComplete = true;
+                        LOGGER.info("Graph attribute startup complete. Created version: "
                                 + INITIAL_ATTRIBUTE_GRAPH_VERSION);
                     } catch (Exception e) {
-                        LOGGER.error("Exception during attribute migration: ", e);
+                        LOGGER.error("Exception during attribute startup: ", e);
                     }
                 }
             });
         } else {
-            isMigrationComplete = true;
-            LOGGER.info("Attribute Graph migration not required.");
+            isStartupComplete = true;
+            LOGGER.info("Attribute Graph startup not required.");
         }
     }
 
-    public boolean isMigrationComplete() {
-        return this.isMigrationComplete;
+    public boolean isStartupComplete() {
+        return this.isStartupComplete;
     }
 
 }
