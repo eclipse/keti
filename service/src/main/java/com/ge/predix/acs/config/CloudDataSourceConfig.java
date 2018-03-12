@@ -19,6 +19,7 @@ package com.ge.predix.acs.config;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.eclipse.keti.acs.config.AcsConfigUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ import org.springframework.cloud.service.relational.DataSourceConfig;
 import org.springframework.cloud.service.relational.DataSourceConfig.ConnectionConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -38,10 +40,10 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 @Configuration
 @Profile({ "cloudDbConfig" })
-@EnableJpaRepositories({ "com.ge.predix.acs.service.policy.admin.dao",
-        "com.ge.predix.acs.privilege.management.dao",
-        "com.ge.predix.acs.zone.management.dao",
-        "com.ge.predix.acs.attribute.connector.management.dao" })
+@EnableJpaRepositories({ "org.eclipse.keti.acs.service.policy.admin.dao",
+        "org.eclipse.keti.acs.privilege.management.dao",
+        "org.eclipse.keti.acs.zone.management.dao",
+        "org.eclipse.keti.acs.attribute.connector.management.dao" })
 public class CloudDataSourceConfig extends AbstractCloudConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudDataSourceConfig.class);
 
@@ -64,6 +66,7 @@ public class CloudDataSourceConfig extends AbstractCloudConfig {
     }
 
     @Bean
+    @Primary
     public DataSource dataSource() {
         LOGGER.info("Starting ACS with the database that is bound to it: {}", this.acsDb); //$NON-NLS-1$
         return connectionFactory().dataSource(this.acsDb, dataSourceConfig());

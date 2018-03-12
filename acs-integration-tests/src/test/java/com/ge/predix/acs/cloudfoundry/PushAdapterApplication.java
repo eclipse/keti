@@ -27,6 +27,8 @@ import java.util.Map;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.eclipse.keti.test.utils.ACSTestUtil;
+import org.eclipse.keti.test.utils.PolicyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +48,6 @@ import org.testng.annotations.Test;
 import com.ge.predix.cloudfoundry.client.CloudFoundryApplicationHelper;
 import com.ge.predix.cloudfoundry.client.CloudFoundryService;
 import com.ge.predix.cloudfoundry.client.CloudFoundryUtilities;
-import com.ge.predix.test.utils.ACSTestUtil;
-import com.ge.predix.test.utils.PolicyHelper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 

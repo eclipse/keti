@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.cloudfoundry.uaa.tokens.GrantType;
+import org.eclipse.keti.test.utils.ACSTestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +41,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidClientExcept
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.stereotype.Component;
 
-import com.ge.predix.test.utils.ACSTestUtil;
+
 
 public final class AcsCloudFoundryUtilities {
 

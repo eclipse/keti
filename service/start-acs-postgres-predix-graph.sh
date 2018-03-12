@@ -12,16 +12,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# SPDX-License-Identifier: Apache-2.0
 ################################################################################
 
 #!/usr/bin/env bash
 
-unset PROXY_OPTS
+# This script will run ACS against a local PostgreSQL database. To setup the database:
+# 1. Install PostgreSQL
+# 2. Open psql
+# 3. execute: 'create database acs;'
+# 4. execute: 'create user postgres;'
+# 5. execute: 'grant all privileges on database acs to postgres;'
 
 if [[ -z "$SPRING_PROFILES_ACTIVE" ]]; then
-    export SPRING_PROFILES_ACTIVE='h2,public,simple-cache,titan'
+    export SPRING_PROFILES_ACTIVE='envDbConfig,predix,simple-cache,graph'
 fi
+export DB_DRIVER_CLASS_NAME='org.postgresql.Driver'
+export DB_URL='jdbc:postgresql:acs'
+export DB_USERNAME='postgres'
+export DB_PASSWORD='postgres'
 export DIR=$( dirname "$( python -c "import os; print os.path.abspath('${BASH_SOURCE[0]}')" )" )
 source "${DIR}/start-acs.sh" "$@"

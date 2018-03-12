@@ -717,6 +717,36 @@
                     <version>1.0.1</version>
                 </dependency>
             </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire.version}</version>
+                        <configuration>
+                            <environmentVariables>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,graph</SPRING_PROFILES_ACTIVE>
+                            </environmentVariables>
+                            <reportsDirectory>${basedir}/surefire-reports-graph</reportsDirectory>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
+                        <configuration>
+                            <environmentVariables>
+                                <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,graph</SPRING_PROFILES_ACTIVE>
+                            </environmentVariables>
+                            <reportsDirectory>${basedir}/surefire-reports-graph/controller-tests</reportsDirectory>
+                            <summaryFile>${basedir}/surefire-reports-graph/controller-tests/failsafe-summary.xml</summaryFile>
+                            <excludes>
+                                <exclude>**/NonHierarchical*IT.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

@@ -16,6 +16,7 @@
 
 package com.ge.predix.test;
 
+import org.eclipse.keti.test.TestNameLogger;
 import org.testng.IInvokedMethod;
 import org.testng.ITestResult;
 import org.testng.SkipException;

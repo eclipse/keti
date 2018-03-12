@@ -16,6 +16,7 @@
 
 package com.ge.predix.acs.monitoring;
 
+import org.eclipse.keti.acs.monitoring.AcsMonitoringUtilities;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Status;

@@ -18,7 +18,7 @@
 
 package org.eclipse.keti.acs.monitoring;
 
-import org.eclipse.keti.acs.privilege.management.dao.GraphMigrationManager;
+import org.eclipse.keti.acs.privilege.management.dao.GraphStartupManager;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.springframework.boot.actuate.health.Status;
@@ -33,14 +33,14 @@ import org.testng.annotations.Test;
 
 public class AcsDbHealthIndicatorTest {
 
-    private static final String IS_MIGRATION_COMPLETE_FIELD_NAME = "isMigrationComplete";
+    private static final String IS_STARTUP_COMPLETE_FIELD_NAME = "isStartupComplete";
 
     @Test(dataProvider = "statuses")
     public void testHealth(final AcsMonitoringRepository acsMonitoringRepository, final Status status,
-            final AcsMonitoringUtilities.HealthCode healthCode, final GraphMigrationManager graphMigrationManager)
+            final AcsMonitoringUtilities.HealthCode healthCode, final GraphStartupManager graphStartupManager)
             throws Exception {
         AcsDbHealthIndicator acsDbHealthIndicator = new AcsDbHealthIndicator(acsMonitoringRepository);
-        acsDbHealthIndicator.setMigrationManager(graphMigrationManager);
+        acsDbHealthIndicator.setStartupManager(graphStartupManager);
         Assert.assertEquals(status, acsDbHealthIndicator.health().getStatus());
         Assert.assertEquals(AcsDbHealthIndicator.DESCRIPTION,
                 acsDbHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.DESCRIPTION_KEY));
@@ -54,31 +54,31 @@ public class AcsDbHealthIndicatorTest {
 
     @DataProvider
     public Object[][] statuses() {
-        GraphMigrationManager happyMigrationManager = new GraphMigrationManager();
-        GraphMigrationManager sadMigrationManager = new GraphMigrationManager();
-        Whitebox.setInternalState(happyMigrationManager, IS_MIGRATION_COMPLETE_FIELD_NAME, true);
-        Whitebox.setInternalState(sadMigrationManager, IS_MIGRATION_COMPLETE_FIELD_NAME, false);
+        GraphStartupManager happyStartupManager = new GraphStartupManager();
+        GraphStartupManager sadStartupManager = new GraphStartupManager();
+        Whitebox.setInternalState(happyStartupManager, IS_STARTUP_COMPLETE_FIELD_NAME, true);
+        Whitebox.setInternalState(sadStartupManager, IS_STARTUP_COMPLETE_FIELD_NAME, false);
 
         return new Object[][] { new Object[] { mockDbWithUp(), Status.UP, AcsMonitoringUtilities.HealthCode.AVAILABLE,
-                happyMigrationManager },
+                happyStartupManager },
 
                 { mockDbWithException(new TransientDataAccessResourceException("")), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.UNAVAILABLE, happyMigrationManager },
+                        AcsMonitoringUtilities.HealthCode.UNAVAILABLE, happyStartupManager },
 
                 { mockDbWithException(new QueryTimeoutException("")), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.UNAVAILABLE, happyMigrationManager },
+                        AcsMonitoringUtilities.HealthCode.UNAVAILABLE, happyStartupManager },
 
                 { mockDbWithException(new DataSourceLookupFailureException("")), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.UNREACHABLE, happyMigrationManager },
+                        AcsMonitoringUtilities.HealthCode.UNREACHABLE, happyStartupManager },
 
                 { mockDbWithException(new PermissionDeniedDataAccessException("", null)), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.MISCONFIGURATION, happyMigrationManager },
+                        AcsMonitoringUtilities.HealthCode.MISCONFIGURATION, happyStartupManager },
 
                 { mockDbWithException(new ConcurrencyFailureException("")), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.ERROR, happyMigrationManager },
+                        AcsMonitoringUtilities.HealthCode.ERROR, happyStartupManager },
 
-                { mockDbWithUp(), Status.DOWN, AcsMonitoringUtilities.HealthCode.MIGRATION_INCOMPLETE,
-                        sadMigrationManager }, };
+                { mockDbWithUp(), Status.DOWN, AcsMonitoringUtilities.HealthCode.STARTUP_INCOMPLETE,
+                        sadStartupManager }, };
     }
 
     private AcsMonitoringRepository mockDbWithUp() {

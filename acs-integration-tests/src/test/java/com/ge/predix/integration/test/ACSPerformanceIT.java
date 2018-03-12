@@ -16,11 +16,19 @@
 
 package com.ge.predix.integration.test;
 
-import static com.ge.predix.test.utils.PrivilegeHelper.DEFAULT_RESOURCE_IDENTIFIER;
-import static com.ge.predix.test.utils.PrivilegeHelper.DEFAULT_SUBJECT_ID;
+import static org.eclipse.keti.test.utils.PrivilegeHelper.DEFAULT_RESOURCE_IDENTIFIER;
+import static org.eclipse.keti.test.utils.PrivilegeHelper.DEFAULT_SUBJECT_ID;
 
 import java.io.IOException;
 
+import org.eclipse.keti.acs.model.Effect;
+import org.eclipse.keti.acs.rest.BaseResource;
+import org.eclipse.keti.acs.rest.BaseSubject;
+import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
+import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
+import org.eclipse.keti.test.utils.ACSITSetUpFactory;
+import org.eclipse.keti.test.utils.PolicyHelper;
+import org.eclipse.keti.test.utils.PrivilegeHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -38,14 +46,6 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.ge.predix.acs.model.Effect;
-import com.ge.predix.acs.rest.BaseResource;
-import com.ge.predix.acs.rest.BaseSubject;
-import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
-import com.ge.predix.acs.rest.PolicyEvaluationResult;
-import com.ge.predix.test.utils.ACSITSetUpFactory;
-import com.ge.predix.test.utils.PolicyHelper;
-import com.ge.predix.test.utils.PrivilegeHelper;
 
 @SuppressWarnings({ "nls" })
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
@@ -101,9 +101,9 @@ public class ACSPerformanceIT extends AbstractTestNGSpringContextTests {
     @Test(invocationCount = 2)
     public void testPolicyEvalPerformanceWithLargePolicySet() throws Exception {
 
-        PolicyEvaluationRequestV1 request = this.policyHelper
-                .createEvalRequest(NOT_MATCHING_ACTION, this.defaultSubject.getSubjectIdentifier(),
-                        (new BaseResource(DEFAULT_RESOURCE_IDENTIFIER)).getResourceIdentifier(), null);
+        PolicyEvaluationRequestV1 request = this.policyHelper.createEvalRequest(NOT_MATCHING_ACTION,
+                this.defaultSubject.getSubjectIdentifier(),
+                (new BaseResource(DEFAULT_RESOURCE_IDENTIFIER)).getResourceIdentifier(), null);
 
         ResponseEntity<PolicyEvaluationResult> postForEntity = this.acsRestTemplate.postForEntity(
                 this.acsUrl + PolicyHelper.ACS_POLICY_EVAL_API_PATH, new HttpEntity<>(request, this.zone1Headers),

@@ -16,12 +16,14 @@
 
 package com.ge.predix.test.utils;
 
-import static com.ge.predix.test.utils.ACSTestUtil.isServerListening;
+import static org.eclipse.keti.test.utils.ACSTestUtil.isServerListening;
 
 import java.net.URI;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.keti.test.utils.ACSTestUtil;
+import org.eclipse.keti.test.utils.OptionalTestSetup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

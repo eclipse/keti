@@ -20,6 +20,7 @@ package org.eclipse.keti.acs.config;
 
 import javax.sql.DataSource;
 
+import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,9 +29,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
-
-@ContextConfiguration(classes = { InMemoryDataSourceConfig.class, CloudDataSourceConfig.class })
+@ContextConfiguration(classes = { InMemoryDataSourceConfig.class })
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
 public class AcsConfigLocalProfileTest extends AbstractTestNGSpringContextTests {
     @Autowired

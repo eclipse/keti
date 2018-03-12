@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.eclipse.keti.acs.monitoring.AcsMonitoringUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Status;
@@ -39,7 +40,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ge.predix.acs.monitoring.AcsMonitoringUtilities;
+
 
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 public class AcsMonitoringIT extends AbstractTestNGSpringContextTests {
@@ -124,7 +125,7 @@ public class AcsMonitoringIT extends AbstractTestNGSpringContextTests {
         Assert.assertTrue(isDependencyStatusUp(responseJson, "acsDb"));
         Assert.assertTrue(isDependencyStatusUp(responseJson, "uaa"));
         List<String> activeProfiles = Arrays.asList(this.environment.getActiveProfiles());
-        Assert.assertTrue(activeProfiles.contains("titan") == isDependencyStatusUp(responseJson, "graphDb"));
+        Assert.assertTrue(activeProfiles.contains("graph") == isDependencyStatusUp(responseJson, "graphDb"));
         Assert.assertTrue(activeProfiles.contains("predix") == isDependencyStatusUp(responseJson, "zac"));
         if (activeProfiles.contains("redis") || activeProfiles.contains("cloud-redis")) {
             Assert.assertTrue(isDependencyStatusUp(responseJson, "decisionCache"));

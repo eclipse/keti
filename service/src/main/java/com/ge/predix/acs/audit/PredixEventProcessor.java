@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import com.ge.predix.acs.commons.web.AcsApiUriTemplates;
+import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates;
 import com.ge.predix.audit.AuditEvent;
 import com.ge.predix.audit.AuditEventProcessor;
 import com.ge.predix.audit.sdk.AuditClient;

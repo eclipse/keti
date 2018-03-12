@@ -38,9 +38,9 @@ import org.testng.annotations.Test;
 
 import com.ge.predix.audit.rest.PredixAuditRequest;
 import com.ge.predix.audit.rest.PredixAuditResponse;
-import com.ge.predix.test.utils.ACSITSetUpFactory;
-import com.ge.predix.test.utils.ACSTestUtil;
-import com.ge.predix.test.utils.ZoneFactory;
+import org.eclipse.keti.test.utils.ACSITSetUpFactory;
+import org.eclipse.keti.test.utils.ACSTestUtil;
+import org.eclipse.keti.test.utils.ZoneFactory;
 
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 public class PredixAuditIT extends AbstractTestNGSpringContextTests {

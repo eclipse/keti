@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.keti.acs.rest.Zone;
+import org.eclipse.keti.test.utils.OptionalTestSetup;
+import org.eclipse.keti.test.utils.ZoneFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -27,7 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.ge.predix.acs.rest.Zone;
+
 
 @Component
 @Profile({ "predix" })

@@ -22,6 +22,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.keti.acs.model.Attribute;
+import org.eclipse.keti.acs.rest.BaseResource;
+import org.eclipse.keti.acs.rest.BaseSubject;
+import org.eclipse.keti.test.utils.ACSITSetUpFactory;
+import org.eclipse.keti.test.utils.ACSTestUtil;
+import org.eclipse.keti.test.utils.PolicyHelper;
+import org.eclipse.keti.test.utils.PrivilegeHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -32,16 +39,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.model.Attribute;
-import com.ge.predix.acs.rest.BaseResource;
-import com.ge.predix.acs.rest.BaseSubject;
-import com.ge.predix.test.utils.ACSITSetUpFactory;
-import com.ge.predix.test.utils.ACSTestUtil;
-import com.ge.predix.test.utils.PolicyHelper;
-import com.ge.predix.test.utils.PrivilegeHelper;
-
 /**
- * This test class is meant for one-off testing of migration of resource, subject attributes from postgres to titan.
+ * This test class is meant for one-off testing of migration of resource, subject attributes from postgres to graph.
  */
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 public class AttributeMigrationTest extends AbstractTestNGSpringContextTests {

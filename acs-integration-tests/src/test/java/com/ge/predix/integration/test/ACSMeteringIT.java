@@ -16,13 +16,19 @@
 
 package com.ge.predix.integration.test;
 
-import static com.ge.predix.integration.test.SubjectResourceFixture.MARISSA_V1;
+import static org.eclipse.keti.integration.test.SubjectResourceFixture.MARISSA_V1;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
+import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
+import org.eclipse.keti.test.utils.ACSITSetUpFactory;
+import org.eclipse.keti.test.utils.ACSTestUtil;
+import org.eclipse.keti.test.utils.PolicyHelper;
+import org.eclipse.keti.test.utils.ZoneFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,23 +45,16 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.ge.predix.acs.rest.PolicyEvaluationRequestV1;
-import com.ge.predix.acs.rest.PolicyEvaluationResult;
-import com.ge.predix.test.utils.ACSITSetUpFactory;
-import com.ge.predix.test.utils.ACSTestUtil;
-import com.ge.predix.test.utils.PolicyHelper;
-import com.ge.predix.test.utils.ZoneFactory;
 import com.nurego.Nurego;
 import com.nurego.model.Entitlement;
 import com.nurego.model.Subscription;
-
 
 /* TODO
  * Reverted the implementation where we do not use ACSITSetupfactory for setting up the testcase because of the below
  * error with nurego subscription model
  *
  * The metering-related test failure in the latest run of the acs-integration-pullrequest job for the predix-cloud
- * and predix-cloud-titan profiles is because test-zone-pipe3 is the Nurego subscription ID used in CF but what's
+ * and predix-cloud-graph profiles is because test-zone-pipe3 is the Nurego subscription ID used in CF but what's
  * actually generated here is ACSITSetUpFactoryPublic<UUID>. We should either keep the subscription ID unchanged or
  * somehow use Nurego APIs to dynamically create the subscription, run tests in this class, then delete the
  * subscription  (the former is probably simpler).
@@ -113,17 +112,17 @@ public class ACSMeteringIT extends AbstractTestNGSpringContextTests {
 
     @BeforeClass
     public void setup() throws Exception {
-        
+
         this.zoneId = "test-zone-pipe3";
         this.acsAdminRestTemplate = this.acsitSetUpFactory.getAcsAdminRestTemplate(this.zoneId);
         this.zoneFactory.createTestZone(this.acsAdminRestTemplate, this.zoneId,
                 Collections.singletonList(this.zoneTrustedIssuer));
         this.acsUrl = this.zoneFactory.getAcsBaseURL();
-        
+
         Nurego.setApiBase(this.nuregoApiBase);
         Nurego.setApiCredentials(nuregoUsername, nuregoPassword, nuregoInstanceId);
 
-        //Busy wait for the meter to achieve steady state for POLICY_UPDATE and POLICY_EVAL
+        // Busy wait for the meter to achieve steady state for POLICY_UPDATE and POLICY_EVAL
         waitForSteadyStateEntitlementUsage(POLICY_UPDATE_FEATURE_ID, this.zoneId);
         waitForSteadyStateEntitlementUsage(POLICY_EVAL_FEATURE_ID, this.zoneId);
     }
