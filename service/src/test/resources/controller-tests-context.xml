@@ -18,8 +18,18 @@
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <context:component-scan
-        base-package="com.ge.predix.web.cors, com.ge.predix.acs, org.eclipse.keti.acs">
+        base-package="org.eclipse.keti.acs, com.ge.predix.web.cors, com.ge.predix.acs">
     </context:component-scan>
+    
+    <bean
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+        xmlns="http://www.springframework.org/schema/beans">
+        <property name="locations">
+            <list>
+                <value>classpath:application.properties</value>
+            </list>
+        </property>
+    </bean>
 
     <bean id="tokenService"
         class="com.ge.predix.uaa.token.lib.ZoneAwareFastTokenService"
@@ -30,20 +40,10 @@
 
     <bean id="zoneConfig" primary="true"
         class="com.ge.predix.uaa.token.lib.DefaultZoneConfiguration">
-        <property name="allowedUriPatterns" ref="urirPatterns" />
+        <property name="allowedUriPatterns" ref="uriPatterns" />
         <property name="trustedIssuerIds" ref="tIssuerIds" />
     </bean>
-
-    <bean
-        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
-        xmlns="http://www.springframework.org/schema/beans">
-        <property name="locations">
-            <list>
-                <value>classpath:application.properties</value>
-            </list>
-        </property>
-    </bean>
-    <util:list id="urirPatterns" value-type="java.lang.String">
+    <util:list id="uriPatterns" value-type="java.lang.String">
         <value>/v1/zone/**</value>
         <value>/health*</value>
         <value>/monitoring/heartbeat*</value>
