@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
-import org.eclipse.keti.acs.privilege.management.dao.GraphMigrationManager;
+import org.eclipse.keti.acs.privilege.management.dao.GraphStartupManager;
 import org.janusgraph.core.QueryException;
 import org.janusgraph.core.JanusGraphConfigurationException;
 import org.janusgraph.diskstorage.ResourceUnavailableException;
@@ -69,7 +69,7 @@ public class GraphDbHealthIndicator implements HealthIndicator {
         try {
             LOGGER.debug("Checking graph database status");
             if (this.resourceHierarchicalRepository
-                    .checkVersionVertexExists(GraphMigrationManager.INITIAL_ATTRIBUTE_GRAPH_VERSION)) {
+                    .checkVersionVertexExists(GraphStartupManager.INITIAL_ATTRIBUTE_GRAPH_VERSION)) {
                 healthCode = AcsMonitoringUtilities.HealthCode.AVAILABLE;
             }
         } catch (QueryException e) {
