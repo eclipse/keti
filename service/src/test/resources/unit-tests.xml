@@ -23,6 +23,7 @@
     <test name="unit-test">
         <packages>
             <package name="org.eclipse.keti.acs.*" />
+            <package name="com.ge.predix.acs.*" />
         </packages>
     </test>
 </suite>

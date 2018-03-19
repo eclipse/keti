@@ -29,6 +29,20 @@
         <relativePath>../</relativePath>
     </parent>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <subject.version>${project.version}</subject.version>
+        <nurego-java.version>1.0.18</nurego-java.version>
+        <cf.org>predix-acs</cf.org>
+        <cf.space>integration</cf.space>
+        <jenkins.build.number>dev</jenkins.build.number>
+        <acs.appname>acs-ci-${jenkins.build.number}</acs.appname>
+        <acs.cf.domain>predix-acs-integration</acs.cf.domain>
+        <cf.base.domain>${CF_BASE_DOMAIN}</cf.base.domain>
+        <uaa.zone>acs.</uaa.zone>
+        <exec-maven-plugin.version>1.5.0</exec-maven-plugin.version>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -70,58 +84,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- run UAA -->
-            <plugin>
-                <groupId>org.codehaus.cargo</groupId>
-                <artifactId>cargo-maven2-plugin</artifactId>
-                <version>1.4.19</version>
-                <configuration>
-                    <skip>${maven.test.skip}</skip>
-                    <configuration>
-                        <home>${project.build.directory}/tomcat8x/container</home>
-                        <properties>
-                            <cargo.port.offset>${PORT_OFFSET}</cargo.port.offset>
-                        </properties>
-                    </configuration>
-                    <container>
-                        <containerId>tomcat8x</containerId>
-                        <systemProperties>
-                            <CLOUD_FOUNDRY_CONFIG_PATH>${project.basedir}/uaa/config</CLOUD_FOUNDRY_CONFIG_PATH>
-                        </systemProperties>
-                        <zipUrlInstaller>
-                            <url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz</url>
-                            <downloadDir>${project.build.directory}/downloads</downloadDir>
-                            <extractDir>${project.build.directory}/extracts</extractDir>
-                        </zipUrlInstaller>
-                    </container>
-                    <deployables>
-                        <deployable>
-                            <groupId>org.cloudfoundry.identity</groupId>
-                            <artifactId>cloudfoundry-identity-uaa</artifactId>
-                            <type>war</type>
-                            <properties>
-                                <context>uaa</context>
-                            </properties>
-                        </deployable>
-                    </deployables>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>start-container</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>stop-container</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -136,15 +98,6 @@
                             <value>org.eclipse.keti.test.TestNameLogger</value>
                         </property>
                     </properties>
-                    <environmentVariables>
-                        <management.health.redis.enabled>false</management.health.redis.enabled>
-                        <uaaCheckHealthUrl>${ACS_UAA_URL}/healthz</uaaCheckHealthUrl>
-                        <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method, Access-Control-Request-Headers</cors.xhr.allowed.headers>
-                        <cors.xhr.allowed.origins>^.*\.grc-apps\.svc\.ge\.com$,^.*\.predix\.io$</cors.xhr.allowed.origins>
-                        <cors.xhr.allowed.uris>^/v2/api-docs$</cors.xhr.allowed.uris>
-                        <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
-                        <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
-                    </environmentVariables>
                     <systemPropertyVariables>
                         <ACS_SERVICE_ID>predix-acs</ACS_SERVICE_ID>
                         <ACS_URL>${ACS_URL}</ACS_URL>
@@ -276,13 +229,60 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>com.nurego</groupId>
+            <artifactId>nurego-java</artifactId>
+            <version>${nurego-java.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>org.cloudfoundry.identity</groupId>
             <artifactId>cloudfoundry-identity-uaa</artifactId>
             <version>4.6.1</version>
             <type>war</type>
         </dependency>
+        <!-- Cloud Foundry Java client dependencies -->
+        <dependency>
+            <groupId>org.cloudfoundry</groupId>
+            <artifactId>cloudfoundry-client-reactor</artifactId>
+            <version>2.12.0.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.projectreactor</groupId>
+                    <artifactId>reactor-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.projectreactor.ipc</groupId>
+                    <artifactId>reactor-netty</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.cloudfoundry</groupId>
+            <artifactId>cloudfoundry-operations</artifactId>
+            <version>2.12.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>3.0.7.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor.ipc</groupId>
+            <artifactId>reactor-netty</artifactId>
+            <version>0.6.3.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.projectreactor</groupId>
+                    <artifactId>reactor-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
-
     <repositories>
         <repository>
             <id>central</id>
@@ -299,6 +299,58 @@
             </activation>
             <build>
                 <plugins>
+                    <!-- run UAA -->
+                    <plugin>
+                        <groupId>org.codehaus.cargo</groupId>
+                        <artifactId>cargo-maven2-plugin</artifactId>
+                        <version>1.4.19</version>
+                        <configuration>
+                            <skip>${maven.test.skip}</skip>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat8x/container</home>
+                                <properties>
+                                    <cargo.port.offset>${PORT_OFFSET}</cargo.port.offset>
+                                </properties>
+                            </configuration>
+                            <container>
+                                <containerId>tomcat8x</containerId>
+                                <systemProperties>
+                                    <CLOUD_FOUNDRY_CONFIG_PATH>${project.basedir}/uaa/config</CLOUD_FOUNDRY_CONFIG_PATH>
+                                </systemProperties>
+                                <zipUrlInstaller>
+                                    <url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz</url>
+                                    <downloadDir>${project.build.directory}/downloads</downloadDir>
+                                    <extractDir>${project.build.directory}/extracts</extractDir>
+                                </zipUrlInstaller>
+                            </container>
+                            <deployables>
+                                <deployable>
+                                    <groupId>org.cloudfoundry.identity</groupId>
+                                    <artifactId>cloudfoundry-identity-uaa</artifactId>
+                                    <type>war</type>
+                                    <properties>
+                                        <context>uaa</context>
+                                    </properties>
+                                </deployable>
+                            </deployables>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-container</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-container</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
@@ -306,6 +358,14 @@
                         <configuration>
                             <environmentVariables>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,httpValidation</SPRING_PROFILES_ACTIVE>
+                                <management.health.redis.enabled>false</management.health.redis.enabled>
+                                <uaaCheckHealthUrl>${ACS_UAA_URL}/healthz</uaaCheckHealthUrl>
+                                <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,
+                                    Access-Control-Request-Headers</cors.xhr.allowed.headers>
+                                <cors.xhr.allowed.origins>^.*\.grc-apps\.svc\.ge\.com$,^.*\.predix\.io$</cors.xhr.allowed.origins>
+                                <cors.xhr.allowed.uris>^/v2/api-docs$</cors.xhr.allowed.uris>
+                                <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
+                                <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
                             </environmentVariables>
                             <reportsDirectory>${basedir}/failsafe-reports-public</reportsDirectory>
                             <summaryFile>${basedir}/failsafe-reports-public/failsafe-summary.xml</summaryFile>
@@ -322,6 +382,58 @@
             <id>public-graph</id>
             <build>
                 <plugins>
+                    <!-- run UAA -->
+                    <plugin>
+                        <groupId>org.codehaus.cargo</groupId>
+                        <artifactId>cargo-maven2-plugin</artifactId>
+                        <version>1.4.19</version>
+                        <configuration>
+                            <skip>${maven.test.skip}</skip>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat8x/container</home>
+                                <properties>
+                                    <cargo.port.offset>${PORT_OFFSET}</cargo.port.offset>
+                                </properties>
+                            </configuration>
+                            <container>
+                                <containerId>tomcat8x</containerId>
+                                <systemProperties>
+                                    <CLOUD_FOUNDRY_CONFIG_PATH>${project.basedir}/uaa/config</CLOUD_FOUNDRY_CONFIG_PATH>
+                                </systemProperties>
+                                <zipUrlInstaller>
+                                    <url>http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.23/bin/apache-tomcat-8.5.23.tar.gz</url>
+                                    <downloadDir>${project.build.directory}/downloads</downloadDir>
+                                    <extractDir>${project.build.directory}/extracts</extractDir>
+                                </zipUrlInstaller>
+                            </container>
+                            <deployables>
+                                <deployable>
+                                    <groupId>org.cloudfoundry.identity</groupId>
+                                    <artifactId>cloudfoundry-identity-uaa</artifactId>
+                                    <type>war</type>
+                                    <properties>
+                                        <context>uaa</context>
+                                    </properties>
+                                </deployable>
+                            </deployables>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-container</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-container</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
@@ -329,12 +441,521 @@
                         <configuration>
                             <environmentVariables>
                                 <SPRING_PROFILES_ACTIVE>h2,public,simple-cache,graph,httpValidation</SPRING_PROFILES_ACTIVE>
+                                <management.health.redis.enabled>false</management.health.redis.enabled>
+                                <uaaCheckHealthUrl>${ACS_UAA_URL}/healthz</uaaCheckHealthUrl>
+                                <cors.xhr.allowed.headers>Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,
+                                    Access-Control-Request-Headers</cors.xhr.allowed.headers>
+                                <cors.xhr.allowed.origins>^.*\.grc-apps\.svc\.ge\.com$,^.*\.predix\.io$</cors.xhr.allowed.origins>
+                                <cors.xhr.allowed.uris>^/v2/api-docs$</cors.xhr.allowed.uris>
+                                <cors.xhr.controlmaxage>1728000</cors.xhr.controlmaxage>
+                                <cors.xhr.allowed.methods>GET</cors.xhr.allowed.methods>
                             </environmentVariables>
                             <reportsDirectory>${basedir}/failsafe-reports-public-graph</reportsDirectory>
                             <summaryFile>${basedir}/failsafe-reports-public-graph/failsafe-summary.xml</summaryFile>
                             <suiteXmlFiles>
                                 <suiteXmlFile>testng-public-graph.xml</suiteXmlFile>
                             </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>predix-cloud</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>com.ge.predix.test.TestNamePredixLogger,com.ge.predix.test.TestAnnotationTransformer</value>
+                                </property>
+                            </properties>
+                            <!-- us32088: Place test reports outside of target
+                                directory so reports are not removed by 'mvn clean' and retained by Jenkins
+                                for each profile -->
+                            <reportsDirectory>${basedir}/failsafe-reports-predix-cloud</reportsDirectory>
+                            <summaryFile>${basedir}/failsafe-reports-predix-cloud/failsafe-summary.xml</summaryFile>
+                            <systemPropertyVariables>
+                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
+                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
+                                <ZONE1_UAA_URL>${ZONE1_UAA_URL}</ZONE1_UAA_URL>
+
+                                <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
+                                <NUREGO_USERNAME>${NUREGO_USERNAME}</NUREGO_USERNAME>
+                                <NUREGO_PASSWORD>${NUREGO_PASSWORD}</NUREGO_PASSWORD>
+                                <NUREGO_INSTANCE_ID>${NUREGO_INSTANCE_ID}</NUREGO_INSTANCE_ID>
+
+                                <jenkins.build.number>${jenkins.build.number}</jenkins.build.number>
+                                <cf.org>${cf.org}</cf.org>
+                                <cf.space>${cf.space}</cf.space>
+                                <ASSET_ADAPTER_URL>set-dynamically</ASSET_ADAPTER_URL>
+                                <ASSET_TOKEN_URL>set-dynamically</ASSET_TOKEN_URL>
+                                <ASSET_ZONE_ID>set-dynamically</ASSET_ZONE_ID>
+                                <ASSET_URL>set-dynamically</ASSET_URL>
+                                <ACS_CF_DOMAIN>${acs.cf.domain}</ACS_CF_DOMAIN>
+                                <ACS_URL>https://${acs.appname}.${cf.base.domain}</ACS_URL>
+                            </systemPropertyVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>testng-predix-cloud.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>cf-update-decision-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${DECISION_CACHE_NAME}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-resource-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${RESOURCE_CACHE_NAME}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-subject-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${SUBJECT_CACHE_NAME}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-rds-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${ACS_DB}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>predix-cloud-graph</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>com.ge.predix.test.TestNamePredixLogger,com.ge.predix.test.TestAnnotationTransformer</value>
+                                </property>
+                            </properties>
+                            <!-- us32088: Place test reports outside of target
+                                directory so reports are not removed by 'mvn clean' and retained by Jenkins
+                                for each profile -->
+                            <reportsDirectory>${basedir}/failsafe-reports-predix-cloud-graph</reportsDirectory>
+                            <summaryFile>${basedir}/failsafe-reports-predix-cloud-graph/failsafe-summary.xml</summaryFile>
+                            <systemPropertyVariables>
+                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
+                                <ZAC_URL>${ZAC_URL}</ZAC_URL>
+                                <ZONE1_UAA_URL>${ZONE1_UAA_URL}</ZONE1_UAA_URL>
+
+                                <NUREGO_API_URL>${NUREGO_API_URL}</NUREGO_API_URL>
+                                <NUREGO_USERNAME>${NUREGO_USERNAME}</NUREGO_USERNAME>
+                                <NUREGO_PASSWORD>${NUREGO_PASSWORD}</NUREGO_PASSWORD>
+                                <NUREGO_INSTANCE_ID>${NUREGO_INSTANCE_ID}</NUREGO_INSTANCE_ID>
+
+                                <jenkins.build.number>${jenkins.build.number}</jenkins.build.number>
+                                <cf.org>${cf.org}</cf.org>
+                                <cf.space>${cf.space}</cf.space>
+                                <ASSET_ADAPTER_URL>set-dynamically</ASSET_ADAPTER_URL>
+                                <ASSET_TOKEN_URL>set-dynamically</ASSET_TOKEN_URL>
+                                <ASSET_ZONE_ID>set-dynamically</ASSET_ZONE_ID>
+                                <ASSET_URL>set-dynamically</ASSET_URL>
+                                <ACS_CF_DOMAIN>${acs.cf.domain}</ACS_CF_DOMAIN>
+                                <ACS_URL>https://${acs.appname}.${cf.base.domain}</ACS_URL>
+                            </systemPropertyVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>testng-predix-cloud-graph.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>cf-update-decision-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${DECISION_CACHE_NAME}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-resource-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${RESOURCE_CACHE_NAME}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-subject-redis-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${SUBJECT_CACHE_NAME}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cf-update-rds-service</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cf</executable>
+                                    <arguments>
+                                        <argument>update-service</argument>
+                                        <argument>${ACS_DB}</argument>
+                                        <argument>-t</argument>
+                                        <argument>""</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>predix-local</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ge.predix.audit</groupId>
+                    <artifactId>audit-sdk</artifactId>
+                    <version>${audit-sdk.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>commons-io</groupId>
+                            <artifactId>commons-io</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-handler</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-codec-http</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>com.ge.predix.eventhub</groupId>
+                    <artifactId>predix-event-hub-sdk</artifactId>
+                    <version>1.2.2-SNAPSHOT</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>grpc-stub</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>grpc-protobuf</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-handler</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>commons-io</groupId>
+                            <artifactId>commons-io</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-codec-http</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-stub</artifactId>
+                    <version>1.0.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-protobuf</artifactId>
+                    <version>1.0.1</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
+                                <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
+                                <spring.profiles.active>h2,predix,simple-cache,httpValidation</spring.profiles.active>
+                            </systemPropertyVariables>
+                            <excludes>
+                                <exclude>**/ACSPerformanceIT.java</exclude>
+                                <exclude>**/PolicyEvalCachingWithGraphDBIT.java</exclude>
+                                <exclude>**/PredixAuditIT.java</exclude>
+                                <exclude>**/PolicyEvaluationWithAttributeConnectorIT.java</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*IT.java</include>
+                                <include>**/*Cucumber*.java</include>
+                                <!-- Uncomment to run migration tests, manually -->
+                                <!-- <include>**/migration/AttributeMigrationTest.java</include> -->
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>predix-local-graph</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ge.predix.audit</groupId>
+                    <artifactId>audit-sdk</artifactId>
+                    <version>${audit-sdk.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>commons-io</groupId>
+                            <artifactId>commons-io</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-handler</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-codec-http</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>com.ge.predix.eventhub</groupId>
+                    <artifactId>predix-event-hub-sdk</artifactId>
+                    <version>1.2.2-SNAPSHOT</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>grpc-stub</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>grpc-protobuf</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-handler</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>commons-io</groupId>
+                            <artifactId>commons-io</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-codec-http</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-stub</artifactId>
+                    <version>1.0.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-protobuf</artifactId>
+                    <version>1.0.1</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <ACS_DEFAULT_ISSUER_ID>${ACS_DEFAULT_ISSUER_ID}</ACS_DEFAULT_ISSUER_ID>
+                                <ZAC_UAA_URL>${ZAC_UAA_URL}</ZAC_UAA_URL>
+                                <spring.profiles.active>h2,predix,simple-cache,graph,httpValidation</spring.profiles.active>
+                            </systemPropertyVariables>
+                            <excludes>
+                                <exclude>**/ACSPerformanceIT.java</exclude>
+                                <exclude>**/PredixAuditIT.java</exclude>
+                                <exclude>**/PolicyEvaluationWithAttributeConnectorIT.java</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*IT.java</include>
+                                <include>**/*Cucumber*.java</include>
+                                <!-- Uncomment to run migration tests, manually -->
+                                <!-- <include>**/migration/AttributeMigrationTest.java</include> -->
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>acceptance</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ge.predix.audit</groupId>
+                    <artifactId>audit-sdk</artifactId>
+                    <version>${audit-sdk.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>commons-io</groupId>
+                            <artifactId>commons-io</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-handler</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-codec-http</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>com.ge.predix.eventhub</groupId>
+                    <artifactId>predix-event-hub-sdk</artifactId>
+                    <version>1.2.2-SNAPSHOT</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>grpc-stub</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>grpc-protobuf</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-handler</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>commons-io</groupId>
+                            <artifactId>commons-io</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>io.netty</groupId>
+                            <artifactId>netty-codec-http</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-stub</artifactId>
+                    <version>1.0.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-protobuf</artifactId>
+                    <version>1.0.1</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <ACS_SERVICE_ID>${ACS_SERVICE_ID}</ACS_SERVICE_ID>
+                            </systemPropertyVariables>
+                            <includes>
+                                <include>**/ACSAcceptanceIT.java</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/NonHierarchical*IT.java</exclude>
+                            </excludes>
                         </configuration>
                     </plugin>
                 </plugins>
