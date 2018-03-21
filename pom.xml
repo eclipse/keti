@@ -89,7 +89,6 @@
         <groovy-all.version>2.4.12</groovy-all.version>
         <maven-surefire.version>2.20</maven-surefire.version>
         <maven-failsafe.version>2.20</maven-failsafe.version>
-        <custom-argline>-Xms512m -Xmx1024m -XX:MaxMetaspaceSize=512m</custom-argline>
     </properties>
 
     <!-- This defines additional repositories to download snapshot dependencies that are no
