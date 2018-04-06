@@ -1,6 +1,6 @@
 ## Keti - Access Control Service
 
-*Note: Keti was earlier called ACS. This repository still has references to artifacts with that name and can be treated as synonymous to Keti.*
+Note: Keti was earlier called ACS. This repository still has references to artifacts with that name and can be treated as synonymous to Keti.
 
 ### License
 
@@ -52,3 +52,8 @@ $ ./run-integration-tests.sh [-g] [-s <maven_settings_file>]
 ```
 
 Specify the `-g` option to run integration tests against Keti that supports hierarchical attributes.
+
+### Documentation
+* [Demo](docs/keti-demo.org)
+* [Keti Overview](https://www.linkedin.com/pulse/eclipse-keti-cloud-native-authorization-service-sanjeev-chopra/)
+
