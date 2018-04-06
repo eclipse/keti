@@ -1,20 +1,23 @@
-#+TITLE: ACS Demo
+#+TITLE: Keti Demo
 #+AUTHOR: Dario Amiri
 
+Note: Keti was earlier called ACS. This repository still has references to artifacts with that name and can be treated
+as synonymous to Keti.
+
 * Overview
-  This document provides basic information intended to get users started with Access Control Service (ACS). We will explore two use cases:
+  This document provides basic information intended to get users started with Eclipse Keti. We will explore two use cases:
   - Access control based on group membership.
   - Access control based on dynamic roles. The roles are dynamic in the sense that a user's role will depend on the resources they are attempting to access. E.g. the user tom@ge.com is an analyst only when accessing resources that belong to a specific site.
   
   In order to use this document as the source for demonstration, you will have to install emacs and configure it as described [[file:.emacs.d/config.org][here]].
 
 ** Technology Stack
-   The ACS technology makes heavy use of various Spring frameworks including:
+   This project makes heavy use of various Spring frameworks including:
    - [[http://projects.spring.io/spring-boot/][Spring Boot]]
    - [[http://projects.spring.io/spring-data-jpa/][Spring Data JPA]]
    - [[http://projects.spring.io/spring-security-oauth/][Spring Security OAuth]]
    
-   The ACS attribute store is a graph database built on:
+   The attribute store is a graph database built on:
    - [[http://tinkerpop.apache.org/][Apache TinkerPop]]
    - [[http://janusgraph.org/][JanusGraph]]
 
@@ -32,7 +35,7 @@
 | postgres +-----+ spring data JPA   | apache tinkerpop  +-----+ cassandra|
 |          |     +-------------------+-------------------+     |          |
 +----------+     | cGRE              | cBLU              |     +----------+
-                 | spring boot       | graph db          |
+                 | spring boot       | JanusGraph        |
                  +-------------------+-------------------+
                  | cPNK             java                 |
                  \---------------------------------------/
@@ -41,18 +44,14 @@
 #+RESULTS:
 [[file:architecture.png]]
 
-** Documentation
-   Comprehensive documentation for ACS is available [[https://www.predix.io/docs#IGyNp2eM][here]].
-
-
 * Setting up UAA
 ** Getting and running UAA
-  - Clone UAA next to ACS project
+  - Clone UAA next to Keti project
 #+BEGIN_SRC sh
 git clone https://github.com/cloudfoundry/uaa ../uaa
 #+END_SRC
 
-  - Copy UAA config file. ACS requires a UAA configuration that uses asymmetric signing of tokens instead of the default symmetric singing.
+  - Copy UAA config file. Keti requires a UAA configuration that uses asymmetric signing of tokens instead of the default symmetric singing.
 #+BEGIN_SRC sh
 cp acs-integration-tests/uaa/config/uaa.yml ../uaa/uaa/src/main/resources/uaa.yml
 #+END_SRC
@@ -94,9 +93,9 @@ Use Ruby, Python, or similar to parse the OAuth 2.0 JSON response and extract th
 #+RESULTS: admin_token
 : eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiJiMDkzYmYzZmVkYjY0YzU0OWM5MTBiNmJiMmNlYjg2NSIsInN1YiI6ImFkbWluIiwiYXV0aG9yaXRpZXMiOlsiY2xpZW50cy5yZWFkIiwiY2xpZW50cy5zZWNyZXQiLCJjbGllbnRzLndyaXRlIiwidWFhLmFkbWluIiwiY2xpZW50cy5hZG1pbiIsInNjaW0ud3JpdGUiLCJzY2ltLnJlYWQiXSwic2NvcGUiOlsiY2xpZW50cy5yZWFkIiwiY2xpZW50cy5zZWNyZXQiLCJjbGllbnRzLndyaXRlIiwidWFhLmFkbWluIiwiY2xpZW50cy5hZG1pbiIsInNjaW0ud3JpdGUiLCJzY2ltLnJlYWQiXSwiY2xpZW50X2lkIjoiYWRtaW4iLCJjaWQiOiJhZG1pbiIsImF6cCI6ImFkbWluIiwiZ3JhbnRfdHlwZSI6ImNsaWVudF9jcmVkZW50aWFscyIsInJldl9zaWciOiI5N2M1MDBiYiIsImlhdCI6MTQ2OTU2MzU3MiwiZXhwIjoxNDY5NjA2NzcyLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImFkbWluIiwiY2xpZW50cyIsInVhYSIsInNjaW0iXX0.iwI9YI6I2CK-B706GazOsYfdM83E5DfUIW5nm0NGu0c6XjNgLZzFjwuMp_AQfZwcG15xU-QTeg6tITyiqml29mZin6R_VuxJPVva4HXuB2tpuNX7wGHQs6iVNSMQZKngfUuOBx-3VdnDmPiNfo9z9bKC9uxKuHYfFNGZe4KlWWk8yLcwSZL7Wai-hrfGkaPfKe7GpqeCR4wr7dOn-9BcVmfRgFF8si7asXAiRvOs5ESH74w_0AW5-yZYvFNHs8g77R6GxP_CURaqofgufrcfPAV3x9MnSRDPy19BC3d4BSBug8Nm8Aq6Zla1dylevOHi2aSY_-eLeNl-d1zQXJnLHw
 
-** Create ACS admin
+** Create Keti admin
 
-Create an OAuth client that we can use to consume the ACS RESTful API.
+Create an OAuth client that we can use to consume the Keti RESTful API.
 
 #+NAME: create_acs_admin
 #+BEGIN_SRC http :exports both :pretty :var access_token=admin_token
