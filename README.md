@@ -55,4 +55,5 @@ Specify the `-g` option to run integration tests against Keti that supports hier
 
 ### Documentation
 * [Demo](docs/keti-demo.org)
+* [Wiki](https://github.com/eclipse/keti/wiki)
 
