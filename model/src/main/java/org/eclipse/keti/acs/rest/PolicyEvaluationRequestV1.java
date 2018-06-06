@@ -138,11 +138,9 @@ public class PolicyEvaluationRequestV1 {
             final PolicyEvaluationRequestV1 other = (PolicyEvaluationRequestV1) obj;
             EqualsBuilder equalsBuilder = new EqualsBuilder();
 
-            // Element by element comparison may produce true negative in Sets so use built in equals
-            // From AbstractSet's (HashSet's ancestor) documentation
-            // This implementation first checks if the specified object is this set; if so it returns true.
-            // Then, it checks if the specified object is a set whose size is identical to the size of this set;
-            // if not, it returns false. If so, it returns containsAll((Collection) o).
+            // Element by element comparison may produce true negative in Sets so use built in equals. Therefore, defer
+            // to the underlying set's equals() implementation. For details, refer to AbstractSet's (HashSet's ancestor)
+            // documentation.
             equalsBuilder.append(this.subjectAttributes, other.subjectAttributes);
             equalsBuilder.append(this.policySetsEvaluationOrder, other.policySetsEvaluationOrder);
 

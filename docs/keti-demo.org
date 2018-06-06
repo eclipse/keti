@@ -9,8 +9,6 @@ as synonymous to Keti.
   - Access control based on group membership.
   - Access control based on dynamic roles. The roles are dynamic in the sense that a user's role will depend on the resources they are attempting to access. E.g. the user tom@ge.com is an analyst only when accessing resources that belong to a specific site.
   
-  In order to use this document as the source for demonstration, you will have to install emacs and configure it as described [[file:.emacs.d/config.org][here]].
-
 ** Technology Stack
    This project makes heavy use of various Spring frameworks including:
    - [[http://projects.spring.io/spring-boot/][Spring Boot]]
