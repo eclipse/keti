@@ -24,6 +24,11 @@ import java.util.Set;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.eclipse.keti.acs.attribute.cache.AttributeCache;
+import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorService;
+import org.eclipse.keti.acs.model.Attribute;
+import org.eclipse.keti.acs.rest.AttributeAdapterConnection;
+import org.eclipse.keti.acs.rest.attribute.adapter.AttributesResponse;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -31,12 +36,6 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import org.eclipse.keti.acs.attribute.cache.AttributeCache;
-import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorService;
-import org.eclipse.keti.acs.model.Attribute;
-import org.eclipse.keti.acs.rest.AttributeAdapterConnection;
-import org.eclipse.keti.acs.rest.attribute.adapter.AttributesResponse;
 
 public abstract class ExternalAttributeReader implements AttributeReader {
 

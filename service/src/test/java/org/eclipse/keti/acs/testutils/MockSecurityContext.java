@@ -20,10 +20,10 @@ package org.eclipse.keti.acs.testutils;
 
 import static org.mockito.Mockito.when;
 
+import org.eclipse.keti.acs.rest.Zone;
 import org.mockito.Mockito;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import org.eclipse.keti.acs.rest.Zone;
 import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
 
 /**

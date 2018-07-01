@@ -27,13 +27,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
@@ -41,6 +34,13 @@ import org.eclipse.keti.acs.model.Condition;
 import org.eclipse.keti.acs.model.Policy;
 import org.eclipse.keti.acs.model.PolicySet;
 import org.eclipse.keti.acs.utils.JsonUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchema;

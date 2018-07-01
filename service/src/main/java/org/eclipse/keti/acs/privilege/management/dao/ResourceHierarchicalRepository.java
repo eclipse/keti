@@ -18,9 +18,9 @@
 
 package org.eclipse.keti.acs.privilege.management.dao;
 
-import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
-
 import java.util.Set;
+
+import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 
 public interface ResourceHierarchicalRepository {
 

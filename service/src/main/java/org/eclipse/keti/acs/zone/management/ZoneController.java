@@ -27,6 +27,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
+import org.eclipse.keti.acs.commons.web.ACSWebConstants;
+import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates;
+import org.eclipse.keti.acs.commons.web.BaseRestApi;
+import org.eclipse.keti.acs.commons.web.RestApiException;
+import org.eclipse.keti.acs.rest.Zone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,12 +40,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import org.eclipse.keti.acs.commons.web.ACSWebConstants;
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates;
-import org.eclipse.keti.acs.commons.web.BaseRestApi;
-import org.eclipse.keti.acs.commons.web.RestApiException;
-import org.eclipse.keti.acs.rest.Zone;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

@@ -18,14 +18,6 @@
 
 package org.eclipse.keti.acs.zone.management;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import org.eclipse.keti.acs.SpringSecurityPolicyContextResolver;
 import org.eclipse.keti.acs.config.GraphBeanDefinitionRegistryPostProcessor;
 import org.eclipse.keti.acs.config.GraphConfig;
@@ -41,6 +33,13 @@ import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
 import org.eclipse.keti.acs.zone.resolver.SpringSecurityZoneResolver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 @ContextConfiguration(
         classes = { GraphBeanDefinitionRegistryPostProcessor.class, GraphConfig.class,

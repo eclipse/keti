@@ -26,18 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import org.eclipse.keti.acs.SpringSecurityPolicyContextResolver;
 import org.eclipse.keti.acs.attribute.cache.AttributeCacheFactory;
 import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorServiceImpl;
@@ -62,6 +50,17 @@ import org.eclipse.keti.acs.testutils.TestUtils;
 import org.eclipse.keti.acs.zone.management.ZoneService;
 import org.eclipse.keti.acs.zone.management.ZoneServiceImpl;
 import org.eclipse.keti.acs.zone.resolver.SpringSecurityZoneResolver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = { AcsRequestContextHolder.class, InMemoryDataSourceConfig.class,
         InMemoryPolicyEvaluationCache.class, AttributeCacheFactory.class, PrivilegeManagementServiceImpl.class,

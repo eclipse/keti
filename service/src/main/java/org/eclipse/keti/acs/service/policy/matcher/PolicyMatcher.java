@@ -18,10 +18,10 @@
 
 package org.eclipse.keti.acs.service.policy.matcher;
 
+import java.util.List;
+
 import org.eclipse.keti.acs.model.Policy;
 import org.eclipse.keti.acs.service.policy.evaluation.MatchedPolicy;
-
-import java.util.List;
 
 /**
  * Matches an access control request to a policy.

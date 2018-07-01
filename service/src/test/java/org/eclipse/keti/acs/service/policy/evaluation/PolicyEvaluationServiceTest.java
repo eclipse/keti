@@ -128,7 +128,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     @BeforeMethod
     public void setupMethod() throws Exception {
         this.evaluationService = new PolicyEvaluationServiceImpl();
-        Whitebox.setInternalState(this.evaluationService, "policySetValidator", this.policySetValidator);
+        ReflectionTestUtils.setField(this.evaluationService, "policySetValidator", this.policySetValidator);
         MockitoAnnotations.initMocks(this);
         when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
         when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
@@ -273,8 +273,10 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     @Test(dataProvider = "policyDataProvider")
     public void testEvaluateWithPolicyWithCacheSetException(final File inputPolicy, final Effect effect)
             throws JsonParseException, JsonMappingException, IOException {
-        Mockito.doThrow(new RuntimeException()).when(this.cache)
-                .set(Mockito.any(PolicyEvaluationRequestCacheKey.class), Mockito.any(PolicyEvaluationResult.class));
+        Mockito.doAnswer(invocation -> {
+            throw new RuntimeException();
+        }).when(this.cache)
+               .set(Mockito.any(PolicyEvaluationRequestCacheKey.class), Mockito.any(PolicyEvaluationResult.class));
         testEvaluateWithPolicy(inputPolicy, effect);
     }
 

@@ -24,13 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.policy.evaluation.cache.PolicyEvaluationCache;
 import org.eclipse.keti.acs.privilege.management.dao.ResourceEntity;
@@ -41,6 +34,12 @@ import org.eclipse.keti.acs.rest.BaseResource;
 import org.eclipse.keti.acs.rest.BaseSubject;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The implementation of privilege management.

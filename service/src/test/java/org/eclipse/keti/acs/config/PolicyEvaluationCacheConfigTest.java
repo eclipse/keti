@@ -21,6 +21,8 @@ package org.eclipse.keti.acs.config;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
+import org.eclipse.keti.acs.policy.evaluation.cache.NonCachingPolicyEvaluationCache;
+import org.eclipse.keti.acs.policy.evaluation.cache.RedisPolicyEvaluationCache;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -28,9 +30,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.env.Environment;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.policy.evaluation.cache.NonCachingPolicyEvaluationCache;
-import org.eclipse.keti.acs.policy.evaluation.cache.RedisPolicyEvaluationCache;
 
 public class PolicyEvaluationCacheConfigTest {
 

@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorController;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpMethod;
@@ -33,8 +34,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorController;
 
 public final class ConnectorHttpMethodsFilterTest {
 

@@ -26,10 +26,6 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory;
 import org.eclipse.keti.acs.encryption.Encryptor;
 import org.eclipse.keti.acs.rest.AttributeAdapterConnection;
@@ -37,6 +33,9 @@ import org.eclipse.keti.acs.rest.AttributeConnector;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
 import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class AttributeConnectorServiceImpl implements AttributeConnectorService {

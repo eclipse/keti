@@ -18,8 +18,16 @@
 
 package org.eclipse.keti.controller.test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.ZONE_URL;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.eclipse.keti.acs.rest.Zone;
 import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
 import org.eclipse.keti.acs.utils.JsonUtils;
@@ -36,15 +44,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.ZONE_URL;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")

@@ -18,10 +18,9 @@
 
 package org.eclipse.keti.acs.service.policy.evaluation;
 
-import org.springframework.http.ResponseEntity;
-
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
+import org.springframework.http.ResponseEntity;
 
 /**
  * RESTful API interface of the Policy Evaluation API.

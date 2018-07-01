@@ -18,7 +18,7 @@
 
 package org.eclipse.keti.acs.service.policy.evaluation;
 
-import static org.mockito.Mockito.anySetOf;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 
@@ -26,15 +26,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.keti.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader;
+import org.eclipse.keti.acs.model.Attribute;
+import org.eclipse.keti.acs.rest.BaseSubject;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader;
-import org.eclipse.keti.acs.model.Attribute;
-import org.eclipse.keti.acs.rest.BaseSubject;
 
 @Test
 public class SubjectAttributeResolverTest {
@@ -50,7 +49,7 @@ public class SubjectAttributeResolverTest {
 
         this.testSubject = new BaseSubject("/test/subject");
         when(this.defaultSubjectAttributeReader.getAttributesByScope(eq(this.testSubject.getSubjectIdentifier()),
-                anySetOf(Attribute.class))).thenReturn(Collections.emptySet());
+                any())).thenReturn(Collections.emptySet());
     }
 
     @Test
@@ -64,7 +63,7 @@ public class SubjectAttributeResolverTest {
 
         // mock attribute service for the expected resource URI after attributeURITemplate is applied
         when(this.defaultSubjectAttributeReader.getAttributesByScope(eq(this.testSubject.getSubjectIdentifier()),
-                anySetOf(Attribute.class))).thenReturn(subjectAttributes);
+                any())).thenReturn(subjectAttributes);
         SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.defaultSubjectAttributeReader,
                 this.testSubject.getSubjectIdentifier(), supplementalSubjectAttributes);
 
@@ -99,7 +98,7 @@ public class SubjectAttributeResolverTest {
         this.testSubject.setAttributes(subjectAttributes);
 
         when(this.defaultSubjectAttributeReader.getAttributesByScope(eq(this.testSubject.getSubjectIdentifier()),
-                anySetOf(Attribute.class))).thenReturn(subjectAttributes);
+                any())).thenReturn(subjectAttributes);
         SubjectAttributeResolver resolver = new SubjectAttributeResolver(this.defaultSubjectAttributeReader,
                 this.testSubject.getSubjectIdentifier(), null);
 

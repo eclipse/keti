@@ -25,6 +25,8 @@ import java.net.URI;
 import java.util.Collections;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.keti.acs.monitoring.ManagementSecurityRoleFilter;
+import org.eclipse.keti.acs.request.context.AcsRequestEnrichingFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -33,8 +35,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 
-import org.eclipse.keti.acs.monitoring.ManagementSecurityRoleFilter;
-import org.eclipse.keti.acs.request.context.AcsRequestEnrichingFilter;
 import com.google.common.base.Predicate;
 
 import io.swagger.models.Scheme;

@@ -20,16 +20,15 @@ package org.eclipse.keti.acs.attribute.readers;
 
 import java.util.Collections;
 
+import org.eclipse.keti.acs.attribute.cache.AttributeCache;
+import org.eclipse.keti.acs.model.Attribute;
+import org.eclipse.keti.acs.rest.AttributeAdapterConnection;
+import org.eclipse.keti.acs.rest.attribute.adapter.AttributesResponse;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.testng.annotations.DataProvider;
-
-import org.eclipse.keti.acs.attribute.cache.AttributeCache;
-import org.eclipse.keti.acs.model.Attribute;
-import org.eclipse.keti.acs.rest.AttributeAdapterConnection;
-import org.eclipse.keti.acs.rest.attribute.adapter.AttributesResponse;
 
 public final class ExternalAttributeReaderHelper {
 

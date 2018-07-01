@@ -18,14 +18,14 @@
 
 package org.eclipse.keti.acs.zone.resolver;
 
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-
 import org.eclipse.keti.acs.commons.web.ZoneDoesNotExistException;
 import org.eclipse.keti.acs.request.context.AcsRequestContext;
 import org.eclipse.keti.acs.request.context.AcsRequestContext.ACSRequestContextAttribute;
 import org.eclipse.keti.acs.request.context.AcsRequestContextHolder;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+
 import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
 
 @Component

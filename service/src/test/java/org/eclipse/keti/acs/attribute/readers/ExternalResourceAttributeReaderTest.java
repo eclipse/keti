@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.eclipse.keti.acs.attribute.cache.AttributeCache;
+import org.eclipse.keti.acs.model.Attribute;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -31,9 +33,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.attribute.cache.AttributeCache;
-import org.eclipse.keti.acs.model.Attribute;
 
 public class ExternalResourceAttributeReaderTest {
 

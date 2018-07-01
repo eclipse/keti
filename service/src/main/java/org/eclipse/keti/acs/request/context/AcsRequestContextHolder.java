@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 
+import org.eclipse.keti.acs.request.context.AcsRequestContext.ACSRequestContextAttribute;
+import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -30,8 +32,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import org.eclipse.keti.acs.request.context.AcsRequestContext.ACSRequestContextAttribute;
-import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
 import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
 
 /**

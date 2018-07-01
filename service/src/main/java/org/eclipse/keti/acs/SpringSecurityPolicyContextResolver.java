@@ -20,12 +20,11 @@ package org.eclipse.keti.acs;
 
 import java.util.Map;
 
+import org.eclipse.keti.acs.service.InvalidACSRequestException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.stereotype.Component;
-
-import org.eclipse.keti.acs.service.InvalidACSRequestException;
 
 /**
  * Retrieve the authentication context.

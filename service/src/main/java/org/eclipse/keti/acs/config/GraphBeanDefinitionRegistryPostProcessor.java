@@ -18,6 +18,8 @@
 
 package org.eclipse.keti.acs.config;
 
+import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
+import org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepository;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -25,9 +27,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-
-import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
-import org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepository;
 
 @Profile("graph")
 @Component

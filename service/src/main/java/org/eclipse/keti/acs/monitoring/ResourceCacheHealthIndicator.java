@@ -18,13 +18,12 @@
 
 package org.eclipse.keti.acs.monitoring;
 
+import org.eclipse.keti.acs.attribute.cache.AttributeCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.stereotype.Component;
-
-import org.eclipse.keti.acs.attribute.cache.AttributeCache;
 
 
 @Component

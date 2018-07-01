@@ -18,10 +18,10 @@
 
 package org.eclipse.keti.acs.privilege.management.dao;
 
+import java.util.List;
+
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
 
 public interface SubjectRepository extends JpaRepository<SubjectEntity, Long> {
 

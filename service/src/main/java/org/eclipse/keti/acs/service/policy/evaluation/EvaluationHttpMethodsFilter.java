@@ -23,10 +23,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.keti.acs.security.AbstractHttpMethodsFilter;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-
-import org.eclipse.keti.acs.security.AbstractHttpMethodsFilter;
 
 @Component
 public class EvaluationHttpMethodsFilter extends AbstractHttpMethodsFilter {

@@ -23,6 +23,9 @@ import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1;
 import static org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.ok;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import org.eclipse.keti.acs.commons.web.BaseRestApi;
+import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
+import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +33,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import org.eclipse.keti.acs.commons.web.BaseRestApi;
-import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
-import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;

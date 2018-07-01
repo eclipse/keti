@@ -29,6 +29,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtility;
+import org.eclipse.keti.acs.request.context.AcsRequestContext;
+import org.eclipse.keti.acs.request.context.AcsRequestContextHolder;
+import org.eclipse.keti.acs.rest.BaseResource;
+import org.eclipse.keti.acs.rest.Zone;
+import org.eclipse.keti.acs.testutils.MockAcsRequestContext;
+import org.eclipse.keti.acs.testutils.MockMvcContext;
+import org.eclipse.keti.acs.testutils.MockSecurityContext;
+import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
+import org.eclipse.keti.acs.testutils.TestUtils;
+import org.eclipse.keti.acs.utils.JsonUtils;
+import org.eclipse.keti.acs.zone.management.ZoneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpStatus;
@@ -45,18 +57,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtility;
-import org.eclipse.keti.acs.request.context.AcsRequestContext;
-import org.eclipse.keti.acs.request.context.AcsRequestContextHolder;
-import org.eclipse.keti.acs.rest.BaseResource;
-import org.eclipse.keti.acs.rest.Zone;
-import org.eclipse.keti.acs.testutils.MockAcsRequestContext;
-import org.eclipse.keti.acs.testutils.MockMvcContext;
-import org.eclipse.keti.acs.testutils.MockSecurityContext;
-import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
-import org.eclipse.keti.acs.testutils.TestUtils;
-import org.eclipse.keti.acs.utils.JsonUtils;
-import org.eclipse.keti.acs.zone.management.ZoneService;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")

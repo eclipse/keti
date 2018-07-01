@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.keti.acs.model.Attribute;
+import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -34,9 +36,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-
-import org.eclipse.keti.acs.model.Attribute;
-import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 
 @Component
 public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarchicalRepository, InitializingBean {

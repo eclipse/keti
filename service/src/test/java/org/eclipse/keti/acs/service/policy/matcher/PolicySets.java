@@ -21,8 +21,9 @@ package org.eclipse.keti.acs.service.policy.matcher;
 import java.io.File;
 import java.io.IOException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.keti.acs.model.PolicySet;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *

@@ -24,15 +24,14 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.rest.Parent;
 import org.eclipse.keti.acs.utils.JsonUtils;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 public class GraphSubjectRepository extends GraphGenericRepository<SubjectEntity>
         implements SubjectRepository, SubjectHierarchicalRepository {

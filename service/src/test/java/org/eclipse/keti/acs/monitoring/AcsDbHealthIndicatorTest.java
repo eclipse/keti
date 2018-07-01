@@ -20,13 +20,13 @@ package org.eclipse.keti.acs.monitoring;
 
 import org.eclipse.keti.acs.privilege.management.dao.GraphStartupManager;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookupFailureException;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -89,7 +89,9 @@ public class AcsDbHealthIndicatorTest {
 
     private AcsMonitoringRepository mockDbWithException(final Exception e) {
         AcsMonitoringRepository acsMonitoringRepository = Mockito.mock(AcsMonitoringRepository.class);
-        Mockito.doThrow(e).when(acsMonitoringRepository).queryPolicySetTable();
+        Mockito.doAnswer(invocation -> {
+            throw e;
+        }).when(acsMonitoringRepository).queryPolicySetTable();
         return acsMonitoringRepository;
     }
 }

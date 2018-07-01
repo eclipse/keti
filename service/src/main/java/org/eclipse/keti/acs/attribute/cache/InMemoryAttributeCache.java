@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 import org.apache.commons.collections4.map.PassiveExpiringMap;
-
 import org.eclipse.keti.acs.attribute.readers.CachedAttributes;
 
 public class InMemoryAttributeCache extends AbstractAttributeCache {

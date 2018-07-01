@@ -18,11 +18,11 @@
 
 package org.eclipse.keti.acs.privilege.management.dao;
 
-import static org.eclipse.keti.acs.privilege.management.dao.AttributePredicate.elementOf;
 import static org.apache.tinkerpop.gremlin.process.traversal.P.eq;
 import static org.apache.tinkerpop.gremlin.process.traversal.P.test;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.in;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
+import static org.eclipse.keti.acs.privilege.management.dao.AttributePredicate.elementOf;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +39,11 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
+import org.eclipse.keti.acs.model.Attribute;
+import org.eclipse.keti.acs.rest.Parent;
+import org.eclipse.keti.acs.utils.JsonUtils;
+import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
+import org.janusgraph.core.SchemaViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +54,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.util.Assert;
 
-import org.eclipse.keti.acs.model.Attribute;
-import org.eclipse.keti.acs.rest.Parent;
-import org.eclipse.keti.acs.utils.JsonUtils;
-import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import com.google.common.collect.Sets;
-import org.janusgraph.core.SchemaViolationException;
 
 public abstract class GraphGenericRepository<E extends ZonableEntity> implements JpaRepository<E, Long> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenericRepository.class);

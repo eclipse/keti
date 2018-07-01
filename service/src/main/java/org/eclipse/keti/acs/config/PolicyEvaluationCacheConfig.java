@@ -21,6 +21,10 @@ package org.eclipse.keti.acs.config;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.keti.acs.policy.evaluation.cache.InMemoryPolicyEvaluationCache;
+import org.eclipse.keti.acs.policy.evaluation.cache.NonCachingPolicyEvaluationCache;
+import org.eclipse.keti.acs.policy.evaluation.cache.PolicyEvaluationCache;
+import org.eclipse.keti.acs.policy.evaluation.cache.RedisPolicyEvaluationCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +32,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
-import org.eclipse.keti.acs.policy.evaluation.cache.InMemoryPolicyEvaluationCache;
-import org.eclipse.keti.acs.policy.evaluation.cache.NonCachingPolicyEvaluationCache;
-import org.eclipse.keti.acs.policy.evaluation.cache.PolicyEvaluationCache;
-import org.eclipse.keti.acs.policy.evaluation.cache.RedisPolicyEvaluationCache;
 
 @Configuration
 public class PolicyEvaluationCacheConfig {

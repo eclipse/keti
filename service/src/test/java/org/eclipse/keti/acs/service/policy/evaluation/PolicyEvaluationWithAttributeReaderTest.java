@@ -19,7 +19,6 @@
 package org.eclipse.keti.acs.service.policy.evaluation;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -105,9 +104,9 @@ public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSprin
     public void setupMethod() throws Exception {
         this.evaluationService = new PolicyEvaluationServiceImpl();
         MockitoAnnotations.initMocks(this);
-        Whitebox.setInternalState(this.policyMatcher, "attributeReaderFactory", this.attributeReaderFactory);
-        Whitebox.setInternalState(this.evaluationService, "policyMatcher", this.policyMatcher);
-        Whitebox.setInternalState(this.evaluationService, "policySetValidator", this.policySetValidator);
+        ReflectionTestUtils.setField(this.policyMatcher, "attributeReaderFactory", this.attributeReaderFactory);
+        ReflectionTestUtils.setField(this.evaluationService, "policyMatcher", this.policyMatcher);
+        ReflectionTestUtils.setField(this.evaluationService, "policySetValidator", this.policySetValidator);
         when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
         when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
         when(this.attributeReaderFactory.getResourceAttributeReader()).thenReturn(this.externalResourceAttributeReader);
@@ -130,7 +129,7 @@ public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSprin
         BaseSubject testSubject = new BaseSubject(SUBJECT_IDENTIFIER, subjectAttributes);
 
         when(this.externalResourceAttributeReader.getAttributes(anyString())).thenReturn(testResource.getAttributes());
-        when(this.externalSubjectAttributeReader.getAttributesByScope(anyString(), anySetOf(Attribute.class)))
+        when(this.externalSubjectAttributeReader.getAttributesByScope(anyString(), any()))
                 .thenReturn(testSubject.getAttributes());
 
         PolicyEvaluationResult evalResult = this.evaluationService

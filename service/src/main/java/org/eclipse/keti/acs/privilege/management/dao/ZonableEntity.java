@@ -18,11 +18,11 @@
 
 package org.eclipse.keti.acs.privilege.management.dao;
 
+import java.util.Set;
+
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.rest.Parent;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
-
-import java.util.Set;
 
 public interface ZonableEntity {
     Long getId();

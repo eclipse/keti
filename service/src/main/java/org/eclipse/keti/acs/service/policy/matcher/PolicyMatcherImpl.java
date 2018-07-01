@@ -26,11 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory;
 import org.eclipse.keti.acs.commons.web.UriTemplateUtils;
 import org.eclipse.keti.acs.model.Attribute;
@@ -39,6 +34,10 @@ import org.eclipse.keti.acs.service.policy.evaluation.MatchedPolicy;
 import org.eclipse.keti.acs.service.policy.evaluation.ResourceAttributeResolver;
 import org.eclipse.keti.acs.service.policy.evaluation.ResourceAttributeResolver.ResourceAttributeResolverResult;
 import org.eclipse.keti.acs.service.policy.evaluation.SubjectAttributeResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author acs-engineers@ge.com

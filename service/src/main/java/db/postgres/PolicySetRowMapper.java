@@ -21,9 +21,8 @@ package db.postgres;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.springframework.jdbc.core.RowMapper;
-
 import org.eclipse.keti.acs.service.policy.admin.dao.PolicySetEntity;
+import org.springframework.jdbc.core.RowMapper;
 
 public class PolicySetRowMapper implements RowMapper<PolicySetEntity> {
 

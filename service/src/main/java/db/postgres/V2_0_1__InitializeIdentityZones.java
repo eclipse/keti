@@ -25,17 +25,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.keti.acs.privilege.management.dao.ResourceEntity;
+import org.eclipse.keti.acs.privilege.management.dao.SubjectEntity;
+import org.eclipse.keti.acs.service.policy.admin.dao.PolicySetEntity;
+import org.eclipse.keti.acs.zone.management.dao.ZoneClientEntity;
 import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-
-import org.eclipse.keti.acs.privilege.management.dao.ResourceEntity;
-import org.eclipse.keti.acs.privilege.management.dao.SubjectEntity;
-import org.eclipse.keti.acs.service.policy.admin.dao.PolicySetEntity;
-import org.eclipse.keti.acs.zone.management.dao.ZoneClientEntity;
 
 //CHECKSTYLE:OFF
 //Naming convention for the class name is being enforced by spring

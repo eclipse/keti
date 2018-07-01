@@ -18,6 +18,10 @@
 
 package org.eclipse.keti.controller.test;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Arrays;
+
 import org.eclipse.keti.acs.commons.web.BaseRestApi;
 import org.eclipse.keti.acs.rest.BaseSubject;
 import org.eclipse.keti.acs.rest.Zone;
@@ -39,10 +43,6 @@ import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.util.Arrays;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")

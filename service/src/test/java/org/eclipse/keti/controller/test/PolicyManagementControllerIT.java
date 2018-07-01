@@ -27,6 +27,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.net.URI;
 
+import org.eclipse.keti.acs.commons.web.UriTemplateUtils;
+import org.eclipse.keti.acs.model.PolicySet;
+import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
+import org.eclipse.keti.acs.rest.Zone;
+import org.eclipse.keti.acs.testutils.MockAcsRequestContext;
+import org.eclipse.keti.acs.testutils.MockMvcContext;
+import org.eclipse.keti.acs.testutils.MockSecurityContext;
+import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
+import org.eclipse.keti.acs.testutils.TestUtils;
+import org.eclipse.keti.acs.utils.JsonUtils;
+import org.eclipse.keti.acs.zone.management.ZoneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -42,17 +53,6 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.eclipse.keti.acs.commons.web.UriTemplateUtils;
-import org.eclipse.keti.acs.model.PolicySet;
-import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
-import org.eclipse.keti.acs.rest.Zone;
-import org.eclipse.keti.acs.testutils.MockAcsRequestContext;
-import org.eclipse.keti.acs.testutils.MockMvcContext;
-import org.eclipse.keti.acs.testutils.MockSecurityContext;
-import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
-import org.eclipse.keti.acs.testutils.TestUtils;
-import org.eclipse.keti.acs.utils.JsonUtils;
-import org.eclipse.keti.acs.zone.management.ZoneService;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")

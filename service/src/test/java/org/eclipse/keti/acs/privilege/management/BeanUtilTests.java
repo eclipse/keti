@@ -22,10 +22,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.testng.annotations.Test;
-
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.utils.JsonUtils;
+import org.testng.annotations.Test;
 
 /**
  *

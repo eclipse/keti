@@ -20,15 +20,14 @@ package org.eclipse.keti.acs.attribute.readers;
 
 import java.util.Map;
 
+import org.eclipse.keti.acs.attribute.cache.AttributeCacheFactory;
+import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorService;
+import org.eclipse.keti.acs.zone.resolver.SpringSecurityZoneResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ConcurrentReferenceHashMap;
-
-import org.eclipse.keti.acs.attribute.cache.AttributeCacheFactory;
-import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorService;
-import org.eclipse.keti.acs.zone.resolver.SpringSecurityZoneResolver;
 
 // CHECKSTYLE:OFF: FinalClass
 @Component

@@ -21,6 +21,13 @@ package org.eclipse.keti.acs.zone.management;
 import java.util.Collections;
 import java.util.Set;
 
+import org.eclipse.keti.acs.config.InMemoryDataSourceConfig;
+import org.eclipse.keti.acs.encryption.Encryptor;
+import org.eclipse.keti.acs.rest.AttributeAdapterConnection;
+import org.eclipse.keti.acs.rest.AttributeConnector;
+import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
+import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
+import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,14 +36,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.config.InMemoryDataSourceConfig;
-import org.eclipse.keti.acs.encryption.Encryptor;
-import org.eclipse.keti.acs.rest.AttributeAdapterConnection;
-import org.eclipse.keti.acs.rest.AttributeConnector;
-import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
-import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
-import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
 
 @EnableAutoConfiguration
 @ContextConfiguration(classes = { InMemoryDataSourceConfig.class, Encryptor.class })

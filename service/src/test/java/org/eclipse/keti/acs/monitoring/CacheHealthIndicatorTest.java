@@ -105,7 +105,9 @@ public class CacheHealthIndicatorTest {
     private CacheHealthIndicator mockCacheWithExceptionWhileGettingConnection(final Exception e, final Class clazz)
             throws Exception {
         CacheHealthIndicator cacheHealthIndicator = mockCache(clazz);
-        Mockito.doThrow(e).when(cacheHealthIndicator).getRedisConnection();
+        Mockito.doAnswer(invocation -> {
+            throw e;
+        }).when(cacheHealthIndicator).getRedisConnection();
         return cacheHealthIndicator;
     }
 
@@ -114,7 +116,9 @@ public class CacheHealthIndicatorTest {
         CacheHealthIndicator decisionCacheHealthIndicator = mockCache(clazz);
         RedisConnection redisConnection = Mockito.mock(RedisConnection.class);
         Mockito.doReturn(redisConnection).when(decisionCacheHealthIndicator).getRedisConnection();
-        Mockito.doThrow(e).when(redisConnection).info();
+        Mockito.doAnswer(invocation -> {
+            throw e;
+        }).when(redisConnection).info();
         return decisionCacheHealthIndicator;
     }
 }

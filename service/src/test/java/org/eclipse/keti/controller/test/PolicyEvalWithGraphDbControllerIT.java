@@ -25,8 +25,8 @@ import static org.eclipse.keti.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBU
 import static org.eclipse.keti.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION;
 import static org.eclipse.keti.acs.testutils.XFiles.createScopedSubjectHierarchy;
 import static org.eclipse.keti.acs.testutils.XFiles.createSubjectHierarchy;
-import static org.eclipse.keti.acs.testutils.XFiles.createTwoLevelResourceHierarchy;
 import static org.eclipse.keti.acs.testutils.XFiles.createThreeLevelResourceHierarchy;
+import static org.eclipse.keti.acs.testutils.XFiles.createTwoLevelResourceHierarchy;
 import static org.eclipse.keti.acs.testutils.XFiles.createTwoParentResourceHierarchy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -38,6 +38,24 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.keti.acs.model.Attribute;
+import org.eclipse.keti.acs.model.Effect;
+import org.eclipse.keti.acs.model.PolicySet;
+import org.eclipse.keti.acs.privilege.management.PrivilegeManagementService;
+import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
+import org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepository;
+import org.eclipse.keti.acs.rest.BaseResource;
+import org.eclipse.keti.acs.rest.BaseSubject;
+import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
+import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
+import org.eclipse.keti.acs.rest.Zone;
+import org.eclipse.keti.acs.testutils.MockAcsRequestContext;
+import org.eclipse.keti.acs.testutils.MockMvcContext;
+import org.eclipse.keti.acs.testutils.MockSecurityContext;
+import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
+import org.eclipse.keti.acs.testutils.TestUtils;
+import org.eclipse.keti.acs.utils.JsonUtils;
+import org.eclipse.keti.acs.zone.management.ZoneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -57,24 +75,6 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.eclipse.keti.acs.model.Attribute;
-import org.eclipse.keti.acs.model.Effect;
-import org.eclipse.keti.acs.model.PolicySet;
-import org.eclipse.keti.acs.privilege.management.PrivilegeManagementService;
-import org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepository;
-import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
-import org.eclipse.keti.acs.rest.BaseResource;
-import org.eclipse.keti.acs.rest.BaseSubject;
-import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
-import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
-import org.eclipse.keti.acs.rest.Zone;
-import org.eclipse.keti.acs.testutils.MockAcsRequestContext;
-import org.eclipse.keti.acs.testutils.MockMvcContext;
-import org.eclipse.keti.acs.testutils.MockSecurityContext;
-import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
-import org.eclipse.keti.acs.testutils.TestUtils;
-import org.eclipse.keti.acs.utils.JsonUtils;
-import org.eclipse.keti.acs.zone.management.ZoneService;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")

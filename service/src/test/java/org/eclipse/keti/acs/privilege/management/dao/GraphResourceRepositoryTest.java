@@ -54,19 +54,18 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import org.eclipse.keti.acs.config.GraphConfig;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.rest.Parent;
 import org.eclipse.keti.acs.utils.JsonUtils;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
-import org.janusgraph.core.SchemaViolationException;
 import org.janusgraph.core.JanusGraphException;
 import org.janusgraph.core.JanusGraphFactory;
+import org.janusgraph.core.SchemaViolationException;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 public class GraphResourceRepositoryTest {
     private static final JsonUtils JSON_UTILS = new JsonUtils();

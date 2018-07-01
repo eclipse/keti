@@ -21,10 +21,9 @@ package db.postgres;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.springframework.jdbc.core.RowMapper;
-
 import org.eclipse.keti.acs.issuer.management.dao.IssuerEntity;
 import org.eclipse.keti.acs.zone.management.dao.ZoneClientEntity;
+import org.springframework.jdbc.core.RowMapper;
 
 @SuppressWarnings("deprecation")
 public class ZoneClientRowMapper implements RowMapper<ZoneClientEntity> {

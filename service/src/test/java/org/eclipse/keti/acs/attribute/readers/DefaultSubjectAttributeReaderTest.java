@@ -26,6 +26,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.keti.acs.model.Attribute;
+import org.eclipse.keti.acs.privilege.management.PrivilegeManagementService;
+import org.eclipse.keti.acs.rest.BaseSubject;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -33,10 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.model.Attribute;
-import org.eclipse.keti.acs.privilege.management.PrivilegeManagementService;
-import org.eclipse.keti.acs.rest.BaseSubject;
 
 @Test
 public class DefaultSubjectAttributeReaderTest {

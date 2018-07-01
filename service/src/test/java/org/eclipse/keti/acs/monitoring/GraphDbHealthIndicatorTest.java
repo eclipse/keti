@@ -19,8 +19,8 @@
 package org.eclipse.keti.acs.monitoring;
 
 import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
-import org.janusgraph.core.QueryException;
 import org.janusgraph.core.JanusGraphConfigurationException;
+import org.janusgraph.core.QueryException;
 import org.janusgraph.diskstorage.ResourceUnavailableException;
 import org.janusgraph.graphdb.database.idassigner.IDPoolExhaustedException;
 import org.mockito.Mockito;
@@ -78,7 +78,9 @@ public class GraphDbHealthIndicatorTest {
 
     private GraphResourceRepository mockGraphDbWithExceptionWhileCheckingVersion(final Exception e) {
         GraphResourceRepository graphResourceRepository = Mockito.mock(GraphResourceRepository.class);
-        Mockito.doThrow(e).when(graphResourceRepository).checkVersionVertexExists(Mockito.anyInt());
+        Mockito.doAnswer(invocation -> {
+            throw e;
+        }).when(graphResourceRepository).checkVersionVertexExists(Mockito.anyInt());
         return graphResourceRepository;
     }
 }

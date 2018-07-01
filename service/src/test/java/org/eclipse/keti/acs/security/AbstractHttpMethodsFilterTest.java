@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.Collections;
 
 import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpHeaders;
@@ -39,8 +40,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder;
 
 public final class AbstractHttpMethodsFilterTest {
 

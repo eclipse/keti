@@ -20,6 +20,17 @@ package org.eclipse.keti.acs.zone.management;
 
 import static org.mockito.Matchers.anyList;
 
+import org.eclipse.keti.acs.SpringSecurityPolicyContextResolver;
+import org.eclipse.keti.acs.config.GraphConfig;
+import org.eclipse.keti.acs.config.InMemoryDataSourceConfig;
+import org.eclipse.keti.acs.privilege.management.dao.ResourceRepository;
+import org.eclipse.keti.acs.privilege.management.dao.SubjectRepository;
+import org.eclipse.keti.acs.rest.Zone;
+import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
+import org.eclipse.keti.acs.testutils.TestUtils;
+import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
+import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
+import org.eclipse.keti.acs.zone.resolver.SpringSecurityZoneResolver;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,17 +44,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import org.eclipse.keti.acs.SpringSecurityPolicyContextResolver;
-import org.eclipse.keti.acs.config.GraphConfig;
-import org.eclipse.keti.acs.config.InMemoryDataSourceConfig;
-import org.eclipse.keti.acs.privilege.management.dao.ResourceRepository;
-import org.eclipse.keti.acs.privilege.management.dao.SubjectRepository;
-import org.eclipse.keti.acs.rest.Zone;
-import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
-import org.eclipse.keti.acs.testutils.TestUtils;
-import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
-import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
-import org.eclipse.keti.acs.zone.resolver.SpringSecurityZoneResolver;
 import com.ge.predix.uaa.token.lib.ZoneOAuth2Authentication;
 
 /**
@@ -91,7 +91,9 @@ public class ZoneServiceTest extends AbstractTransactionalTestNGSpringContextTes
         ResourceRepository resourceRepository = Mockito.mock(ResourceRepository.class);
         Mockito.doNothing().when(resourceRepository).delete(anyList());
         SubjectRepository subjectRepository = Mockito.mock(SubjectRepository.class);
-        Mockito.doThrow(new RuntimeException("Subject Deletion Failed!")).when(subjectRepository).delete(anyList());
+        Mockito.doAnswer(invocation -> {
+            throw new RuntimeException("Subject Deletion Failed!");
+        }).when(subjectRepository).delete(anyList());
         this.testUtils.setField(this.zoneService, "subjectRepository", subjectRepository);
         this.testUtils.setField(this.zoneService, "resourceRepository", resourceRepository);
         this.testUtils.setField(this.zoneService, "zoneRepository", zoneRepository);

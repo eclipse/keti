@@ -18,12 +18,12 @@
 
 package org.eclipse.keti.acs.privilege.management;
 
+import java.util.List;
+import java.util.Set;
+
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.rest.BaseResource;
 import org.eclipse.keti.acs.rest.BaseSubject;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * CRUD interface operations for privilege management.

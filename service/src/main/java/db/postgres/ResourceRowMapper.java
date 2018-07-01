@@ -21,9 +21,8 @@ package db.postgres;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.springframework.jdbc.core.RowMapper;
-
 import org.eclipse.keti.acs.privilege.management.dao.ResourceEntity;
+import org.springframework.jdbc.core.RowMapper;
 
 public class ResourceRowMapper implements RowMapper<ResourceEntity> {
 

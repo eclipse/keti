@@ -21,6 +21,9 @@ package org.eclipse.keti.acs.testutils;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.eclipse.keti.acs.rest.Zone;
+import org.eclipse.keti.acs.zone.management.ZoneService;
+import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.http.MediaType;
@@ -29,10 +32,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testng.Assert;
-
-import org.eclipse.keti.acs.rest.Zone;
-import org.eclipse.keti.acs.zone.management.ZoneService;
-import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 
 /**
  * @author acs-engineers@ge.com

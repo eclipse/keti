@@ -18,17 +18,17 @@
 
 package org.eclipse.keti.acs.monitoring;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 // Modified version of org.springframework.boot.actuate.health.OrderedHealthAggregatorTests
 public class AcsHealthAggregatorTest {

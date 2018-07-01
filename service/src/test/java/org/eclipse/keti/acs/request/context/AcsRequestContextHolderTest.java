@@ -18,15 +18,6 @@
 
 package org.eclipse.keti.acs.request.context;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import org.eclipse.keti.acs.config.GraphConfig;
 import org.eclipse.keti.acs.config.InMemoryDataSourceConfig;
 import org.eclipse.keti.acs.request.context.AcsRequestContext.ACSRequestContextAttribute;
@@ -36,6 +27,14 @@ import org.eclipse.keti.acs.testutils.TestUtils;
 import org.eclipse.keti.acs.zone.management.ZoneService;
 import org.eclipse.keti.acs.zone.management.ZoneServiceImpl;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 @ContextConfiguration(
         classes = { InMemoryDataSourceConfig.class, ZoneServiceImpl.class, AcsRequestContextHolder.class,

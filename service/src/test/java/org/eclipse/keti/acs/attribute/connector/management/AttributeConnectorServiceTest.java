@@ -22,6 +22,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory;
+import org.eclipse.keti.acs.rest.AttributeAdapterConnection;
+import org.eclipse.keti.acs.rest.AttributeConnector;
+import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
+import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
+import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -30,13 +36,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory;
-import org.eclipse.keti.acs.rest.AttributeAdapterConnection;
-import org.eclipse.keti.acs.rest.AttributeConnector;
-import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
-import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
-import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
 
 @Test
 public class AttributeConnectorServiceTest {
@@ -76,7 +75,9 @@ public class AttributeConnectorServiceTest {
     public void testUpsertResourceConnectorWhenSaveFails(final AttributeConnector connector) {
         ZoneEntity zoneEntity = new ZoneEntity();
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();
-        Mockito.doThrow(Exception.class).when(this.zoneRepository).save(Mockito.any(ZoneEntity.class));
+        Mockito.doAnswer(invocation -> {
+            throw new Exception();
+        }).when(this.zoneRepository).save(Mockito.any(ZoneEntity.class));
         this.connectorService.upsertResourceConnector(connector);
     }
 
@@ -118,7 +119,9 @@ public class AttributeConnectorServiceTest {
         ZoneEntity zoneEntity = new ZoneEntity();
         zoneEntity.setResourceAttributeConnector(new AttributeConnector());
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();
-        Mockito.doThrow(Exception.class).when(this.zoneRepository).save(Mockito.any(ZoneEntity.class));
+        Mockito.doAnswer(invocation -> {
+            throw new Exception();
+        }).when(this.zoneRepository).save(Mockito.any(ZoneEntity.class));
         this.connectorService.deleteResourceConnector();
     }
 
@@ -143,7 +146,9 @@ public class AttributeConnectorServiceTest {
     public void testUpsertSubjectConnectorWhenSaveFails(final AttributeConnector connector) {
         ZoneEntity zoneEntity = new ZoneEntity();
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();
-        Mockito.doThrow(Exception.class).when(this.zoneRepository).save(Mockito.any(ZoneEntity.class));
+        Mockito.doAnswer(invocation -> {
+            throw new Exception();
+        }).when(this.zoneRepository).save(Mockito.any(ZoneEntity.class));
         this.connectorService.upsertSubjectConnector(connector);
     }
 
@@ -176,7 +181,9 @@ public class AttributeConnectorServiceTest {
         ZoneEntity zoneEntity = new ZoneEntity();
         zoneEntity.setSubjectAttributeConnector(new AttributeConnector());
         Mockito.doReturn(zoneEntity).when(this.zoneResolver).getZoneEntityOrFail();
-        Mockito.doThrow(Exception.class).when(this.zoneRepository).save(Mockito.any(ZoneEntity.class));
+        Mockito.doAnswer(invocation -> {
+            throw new Exception();
+        }).when(this.zoneRepository).save(Mockito.any(ZoneEntity.class));
         this.connectorService.deleteSubjectConnector();
     }
 

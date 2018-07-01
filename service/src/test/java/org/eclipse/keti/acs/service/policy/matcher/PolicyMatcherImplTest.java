@@ -18,7 +18,7 @@
 
 package org.eclipse.keti.acs.service.policy.matcher;
 
-import static org.mockito.Matchers.anySetOf;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -30,15 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.web.util.UriTemplate;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory;
 import org.eclipse.keti.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
@@ -52,6 +43,14 @@ import org.eclipse.keti.acs.model.PolicySet;
 import org.eclipse.keti.acs.rest.BaseResource;
 import org.eclipse.keti.acs.rest.BaseSubject;
 import org.eclipse.keti.acs.service.policy.evaluation.MatchedPolicy;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.web.util.UriTemplate;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * Unit tests for PolicyMatcher class.
@@ -80,7 +79,7 @@ public class PolicyMatcherImplTest {
         when(this.defaultResourceAttributeReader.getAttributes(anyString())).thenReturn(Collections.emptySet());
         BaseSubject subject = new BaseSubject("test-subject");
         subject.setAttributes(new HashSet<>());
-        when(this.defaultSubjectAttributeReader.getAttributesByScope(anyString(), anySetOf(Attribute.class)))
+        when(this.defaultSubjectAttributeReader.getAttributesByScope(anyString(), any()))
             .thenReturn(subject.getAttributes());
     }
 

@@ -18,6 +18,23 @@
 
 package org.eclipse.keti.controller.test;
 
+import static org.eclipse.keti.acs.testutils.XFiles.AGENT_MULDER;
+import static org.eclipse.keti.acs.testutils.XFiles.FBI;
+import static org.eclipse.keti.acs.testutils.XFiles.SITE_BASEMENT;
+import static org.eclipse.keti.acs.testutils.XFiles.SITE_QUANTICO;
+import static org.eclipse.keti.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP;
+import static org.eclipse.keti.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTE;
+import static org.eclipse.keti.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION;
+import static org.eclipse.keti.acs.testutils.XFiles.TOP_SECRET_GROUP;
+import static org.eclipse.keti.acs.testutils.XFiles.createSubjectHierarchy;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.keti.acs.rest.BaseSubject;
 import org.eclipse.keti.acs.rest.Zone;
 import org.eclipse.keti.acs.testutils.MockAcsRequestContext;
@@ -36,23 +53,6 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.eclipse.keti.acs.testutils.XFiles.AGENT_MULDER;
-import static org.eclipse.keti.acs.testutils.XFiles.FBI;
-import static org.eclipse.keti.acs.testutils.XFiles.SITE_BASEMENT;
-import static org.eclipse.keti.acs.testutils.XFiles.SITE_QUANTICO;
-import static org.eclipse.keti.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP;
-import static org.eclipse.keti.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTE;
-import static org.eclipse.keti.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION;
-import static org.eclipse.keti.acs.testutils.XFiles.TOP_SECRET_GROUP;
-import static org.eclipse.keti.acs.testutils.XFiles.createSubjectHierarchy;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")

@@ -34,6 +34,20 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepository;
+import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
+import org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepository;
+import org.janusgraph.core.EdgeLabel;
+import org.janusgraph.core.JanusGraph;
+import org.janusgraph.core.JanusGraphFactory;
+import org.janusgraph.core.JanusGraphFactory.Builder;
+import org.janusgraph.core.PropertyKey;
+import org.janusgraph.core.VertexLabel;
+import org.janusgraph.core.schema.JanusGraphManagement;
+import org.janusgraph.core.schema.JanusGraphManagement.IndexBuilder;
+import org.janusgraph.core.schema.SchemaAction;
+import org.janusgraph.core.schema.SchemaStatus;
+import org.janusgraph.graphdb.database.management.ManagementSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,21 +55,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.util.Assert;
-
-import org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepository;
-import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
-import org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepository;
-import org.janusgraph.core.EdgeLabel;
-import org.janusgraph.core.PropertyKey;
-import org.janusgraph.core.JanusGraphFactory;
-import org.janusgraph.core.JanusGraphFactory.Builder;
-import org.janusgraph.core.JanusGraph;
-import org.janusgraph.core.VertexLabel;
-import org.janusgraph.core.schema.SchemaAction;
-import org.janusgraph.core.schema.SchemaStatus;
-import org.janusgraph.core.schema.JanusGraphManagement;
-import org.janusgraph.core.schema.JanusGraphManagement.IndexBuilder;
-import org.janusgraph.graphdb.database.management.ManagementSystem;
 
 @Configuration
 @Profile({ "graph" })

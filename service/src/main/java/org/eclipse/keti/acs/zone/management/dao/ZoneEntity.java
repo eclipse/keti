@@ -34,12 +34,12 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.keti.acs.privilege.management.dao.ResourceEntity;
 import org.eclipse.keti.acs.privilege.management.dao.SubjectEntity;
 import org.eclipse.keti.acs.rest.AttributeConnector;
 import org.eclipse.keti.acs.service.policy.admin.dao.PolicySetEntity;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Entity
 @Table(

@@ -23,13 +23,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.mockito.internal.util.reflection.Whitebox;
+import org.eclipse.keti.acs.attribute.readers.CachedAttributes;
+import org.eclipse.keti.acs.model.Attribute;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.attribute.readers.CachedAttributes;
-import org.eclipse.keti.acs.model.Attribute;
 
 public class InMemoryAttributeCacheTest {
 
@@ -46,8 +44,8 @@ public class InMemoryAttributeCacheTest {
         CachedAttributes cachedAttributes = new CachedAttributes(attributes);
         inMemoryAttributeCache.set(TEST_KEY, cachedAttributes);
 
-        Map<String, CachedAttributes> resourceCache = (Map<String, CachedAttributes>) Whitebox
-                .getInternalState(inMemoryAttributeCache, "attributeCache");
+        Map<String, CachedAttributes> resourceCache = (Map<String, CachedAttributes>) ReflectionTestUtils
+                .getField(inMemoryAttributeCache, "attributeCache");
         String cacheKey = AbstractAttributeCache.resourceKey(TEST_ZONE, TEST_KEY);
         Assert.assertEquals(resourceCache.get(cacheKey), cachedAttributes);
     }

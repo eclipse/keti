@@ -24,11 +24,10 @@ import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.eclipse.keti.acs.attribute.readers.CachedAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-
-import org.eclipse.keti.acs.attribute.readers.CachedAttributes;
 
 public class RedisAttributeCache extends AbstractAttributeCache {
 

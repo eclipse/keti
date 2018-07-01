@@ -20,7 +20,6 @@ package org.eclipse.keti.acs.policy.evaluation.cache;
 
 import static org.eclipse.keti.acs.testutils.XFiles.AGENT_MULDER;
 import static org.eclipse.keti.acs.testutils.XFiles.XFILES_ID;
-import static org.mockito.internal.util.reflection.Whitebox.getInternalState;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Map;
@@ -59,7 +58,7 @@ public class InMemoryPolicyEvaluationCacheTest {
         String value = OBJECT_MAPPER.writeValueAsString(result);
         this.cache.set(key.toDecisionKey(), value);
 
-        Map<String, String> evalCache = (Map<String, String>) getInternalState(this.cache, "evalCache");
+        Map<String, String> evalCache = (Map<String, String>) ReflectionTestUtils.getField(this.cache, "evalCache");
         assertEquals(evalCache.size(), 1);
     }
 
@@ -70,7 +69,7 @@ public class InMemoryPolicyEvaluationCacheTest {
         String value = OBJECT_MAPPER.writeValueAsString(new DateTime());
         this.cache.set(key, value);
 
-        Map<String, String> evalCache = (Map<String, String>) getInternalState(this.cache, "evalCache");
+        Map<String, String> evalCache = (Map<String, String>) ReflectionTestUtils.getField(this.cache, "evalCache");
         assertEquals(evalCache.size(), 1);
     }
 
@@ -81,7 +80,7 @@ public class InMemoryPolicyEvaluationCacheTest {
         String value = OBJECT_MAPPER.writeValueAsString(new DateTime());
         this.cache.set(key, value);
 
-        Map<String, String> evalCache = (Map<String, String>) getInternalState(this.cache, "evalCache");
+        Map<String, String> evalCache = (Map<String, String>) ReflectionTestUtils.getField(this.cache, "evalCache");
         assertEquals(evalCache.size(), 1);
     }
 
@@ -92,7 +91,7 @@ public class InMemoryPolicyEvaluationCacheTest {
         String value = OBJECT_MAPPER.writeValueAsString(new DateTime());
         this.cache.set(key, value);
 
-        Map<String, String> evalCache = (Map<String, String>) getInternalState(this.cache, "evalCache");
+        Map<String, String> evalCache = (Map<String, String>) ReflectionTestUtils.getField(this.cache, "evalCache");
         assertEquals(evalCache.size(), 1);
     }
 

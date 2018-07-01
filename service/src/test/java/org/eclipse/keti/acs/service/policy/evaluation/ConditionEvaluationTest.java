@@ -63,7 +63,7 @@ public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
     public void testConditionEvaluationWithConstants(final List<Condition> conditions, final boolean expectedResult,
             final boolean throwsException) {
         PolicyEvaluationServiceImpl evaluationService = new PolicyEvaluationServiceImpl();
-        Whitebox.setInternalState(evaluationService, "policySetValidator", this.policySetValidator);
+        ReflectionTestUtils.setField(evaluationService, "policySetValidator", this.policySetValidator);
         Set<Attribute> subjectAttributes = Collections.emptySet();
         try {
             Assert.assertEquals(evaluationService.evaluateConditions(subjectAttributes, new HashSet<>(), "",
@@ -110,7 +110,7 @@ public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
         subject.setAttributes(subjectAttributes);
 
         PolicyEvaluationServiceImpl evaluationService = new PolicyEvaluationServiceImpl();
-        Whitebox.setInternalState(evaluationService, "policySetValidator", this.policySetValidator);
+        ReflectionTestUtils.setField(evaluationService, "policySetValidator", this.policySetValidator);
 
         try {
             Assert.assertEquals(evaluationService.evaluateConditions(subjectAttributes, resourceAttributes, resourceURI,

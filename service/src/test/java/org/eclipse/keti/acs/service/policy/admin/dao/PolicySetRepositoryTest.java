@@ -18,6 +18,10 @@
 
 package org.eclipse.keti.acs.service.policy.admin.dao;
 
+import org.eclipse.keti.acs.config.InMemoryDataSourceConfig;
+import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
+import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
+import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.test.context.ActiveProfiles;
@@ -25,11 +29,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.config.InMemoryDataSourceConfig;
-import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
-import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
-import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
 
 @ContextConfiguration(classes = InMemoryDataSourceConfig.class)
 @EnableAutoConfiguration

@@ -22,12 +22,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.privilege.management.PrivilegeManagementService;
 import org.eclipse.keti.acs.rest.BaseSubject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class PrivilegeServiceSubjectAttributeReader implements SubjectAttributeReader {

@@ -34,7 +34,6 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.rest.Parent;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
