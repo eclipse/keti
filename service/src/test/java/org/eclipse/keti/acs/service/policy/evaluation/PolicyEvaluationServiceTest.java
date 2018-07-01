@@ -18,8 +18,7 @@
 
 package org.eclipse.keti.acs.service.policy.evaluation;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -153,7 +152,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
         policySets.add(new PolicySet());
         when(this.policyService.getAllPolicySets()).thenReturn(policySets);
         List<MatchedPolicy> matchedPolicies = Collections.emptyList();
-        when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
+        when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), any()))
                 .thenReturn(new MatchResult(matchedPolicies, new HashSet<String>()));
         PolicyEvaluationResult evalPolicy = this.evaluationService
                 .evalPolicy(createRequest("resource1", "subject1", "GET"));
@@ -226,7 +225,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     public void testEvaluateWithMultiplePolicySets(final List<PolicySet> allPolicySets,
             final LinkedHashSet<String> policySetsPriority, final Effect effect) {
         when(this.policyService.getAllPolicySets()).thenReturn(allPolicySets);
-        when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
+        when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), any()))
                 .thenAnswer(new Answer<MatchResult>() {
                     @Override
                     public MatchResult answer(final InvocationOnMock invocation) {
@@ -250,8 +249,10 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     public void testPolicyEvaluationExceptionHandling() {
         List<PolicySet> twoPolicySets = createNotApplicableAndDenyPolicySets();
         when(this.policyService.getAllPolicySets()).thenReturn(twoPolicySets);
-        when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
-                .thenThrow(new RuntimeException("This policy matcher is designed to throw an exception."));
+        when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), any()))
+                .thenAnswer(invocation -> {
+                    throw new RuntimeException("This policy matcher is designed to throw an exception.");
+                });
 
         PolicyEvaluationResult result = this.evaluationService.evalPolicy(
                 createRequest("anyresource", "anysubject", "GET",
@@ -266,7 +267,10 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     @Test(dataProvider = "policyDataProvider")
     public void testEvaluateWithPolicyWithCacheGetException(final File inputPolicy, final Effect effect)
             throws JsonParseException, JsonMappingException, IOException {
-        when(this.cache.get(Mockito.any(PolicyEvaluationRequestCacheKey.class))).thenThrow(new RuntimeException());
+        when(this.cache.get(Mockito.any(PolicyEvaluationRequestCacheKey.class)))
+            .thenAnswer(invocation -> {
+                throw new RuntimeException();
+            });
         testEvaluateWithPolicy(inputPolicy, effect);
     }
 
@@ -305,9 +309,9 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
         for (Policy policy : policySet.getPolicies()) {
             matchedPolicies.add(new MatchedPolicy(policy, resourceAttributes, subjectAttributes));
         }
-        when(this.policyMatcher.match(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
+        when(this.policyMatcher.match(any(PolicyMatchCandidate.class), any()))
                 .thenReturn(matchedPolicies);
-        when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
+        when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), any()))
                 .thenReturn(new MatchResult(matchedPolicies, new HashSet<String>()));
     }
 

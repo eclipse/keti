@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,22 +14,15 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
-
-package org.eclipse.keti.acs.zone.management;
-
-import org.eclipse.keti.acs.rest.Zone;
-
-/**
- *
- * @author acs-engineers@ge.com
  */
-public interface ZoneService {
 
-    boolean upsertZone(Zone zone);
+package org.eclipse.keti.acs.service.policy.evaluation
 
-    Zone retrieveZone(String zoneName);
+import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
+import org.eclipse.keti.acs.rest.PolicyEvaluationResult
 
-    Boolean deleteZone(String zoneName);
+@FunctionalInterface
+interface PolicyEvaluationService {
 
+    fun evalPolicy(request: PolicyEvaluationRequestV1): PolicyEvaluationResult
 }

@@ -56,6 +56,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -117,6 +118,7 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
     @BeforeMethod
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        ReflectionTestUtils.setField(this.policyService, "policySetValidator", this.policySetValidator);
         initializeDefaultResolverBehavior();
     }
 
@@ -223,13 +225,19 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
 
     @Test(expectedExceptions = { PolicyManagementException.class })
     public void testCreatePolicySetWithMissingClientId() {
-        Mockito.when(this.mockZoneResolver.getZoneEntityOrFail()).thenThrow(new InvalidACSRequestException());
+        Mockito.when(this.mockZoneResolver.getZoneEntityOrFail())
+               .thenAnswer(invocation -> {
+                   throw new InvalidACSRequestException();
+               });
         this.createSimplePolicySet();
     }
 
     @Test(expectedExceptions = { PolicyManagementException.class })
     public void testCreatePolicySetWithMissingIssuer() {
-        Mockito.when(this.mockZoneResolver.getZoneEntityOrFail()).thenThrow(new InvalidACSRequestException());
+        Mockito.when(this.mockZoneResolver.getZoneEntityOrFail())
+               .thenAnswer(invocation -> {
+                   throw new InvalidACSRequestException();
+               });
         this.createSimplePolicySet();
     }
 
@@ -298,6 +306,7 @@ public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpri
 
     private void initializeDefaultResolverBehavior() {
         Mockito.when(this.mockZoneResolver.getZoneEntityOrFail()).thenReturn(this.defaultZone);
+        ReflectionTestUtils.setField(this.policyService, "zoneResolver", this.mockZoneResolver);
     }
 
     private ZoneEntity createZone(final String name, final String subdomain, final String description) {

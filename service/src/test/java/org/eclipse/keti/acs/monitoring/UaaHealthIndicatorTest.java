@@ -67,7 +67,10 @@ public class UaaHealthIndicatorTest {
 
     private RestTemplate mockRestWithException(final Exception e) {
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        Mockito.when(restTemplate.getForObject(this.uaaCheckHealthUrl, String.class)).thenThrow(e);
+        Mockito.when(restTemplate.getForObject(this.uaaCheckHealthUrl, String.class))
+               .thenAnswer(invocation -> {
+                   throw e;
+               });
         return restTemplate;
     }
 }
