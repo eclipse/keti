@@ -24,6 +24,8 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 import javax.sql.DataSource
 
+private val LOGGER = LoggerFactory.getLogger(AcsMonitoringRepository::class.java)
+
 /**
  *
  * @author acs-engineers@ge.com
@@ -45,10 +47,5 @@ class AcsMonitoringRepository {
             "Successfully executed health check query on ACS database: {} (result set size: {})", query,
             queryResults.size
         )
-    }
-
-    companion object {
-
-        private val LOGGER = LoggerFactory.getLogger(AcsMonitoringRepository::class.java)
     }
 }

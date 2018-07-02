@@ -37,6 +37,8 @@ import javax.persistence.OneToMany
 import javax.persistence.Table
 import javax.persistence.UniqueConstraint
 
+private val OBJECT_MAPPER = ObjectMapper()
+
 @Entity
 @Table(
     name = "authorization_zone",
@@ -172,10 +174,5 @@ class ZoneEntity {
         }
 
         return connector
-    }
-
-    companion object {
-
-        private val OBJECT_MAPPER = ObjectMapper()
     }
 }

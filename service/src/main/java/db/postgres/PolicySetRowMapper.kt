@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,21 +14,19 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package db.postgres;
+package db.postgres
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.eclipse.keti.acs.service.policy.admin.dao.PolicySetEntity
+import org.springframework.jdbc.core.RowMapper
+import java.sql.ResultSet
+import java.sql.SQLException
 
-import org.eclipse.keti.acs.service.policy.admin.dao.PolicySetEntity;
-import org.springframework.jdbc.core.RowMapper;
+class PolicySetRowMapper : RowMapper<PolicySetEntity> {
 
-public class PolicySetRowMapper implements RowMapper<PolicySetEntity> {
-
-    @Override
-    public PolicySetEntity mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-        return new PolicySetEntity(null, rs.getString("policy_set_id"), rs.getString("policy_set_json"));
+    @Throws(SQLException::class)
+    override fun mapRow(rs: ResultSet, rowNum: Int): PolicySetEntity {
+        return PolicySetEntity(null, rs.getString("policy_set_id"), rs.getString("policy_set_json"))
     }
-
 }

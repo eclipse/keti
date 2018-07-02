@@ -470,11 +470,11 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
     fun getEntityAndDescendantsIds(entity: E?): Set<String> {
         return if (entity == null) {
             emptySet()
-        } else this.graphTraversal.V(entity.id!!).has(entityIdKey).emit().repeat(`in`<Any>().has(entityIdKey))
+        } else this.graphTraversal.V(entity.id).has(entityIdKey).emit().repeat(`in`<Any>().has(entityIdKey))
             .until(eq<Traverser<Vertex>>(null)).values<Any>(entityIdKey).map { it.toString() }.toSet()
     }
 
-    internal abstract fun getEntityId(entity: E): String?
+    abstract fun getEntityId(entity: E): String?
 
     internal abstract fun updateVertexProperties(entity: E, vertex: Vertex)
 

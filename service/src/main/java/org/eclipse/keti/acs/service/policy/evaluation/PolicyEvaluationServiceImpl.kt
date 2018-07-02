@@ -50,6 +50,8 @@ import java.util.HashMap
 import java.util.HashSet
 import java.util.LinkedHashSet
 
+private val LOGGER = LoggerFactory.getLogger(PolicyEvaluationServiceImpl::class.java)
+
 @Component
 class PolicyEvaluationServiceImpl : PolicyEvaluationService {
 
@@ -355,9 +357,5 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
             }
             LOGGER.debug(sb.toString())
         }
-    }
-
-    companion object {
-        private val LOGGER = LoggerFactory.getLogger(PolicyEvaluationServiceImpl::class.java)
     }
 }
