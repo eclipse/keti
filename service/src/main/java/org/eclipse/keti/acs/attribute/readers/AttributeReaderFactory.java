@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.eclipse.keti.acs.attribute.cache.AttributeCacheFactory;
 import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorService;
-import org.eclipse.keti.acs.zone.resolver.SpringSecurityZoneResolver;
+import org.eclipse.keti.acs.zone.resolver.SpringSecurityZoneResolverKt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -60,7 +60,7 @@ public class AttributeReaderFactory {
             return this.privilegeServiceResourceAttributeReader;
         }
 
-        String zoneName = SpringSecurityZoneResolver.getZoneName();
+        String zoneName = SpringSecurityZoneResolverKt.getZoneName();
         ExternalResourceAttributeReader externalResourceAttributeReader = this.externalResourceAttributeReaderCache
                 .get(zoneName);
         if (externalResourceAttributeReader != null) {
@@ -80,7 +80,7 @@ public class AttributeReaderFactory {
             return this.privilegeServiceSubjectAttributeReader;
         }
 
-        String zoneName = SpringSecurityZoneResolver.getZoneName();
+        String zoneName = SpringSecurityZoneResolverKt.getZoneName();
         ExternalSubjectAttributeReader externalSubjectAttributeReader = this.externalSubjectAttributeReaderCache
                 .get(zoneName);
         if (externalSubjectAttributeReader != null) {

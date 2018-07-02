@@ -36,7 +36,7 @@ import java.util.Map;
 
 import org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtility;
 import org.eclipse.keti.acs.request.context.AcsRequestContext;
-import org.eclipse.keti.acs.request.context.AcsRequestContextHolder;
+import org.eclipse.keti.acs.request.context.AcsRequestContextHolderKt;
 import org.eclipse.keti.acs.rest.AttributeConnector;
 import org.eclipse.keti.acs.rest.Zone;
 import org.eclipse.keti.acs.testutils.MockAcsRequestContext;
@@ -178,8 +178,8 @@ public class AttributeConnectorControllerIT extends AbstractTestNGSpringContextT
         Map<AcsRequestContext.ACSRequestContextAttribute, Object> newMap = new HashMap<>();
         newMap.put(AcsRequestContext.ACSRequestContextAttribute.ZONE_ENTITY, null);
 
-        ReflectionTestUtils.setField(AcsRequestContextHolder.getAcsRequestContext(),
-                "unModifiableRequestContextMap", newMap);
+        ReflectionTestUtils.setField(AcsRequestContextHolderKt.getAcsRequestContext(),
+                                     "unModifiableRequestContextMap", newMap);
 
         MockMvcContext getContext =
                 TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, testZone3.getSubdomain(),

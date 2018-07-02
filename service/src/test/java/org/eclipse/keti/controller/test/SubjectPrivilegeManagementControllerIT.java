@@ -33,7 +33,7 @@ import javax.security.auth.Subject;
 
 import org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtility;
 import org.eclipse.keti.acs.request.context.AcsRequestContext;
-import org.eclipse.keti.acs.request.context.AcsRequestContextHolder;
+import org.eclipse.keti.acs.request.context.AcsRequestContextHolderKt;
 import org.eclipse.keti.acs.rest.BaseSubject;
 import org.eclipse.keti.acs.rest.Zone;
 import org.eclipse.keti.acs.testutils.MockAcsRequestContext;
@@ -369,7 +369,7 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         Map<AcsRequestContext.ACSRequestContextAttribute, Object> newMap = new HashMap<>();
         newMap.put(AcsRequestContext.ACSRequestContextAttribute.ZONE_ENTITY, null);
 
-        ReflectionTestUtils.setField(AcsRequestContextHolder.getAcsRequestContext(),
+        ReflectionTestUtils.setField(AcsRequestContextHolderKt.getAcsRequestContext(),
                 "unModifiableRequestContextMap", newMap);
 
         MockMvcContext getContext =

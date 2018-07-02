@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 General Electric Company
+ * Copyright 2017 General Electric Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.eclipse.keti.acs.zone.management.dao
+package org.eclipse.keti.acs.request.context
 
-import org.springframework.data.jpa.repository.JpaRepository
+class AcsRequestContext// Hide Constructor
+internal constructor(private val unModifiableRequestContextMap: Map<ACSRequestContextAttribute, Any?>) {
 
-interface ZoneRepository : JpaRepository<ZoneEntity, Long> {
+    enum class ACSRequestContextAttribute {
+        ZONE_ENTITY
+    }
 
-    fun getBySubdomain(subdomain: String?): ZoneEntity?
-
-    fun getByName(name: String): ZoneEntity?
+    operator fun get(acsRequestContextEnum: ACSRequestContextAttribute): Any? {
+        return this.unModifiableRequestContextMap[acsRequestContextEnum]
+    }
 }

@@ -67,7 +67,7 @@ class PolicyManagementController : BaseRestApi() {
     )
     @ResponseBody
     fun getAllPolicySets(): ResponseEntity<List<PolicySet>> {
-        val allPolicySets = this.service!!.allPolicySets
+        val allPolicySets = this.service.allPolicySets
         return ok(allPolicySets)
     }
 
@@ -87,7 +87,7 @@ class PolicyManagementController : BaseRestApi() {
         validatePolicyIdOrFail(policySet, policySetId)
 
         try {
-            this.service!!.upsertPolicySet(policySet)
+            this.service.upsertPolicySet(policySet)
             val policySetUri = UriTemplateUtils.expand(POLICY_SET_URL, "policySetId:" + policySet.name)
             return created(policySetUri.path)
         } catch (e: PolicyManagementException) {
@@ -99,7 +99,7 @@ class PolicyManagementController : BaseRestApi() {
     @RequestMapping(method = [GET], value = [POLICY_SET_URL])
     @ResponseBody
     fun getPolicySet(@PathVariable("policySetId") name: String): ResponseEntity<PolicySet> {
-        val result = this.service!!.getPolicySet(name)
+        val result = this.service.getPolicySet(name)
 
         return if (null != result) {
             ok(result)
@@ -109,7 +109,7 @@ class PolicyManagementController : BaseRestApi() {
     @ApiOperation(value = "Deletes a policy set for the given zone.", tags = ["Policy Set Management"])
     @RequestMapping(method = [DELETE], value = [POLICY_SET_URL])
     fun deletePolicySet(@PathVariable("policySetId") name: String): ResponseEntity<Void> {
-        this.service!!.deletePolicySet(name)
+        this.service.deletePolicySet(name)
         return noContent()
     }
 

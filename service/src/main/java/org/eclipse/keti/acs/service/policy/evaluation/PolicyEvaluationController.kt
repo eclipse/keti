@@ -67,6 +67,6 @@ class PolicyEvaluationController : BaseRestApi() {
     )
     @ResponseBody
     fun evalPolicyV1(@RequestBody request: PolicyEvaluationRequestV1): ResponseEntity<PolicyEvaluationResult> {
-        return ok(this.service!!.evalPolicy(request))
+        return ok(this.service.evalPolicy(request))
     }
 }

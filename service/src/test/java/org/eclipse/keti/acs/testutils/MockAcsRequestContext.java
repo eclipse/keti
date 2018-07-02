@@ -21,7 +21,7 @@ package org.eclipse.keti.acs.testutils;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.eclipse.keti.acs.request.context.AcsRequestContextHolder;
+import org.eclipse.keti.acs.request.context.AcsRequestContextHolderKt;
 
 public final class MockAcsRequestContext {
     private MockAcsRequestContext() {
@@ -30,11 +30,9 @@ public final class MockAcsRequestContext {
 
     public static void mockAcsRequestContext() {
         try {
-            Method method = AcsRequestContextHolder.class.getDeclaredMethod("initialize");
+            Method method = AcsRequestContextHolderKt.class.getDeclaredMethod("initialize");
             method.setAccessible(true);
-            Object nullObj = null;
-            Object[] nullArgs = null;
-            method.invoke(nullObj, nullArgs);
+            method.invoke(null);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException e) {
             Throwable cause = e.getCause();

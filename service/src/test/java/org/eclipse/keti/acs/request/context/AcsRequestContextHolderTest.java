@@ -65,7 +65,7 @@ public class AcsRequestContextHolderTest extends AbstractTestNGSpringContextTest
 
     @Test
     public void testAcsRequestContextSet() {
-        AcsRequestContext acsRequestContext = AcsRequestContextHolder.getAcsRequestContext();
+        AcsRequestContext acsRequestContext = AcsRequestContextHolderKt.getAcsRequestContext();
         ZoneEntity zoneEntity = (ZoneEntity) acsRequestContext.get(ACSRequestContextAttribute.ZONE_ENTITY);
         Assert.assertEquals(zoneEntity.getName(), ZONE_NAME + ZONE_NAME_SUFFIX);
         Assert.assertEquals(zoneEntity.getSubdomain(), ZONE_NAME + ZONE_SUBDOMAIN_SUFFIX);
@@ -73,7 +73,7 @@ public class AcsRequestContextHolderTest extends AbstractTestNGSpringContextTest
 
     @Test
     public void testClearAcsRequestContext() {
-        AcsRequestContextHolder.clear();
-        Assert.assertNull(AcsRequestContextHolder.getAcsRequestContext());
+        AcsRequestContextHolderKt.clear();
+        Assert.assertNull(AcsRequestContextHolderKt.getAcsRequestContext());
     }
 }

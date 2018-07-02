@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,13 +14,14 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.zone.resolver;
+package org.eclipse.keti.acs.zone.resolver
 
-import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
+import org.eclipse.keti.acs.zone.management.dao.ZoneEntity
 
 @FunctionalInterface
-public interface ZoneResolver {
-    ZoneEntity getZoneEntityOrFail();
+interface ZoneResolver {
+
+    val zoneEntityOrFail: ZoneEntity
 }
