@@ -185,7 +185,7 @@ public class SubjectRepositoryProxy implements SubjectRepository, SubjectHierarc
 
     @Override
     public SubjectEntity getSubjectWithInheritedAttributesForScopes(final ZoneEntity zone,
-            final String subjectIdentifier, final Set<Attribute> scopes) {
+            final String subjectIdentifier, final Set<? extends Attribute> scopes) {
         if (this.activeRepository == this.graphRepository) { // i.e. graph is enabled
             return this.graphRepository.getSubjectWithInheritedAttributesForScopes(zone, subjectIdentifier, scopes);
         } else {

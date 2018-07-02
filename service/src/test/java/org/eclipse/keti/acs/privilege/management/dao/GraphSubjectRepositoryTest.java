@@ -18,8 +18,8 @@
 
 package org.eclipse.keti.acs.privilege.management.dao;
 
-import static org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepository.PARENT_EDGE_LABEL;
-import static org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepository.SUBJECT_ID_KEY;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepositoryKt.PARENT_EDGE_LABEL;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepositoryKt.SUBJECT_ID_KEY;
 import static org.eclipse.keti.acs.testutils.XFiles.AGENT_MULDER;
 import static org.eclipse.keti.acs.testutils.XFiles.AGENT_SCULLY;
 import static org.eclipse.keti.acs.testutils.XFiles.FBI;
@@ -193,12 +193,14 @@ public class GraphSubjectRepositoryTest {
             invocationCount = CONCURRENT_TEST_INVOCATIONS)
     public void testSaveScopes() {
         SubjectEntity subject = persistScopedHierarchy(AGENT_MULDER + getRandomNumber(), SITE_BASEMENT);
-        assertThat(IteratorUtils.count(this.graphTraversalSource.V(subject.getId()).outE(PARENT_EDGE_LABEL)),
+        assertThat(IteratorUtils.count(this.graphTraversalSource.V(subject.getId()).outE(
+                PARENT_EDGE_LABEL)),
                 equalTo(2L));
 
         // Persist again (i.e. update) and make sure vertex and edge count are stable.
         this.subjectRepository.save(subject);
-        assertThat(IteratorUtils.count(this.graphTraversalSource.V(subject.getId()).outE(PARENT_EDGE_LABEL)),
+        assertThat(IteratorUtils.count(this.graphTraversalSource.V(subject.getId()).outE(
+                PARENT_EDGE_LABEL)),
                 equalTo(2L));
 
         Parent parent = null;

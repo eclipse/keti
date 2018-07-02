@@ -18,7 +18,7 @@
 
 package org.eclipse.keti.acs.privilege.management.dao;
 
-import static org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository.RESOURCE_ID_KEY;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepositoryKt.RESOURCE_ID_KEY;
 import static org.eclipse.keti.acs.testutils.XFiles.ASCENSION_ATTRIBUTES;
 import static org.eclipse.keti.acs.testutils.XFiles.ASCENSION_ID;
 import static org.eclipse.keti.acs.testutils.XFiles.BASEMENT_ATTRIBUTES;

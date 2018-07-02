@@ -18,11 +18,15 @@
 
 package org.eclipse.keti.acs.config;
 
-import static org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepository.PARENT_EDGE_LABEL;
-import static org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepository.SCOPE_PROPERTY_KEY;
-import static org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepository.ZONE_ID_KEY;
-import static org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository.RESOURCE_ID_KEY;
-import static org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepository.SUBJECT_ID_KEY;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepositoryKt.PARENT_EDGE_LABEL;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepositoryKt.SCOPE_PROPERTY_KEY;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepositoryKt.VERSION_PROPERTY_KEY;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepositoryKt.VERSION_VERTEX_LABEL;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepositoryKt.ZONE_ID_KEY;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepositoryKt.RESOURCE_ID_KEY;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepositoryKt.RESOURCE_LABEL;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepositoryKt.SUBJECT_ID_KEY;
+import static org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepositoryKt.SUBJECT_LABEL;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
@@ -34,9 +38,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.eclipse.keti.acs.privilege.management.dao.GraphGenericRepository;
-import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
-import org.eclipse.keti.acs.privilege.management.dao.GraphSubjectRepository;
 import org.janusgraph.core.EdgeLabel;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphFactory;
@@ -121,9 +122,9 @@ public class GraphConfig {
     }
 
     public static void createSchemaElements(final Graph newGraph) throws InterruptedException {
-        createVertexLabel(newGraph, GraphResourceRepository.RESOURCE_LABEL);
-        createVertexLabel(newGraph, GraphSubjectRepository.SUBJECT_LABEL);
-        createVertexLabel(newGraph, GraphGenericRepository.VERSION_VERTEX_LABEL);
+        createVertexLabel(newGraph, RESOURCE_LABEL);
+        createVertexLabel(newGraph, SUBJECT_LABEL);
+        createVertexLabel(newGraph, VERSION_VERTEX_LABEL);
 
         createIndex(newGraph, BY_ZONE_INDEX_NAME, ZONE_ID_KEY);
         createUniqueCompositeIndex(newGraph, BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME,
@@ -133,9 +134,10 @@ public class GraphConfig {
                 new String[] { ZONE_ID_KEY, SUBJECT_ID_KEY });
 
         createUniqueCompositeIndex(newGraph, BY_VERSION_UNIQUE_INDEX_NAME,
-                new String[] { GraphGenericRepository.VERSION_PROPERTY_KEY }, Integer.class);
+                                   new String[] { VERSION_PROPERTY_KEY }, Integer.class);
 
-        createEdgeIndex(newGraph, BY_SCOPE_INDEX_NAME, PARENT_EDGE_LABEL, SCOPE_PROPERTY_KEY);
+        createEdgeIndex(newGraph, BY_SCOPE_INDEX_NAME, PARENT_EDGE_LABEL,
+                        SCOPE_PROPERTY_KEY);
     }
 
     public static void createIndex(final Graph newGraph, final String indexName, final String indexKey)

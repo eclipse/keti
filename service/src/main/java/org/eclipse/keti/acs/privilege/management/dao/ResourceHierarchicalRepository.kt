@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,16 +14,15 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.zone.management.dao;
+package org.eclipse.keti.acs.privilege.management.dao
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.eclipse.keti.acs.zone.management.dao.ZoneEntity
 
-public interface ZoneRepository extends JpaRepository<ZoneEntity, Long> {
+interface ResourceHierarchicalRepository {
 
-    ZoneEntity getBySubdomain(String subdomain);
+    fun getResourceWithInheritedAttributes(zone: ZoneEntity, resourceIdentifier: String): ResourceEntity?
 
-    ZoneEntity getByName(String name);
-
+    fun getResourceEntityAndDescendantsIds(entity: ResourceEntity?): Set<String>
 }
