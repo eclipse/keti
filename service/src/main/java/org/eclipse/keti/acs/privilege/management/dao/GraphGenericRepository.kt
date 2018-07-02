@@ -172,7 +172,7 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
 
     override fun delete(entities: Iterable<E>) {
         val ids = ArrayList<Long>()
-        entities.forEach { item -> ids.add(item.id) }
+        entities.forEach { item -> ids.add(item.id!!) }
         this.commitTransaction(Runnable { this.graphTraversal.V(*ids.toTypedArray()).drop().iterate() })
     }
 
@@ -221,7 +221,7 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
             verifyEntityNotSelfReferencing(entity)
             val entityId = getEntityId(entity)
             Assert.notNull(entity.zone, "ZonableEntity must have a non-null zone.")
-            val zoneId = entity.zone.name
+            val zoneId = entity.zone!!.name
             Assert.hasText(zoneId, "zoneName is required.")
             val entityVertex = this.graphTraversal.addV().property(T.label, entityLabel)
                 .property(ZONE_ID_KEY, zoneId).property(entityIdKey, entityId).next()
@@ -273,12 +273,12 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
     }
 
     private fun saveParentRelationship(entity: E, vertex: Vertex, parent: Parent) {
-        val traversal = this.graphTraversal.V().has(ZONE_ID_KEY, entity.zone.name)
+        val traversal = this.graphTraversal.V().has(ZONE_ID_KEY, entity.zone!!.name)
             .has(entityIdKey, parent.identifier)
         if (!traversal.hasNext()) {
             throw IllegalStateException(
                 String.format(
-                    "No parent exists in zone '%s' with '%s' value of '%s'.", entity.zone.name,
+                    "No parent exists in zone '%s' with '%s' value of '%s'.", entity.zone!!.name,
                     entityIdKey, parent.identifier
                 )
             )
@@ -291,12 +291,12 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
         val parents = HashSet<ParentEntity>()
         entity.parents.forEach { parent ->
             val traversal = this.graphTraversal.V()
-                .has(ZONE_ID_KEY, entity.zone.name).has(entityIdKey, parent.identifier)
+                .has(ZONE_ID_KEY, entity.zone!!.name).has(entityIdKey, parent.identifier)
             if (!traversal.hasNext()) {
                 throw IllegalStateException(
                     String.format(
                         "No parent exists in zone '%s' with '%s' value of '%s'.",
-                        entity.zone.name, entityIdKey, parent.identifier
+                        entity.zone!!.name, entityIdKey, parent.identifier
                     )
                 )
             }
@@ -474,7 +474,7 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
             .until(eq<Traverser<Vertex>>(null)).values<Any>(entityIdKey).map { it.toString() }.toSet()
     }
 
-    internal abstract fun getEntityId(entity: E): String
+    internal abstract fun getEntityId(entity: E): String?
 
     internal abstract fun updateVertexProperties(entity: E, vertex: Vertex)
 

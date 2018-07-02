@@ -139,13 +139,13 @@ public class V2_0_1__InitializeIdentityZones implements SpringJdbcMigration {
         jdbcTemplate.update("DELETE FROM policy_set *");
         for (PolicySetEntity ps : policysets) {
             SqlRowSet row = jdbcTemplate
-                    .queryForRowSet("SELECT * FROM policy_set WHERE policy_set_id =?", ps.getPolicySetID());
+                    .queryForRowSet("SELECT * FROM policy_set WHERE policy_set_id =?", ps.getPolicySetId());
             if (row.next()) {
                 jdbcTemplate.update("UPDATE policy_set SET policy_set_json = ? WHERE policy_set_id = ?",
-                        ps.getPolicySetJson(), ps.getPolicySetID());
+                        ps.getPolicySetJson(), ps.getPolicySetId());
             } else {
                 jdbcTemplate.update("INSERT INTO policy_set (policy_set_id, policy_set_json, "
-                        + " authorization_zone_id) VALUES (?,?,?)", ps.getPolicySetID(), ps.getPolicySetJson(), zone);
+                        + " authorization_zone_id) VALUES (?,?,?)", ps.getPolicySetId(), ps.getPolicySetJson(), zone);
             }
         }
     }

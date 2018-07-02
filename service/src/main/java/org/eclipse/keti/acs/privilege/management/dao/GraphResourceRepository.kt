@@ -57,7 +57,7 @@ class GraphResourceRepository : GraphGenericRepository<ResourceEntity>(), Resour
         return getEntityWithInheritedAttributes(zone, resourceIdentifier, emptySet())
     }
 
-    override fun getEntityId(entity: ResourceEntity): String {
+    override fun getEntityId(entity: ResourceEntity): String? {
         return entity.resourceIdentifier
     }
 

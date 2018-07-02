@@ -40,7 +40,7 @@ val zoneEntity: ZoneEntity
     }
 
 val zoneName: String
-    get() = zoneEntity.name
+    get() = zoneEntity.name!!
 
 @Component
 class SpringSecurityZoneResolver : ZoneResolver {

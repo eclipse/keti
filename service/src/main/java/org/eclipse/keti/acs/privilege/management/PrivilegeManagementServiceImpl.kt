@@ -283,7 +283,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
                 .getByZoneAndSubjectIdentifier(zone, subject.subjectIdentifier)
             val entity = this.privilegeConverter.toSubjectEntity(zone, subject)
             if (persistedSubject != null) {
-                entity!!.setId(persistedSubject.id)
+                entity!!.id = persistedSubject.id
             }
             subjectEntities.add(entity)
         }
@@ -357,7 +357,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
             .getByZoneAndSubjectIdentifier(zone, subject.subjectIdentifier)
 
         if (persistedSubject != null) {
-            updatedSubject!!.setId(persistedSubject.id)
+            updatedSubject!!.id = persistedSubject.id
             this.cache.resetForSubjectsByIds(
                 zone.name,
                 this.subjectRepository.getSubjectEntityAndDescendantsIds(updatedSubject)

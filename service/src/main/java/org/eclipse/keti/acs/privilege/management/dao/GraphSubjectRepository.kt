@@ -64,7 +64,7 @@ class GraphSubjectRepository : GraphGenericRepository<SubjectEntity>(), SubjectR
         return getEntityWithInheritedAttributes(zone, subjectIdentifier, scopes)
     }
 
-    override fun getEntityId(entity: SubjectEntity): String {
+    override fun getEntityId(entity: SubjectEntity): String? {
         return entity.subjectIdentifier
     }
 
@@ -83,7 +83,7 @@ class GraphSubjectRepository : GraphGenericRepository<SubjectEntity>(), SubjectR
         val zoneEntity = ZoneEntity()
         zoneEntity.name = zoneName
         val subjectEntity = SubjectEntity(zoneEntity, subjectIdentifier)
-        subjectEntity.setId(vertex.id() as Long)
+        subjectEntity.id = vertex.id() as Long
         val attributesAsJson =
             getPropertyOrEmptyString(vertex, ATTRIBUTES_PROPERTY_KEY)
         subjectEntity.attributesAsJson = attributesAsJson
