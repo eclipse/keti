@@ -42,13 +42,15 @@ public class AcsDbHealthIndicatorTest {
         AcsDbHealthIndicator acsDbHealthIndicator = new AcsDbHealthIndicator(acsMonitoringRepository);
         acsDbHealthIndicator.setStartupManager(graphStartupManager);
         Assert.assertEquals(status, acsDbHealthIndicator.health().getStatus());
-        Assert.assertEquals(AcsDbHealthIndicator.DESCRIPTION,
-                acsDbHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.DESCRIPTION_KEY));
-        if (healthCode == AcsMonitoringUtilities.HealthCode.AVAILABLE) {
-            Assert.assertFalse(acsDbHealthIndicator.health().getDetails().containsKey(AcsMonitoringUtilities.CODE_KEY));
+        Assert.assertEquals(DB_DESCRIPTION,
+                            acsDbHealthIndicator.health().getDetails().get(
+                                    DESCRIPTION_KEY));
+        if (healthCode == HealthCode.AVAILABLE) {
+            Assert.assertFalse(acsDbHealthIndicator.health().getDetails().containsKey(
+                    CODE_KEY));
         } else {
             Assert.assertEquals(healthCode,
-                    acsDbHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.CODE_KEY));
+                    acsDbHealthIndicator.health().getDetails().get(CODE_KEY));
         }
     }
 

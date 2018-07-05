@@ -18,6 +18,10 @@
 
 package org.eclipse.keti.acs.monitoring;
 
+import static org.eclipse.keti.acs.monitoring.AcsMonitoringUtilitiesKt.CODE_KEY;
+import static org.eclipse.keti.acs.monitoring.AcsMonitoringUtilitiesKt.DESCRIPTION_KEY;
+import static org.eclipse.keti.acs.monitoring.GraphDbHealthIndicatorKt.GRAPH_DESCRIPTION;
+
 import org.eclipse.keti.acs.privilege.management.dao.GraphResourceRepository;
 import org.janusgraph.core.JanusGraphConfigurationException;
 import org.janusgraph.core.QueryException;
@@ -34,39 +38,41 @@ public class GraphDbHealthIndicatorTest {
 
     @Test(dataProvider = "statuses")
     public void testHealth(final GraphResourceRepository graphResourceRepository, final Status status,
-            final AcsMonitoringUtilities.HealthCode healthCode, final boolean cassandraEnabled) throws Exception {
+            final HealthCode healthCode, final boolean cassandraEnabled) throws Exception {
         GraphDbHealthIndicator graphDbHealthIndicator = new GraphDbHealthIndicator(graphResourceRepository);
         ReflectionTestUtils.setField(graphDbHealthIndicator, "cassandraEnabled", cassandraEnabled);
         Assert.assertEquals(status, graphDbHealthIndicator.health().getStatus());
-        Assert.assertEquals(GraphDbHealthIndicator.DESCRIPTION,
-                graphDbHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.DESCRIPTION_KEY));
-        if (healthCode == AcsMonitoringUtilities.HealthCode.AVAILABLE) {
+        Assert.assertEquals(GRAPH_DESCRIPTION,
+                            graphDbHealthIndicator.health().getDetails().get(
+                                    DESCRIPTION_KEY));
+        if (healthCode == HealthCode.AVAILABLE) {
             Assert.assertFalse(
-                    graphDbHealthIndicator.health().getDetails().containsKey(AcsMonitoringUtilities.CODE_KEY));
+                    graphDbHealthIndicator.health().getDetails().containsKey(
+                            CODE_KEY));
         } else {
             Assert.assertEquals(healthCode,
-                    graphDbHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.CODE_KEY));
+                    graphDbHealthIndicator.health().getDetails().get(CODE_KEY));
         }
     }
 
     @DataProvider
     public Object[][] statuses() {
         return new Object[][] {
-                new Object[] { mockGraphDbWithUp(), Status.UP, AcsMonitoringUtilities.HealthCode.IN_MEMORY, false },
+                new Object[] { mockGraphDbWithUp(), Status.UP, HealthCode.IN_MEMORY, false },
 
-                { mockGraphDbWithUp(), Status.UP, AcsMonitoringUtilities.HealthCode.AVAILABLE, true },
+                { mockGraphDbWithUp(), Status.UP, HealthCode.AVAILABLE, true },
 
                 { mockGraphDbWithExceptionWhileCheckingVersion(new QueryException("")), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.INVALID_QUERY, true },
+                        HealthCode.INVALID_QUERY, true },
 
                 { mockGraphDbWithExceptionWhileCheckingVersion(new ResourceUnavailableException("")), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.UNAVAILABLE, true },
+                        HealthCode.UNAVAILABLE, true },
 
                 { mockGraphDbWithExceptionWhileCheckingVersion(new JanusGraphConfigurationException("")), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.MISCONFIGURATION, true },
+                        HealthCode.MISCONFIGURATION, true },
 
                 { mockGraphDbWithExceptionWhileCheckingVersion(new IDPoolExhaustedException("")), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.ERROR, true }, };
+                        HealthCode.ERROR, true }, };
 
     }
 

@@ -18,6 +18,10 @@
 
 package org.eclipse.keti.acs.monitoring;
 
+import static org.eclipse.keti.acs.monitoring.AbstractCacheHealthIndicatorKt.CACHE_DESCRIPTION;
+import static org.eclipse.keti.acs.monitoring.AcsMonitoringUtilitiesKt.CODE_KEY;
+import static org.eclipse.keti.acs.monitoring.AcsMonitoringUtilitiesKt.DESCRIPTION_KEY;
+
 import org.mockito.Mockito;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -31,14 +35,17 @@ public class CacheHealthIndicatorTest {
 
     @Test(dataProvider = "statuses")
     public void testHealth(final CacheHealthIndicator cacheHealthIndicator, final Status status,
-            final AcsMonitoringUtilities.HealthCode healthCode) throws Exception {
+            final HealthCode healthCode) throws Exception {
         Assert.assertEquals(cacheHealthIndicator.health().getStatus(), status);
-        Assert.assertEquals(cacheHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.DESCRIPTION_KEY),
-                AbstractCacheHealthIndicator.DESCRIPTION);
-        if (healthCode == AcsMonitoringUtilities.HealthCode.AVAILABLE) {
-            Assert.assertFalse(cacheHealthIndicator.health().getDetails().containsKey(AcsMonitoringUtilities.CODE_KEY));
+        Assert.assertEquals(cacheHealthIndicator.health().getDetails().get(
+                DESCRIPTION_KEY),
+                            CACHE_DESCRIPTION);
+        if (healthCode == HealthCode.AVAILABLE) {
+            Assert.assertFalse(cacheHealthIndicator.health().getDetails().containsKey(
+                    CODE_KEY));
         } else {
-            Assert.assertEquals(cacheHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.CODE_KEY),
+            Assert.assertEquals(cacheHealthIndicator.health().getDetails().get(
+                    CODE_KEY),
                     healthCode);
         }
     }
@@ -47,36 +54,36 @@ public class CacheHealthIndicatorTest {
     public Object[][] statuses() throws Exception {
         return new Object[][] {
                 new Object[] { mockCacheWithUp(true, true, DecisionCacheHealthIndicator.class), Status.UP,
-                        AcsMonitoringUtilities.HealthCode.AVAILABLE },
+                        HealthCode.AVAILABLE },
                 { mockCacheWithUp(true, true, ResourceCacheHealthIndicator.class), Status.UP,
-                        AcsMonitoringUtilities.HealthCode.AVAILABLE },
+                        HealthCode.AVAILABLE },
                 { mockCacheWithUp(true, true, SubjectCacheHealthIndicator.class), Status.UP,
-                        AcsMonitoringUtilities.HealthCode.AVAILABLE },
+                        HealthCode.AVAILABLE },
                 { mockCacheWithUp(false, true, DecisionCacheHealthIndicator.class), Status.UNKNOWN,
-                        AcsMonitoringUtilities.HealthCode.DISABLED },
+                        HealthCode.DISABLED },
                 { mockCacheWithUp(false, true, ResourceCacheHealthIndicator.class), Status.UNKNOWN,
-                        AcsMonitoringUtilities.HealthCode.DISABLED },
+                        HealthCode.DISABLED },
                 { mockCacheWithUp(false, true, SubjectCacheHealthIndicator.class), Status.UNKNOWN,
-                        AcsMonitoringUtilities.HealthCode.DISABLED },
+                        HealthCode.DISABLED },
                 { mockCacheWithUp(true, false, DecisionCacheHealthIndicator.class), Status.UNKNOWN,
-                        AcsMonitoringUtilities.HealthCode.HEALTH_CHECK_DISABLED },
+                        HealthCode.HEALTH_CHECK_DISABLED },
                 { mockCacheWithUp(true, false, ResourceCacheHealthIndicator.class), Status.UNKNOWN,
-                        AcsMonitoringUtilities.HealthCode.HEALTH_CHECK_DISABLED },
+                        HealthCode.HEALTH_CHECK_DISABLED },
                 { mockCacheWithUp(true, false, SubjectCacheHealthIndicator.class), Status.UNKNOWN,
-                        AcsMonitoringUtilities.HealthCode.HEALTH_CHECK_DISABLED },
+                        HealthCode.HEALTH_CHECK_DISABLED },
                 { mockCacheWithExceptionWhileGettingConnection(new RuntimeException(),
                         DecisionCacheHealthIndicator.class), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.ERROR },
+                        HealthCode.ERROR },
                 { mockCacheWithExceptionWhileGettingConnection(new RuntimeException(),
-                        ResourceCacheHealthIndicator.class), Status.DOWN, AcsMonitoringUtilities.HealthCode.ERROR },
+                        ResourceCacheHealthIndicator.class), Status.DOWN, HealthCode.ERROR },
                 { mockCacheWithExceptionWhileGettingConnection(new RuntimeException(),
-                        SubjectCacheHealthIndicator.class), Status.DOWN, AcsMonitoringUtilities.HealthCode.ERROR },
+                        SubjectCacheHealthIndicator.class), Status.DOWN, HealthCode.ERROR },
                 { mockCacheWithExceptionWhileGettingInfo(new RuntimeException(), DecisionCacheHealthIndicator.class),
-                        Status.DOWN, AcsMonitoringUtilities.HealthCode.ERROR },
+                        Status.DOWN, HealthCode.ERROR },
                 { mockCacheWithExceptionWhileGettingInfo(new RuntimeException(), ResourceCacheHealthIndicator.class),
-                        Status.DOWN, AcsMonitoringUtilities.HealthCode.ERROR },
+                        Status.DOWN, HealthCode.ERROR },
                 { mockCacheWithExceptionWhileGettingInfo(new RuntimeException(), SubjectCacheHealthIndicator.class),
-                        Status.DOWN, AcsMonitoringUtilities.HealthCode.ERROR } };
+                        Status.DOWN, HealthCode.ERROR } };
     }
 
     @SuppressWarnings("unchecked")

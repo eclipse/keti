@@ -18,6 +18,9 @@
 
 package org.eclipse.keti.acs.monitoring;
 
+import static org.eclipse.keti.acs.monitoring.AcsMonitoringUtilitiesKt.CODE_KEY;
+import static org.eclipse.keti.acs.monitoring.AcsMonitoringUtilitiesKt.DESCRIPTION_KEY;
+
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Status;
@@ -34,29 +37,30 @@ public class UaaHealthIndicatorTest {
 
     @Test(dataProvider = "statuses")
     public void testHealth(final RestTemplate restTemplate, final Status status,
-            final AcsMonitoringUtilities.HealthCode healthCode) throws Exception {
+            final HealthCode healthCode) throws Exception {
         UaaHealthIndicator uaaHealthIndicator = new UaaHealthIndicator(restTemplate);
         Assert.assertEquals(status, uaaHealthIndicator.health().getStatus());
         Assert.assertEquals(uaaHealthIndicator.getDescription(),
-                uaaHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.DESCRIPTION_KEY));
-        if (healthCode == AcsMonitoringUtilities.HealthCode.AVAILABLE) {
-            Assert.assertFalse(uaaHealthIndicator.health().getDetails().containsKey(AcsMonitoringUtilities.CODE_KEY));
+                uaaHealthIndicator.health().getDetails().get(DESCRIPTION_KEY));
+        if (healthCode == HealthCode.AVAILABLE) {
+            Assert.assertFalse(uaaHealthIndicator.health().getDetails().containsKey(
+                    CODE_KEY));
         } else {
             Assert.assertEquals(healthCode,
-                    uaaHealthIndicator.health().getDetails().get(AcsMonitoringUtilities.CODE_KEY));
+                    uaaHealthIndicator.health().getDetails().get(CODE_KEY));
         }
     }
 
     @DataProvider
     public Object[][] statuses() {
         return new Object[][] {
-                new Object[] { mockRestWithUp(), Status.UP, AcsMonitoringUtilities.HealthCode.AVAILABLE },
+                new Object[] { mockRestWithUp(), Status.UP, HealthCode.AVAILABLE },
 
                 { mockRestWithException(new RestClientException("")), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.UNREACHABLE },
+                        HealthCode.UNREACHABLE },
 
                 { mockRestWithException(new RuntimeException()), Status.DOWN,
-                        AcsMonitoringUtilities.HealthCode.ERROR }, };
+                        HealthCode.ERROR }, };
     }
 
     private RestTemplate mockRestWithUp() {

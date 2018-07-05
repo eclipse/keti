@@ -83,12 +83,13 @@ public class AcsHealthAggregatorTest {
 
     @DataProvider
     public Object[][] statuses() {
-        return new Object[][] { new Object[] { AcsHealthAggregator.DEGRADED_STATUS,
-                Arrays.asList(Status.UP, AcsHealthAggregator.DEGRADED_STATUS, Status.UP) },
+        return new Object[][] { new Object[] {
+                AcsHealthAggregatorKt.getDEGRADED_STATUS(),
+                Arrays.asList(Status.UP, AcsHealthAggregatorKt.getDEGRADED_STATUS(), Status.UP) },
 
                 { Status.UP, Arrays.asList(Status.UP, Status.UNKNOWN, Status.UP) },
 
-                { Status.DOWN, Arrays.asList(Status.UP, AcsHealthAggregator.DEGRADED_STATUS, Status.DOWN) }, };
+                { Status.DOWN, Arrays.asList(Status.UP, AcsHealthAggregatorKt.getDEGRADED_STATUS(), Status.DOWN) }, };
     }
 
     @Test
@@ -115,7 +116,9 @@ public class AcsHealthAggregatorTest {
         return new Object[][] {
                 new Object[] { "h1", new Health.Builder().status(new Status("CUSTOM")).build(), Status.UNKNOWN },
 
-                { "cache", new Health.Builder().status(Status.DOWN).build(), AcsHealthAggregator.DEGRADED_STATUS },
+                { "cache", new Health.Builder().status(Status.DOWN).build(),
+                  AcsHealthAggregatorKt.getDEGRADED_STATUS()
+                },
 
                 { "cache", new Health.Builder().status(Status.UNKNOWN).build(), Status.UP }, };
     }
