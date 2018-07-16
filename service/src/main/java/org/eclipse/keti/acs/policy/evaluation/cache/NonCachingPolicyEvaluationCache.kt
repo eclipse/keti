@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,71 +14,81 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.policy.evaluation.cache;
+package org.eclipse.keti.acs.policy.evaluation.cache
 
-import java.util.List;
-import java.util.Set;
+import org.eclipse.keti.acs.privilege.management.dao.ResourceEntity
+import org.eclipse.keti.acs.privilege.management.dao.SubjectEntity
+import org.eclipse.keti.acs.rest.PolicyEvaluationResult
 
-import org.eclipse.keti.acs.privilege.management.dao.ResourceEntity;
-import org.eclipse.keti.acs.privilege.management.dao.SubjectEntity;
-import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
+class NonCachingPolicyEvaluationCache : PolicyEvaluationCache {
 
-public class NonCachingPolicyEvaluationCache implements PolicyEvaluationCache {
-
-    @Override
-    public PolicyEvaluationResult get(final PolicyEvaluationRequestCacheKey key) {
-        return null;
+    override fun get(key: PolicyEvaluationRequestCacheKey): PolicyEvaluationResult? {
+        return null
     }
 
-    @Override
-    public void set(final PolicyEvaluationRequestCacheKey key, final PolicyEvaluationResult value) {
+    override fun set(
+        key: PolicyEvaluationRequestCacheKey,
+        value: PolicyEvaluationResult
+    ) {
         // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
     }
 
-    @Override
-    public void reset() {
+    override fun reset() {
         // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
     }
 
-    @Override
-    public void reset(final PolicyEvaluationRequestCacheKey key) {
+    override fun reset(key: PolicyEvaluationRequestCacheKey) {
         // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
     }
 
-    @Override
-    public void resetForPolicySet(final String zoneId, final String policySetId) {
+    override fun resetForPolicySet(
+        zoneId: String,
+        policySetId: String
+    ) {
         // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
     }
 
-    @Override
-    public void resetForResource(final String zoneId, final String resourceId) {
+    override fun resetForResource(
+        zoneId: String,
+        resourceId: String
+    ) {
         // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
     }
 
-    @Override
-    public void resetForResources(final String zoneId, final List<ResourceEntity> entities) {
+    override fun resetForResources(
+        zoneId: String,
+        entities: List<ResourceEntity>
+    ) {
         // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
     }
 
-    @Override
-    public void resetForResourcesByIds(final String zoneId, final Set<String> resourceIds) {
+    override fun resetForResourcesByIds(
+        zoneId: String,
+        resourceIds: Set<String>
+    ) {
         // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
     }
 
-    @Override
-    public void resetForSubject(final String zoneId, final String subjectId) {
+    override fun resetForSubject(
+        zoneId: String,
+        subjectId: String
+    ) {
         // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
     }
 
-    @Override
-    public void resetForSubjects(final String zoneId, final List<SubjectEntity> subjectEntities) {
+    override fun resetForSubjects(
+        zoneId: String,
+        subjectEntities: List<SubjectEntity>
+    ) {
         // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
     }
 
-    @Override
-    public void resetForSubjectsByIds(final String zoneId, final Set<String> subjectIds) {
+    override fun resetForSubjectsByIds(
+        zoneId: String,
+        subjectIds: Set<String>
+    ) {
         // Purposely empty since it's required by the PolicyEvaluationCache interface but unused here
     }
 }

@@ -65,7 +65,7 @@ public class InMemoryPolicyEvaluationCacheTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSetPolicySetChangedTimestamp() throws Exception {
-        String key = AbstractPolicyEvaluationCache.policySetKey(ZONE_NAME, "testSetPolicyPolicySetChangedTimestamp");
+        String key = AbstractPolicyEvaluationCacheKt.policySetKey(ZONE_NAME, "testSetPolicyPolicySetChangedTimestamp");
         String value = OBJECT_MAPPER.writeValueAsString(new DateTime());
         this.cache.set(key, value);
 
@@ -76,7 +76,7 @@ public class InMemoryPolicyEvaluationCacheTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSetPolicyResourceChangedTimestamp() throws Exception {
-        String key = AbstractPolicyEvaluationCache.resourceKey(ZONE_NAME, XFILES_ID);
+        String key = AbstractPolicyEvaluationCacheKt.resourceKey(ZONE_NAME, XFILES_ID);
         String value = OBJECT_MAPPER.writeValueAsString(new DateTime());
         this.cache.set(key, value);
 
@@ -87,7 +87,7 @@ public class InMemoryPolicyEvaluationCacheTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSetPolicySubjectChangedTimestamp() throws Exception {
-        String key = AbstractPolicyEvaluationCache.subjectKey(ZONE_NAME, AGENT_MULDER);
+        String key = AbstractPolicyEvaluationCacheKt.subjectKey(ZONE_NAME, AGENT_MULDER);
         String value = OBJECT_MAPPER.writeValueAsString(new DateTime());
         this.cache.set(key, value);
 

@@ -104,7 +104,7 @@ class PolicyManagementServiceImpl : PolicyManagementService {
             )
         }
 
-        this.cache.resetForPolicySet(zone.name, policySetName)
+        this.cache.resetForPolicySet(zone.name!!, policySetName)
         this.policySetRepository.save(policySetEntity)
     }
 
@@ -146,7 +146,7 @@ class PolicyManagementServiceImpl : PolicyManagementService {
 
             // Since we only support one policy set and we don't want to load that policy set when checking for a
             // cached invalidation, we use a hard-coded value for the policy set key.
-            this.cache.resetForPolicySet(zone.name, policySetId)
+            this.cache.resetForPolicySet(zone.name!!, policySetId!!)
             this.policySetRepository.delete(policySetEntity)
         } else {
             LOGGER.debug(

@@ -18,7 +18,7 @@
 
 package org.eclipse.keti.acs.monitoring
 
-import org.eclipse.keti.acs.policy.evaluation.cache.PolicyEvaluationCache
+import org.eclipse.keti.acs.policy.evaluation.cache.DECISION
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -32,4 +32,4 @@ class DecisionCacheHealthIndicator @Autowired
 constructor(
     decisionRedisConnectionFactory: RedisConnectionFactory,
     @Value("\${ENABLE_DECISION_CACHING:false}") cacheEnabled: Boolean
-) : AbstractCacheHealthIndicator(decisionRedisConnectionFactory, PolicyEvaluationCache.DECISION, cacheEnabled)
+) : AbstractCacheHealthIndicator(decisionRedisConnectionFactory, DECISION, cacheEnabled)

@@ -98,13 +98,13 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
         // At this point empty evaluation order means we have only one policy set.
         // Fixing policy evaluation order so we could build a cache key.
         val key: PolicyEvaluationRequestCacheKey = if (policySetsEvaluationOrder.isEmpty()) {
-            Builder().zoneId(zone.name)
+            Builder().zoneId(zone.name!!)
                 .policySetIds(
                     LinkedHashSet(setOf(filteredPolicySets.iterator().next().name))
                 )
                 .request(request).build()
         } else {
-            Builder().zoneId(zone.name).request(request).build()
+            Builder().zoneId(zone.name!!).request(request).build()
         }
 
         var result: PolicyEvaluationResult? = null

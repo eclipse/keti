@@ -102,7 +102,7 @@ public class AbstractPolicyEvaluationCacheTest {
         PolicyEvaluationResult result = mockPermitResult();
 
         this.cache.set(key, result);
-        this.cache.delete(AbstractPolicyEvaluationCache.resourceKey(ZONE_NAME, XFILES_ID));
+        this.cache.delete(AbstractPolicyEvaluationCacheKt.resourceKey(ZONE_NAME, XFILES_ID));
         assertNull(this.cache.get(key));
     }
 

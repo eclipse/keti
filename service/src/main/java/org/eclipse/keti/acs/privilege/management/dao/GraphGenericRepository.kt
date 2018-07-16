@@ -98,11 +98,11 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
     @Value("\${GRAPH_TRAVERSAL_LIMIT:256}")
     var traversalLimit: Long = 256
 
-    internal abstract val entityIdKey: String
+    abstract val entityIdKey: String
 
-    internal abstract val entityLabel: String
+    abstract val entityLabel: String
 
-    internal abstract val relationshipKey: String
+    abstract val relationshipKey: String
 
     override fun deleteAllInBatch() {
         deleteAll()
@@ -476,9 +476,9 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
 
     abstract fun getEntityId(entity: E): String?
 
-    internal abstract fun updateVertexProperties(entity: E, vertex: Vertex)
+    abstract fun updateVertexProperties(entity: E, vertex: Vertex)
 
-    internal abstract fun vertexToEntity(vertex: Vertex): E
+    abstract fun vertexToEntity(vertex: Vertex): E
     private fun commitTransaction(graphQuery: Runnable) {
         try {
             graphQuery.run()

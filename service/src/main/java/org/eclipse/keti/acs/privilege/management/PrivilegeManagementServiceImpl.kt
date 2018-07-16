@@ -125,7 +125,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
         }
 
         try {
-            this.cache.resetForResources(zone.name, entities)
+            this.cache.resetForResources(zone.name!!, entities)
             this.resourceRepository.save(entities)
         } catch (e: Exception) {
 
@@ -198,7 +198,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
             )
             updatedResource!!.id = persistedResource.id
             this.cache.resetForResourcesByIds(
-                zone.name,
+                zone.name!!,
                 this.resourceRepository.getResourceEntityAndDescendantsIds(updatedResource)
             )
         } else {
@@ -207,8 +207,8 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
                 resource.resourceIdentifier, zone
             )
             this.cache.resetForResourcesByIds(
-                zone.name,
-                setOf(updatedResource!!.resourceIdentifier)
+                zone.name!!,
+                setOf(updatedResource!!.resourceIdentifier!!)
             )
         }
 
@@ -250,7 +250,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
             .getByZoneAndResourceIdentifier(zone, resourceIdentifier)
         if (resourceEntity != null) {
             this.cache.resetForResourcesByIds(
-                zone.name,
+                zone.name!!,
                 this.resourceRepository.getResourceEntityAndDescendantsIds(resourceEntity)
             )
             this.resourceRepository.delete(resourceEntity.id)
@@ -288,7 +288,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
             subjectEntities.add(entity)
         }
         try {
-            this.cache.resetForSubjects(zone.name, subjectEntities)
+            this.cache.resetForSubjects(zone.name!!, subjectEntities)
             this.subjectRepository.save(subjectEntities)
         } catch (e: Exception) {
             var message = String.format(
@@ -359,13 +359,13 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
         if (persistedSubject != null) {
             updatedSubject!!.id = persistedSubject.id
             this.cache.resetForSubjectsByIds(
-                zone.name,
+                zone.name!!,
                 this.subjectRepository.getSubjectEntityAndDescendantsIds(updatedSubject)
             )
         } else {
             this.cache.resetForSubjectsByIds(
-                zone.name,
-                setOf(updatedSubject!!.subjectIdentifier)
+                zone.name!!,
+                setOf(updatedSubject!!.subjectIdentifier!!)
             )
         }
 
@@ -399,7 +399,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
         val subjectEntity = this.subjectRepository.getByZoneAndSubjectIdentifier(zone, subjectIdentifier)
         if (subjectEntity != null) {
             this.cache.resetForSubjectsByIds(
-                zone.name,
+                zone.name!!,
                 this.subjectRepository.getSubjectEntityAndDescendantsIds(subjectEntity)
             )
             this.subjectRepository.delete(subjectEntity.id)
