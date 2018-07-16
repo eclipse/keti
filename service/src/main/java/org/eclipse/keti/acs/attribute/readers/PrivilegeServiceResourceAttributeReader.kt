@@ -16,20 +16,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.eclipse.keti.acs.monitoring
+package org.eclipse.keti.acs.attribute.readers
 
-import org.eclipse.keti.acs.attribute.cache.SUBJECT
+import org.eclipse.keti.acs.model.Attribute
+import org.eclipse.keti.acs.privilege.management.PrivilegeManagementService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Profile
-import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.stereotype.Component
+import java.util.Collections
+import java.util.HashSet
 
 @Component
-@Profile("cloud-redis", "redis")
-// This class doesn't extend RedisHealthIndicator on purpose because we don't want to output Redis-specific properties
-class SubjectCacheHealthIndicator @Autowired
-constructor(
-    subjectRedisConnectionFactory: RedisConnectionFactory,
-    @Value("\${ENABLE_SUBJECT_CACHING:false}") cacheEnabled: Boolean
-) : AbstractCacheHealthIndicator(subjectRedisConnectionFactory, SUBJECT, cacheEnabled)
+class PrivilegeServiceResourceAttributeReader : ResourceAttributeReader {
+
+    @Autowired
+    private lateinit var privilegeManagementService: PrivilegeManagementService
+
+    override fun getAttributes(identifier: String): Set<Attribute> {
+        var resourceAttributes = emptySet<Attribute>()
+        val resource = this.privilegeManagementService.getByResourceIdentifierWithInheritedAttributes(identifier)
+        if (null != resource) {
+            resourceAttributes = Collections.unmodifiableSet(HashSet(resource.attributes))
+        }
+        return resourceAttributes
+    }
+}

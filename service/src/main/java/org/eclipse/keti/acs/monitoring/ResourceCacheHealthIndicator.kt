@@ -18,7 +18,7 @@
 
 package org.eclipse.keti.acs.monitoring
 
-import org.eclipse.keti.acs.attribute.cache.AttributeCache
+import org.eclipse.keti.acs.attribute.cache.RESOURCE
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -32,4 +32,4 @@ class ResourceCacheHealthIndicator @Autowired
 constructor(
     resourceRedisConnectionFactory: RedisConnectionFactory,
     @Value("\${ENABLE_RESOURCE_CACHING:false}") cacheEnabled: Boolean
-) : AbstractCacheHealthIndicator(resourceRedisConnectionFactory, AttributeCache.RESOURCE, cacheEnabled)
+) : AbstractCacheHealthIndicator(resourceRedisConnectionFactory, RESOURCE, cacheEnabled)

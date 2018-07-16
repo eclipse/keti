@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,17 +14,9 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.attribute.cache;
+package org.eclipse.keti.acs.attribute.readers
 
-public abstract class AbstractAttributeCache implements AttributeCache {
-
-    static String resourceKey(final String zoneId, final String identifier) {
-        return zoneId + ":attr-res-id:" + Integer.toHexString(identifier.hashCode());
-    }
-
-    static String subjectKey(final String zoneId, final String identifier) {
-        return zoneId + ":attr-sub-id:" + Integer.toHexString(identifier.hashCode());
-    }
-}
+//tagging interface to create explicit type for ResourceAttributeReader
+interface ResourceAttributeReader : AttributeReader

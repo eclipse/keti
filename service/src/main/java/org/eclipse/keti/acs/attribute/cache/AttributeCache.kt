@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,28 +14,29 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.attribute.cache;
+package org.eclipse.keti.acs.attribute.cache
 
-import org.eclipse.keti.acs.attribute.readers.CachedAttributes;
+import org.eclipse.keti.acs.attribute.readers.CachedAttributes
 
-public interface AttributeCache {
-    String RESOURCE = "resource";
-    String SUBJECT = "subject";
+const val RESOURCE = "resource"
+const val SUBJECT = "subject"
 
-    default void setAttributes(final String identifier, final CachedAttributes value) {
-        this.set(identifier, value);
+interface AttributeCache {
+
+    fun setAttributes(identifier: String, value: CachedAttributes) {
+        this[identifier] = value
     }
 
-    default CachedAttributes getAttributes(final String identifier) {
-        return this.get(identifier);
+    fun getAttributes(identifier: String): CachedAttributes? {
+        return this[identifier]
     }
 
-    void set(String key, CachedAttributes value);
+    operator fun set(key: String, value: CachedAttributes)
 
     // get should return null if value is not found in the cache
-    CachedAttributes get(String key);
+    operator fun get(key: String): CachedAttributes?
 
-    void flushAll();
+    fun flushAll()
 }

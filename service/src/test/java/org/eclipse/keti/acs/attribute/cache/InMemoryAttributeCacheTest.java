@@ -38,27 +38,27 @@ public class InMemoryAttributeCacheTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSetCachedAttributes() {
-        InMemoryAttributeCache inMemoryAttributeCache = new InMemoryAttributeCache(5, TEST_ZONE,
-                AbstractAttributeCache::resourceKey);
+        InMemoryAttributeCache inMemoryAttributeCache =
+            new InMemoryAttributeCache(5, TEST_ZONE, AbstractAttributeCacheKt::resourceKey);
         Set<Attribute> attributes = Collections.singleton(new Attribute("https://test.com", "attribute1", "value1"));
         CachedAttributes cachedAttributes = new CachedAttributes(attributes);
         inMemoryAttributeCache.set(TEST_KEY, cachedAttributes);
 
         Map<String, CachedAttributes> resourceCache = (Map<String, CachedAttributes>) ReflectionTestUtils
                 .getField(inMemoryAttributeCache, "attributeCache");
-        String cacheKey = AbstractAttributeCache.resourceKey(TEST_ZONE, TEST_KEY);
+        String cacheKey = AbstractAttributeCacheKt.resourceKey(TEST_ZONE, TEST_KEY);
         Assert.assertEquals(resourceCache.get(cacheKey), cachedAttributes);
     }
 
     @Test
     public void testGetCachedAttributes() {
-        InMemoryAttributeCache inMemoryAttributeCache = new InMemoryAttributeCache(5, TEST_ZONE,
-                AbstractAttributeCache::resourceKey);
+        InMemoryAttributeCache inMemoryAttributeCache =
+            new InMemoryAttributeCache(5, TEST_ZONE, AbstractAttributeCacheKt::resourceKey);
         Set<Attribute> attributes = Collections.singleton(new Attribute("https://test.com", "attribute1", "value1"));
         CachedAttributes cachedAttributes = new CachedAttributes(attributes);
 
         Map<String, CachedAttributes> cachedAttributesMap = new HashMap<>();
-        String cacheKey = AbstractAttributeCache.resourceKey(TEST_ZONE, TEST_KEY);
+        String cacheKey = AbstractAttributeCacheKt.resourceKey(TEST_ZONE, TEST_KEY);
         cachedAttributesMap.put(cacheKey, cachedAttributes);
         ReflectionTestUtils.setField(inMemoryAttributeCache, "attributeCache", cachedAttributesMap);
 
@@ -69,13 +69,13 @@ public class InMemoryAttributeCacheTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testFlushAll() {
-        InMemoryAttributeCache inMemoryAttributeCache = new InMemoryAttributeCache(5, TEST_ZONE,
-                AbstractAttributeCache::subjectKey);
+        InMemoryAttributeCache inMemoryAttributeCache =
+            new InMemoryAttributeCache(5, TEST_ZONE, AbstractAttributeCacheKt::subjectKey);
         Set<Attribute> attributes = Collections.singleton(new Attribute("https://test.com", "attribute1", "value1"));
         CachedAttributes cachedAttributes = new CachedAttributes(attributes);
 
         Map<String, CachedAttributes> cachedAttributesMap = new HashMap<>();
-        String cacheKey = AbstractAttributeCache.subjectKey(TEST_ZONE, TEST_KEY);
+        String cacheKey = AbstractAttributeCacheKt.subjectKey(TEST_ZONE, TEST_KEY);
         cachedAttributesMap.put(cacheKey, cachedAttributes);
         ReflectionTestUtils.setField(inMemoryAttributeCache, "attributeCache", cachedAttributesMap);
         Assert.assertEquals(inMemoryAttributeCache.get(TEST_KEY), cachedAttributes);

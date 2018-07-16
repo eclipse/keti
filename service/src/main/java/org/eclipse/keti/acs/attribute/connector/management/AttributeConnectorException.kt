@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,27 +14,15 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.attribute.cache;
+package org.eclipse.keti.acs.attribute.connector.management
 
-import org.eclipse.keti.acs.attribute.readers.CachedAttributes;
+class AttributeConnectorException : RuntimeException {
 
-public class NonCachingAttributeCache implements AttributeCache {
+    constructor() : super()
 
-    @Override
-    public void set(final String key, final CachedAttributes value) {
-        //Intentionally left empty to satisfy interface
-    }
+    constructor(message: String) : super(message)
 
-    @Override
-    public CachedAttributes get(final String key) {
-        return null;
-    }
-
-    @Override
-    public void flushAll() {
-        //Intentionally left empty to satisfy interface
-    }
-
+    constructor(message: String, cause: Throwable) : super(message, cause)
 }
