@@ -77,7 +77,7 @@ abstract class AbstractCacheHealthIndicator(
 ) : CacheHealthIndicator {
 
     @Value("\${ENABLED_REDIS_HEALTH_CHECK:false}")
-    private val healthCheckEnabled: Boolean = false
+    private var healthCheckEnabled: Boolean = false
 
     override val redisConnection: RedisConnection
         get() = RedisConnectionUtils.getConnection(this.redisConnectionFactory)

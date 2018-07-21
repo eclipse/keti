@@ -18,7 +18,6 @@
 
 package org.eclipse.keti.acs.service.policy.validation
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.fge.jsonschema.main.JsonSchemaFactory
 import org.eclipse.keti.acs.commons.policy.condition.ConditionScript
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache
@@ -36,6 +35,11 @@ import java.util.Arrays
 import java.util.HashSet
 import javax.annotation.PostConstruct
 
+private val LOGGER = LoggerFactory.getLogger(PolicySetValidatorImpl::class.java)
+
+private val JSONUTILS = JsonUtils()
+private val JSONSCHEMA = JSONUTILS.readJsonNodeFromFile("acs-policy-set-schema.json")
+
 /**
  * @author acs-engineers@ge.com
  */
@@ -49,9 +53,9 @@ class PolicySetValidatorImpl : PolicySetValidator {
     private lateinit var conditionShell: GroovyConditionShell
 
     @Value("\${validAcsPolicyHttpActions:GET, POST, PUT, DELETE, PATCH, SUBSCRIBE, MESSAGE}")
-    private var validAcsPolicyHttpActions: String? = null
+    private var validAcsPolicyHttpActions: String = "GET, POST, PUT, DELETE, PATCH, SUBSCRIBE, MESSAGE"
 
-    private var validAcsPolicyHttpActionsSet: Set<String>? = null
+    private lateinit var validAcsPolicyHttpActionsSet: Set<String>
 
     override fun removeCachedConditions(policySet: PolicySet) {
         for (policy in policySet.policies) {
@@ -81,7 +85,7 @@ class PolicySetValidatorImpl : PolicySetValidator {
                 return
             }
             for (action in policyActions.split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
-                if (!this.validAcsPolicyHttpActionsSet!!.contains(action)) {
+                if (!this.validAcsPolicyHttpActionsSet.contains(action)) {
                     throw PolicySetValidationException(
                         String.format(
                             "Policy Action validation failed: " + "the action: [%s] is not contained in the allowed set of actions: [%s]",
@@ -163,24 +167,12 @@ class PolicySetValidatorImpl : PolicySetValidator {
     @PostConstruct
     fun init() {
         val actions =
-            this.validAcsPolicyHttpActions!!.split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            this.validAcsPolicyHttpActions.split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         LOGGER.debug("ACS Server configured with validAcsPolicyHttpActions : {}", this.validAcsPolicyHttpActions)
         this.validAcsPolicyHttpActionsSet = HashSet(Arrays.asList(*actions))
     }
 
     fun setValidAcsPolicyHttpActions(validAcsPolicyHttpActions: String) {
         this.validAcsPolicyHttpActions = validAcsPolicyHttpActions
-    }
-
-    companion object {
-
-        private val LOGGER = LoggerFactory.getLogger(PolicySetValidatorImpl::class.java)
-
-        private val JSONUTILS = JsonUtils()
-        private val JSONSCHEMA: JsonNode?
-
-        init {
-            JSONSCHEMA = JSONUTILS.readJsonNodeFromFile("acs-policy-set-schema.json")
-        }
     }
 }

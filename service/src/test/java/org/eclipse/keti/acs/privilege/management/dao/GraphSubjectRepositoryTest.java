@@ -54,7 +54,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
-import org.eclipse.keti.acs.config.GraphConfig;
+import org.eclipse.keti.acs.config.GraphConfigKt;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.rest.Parent;
 import org.eclipse.keti.acs.utils.JsonUtils;
@@ -79,7 +79,7 @@ public class GraphSubjectRepositoryTest {
     public void setup() throws Exception {
         this.subjectRepository = new GraphSubjectRepository();
         Graph graph = JanusGraphFactory.build().set("storage.backend", "inmemory").open();
-        GraphConfig.createSchemaElements(graph);
+        GraphConfigKt.createSchemaElements(graph);
         this.graphTraversalSource = graph.traversal();
         this.subjectRepository.setGraphTraversal(this.graphTraversalSource);
     }

@@ -52,7 +52,7 @@ class GraphMigrationManager {
     @Qualifier("subjectHierarchicalRepository")
     private lateinit var subjectHierarchicalRepository: GraphSubjectRepository
 
-    private var isMigrationComplete: Boolean? = false
+    private var isMigrationComplete: Boolean = false
 
     private val resourceMigrationManager = ResourceMigrationManager()
     private val subjectMigrationManager = SubjectMigrationManager()

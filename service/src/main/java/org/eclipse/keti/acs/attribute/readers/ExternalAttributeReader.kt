@@ -41,10 +41,10 @@ abstract class ExternalAttributeReader(
 ) : AttributeReader {
 
     @Value("\${MAX_NUMBER_OF_ATTRIBUTES:1500}")
-    private val maxNumberOfAttributes: Int = 1500
+    private var maxNumberOfAttributes: Int = 1500
 
     @Value("\${MAX_SIZE_OF_ATTRIBUTES_IN_BYTES:500000}")
-    private val maxSizeOfAttributesInBytes: Int = 500000
+    private var maxSizeOfAttributesInBytes: Int = 500000
 
     private val adapterRestTemplateCache = ConcurrentReferenceHashMap<AttributeAdapterConnection, OAuth2RestTemplate>()
 

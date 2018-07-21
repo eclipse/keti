@@ -31,7 +31,7 @@ import org.springframework.util.ConcurrentReferenceHashMap
 class AttributeReaderFactory {
 
     @Value("\${ADAPTER_TIMEOUT_MILLIS:3000}")
-    private val adapterTimeoutMillis: Int = 3000
+    private var adapterTimeoutMillis: Int = 3000
 
     @Autowired
     private lateinit var privilegeServiceResourceAttributeReader: PrivilegeServiceResourceAttributeReader

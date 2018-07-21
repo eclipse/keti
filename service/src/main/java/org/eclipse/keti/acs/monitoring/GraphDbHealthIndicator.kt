@@ -43,7 +43,7 @@ class GraphDbHealthIndicator @Autowired
 constructor(private val resourceHierarchicalRepository: GraphResourceRepository) : HealthIndicator {
 
     @Value("\${GRAPH_ENABLE_CASSANDRA:false}")
-    private val cassandraEnabled: Boolean = false
+    private var cassandraEnabled: Boolean = false
 
     override fun health(): Health {
         var health = health({ this.check() }, GRAPH_DESCRIPTION)

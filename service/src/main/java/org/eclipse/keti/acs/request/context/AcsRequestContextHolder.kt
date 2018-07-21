@@ -49,6 +49,13 @@ fun clear() {
 val acsRequestContext: AcsRequestContext?
     get() = ACS_REQUEST_CONTEXT_STORE.get()
 
+private var zoneRepository: ZoneRepository? = null
+
+internal fun initAcsRequestContextBuilderRepos(applicationContext: ApplicationContext) {
+    zoneRepository = applicationContext.getBean(ZoneRepository::class.java)
+    LOGGER.info("AcsRequestContextBuilder JPA Repositories Initialized")
+}
+
 /**
  * A ThreadLocal store for the ACS Request Context.
  *
@@ -61,7 +68,7 @@ private constructor() : ApplicationContextAware {
     @Throws(BeansException::class)
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         LOGGER.trace("AcsRequestContextHolder Initialized")
-        AcsRequestContextBuilder.initAcsRequestContextBuilderRepos(applicationContext)
+        initAcsRequestContextBuilderRepos(applicationContext)
     }
 
     /**
@@ -86,16 +93,6 @@ private constructor() : ApplicationContextAware {
 
         internal fun build(): AcsRequestContext {
             return AcsRequestContext(this.requestContextMap.toMap())
-        }
-
-        companion object {
-            private var zoneRepository: ZoneRepository? = null
-            private val LOGGER = LoggerFactory.getLogger(AcsRequestContextBuilder::class.java)
-
-            internal fun initAcsRequestContextBuilderRepos(applicationContext: ApplicationContext) {
-                zoneRepository = applicationContext.getBean(ZoneRepository::class.java)
-                LOGGER.info("AcsRequestContextBuilder JPA Repositories Initialized")
-            }
         }
     }
 }

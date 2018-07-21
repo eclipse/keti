@@ -35,7 +35,7 @@ private val LOGGER = LoggerFactory.getLogger(RedisPolicyEvaluationCache::class.j
 class RedisPolicyEvaluationCache : AbstractPolicyEvaluationCache(), InitializingBean {
 
     @Value("\${CACHED_EVAL_TTL_SECONDS:600}")
-    private val cachedEvalTimeToLiveSeconds: Long = 600
+    private var cachedEvalTimeToLiveSeconds: Long = 600
 
     @Autowired
     private lateinit var decisionCacheRedisTemplate: RedisTemplate<String, String>

@@ -54,7 +54,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.eclipse.keti.acs.config.GraphConfig;
+import org.eclipse.keti.acs.config.GraphConfigKt;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.rest.Parent;
 import org.eclipse.keti.acs.utils.JsonUtils;
@@ -92,7 +92,7 @@ public class GraphResourceRepositoryTest {
 
     private void setupGraph() throws InterruptedException, ExecutionException {
         Graph graph = JanusGraphFactory.build().set("storage.backend", "inmemory").open();
-        GraphConfig.createSchemaElements(graph);
+        GraphConfigKt.createSchemaElements(graph);
         this.graphTraversalSource = graph.traversal();
         this.dropAllResources();
     }

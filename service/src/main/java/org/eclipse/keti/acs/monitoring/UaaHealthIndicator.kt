@@ -35,7 +35,7 @@ class UaaHealthIndicator @Autowired
 constructor(private val uaaTemplate: RestTemplate) : HealthIndicator {
 
     @Value("\${uaaCheckHealthUrl}")
-    private val uaaCheckHealthUrl: String? = null
+    private var uaaCheckHealthUrl: String? = null
 
     val description: String
         get() = String.format("Health check performed by attempting to hit '%s'", this.uaaCheckHealthUrl)

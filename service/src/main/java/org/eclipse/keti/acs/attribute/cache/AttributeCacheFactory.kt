@@ -32,10 +32,10 @@ private val LOGGER = LoggerFactory.getLogger(AttributeCacheFactory::class.java)
 class AttributeCacheFactory {
 
     @Value("\${ENABLE_RESOURCE_CACHING:true}")
-    private val resourceCachingEnabled: Boolean = true
+    private var resourceCachingEnabled: Boolean = true
 
     @Value("\${ENABLE_SUBJECT_CACHING:true}")
-    private val subjectCachingEnabled: Boolean = true
+    private var subjectCachingEnabled: Boolean = true
 
     private lateinit var environment: Environment
 

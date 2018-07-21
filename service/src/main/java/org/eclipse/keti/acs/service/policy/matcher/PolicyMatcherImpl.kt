@@ -32,6 +32,8 @@ import java.util.ArrayList
 import java.util.Arrays
 import java.util.HashSet
 
+private val LOGGER = LoggerFactory.getLogger(PolicyMatcherImpl::class.java)
+
 /**
  * @author acs-engineers@ge.com
  */
@@ -181,9 +183,5 @@ class PolicyMatcherImpl : PolicyMatcher {
             }
         }
         return false
-    }
-
-    companion object {
-        private val LOGGER = LoggerFactory.getLogger(PolicyMatcherImpl::class.java)
     }
 }
