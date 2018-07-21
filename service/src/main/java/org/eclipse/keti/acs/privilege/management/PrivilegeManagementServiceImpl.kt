@@ -70,7 +70,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
 
             if (!CollectionUtils.isEmpty(resourceEntities)) {
                 for (resourceEntity in resourceEntities) {
-                    resources.add(this.privilegeConverter.toResource(resourceEntity))
+                    resources.add(this.privilegeConverter.toResource(resourceEntity)!!)
                 }
             }
             return resources
@@ -85,7 +85,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
             val subjectEntities = this.subjectRepository.findByZone(zone)
             if (!CollectionUtils.isEmpty(subjectEntities)) {
                 for (subjectEntity in subjectEntities) {
-                    subjects.add(this.privilegeConverter.toSubject(subjectEntity))
+                    subjects.add(this.privilegeConverter.toSubject(subjectEntity)!!)
                 }
             }
             return subjects
@@ -121,7 +121,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
                 )
                 entity!!.id = persistedResource.id
             }
-            entities.add(entity)
+            entities.add(entity!!)
         }
 
         try {
@@ -285,7 +285,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
             if (persistedSubject != null) {
                 entity!!.id = persistedSubject.id
             }
-            subjectEntities.add(entity)
+            subjectEntities.add(entity!!)
         }
         try {
             this.cache.resetForSubjects(zone.name!!, subjectEntities)

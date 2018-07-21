@@ -22,6 +22,8 @@ import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.RESOURCE_CONNE
 import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.SUBJECT_CONNECTOR_URL;
 import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1;
 import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.ZONE_URL;
+import static org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtilityKt.INCORRECT_PARAMETER_TYPE_ERROR;
+import static org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtilityKt.INCORRECT_PARAMETER_TYPE_MESSAGE;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -34,7 +36,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtility;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.eclipse.keti.acs.request.context.AcsRequestContext;
 import org.eclipse.keti.acs.request.context.AcsRequestContextHolderKt;
 import org.eclipse.keti.acs.rest.AttributeConnector;
@@ -59,10 +63,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
@@ -185,8 +185,9 @@ public class AttributeConnectorControllerIT extends AbstractTestNGSpringContextT
                 TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, testZone3.getSubdomain(),
                         "/v1/connector/resource");
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isBadRequest())
-                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_ERROR, is("Bad Request")))
-                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_MESSAGE,
+                .andExpect(jsonPath(INCORRECT_PARAMETER_TYPE_ERROR, is("Bad Request")))
+                .andExpect(jsonPath(
+                    INCORRECT_PARAMETER_TYPE_MESSAGE,
                         is("Zone not found")));
     }
 

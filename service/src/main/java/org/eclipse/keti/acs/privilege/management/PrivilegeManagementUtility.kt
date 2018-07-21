@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,17 +14,17 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.privilege.management;
+package org.eclipse.keti.acs.privilege.management
 
-public final class PrivilegeManagementUtility {
+const val INHERITED_ATTRIBUTES_REQUEST_PARAMETER = "includeInheritedAttributes"
+const val INCORRECT_PARAMETER_TYPE_ERROR = "error"
+const val INCORRECT_PARAMETER_TYPE_MESSAGE = "message"
 
-    private PrivilegeManagementUtility() {
-        throw new AssertionError();
+class PrivilegeManagementUtility private constructor() {
+
+    init {
+        throw AssertionError()
     }
-
-    public static final String INHERITED_ATTRIBUTES_REQUEST_PARAMETER = "includeInheritedAttributes";
-    public static final String INCORRECT_PARAMETER_TYPE_ERROR = "error";
-    public static final String INCORRECT_PARAMETER_TYPE_MESSAGE = "message";
 }

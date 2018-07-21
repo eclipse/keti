@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,22 +14,16 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.privilege.management;
+package org.eclipse.keti.acs.privilege.management
 
 /**
- *
  * @author acs-engineers@ge.com
  */
-@SuppressWarnings("javadoc")
-public class PrivilegeManagementException extends RuntimeException {
+class PrivilegeManagementException : RuntimeException {
 
-    private static final long serialVersionUID = 3366459522709591127L;
-
-    public PrivilegeManagementException() {
-        super();
-    }
+    constructor() : super()
 
     /**
      * @param message
@@ -37,31 +31,29 @@ public class PrivilegeManagementException extends RuntimeException {
      * @param enableSuppression
      * @param writableStackTrace
      */
-    public PrivilegeManagementException(final String message, final Throwable cause, final boolean enableSuppression,
-            final boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+    constructor(
+        message: String,
+        cause: Throwable,
+        enableSuppression: Boolean,
+        writableStackTrace: Boolean
+    ) : super(message, cause, enableSuppression, writableStackTrace)
 
     /**
      * @param message
      * @param cause
      */
-    public PrivilegeManagementException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
+    constructor(
+        message: String,
+        cause: Throwable
+    ) : super(message, cause)
 
     /**
      * @param message
      */
-    public PrivilegeManagementException(final String message) {
-        super(message);
-    }
+    constructor(message: String) : super(message)
 
     /**
      * @param cause
      */
-    public PrivilegeManagementException(final Throwable cause) {
-        super(cause);
-    }
-
+    constructor(cause: Throwable) : super(cause)
 }

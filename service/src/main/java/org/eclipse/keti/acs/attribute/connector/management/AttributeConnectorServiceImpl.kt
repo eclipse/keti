@@ -68,7 +68,7 @@ class AttributeConnectorServiceImpl : AttributeConnectorService {
         setEncryptionKey(this.encryptionKey)
     }
 
-    fun setEncryptionKey(encryptionKey: String?) {
+    fun setEncryptionKey(encryptionKey: String) {
         this.encryptor = Encryptor()
         this.encryptor!!.setEncryptionKey(encryptionKey)
     }

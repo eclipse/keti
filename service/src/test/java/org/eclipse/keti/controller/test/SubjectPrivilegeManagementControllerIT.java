@@ -19,6 +19,9 @@
 // @formatter:off
 package org.eclipse.keti.controller.test;
 
+import static org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtilityKt.INCORRECT_PARAMETER_TYPE_ERROR;
+import static org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtilityKt.INCORRECT_PARAMETER_TYPE_MESSAGE;
+import static org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtilityKt.INHERITED_ATTRIBUTES_REQUEST_PARAMETER;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isIn;
@@ -31,7 +34,7 @@ import java.util.Map;
 
 import javax.security.auth.Subject;
 
-import org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtility;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.keti.acs.request.context.AcsRequestContext;
 import org.eclipse.keti.acs.request.context.AcsRequestContextHolderKt;
 import org.eclipse.keti.acs.rest.BaseSubject;
@@ -57,8 +60,6 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -268,10 +269,10 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
         getContext.getMockMvc()
                 .perform(getContext.getBuilder().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_ERROR, is(HttpStatus
+                .andExpect(jsonPath(INCORRECT_PARAMETER_TYPE_ERROR, is(HttpStatus
                 .BAD_REQUEST.getReasonPhrase())))
-                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_MESSAGE,
-                is("Request Parameter " + PrivilegeManagementUtility.INHERITED_ATTRIBUTES_REQUEST_PARAMETER
+                .andExpect(jsonPath(INCORRECT_PARAMETER_TYPE_MESSAGE,
+                is("Request Parameter " + INHERITED_ATTRIBUTES_REQUEST_PARAMETER
                                     + " must be a boolean value")));
 
     }
@@ -376,8 +377,8 @@ public class SubjectPrivilegeManagementControllerIT extends AbstractTestNGSpring
                 TEST_UTILS.createWACWithCustomGETRequestBuilder(this.wac, testZone3.getSubdomain(),
                         SUBJECT_BASE_URL + "/test-subject");
         getContext.getMockMvc().perform(getContext.getBuilder()).andExpect(status().isBadRequest())
-                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_ERROR, is("Bad Request")))
-                .andExpect(jsonPath(PrivilegeManagementUtility.INCORRECT_PARAMETER_TYPE_MESSAGE,
+                .andExpect(jsonPath(INCORRECT_PARAMETER_TYPE_ERROR, is("Bad Request")))
+                .andExpect(jsonPath(INCORRECT_PARAMETER_TYPE_MESSAGE,
                         is("Zone not found")));
     }
 
