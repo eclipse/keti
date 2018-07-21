@@ -31,7 +31,7 @@ class ExternalSubjectAttributeReader(
     override val attributeAdapterConnections: Set<AttributeAdapterConnection>?
         get() = this.connectorService?.subjectAttributeConnector?.adapters
 
-    override fun getAttributesByScope(identifier: String, scopes: Set<Attribute>): Set<Attribute>? {
+    override fun getAttributesByScope(identifier: String, scopes: Set<Attribute>?): Set<Attribute>? {
         // Connectors have no notion of scoped attributes
         return this.getAttributes(identifier)
     }

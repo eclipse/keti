@@ -183,7 +183,7 @@ class PolicyManagementServiceImpl : PolicyManagementService {
             this.policySetValidator.validatePolicySet(policySet)
         } catch (e: PolicySetValidationException) {
             LOGGER.debug("Policy Validation Failed policySetName = {}, zone = {}.", policySet.name, zone)
-            throw PolicyManagementException(e.message, e)
+            throw PolicyManagementException(e.message!!, e)
         }
     }
 }

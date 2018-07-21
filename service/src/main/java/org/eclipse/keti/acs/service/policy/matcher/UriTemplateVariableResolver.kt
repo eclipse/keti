@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2017 General Electric Company
+ * Copyright 2018 General Electric Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.eclipse.keti.acs.attribute.readers
+package org.eclipse.keti.acs.service.policy.matcher
 
-import org.eclipse.keti.acs.model.Attribute
+import org.springframework.web.util.UriTemplate
 
-interface SubjectAttributeReader : AttributeReader {
-    fun getAttributesByScope(identifier: String, scopes: Set<Attribute>?): Set<Attribute>?
+class UriTemplateVariableResolver {
+
+    fun resolve(
+        uri: String,
+        uriTemplate: UriTemplate,
+        uriTemplateVariableName: String
+    ): String? {
+
+        val variables = uriTemplate.match(uri)
+        return variables[uriTemplateVariableName]
+    }
+
 }

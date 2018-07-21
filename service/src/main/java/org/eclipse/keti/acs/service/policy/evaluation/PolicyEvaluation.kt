@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,13 +14,13 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.service.policy.evaluation;
+package org.eclipse.keti.acs.service.policy.evaluation
 
-import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
-import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
-import org.springframework.http.ResponseEntity;
+import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
+import org.eclipse.keti.acs.rest.PolicyEvaluationResult
+import org.springframework.http.ResponseEntity
 
 /**
  * RESTful API interface of the Policy Evaluation API.
@@ -28,16 +28,16 @@ import org.springframework.http.ResponseEntity;
  * @author acs-engineers@ge.com
  */
 @FunctionalInterface
-public interface PolicyEvaluation {
+interface PolicyEvaluation {
 
     /**
      * Takes the given access control request and determines if it is allowed or denied, according to the stored
      * policies. It Delegates the policy evaluation to the PolicyEvaluationServices.
      *
      * @param request
-     *            Includes the resource url, action and subject to be checked.
+     * Includes the resource url, action and subject to be checked.
      * @return a policy evaluation result with allow or deny
      */
-    ResponseEntity<PolicyEvaluationResult> evalPolicyV1(PolicyEvaluationRequestV1 request);
+    fun evalPolicyV1(request: PolicyEvaluationRequestV1): ResponseEntity<PolicyEvaluationResult>
 
 }

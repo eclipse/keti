@@ -329,7 +329,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
     }
 
     @Transactional(readOnly = true)
-    override fun getBySubjectIdentifierAndScopes(subjectIdentifier: String, scopes: Set<Attribute>): BaseSubject? {
+    override fun getBySubjectIdentifierAndScopes(subjectIdentifier: String, scopes: Set<Attribute>?): BaseSubject? {
         val zone = this.zoneResolver.zoneEntityOrFail
         val subjectEntity = this.subjectRepository
             .getSubjectWithInheritedAttributesForScopes(zone, subjectIdentifier, scopes)

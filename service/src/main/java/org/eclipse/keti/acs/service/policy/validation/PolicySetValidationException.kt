@@ -16,10 +16,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.eclipse.keti.acs.attribute.readers
+package org.eclipse.keti.acs.service.policy.validation
 
-import org.eclipse.keti.acs.model.Attribute
+/**
+ *
+ * @author acs-engineers@ge.com
+ */
+class PolicySetValidationException : RuntimeException {
 
-interface SubjectAttributeReader : AttributeReader {
-    fun getAttributesByScope(identifier: String, scopes: Set<Attribute>?): Set<Attribute>?
+    constructor() : super()
+
+    constructor(
+        message: String,
+        cause: Throwable,
+        enableSuppression: Boolean,
+        writableStackTrace: Boolean
+    ) : super(message, cause, enableSuppression, writableStackTrace)
+
+    constructor(
+        message: String,
+        cause: Throwable
+    ) : super(message, cause)
+
+    constructor(message: String) : super(message)
+
+    constructor(cause: Throwable) : super(cause)
 }

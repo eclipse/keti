@@ -16,10 +16,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.eclipse.keti.acs.attribute.readers
+package org.eclipse.keti.acs.service.policy.evaluation
 
-import org.eclipse.keti.acs.model.Attribute
+import org.eclipse.keti.acs.security.AbstractHttpMethodsFilter
+import org.springframework.http.HttpMethod
+import org.springframework.stereotype.Component
+import java.util.LinkedHashMap
 
-interface SubjectAttributeReader : AttributeReader {
-    fun getAttributesByScope(identifier: String, scopes: Set<Attribute>?): Set<Attribute>?
+private const val EVALUATION_URI_REGEX = "\\A/v1/policy-evaluation/??\\Z"
+
+private fun uriPatternsAndAllowedHttpMethods(): Map<String, Set<HttpMethod>> {
+    val uriPatternsAndAllowedHttpMethods = LinkedHashMap<String, Set<HttpMethod>>()
+    uriPatternsAndAllowedHttpMethods[EVALUATION_URI_REGEX] = setOf(HttpMethod.POST)
+    return uriPatternsAndAllowedHttpMethods
 }
+
+@Component
+class EvaluationHttpMethodsFilter : AbstractHttpMethodsFilter(uriPatternsAndAllowedHttpMethods())

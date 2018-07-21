@@ -289,6 +289,7 @@ public class PolicyMatcherImplTest {
 
         PolicyMatchCandidate candidate = new PolicyMatchCandidate();
         candidate.setResourceURI("/alarm/site/site45/asset/asset46");
+        candidate.setSubjectIdentifier("Edward R. Murrow");
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 2);
     }
@@ -300,6 +301,7 @@ public class PolicyMatcherImplTest {
 
         PolicyMatchCandidate candidate = new PolicyMatchCandidate();
         candidate.setResourceURI("/alarm/site/site45");
+        candidate.setSubjectIdentifier("Edward R. Murrow");
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 1);
     }
@@ -331,6 +333,7 @@ public class PolicyMatcherImplTest {
         PolicyMatchCandidate candidate = new PolicyMatchCandidate();
         candidate.setAction("GET");
         candidate.setResourceURI(uri);
+        candidate.setSubjectIdentifier("Edward R. Murrow");
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         int expectedSize = policyMatcherExpectedMatch ? 1 : 0;
         Assert.assertEquals(matchedPolicies.size(), expectedSize, "Policy match count is incorrect");
@@ -350,6 +353,7 @@ public class PolicyMatcherImplTest {
         PolicyMatchCandidate candidate = new PolicyMatchCandidate();
         candidate.setAction("GET");
         candidate.setResourceURI("/assets/45");
+        candidate.setSubjectIdentifier("Edward R. Murrow");
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 1);
     }
@@ -362,6 +366,7 @@ public class PolicyMatcherImplTest {
         PolicyMatchCandidate candidate = new PolicyMatchCandidate();
         candidate.setAction("GET");
         candidate.setResourceURI("/assets/45");
+        candidate.setSubjectIdentifier("Edward R. Murrow");
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 0);
     }
@@ -381,6 +386,7 @@ public class PolicyMatcherImplTest {
         PolicyMatchCandidate candidate = new PolicyMatchCandidate();
         candidate.setAction("GET");
         candidate.setResourceURI("/assets/45");
+        candidate.setSubjectIdentifier("Edward R. Murrow");
         List<MatchedPolicy> matchedPolicies = this.policyMatcher.match(candidate, policies);
         Assert.assertEquals(matchedPolicies.size(), 1);
         Assert.assertEquals(matchedPolicies.get(0).getPolicy().getEffect(), Effect.DENY);

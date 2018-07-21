@@ -216,16 +216,16 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
             )
 
             var effect = Effect.NOT_APPLICABLE
-            val resolvedResourceUris = matchResult.resolvedResourceUris
+            val resolvedResourceUris = matchResult.resolvedResourceUris.toMutableSet()
             resolvedResourceUris.add(resourceURI)
 
             var resourceAttributes = emptySet<Attribute>()
             var subjectAttributes = emptySet<Attribute>()
             val matchedPolicies = matchResult.matchedPolicies
             for (matchedPolicy in matchedPolicies) {
-                val policy = matchedPolicy.policy
-                resourceAttributes = matchedPolicy.resourceAttributes
-                subjectAttributes = matchedPolicy.subjectAttributes
+                val policy = matchedPolicy.policy!!
+                resourceAttributes = matchedPolicy.resourceAttributes!!
+                subjectAttributes = matchedPolicy.subjectAttributes!!
                 val target = policy.target
                 var resourceURITemplate: String? = null
                 if (target != null && target.resource != null) {

@@ -16,10 +16,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.eclipse.keti.acs.attribute.readers
+package org.eclipse.keti.acs.service.policy.matcher
 
-import org.eclipse.keti.acs.model.Attribute
+import org.eclipse.keti.acs.service.policy.evaluation.MatchedPolicy
 
-interface SubjectAttributeReader : AttributeReader {
-    fun getAttributesByScope(identifier: String, scopes: Set<Attribute>?): Set<Attribute>?
-}
+class MatchResult(
+    val matchedPolicies: List<MatchedPolicy>,
+    val resolvedResourceUris: Set<String>
+)

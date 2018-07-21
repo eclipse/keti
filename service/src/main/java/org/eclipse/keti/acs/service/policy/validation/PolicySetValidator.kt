@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,35 +14,33 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.service.policy.validation;
+package org.eclipse.keti.acs.service.policy.validation
 
-import java.util.List;
-
-import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
-import org.eclipse.keti.acs.model.Condition;
-import org.eclipse.keti.acs.model.PolicySet;
+import org.eclipse.keti.acs.commons.policy.condition.ConditionScript
+import org.eclipse.keti.acs.model.Condition
+import org.eclipse.keti.acs.model.PolicySet
 
 /**
  *
  * @author acs-engineers@ge.com
  */
-public interface PolicySetValidator {
+interface PolicySetValidator {
 
-    void removeCachedConditions(PolicySet policySet);
+    fun removeCachedConditions(policySet: PolicySet)
 
     /**
      * @param policySet
-     *            PolicySet to be validated
+     * PolicySet to be validated
      */
-    void validatePolicySet(PolicySet policySet);
+    fun validatePolicySet(policySet: PolicySet)
 
     /**
      * @param conditions
-     *            Policy conditions to be validated
+     * Policy conditions to be validated
      * @return A list of the corresponding ConditionScript for validated conditions
      */
-    List<ConditionScript> validatePolicyConditions(List<Condition> conditions);
+    fun validatePolicyConditions(conditions: List<Condition>?): List<ConditionScript>
 
 }

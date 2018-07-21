@@ -49,7 +49,7 @@ interface PrivilegeManagementService {
 
     fun getBySubjectIdentifierWithInheritedAttributes(subjectIdentifier: String): BaseSubject?
 
-    fun getBySubjectIdentifierAndScopes(subjectIdentifier: String, scopes: Set<Attribute>): BaseSubject?
+    fun getBySubjectIdentifierAndScopes(subjectIdentifier: String, scopes: Set<Attribute>?): BaseSubject?
 
     fun upsertSubject(subject: BaseSubject?): Boolean
 
