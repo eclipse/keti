@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,25 +14,27 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.commons.policy.condition;
-
-import java.util.Set;
-
-import org.eclipse.keti.acs.model.Attribute;
+package org.eclipse.keti.acs.commons.policy.condition
 
 /**
+ * Represents a shell capable of compiling a policy condition.
  *
  * @author acs-engineers@ge.com
  */
-public class SubjectHandler extends AbstractHandler {
+@FunctionalInterface
+interface ConditionShell {
 
     /**
-     * @param attributeSet
-     *            Attributes to be bound for this subject.
+     * Validates the script & generates condition script object.
+     *
+     * @param script
+     * the policy condition string
+     * @return a Script object instance capable of executing the policy condition.
+     * @throws ConditionParsingException
+     * on validation error
      */
-    public SubjectHandler(final Set<Attribute> attributeSet) {
-        super("Subject", attributeSet);
-    }
+    @Throws(ConditionParsingException::class)
+    fun parse(script: String): ConditionScript
 }

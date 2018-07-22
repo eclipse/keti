@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,26 +14,24 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.commons.policy.condition;
+package org.eclipse.keti.acs.commons.policy.condition
 
 /**
- * Represents a shell capable of compiling a policy condition.
+ * Represents a compiled policy condition script.
  *
  * @author acs-engineers@ge.com
  */
 @FunctionalInterface
-public interface ConditionShell {
+interface ConditionScript {
 
     /**
-     * Validates the script & generates condition script object.
+     * Executes the policy condition script.
      *
-     * @param script
-     *            the policy condition string
-     * @return a Script object instance capable of executing the policy condition.
-     * @throws ConditionParsingException
-     *             on validation error
+     * @param boundVariables
+     * the bound variables used at runtime.
+     * @return true or false
      */
-    ConditionScript parse(String script) throws ConditionParsingException;
+    fun execute(boundVariables: Map<String, Any>): Boolean
 }

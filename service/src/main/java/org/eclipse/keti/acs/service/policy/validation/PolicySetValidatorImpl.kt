@@ -60,7 +60,7 @@ class PolicySetValidatorImpl : PolicySetValidator {
     override fun removeCachedConditions(policySet: PolicySet) {
         for (policy in policySet.policies) {
             for (condition in policy.conditions) {
-                this.conditionCache.remove(condition.condition)
+                this.conditionCache.remove(condition.condition!!)
             }
         }
     }
@@ -132,7 +132,7 @@ class PolicySetValidatorImpl : PolicySetValidator {
             }
             for (condition in conditions) {
                 val conditionScript = condition.condition
-                var compiledScript: ConditionScript? = this.conditionCache.get(conditionScript)
+                var compiledScript: ConditionScript? = this.conditionCache[conditionScript!!]
                 if (compiledScript != null) {
                     conditionScripts.add(compiledScript)
                     continue
