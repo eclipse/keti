@@ -1,5 +1,7 @@
+#!/usr/bin/env bash
+
 ################################################################################
-# Copyright 2017 General Electric Company
+# Copyright 2018 General Electric Company
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +17,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 ################################################################################
-
-#!/usr/bin/env bash
 
 { set -e; } 2> /dev/null
 
@@ -100,7 +100,7 @@ function generate_copyright_header {
     COPYRIGHT_HEADER="${COPYRIGHT_HEADER}${BEGINNING_COMMENT_LINE}${NEWLINE}"
 
     IFS="$NEWLINE"
-    for l in $COPYRIGHT_HEADER_BODY; do
+    for l in ${COPYRIGHT_HEADER_BODY}; do
         if [[ "$BEGINNING_COMMENT_MARKER" != "$CONTINUING_COMMENT_MARKER" ]]; then
             COPYRIGHT_HEADER="${COPYRIGHT_HEADER} "
         fi
@@ -137,6 +137,8 @@ function upsert_copyright {
 
     if [[ "$1" == 'xml' ]]; then
         echo -e '<?xml version="1.0" encoding="UTF-8"?>\n' > "$TMP_FILE"
+    elif [[ "$1" == 'sh' ]]; then
+        echo -e '#!/usr/bin/env bash\n' > "$TMP_FILE"
     fi
 
     echo "$( generate_copyright_header "$1" )" >> "$TMP_FILE"
@@ -144,6 +146,8 @@ function upsert_copyright {
 
     if [[ "$1" == 'xml' ]]; then
         cat "$2" | awk '/<\?xml/{y=1;next}y' | sed '/./,$!d' >> "$TMP_FILE"
+    elif [[ "$1" == 'sh' ]]; then
+        cat "$2" | awk '/^#!/{y=1;next}y' | sed '/./,$!d' >> "$TMP_FILE"
     else
         cat "$2" >> "$TMP_FILE"
     fi
@@ -156,7 +160,7 @@ function upsert_copyright {
 }
 
 function normalize_authors {
-    perl -i -pe 's/(\@author\s*)\d{1,}/$1acs-engineers\@ge.com/' "$2"
+    perl -i -pe 's/(\@author\s*)\d{1,}/$1acs-engineers\@ge.com/' "$1"
 }
 
 function modify_copyright_in_file {
@@ -172,7 +176,7 @@ function modify_copyright_in_file {
 
     if [[ -n "$NORMALIZE_AUTHORS" ]]; then
         echo "Normalizing author information in file: ${1} with extension: .${EXTENSION}"
-        normalize_authors "$EXTENSION" "$1"
+        normalize_authors "$1"
     fi
 }
 
@@ -184,7 +188,8 @@ unset SRC_FILE
 
 read_args "$@"
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$( cd "${SCRIPT_DIR}/.." && pwd )"
 
 if [[ -n "$DEBUG" ]]; then
     echo 'The following options are set:'
@@ -193,7 +198,8 @@ if [[ -n "$DEBUG" ]]; then
     echo "  NORMALIZE_AUTHORS: ${NORMALIZE_AUTHORS}"
     echo "  DEBUG: ${DEBUG}"
     echo "  SRC_FILE: ${SRC_FILE}"
-    echo "  DIR: ${DIR}"
+    echo "  SCRIPT_DIR: ${SCRIPT_DIR}"
+    echo "  ROOT_DIR: ${ROOT_DIR}"
     echo ''
 fi
 
@@ -211,7 +217,7 @@ if [[ -n "$DEBUG" ]]; then
 fi
 
 if [[ -z "$SRC_FILE" ]]; then
-    for f in $( find "$DIR" \( -not -path '*/\.*' -and -not -path '*/failsafe*' -and -not -path '*/surefire*' \) -type f \( -iname '*.groovy' -or -iname '*.java' -or -iname '*.sh' -or -iname '*.properties' -or -iname '*.xml' \) ); do
+    for f in $( find "$ROOT_DIR" \( -not -path '*/\.*' -and -not -path '*/failsafe*' -and -not -path '*/surefire*' \) -type f \( -iname '*.groovy' -or -iname '*.java' -or -iname '*.sh' -or -iname '*.properties' -or -iname '*.xml' \) ); do
         modify_copyright_in_file "$f"
     done
 else
