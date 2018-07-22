@@ -16,24 +16,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.eclipse.keti.acs.privilege.management.dao
+package org.eclipse.keti.acs.commons.exception
 
-import org.eclipse.keti.acs.model.Attribute
-import org.eclipse.keti.acs.rest.Parent
-import org.eclipse.keti.acs.zone.management.dao.ZoneEntity
+/**
+ * @author acs-engineers@ge.com
+ */
+class UntrustedIssuerException : RuntimeException {
 
-interface ZonableEntity {
-    var id: Long?
+    constructor(
+        message: String,
+        cause: Throwable,
+        enableSuppression: Boolean,
+        writableStackTrace: Boolean
+    ) : super(message, cause, enableSuppression, writableStackTrace)
 
-    val entityId: String?
+    constructor(cause: Throwable) : super(cause)
 
-    val entityType: String
+    constructor() : super()
 
-    var zone: ZoneEntity?
+    constructor(
+        message: String,
+        cause: Throwable
+    ) : super(message, cause)
 
-    var attributes: Set<Attribute>?
-
-    var attributesAsJson: String?
-
-    var parents: Set<Parent>
+    constructor(message: String) : super(message)
 }

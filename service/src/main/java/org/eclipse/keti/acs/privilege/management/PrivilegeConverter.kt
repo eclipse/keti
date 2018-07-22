@@ -58,7 +58,7 @@ class PrivilegeConverter {
         val resource = BaseResource(resourceEntity.resourceIdentifier!!)
 
         val deserialize = this.jsonUtils.deserialize(
-            resourceEntity.attributesAsJson, Set::class.java as Class<Set<Attribute>>, Attribute::class.java
+            resourceEntity.attributesAsJson!!, Set::class.java as Class<Set<Attribute>>, Attribute::class.java
         )
         resource.attributes = deserialize
         resource.parents = resourceEntity.parents
@@ -89,7 +89,7 @@ class PrivilegeConverter {
         val subject = BaseSubject(subjectEntity.subjectIdentifier!!)
 
         val deserialize = this.jsonUtils.deserialize(
-            subjectEntity.attributesAsJson, Set::class.java as Class<Set<Attribute>>, Attribute::class.java
+            subjectEntity.attributesAsJson!!, Set::class.java as Class<Set<Attribute>>, Attribute::class.java
         )
         subject.attributes = deserialize
         subject.parents = subjectEntity.parents

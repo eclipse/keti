@@ -61,7 +61,7 @@ class PolicyManagementServiceImpl : PolicyManagementService {
             val result = ArrayList<PolicySet>()
             val policySetEnityList = this.policySetRepository.findByZone(zone)
             for (policySetEntity in policySetEnityList) {
-                result.add(this.jsonUtils.deserialize(policySetEntity.policySetJson, PolicySet::class.java))
+                result.add(this.jsonUtils.deserialize(policySetEntity.policySetJson!!, PolicySet::class.java)!!)
             }
             return result
         }
@@ -124,7 +124,7 @@ class PolicyManagementServiceImpl : PolicyManagementService {
         val zone = this.zoneResolver.zoneEntityOrFail
         val policySetEntity = this.policySetRepository.getByZoneAndPolicySetId(zone, policySetName)
         if (policySetEntity != null) {
-            return this.jsonUtils.deserialize(policySetEntity.policySetJson, PolicySet::class.java)
+            return this.jsonUtils.deserialize(policySetEntity.policySetJson!!, PolicySet::class.java)
         }
         LOGGER.debug("No policy set found for policySetName = {},  zone = {}.", policySetName, zone)
         return null
@@ -139,7 +139,7 @@ class PolicyManagementServiceImpl : PolicyManagementService {
                 zone.name
             )
 
-            val policySet = this.jsonUtils.deserialize(policySetEntity.policySetJson, PolicySet::class.java)
+            val policySet = this.jsonUtils.deserialize(policySetEntity.policySetJson!!, PolicySet::class.java)
             if (policySet != null) {
                 this.policySetValidator.removeCachedConditions(policySet)
             }

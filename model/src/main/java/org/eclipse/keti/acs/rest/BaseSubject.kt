@@ -36,7 +36,7 @@ class BaseSubject {
     var subjectIdentifier: String? = null
 
     @ApiModelProperty(value = "The list of attribute values being assigned", required = true)
-    var attributes = emptySet<Attribute>()
+    var attributes: Set<Attribute>? = emptySet()
 
     @ApiModelProperty(value = "A set that identifies subjects whose attributes also apply to this subject during" + "policy evaluation.")
     var parents = emptySet<Parent>()

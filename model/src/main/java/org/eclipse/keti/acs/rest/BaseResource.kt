@@ -36,7 +36,7 @@ class BaseResource {
     var resourceIdentifier: String? = null
 
     @ApiModelProperty(value = "The list of attribute values being assigned", required = true)
-    var attributes = emptySet<Attribute>()
+    var attributes: Set<Attribute>? = emptySet()
 
     @ApiModelProperty(value = "A set that identifies resources whose attributes also apply to this resource during " + "policy evaluation.")
     var parents = emptySet<Parent>()

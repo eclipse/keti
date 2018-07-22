@@ -57,7 +57,7 @@ class SubjectEntity : ZonableEntity {
      * Clob representing set of attributes as a JSON body.
      */
     @Column(name = "attributes", columnDefinition = "CLOB NOT NULL")
-    override var attributesAsJson = "{}"
+    override var attributesAsJson: String? = "{}"
 
     @Transient
     override var attributes: Set<Attribute>? = emptySet()
