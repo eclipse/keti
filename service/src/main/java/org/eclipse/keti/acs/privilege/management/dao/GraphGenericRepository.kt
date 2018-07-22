@@ -240,7 +240,7 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
     }
 
     private fun verifyEntityNotSelfReferencing(entity: E) {
-        if (entity.parents.contains(Parent(getEntityId(entity)))) {
+        if (entity.parents.contains(Parent(getEntityId(entity)!!))) {
             throw SchemaViolationException(
                 String.format("The entity '%s' references itself as a parent.", getEntityId(entity))
             )

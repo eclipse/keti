@@ -34,6 +34,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.keti.acs.PolicyContextResolver;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache;
@@ -47,6 +50,7 @@ import org.eclipse.keti.acs.privilege.management.PrivilegeManagementService;
 import org.eclipse.keti.acs.rest.BaseResource;
 import org.eclipse.keti.acs.rest.BaseSubject;
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
+import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1Kt;
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
 import org.eclipse.keti.acs.service.policy.admin.PolicyManagementService;
 import org.eclipse.keti.acs.service.policy.matcher.MatchResult;
@@ -72,10 +76,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for PolicyEvaluationService. Uses mocks, no external dependencies.

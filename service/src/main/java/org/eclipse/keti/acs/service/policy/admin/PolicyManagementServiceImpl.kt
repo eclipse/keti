@@ -76,7 +76,7 @@ class PolicyManagementServiceImpl : PolicyManagementService {
             validatePolicySet(zone, policySet)
 
             val policySetPayload = this.jsonUtils.serialize(policySet)
-            upsertPolicySetInTransaction(policySetName, zone, policySetPayload)
+            upsertPolicySetInTransaction(policySetName!!, zone, policySetPayload)
         } catch (e: Exception) {
             handleException(e, policySetName)
         }

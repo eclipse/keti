@@ -69,7 +69,7 @@ class ResourceAttributeResolver (
 
     fun resolveResourceURI(policy: Policy?): String? {
         if (attributeUriTemplateExists(policy)) {
-            val attributeUriTemplate = policy!!.target.resource.attributeUriTemplate
+            val attributeUriTemplate = policy!!.target!!.resource?.attributeUriTemplate
             val uriTemplate = UriTemplate(attributeUriTemplate)
             return this.uriTemplateVariableResolver.resolve(
                 this.requestResourceUri, uriTemplate, ATTRIBUTE_URI_TEMPLATE_VARIABLE
@@ -79,8 +79,8 @@ class ResourceAttributeResolver (
     }
 
     private fun attributeUriTemplateExists(policy: Policy?): Boolean {
-        return if (policy != null && policy.target != null && policy.target.resource != null) {
-            StringUtils.isNotBlank(policy.target.resource.attributeUriTemplate)
+        return if (policy?.target?.resource != null) {
+            StringUtils.isNotBlank(policy.target!!.resource!!.attributeUriTemplate)
         } else false
     }
 

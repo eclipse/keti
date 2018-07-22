@@ -56,7 +56,7 @@ class ZoneServiceImpl : ZoneService {
         LOGGER.debug("upsertZone Request for: {}", zone)
         validateAndSanitizeInputOrFail(zone)
         var isEntityUpdate = false
-        var zoneEntity = this.zoneRepository.getByName(zone.name)
+        var zoneEntity = this.zoneRepository.getByName(zone.name!!)
         val zoneWithSameSubdomain = this.zoneRepository.getBySubdomain(zone.subdomain)
         if (null != zoneWithSameSubdomain && null == zoneEntity) {
             // there is already a zone with proposed subdomain and it is not an
@@ -97,7 +97,7 @@ class ZoneServiceImpl : ZoneService {
     }
 
     private fun validateAndSanitizeInputOrFail(zone: Zone) {
-        this.validateSubdomainNames(zone.subdomain)
+        this.validateSubdomainNames(zone.subdomain!!)
         if (StringUtils.isEmpty(zone.name)) {
             throw ZoneManagementException("Empty or Null Zone Name: The Zone Name is mandatory.")
         }

@@ -23,6 +23,7 @@ import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory
 import org.eclipse.keti.acs.encryption.Encryptor
 import org.eclipse.keti.acs.rest.AttributeAdapterConnection
 import org.eclipse.keti.acs.rest.AttributeConnector
+import org.eclipse.keti.acs.rest.newInstance
 import org.eclipse.keti.acs.zone.management.dao.ZoneRepository
 import org.eclipse.keti.acs.zone.resolver.ZoneResolver
 import org.springframework.beans.factory.annotation.Autowired
@@ -81,7 +82,7 @@ class AttributeConnectorServiceImpl : AttributeConnectorService {
         try {
             val existingConnector = zoneEntity.resourceAttributeConnector
             isCreated = null == existingConnector
-            connector!!.adapters = encryptAdapterClientSecrets(connector.adapters)
+            connector!!.adapters = encryptAdapterClientSecrets(connector.adapters!!)
             zoneEntity.resourceAttributeConnector = connector
             this.zoneRepository.save(zoneEntity)
             if (!isCreated) {
@@ -104,8 +105,8 @@ class AttributeConnectorServiceImpl : AttributeConnectorService {
             var connector = zoneEntity.resourceAttributeConnector
             if (null != connector) {
                 // Deep copy the connector to prevent double-decryption of secrets
-                connector = AttributeConnector.newInstance(connector)
-                connector!!.adapters = decryptAdapterClientSecrets(connector.adapters)
+                connector = newInstance(connector)
+                connector.adapters = decryptAdapterClientSecrets(connector.adapters!!)
             }
             return connector
         } catch (e: Exception) {
@@ -145,7 +146,7 @@ class AttributeConnectorServiceImpl : AttributeConnectorService {
         try {
             val existingConnector = zoneEntity.subjectAttributeConnector
             isCreated = null == existingConnector
-            connector!!.adapters = encryptAdapterClientSecrets(connector.adapters)
+            connector!!.adapters = encryptAdapterClientSecrets(connector.adapters!!)
             zoneEntity.subjectAttributeConnector = connector
             this.zoneRepository.save(zoneEntity)
             if (!isCreated) {
@@ -168,8 +169,8 @@ class AttributeConnectorServiceImpl : AttributeConnectorService {
             var connector = zoneEntity.subjectAttributeConnector
             if (null != connector) {
                 // Deep copy the connector to prevent double-decryption of secrets
-                connector = AttributeConnector.newInstance(connector)
-                connector!!.adapters = decryptAdapterClientSecrets(connector.adapters)
+                connector = newInstance(connector)
+                connector.adapters = decryptAdapterClientSecrets(connector.adapters!!)
             }
             return connector
         } catch (e: Exception) {
@@ -225,10 +226,10 @@ class AttributeConnectorServiceImpl : AttributeConnectorService {
             )
         }
 
-        if (adapter.uaaClientId == null || adapter.uaaClientId.isEmpty()) {
+        if (adapter.uaaClientId == null || adapter.uaaClientId!!.isEmpty()) {
             throw AttributeConnectorException("Attribute adapter configuration requires a nonempty client ID")
         }
-        if (adapter.uaaClientSecret == null || adapter.uaaClientSecret.isEmpty()) {
+        if (adapter.uaaClientSecret == null || adapter.uaaClientSecret!!.isEmpty()) {
             throw AttributeConnectorException("Attribute adapter configuration requires a nonempty client secret")
         }
     }
@@ -237,8 +238,8 @@ class AttributeConnectorServiceImpl : AttributeConnectorService {
         if (connector == null) {
             throw AttributeConnectorException("Attribute connector configuration requires a valid connector")
         }
-        if (connector.adapters == null || connector.adapters.isEmpty()
-            || connector.adapters.size > 1
+        if (connector.adapters == null || connector.adapters!!.isEmpty()
+            || connector.adapters!!.size > 1
         ) {
             throw AttributeConnectorException("Attribute connector configuration requires one adapter")
         }
@@ -247,7 +248,7 @@ class AttributeConnectorServiceImpl : AttributeConnectorService {
                 "Minimum value for maxCachedIntervalMinutes is $CACHED_INTERVAL_THRESHOLD_MINUTES"
             )
         }
-        connector.adapters.parallelStream()
+        connector.adapters!!.parallelStream()
             .forEach { this.validateAdapterEntityOrFail(it) }
     }
 
@@ -257,7 +258,7 @@ class AttributeConnectorServiceImpl : AttributeConnectorService {
         if (CollectionUtils.isEmpty(adapters)) {
             return emptySet()
         }
-        adapters.forEach { adapter -> adapter.uaaClientSecret = this.encryptor!!.encrypt(adapter.uaaClientSecret) }
+        adapters.forEach { adapter -> adapter.uaaClientSecret = this.encryptor!!.encrypt(adapter.uaaClientSecret!!) }
         return adapters
     }
 
@@ -267,7 +268,7 @@ class AttributeConnectorServiceImpl : AttributeConnectorService {
         if (CollectionUtils.isEmpty(adapters)) {
             return emptySet()
         }
-        adapters.forEach { adapter -> adapter.uaaClientSecret = this.encryptor!!.decrypt(adapter.uaaClientSecret) }
+        adapters.forEach { adapter -> adapter.uaaClientSecret = this.encryptor!!.decrypt(adapter.uaaClientSecret!!) }
         return adapters
     }
 }

@@ -215,7 +215,7 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
 
             //Add 'n' Policy Set keys
             val policySetIds = evalRequestKey.policySetIds
-            policySetIds.forEach { policySetId -> keys.add(policySetKey(evalRequestKey.zoneId!!, policySetId)) }
+            policySetIds.forEach { policySetId -> keys.add(policySetKey(evalRequestKey.zoneId!!, policySetId!!)) }
 
             // n+1
             keys.add(subjectKey(evalRequestKey.zoneId!!, evalRequestKey.subjectId!!))
@@ -293,7 +293,7 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
 
         val policySetIds = key.policySetIds
         for (policySetId in policySetIds) {
-            setPolicySetIfNotExists(zoneId, policySetId)
+            setPolicySetIfNotExists(zoneId, policySetId!!)
         }
     }
 

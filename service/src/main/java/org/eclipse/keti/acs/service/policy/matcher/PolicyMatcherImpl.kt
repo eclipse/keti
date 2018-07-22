@@ -118,22 +118,22 @@ class PolicyMatcherImpl : PolicyMatcher {
         resourceAttributes: Set<Attribute>,
         policy: Policy
     ): Boolean {
-        if (null == policy.target.resource) {
+        if (null == policy.target?.resource) {
             return true
         }
 
-        val uriTemplateMatch = UriTemplateUtils.isCanonicalMatch(policy.target.resource.uriTemplate, resourceURI)
+        val uriTemplateMatch = UriTemplateUtils.isCanonicalMatch(policy.target!!.resource!!.uriTemplate, resourceURI)
 
         if (!uriTemplateMatch) {
             return false
         }
 
-        if (null == policy.target.resource.attributes) {
+        if (null == policy.target!!.resource!!.attributes) {
             return true
         }
 
-        for (attr in policy.target.resource.attributes) {
-            if (!containsAttributeType(attr.issuer, attr.name, resourceAttributes)) {
+        for (attr in policy.target!!.resource!!.attributes!!) {
+            if (!containsAttributeType(attr.issuer!!, attr.name!!, resourceAttributes)) {
                 return false
             }
         }
@@ -144,12 +144,12 @@ class PolicyMatcherImpl : PolicyMatcher {
         subjectAttributes: Set<Attribute>,
         policy: Policy
     ): Boolean {
-        if (null == policy.target.subject || null == policy.target.subject.attributes) {
+        if (null == policy.target?.subject || null == policy.target!!.subject!!.attributes) {
             return true
         }
 
-        for (attr in policy.target.subject.attributes) {
-            if (!containsAttributeType(attr.issuer, attr.name, subjectAttributes)) {
+        for (attr in policy.target!!.subject!!.attributes) {
+            if (!containsAttributeType(attr.issuer!!, attr.name!!, subjectAttributes)) {
                 return false
             }
         }
@@ -163,13 +163,13 @@ class PolicyMatcherImpl : PolicyMatcher {
         // Target's action is not null and they match or the Target's action is
         // null and is considered a match for anything
         var policyActionList = emptyList<String>()
-        val policyActionDefined = policy.target != null && policy.target.action != null
+        val policyActionDefined = policy.target != null && policy.target!!.action != null
         if (policyActionDefined) {
-            val policyActions = policy.target.action
+            val policyActions = policy.target!!.action!!
             policyActionList =
                 Arrays.asList(*policyActions.split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
         }
-        return policyActionDefined && requestAction != null && policyActionList.contains(requestAction) || policy.target.action == null
+        return policyActionDefined && requestAction != null && policyActionList.contains(requestAction) || policy.target?.action == null
     }
 
     private fun containsAttributeType(

@@ -47,8 +47,8 @@ class ZoneConverter {
         }
 
         val zone = Zone()
-        zone.name = zoneEntity.name
-        zone.subdomain = zoneEntity.subdomain
+        zone.name = zoneEntity.name!!
+        zone.subdomain = zoneEntity.subdomain!!
         zone.description = zoneEntity.description
         return zone
     }

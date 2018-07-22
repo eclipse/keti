@@ -56,7 +56,7 @@ public class ZoneRepositoryTest extends AbstractTransactionalTestNGSpringContext
         ZoneEntity zone = createZoneWithConnectorAndAssert();
 
         AttributeConnector expectedConnector = new AttributeConnector();
-        expectedConnector.setIsActive(true);
+        expectedConnector.setActive(true);
         expectedConnector.setAdapters(Collections.singleton(new AttributeAdapterConnection("http://some-adapter.com",
                 "http://some-uaa.com", "some-client", "some-secret")));
         zone.setResourceAttributeConnector(expectedConnector);

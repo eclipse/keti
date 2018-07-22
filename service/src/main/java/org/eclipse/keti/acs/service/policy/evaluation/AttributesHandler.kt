@@ -37,7 +37,7 @@ class AttributesHandler
 
     init {
         for (attributeValue in attributes) {
-            this.attributeMap[getKey(attributeValue.issuer, attributeValue.name)] = attributeValue.value
+            this.attributeMap[getKey(attributeValue.issuer!!, attributeValue.name!!)] = attributeValue.value!!
         }
     }
 

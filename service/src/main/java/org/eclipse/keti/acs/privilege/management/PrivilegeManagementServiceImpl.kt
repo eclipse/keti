@@ -111,7 +111,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
     ) {
         for (resource in resources) {
             val persistedResource = this.resourceRepository
-                .getByZoneAndResourceIdentifier(zone, resource.resourceIdentifier)
+                .getByZoneAndResourceIdentifier(zone, resource.resourceIdentifier!!)
 
             val entity = this.privilegeConverter.toResourceEntity(zone, resource)
             if (persistedResource != null) {
@@ -189,7 +189,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
         updatedResource: ResourceEntity?
     ): ResourceEntity? {
         val persistedResource = this.resourceRepository
-            .getByZoneAndResourceIdentifier(zone, resource.resourceIdentifier)
+            .getByZoneAndResourceIdentifier(zone, resource.resourceIdentifier!!)
 
         if (persistedResource != null) {
             LOGGER.debug(
@@ -280,7 +280,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
     ) {
         for (subject in subjects) {
             val persistedSubject = this.subjectRepository
-                .getByZoneAndSubjectIdentifier(zone, subject.subjectIdentifier)
+                .getByZoneAndSubjectIdentifier(zone, subject.subjectIdentifier!!)
             val entity = this.privilegeConverter.toSubjectEntity(zone, subject)
             if (persistedSubject != null) {
                 entity!!.id = persistedSubject.id
@@ -354,7 +354,7 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
         updatedSubject: SubjectEntity?
     ): SubjectEntity? {
         val persistedSubject = this.subjectRepository
-            .getByZoneAndSubjectIdentifier(zone, subject.subjectIdentifier)
+            .getByZoneAndSubjectIdentifier(zone, subject.subjectIdentifier!!)
 
         if (persistedSubject != null) {
             updatedSubject!!.id = persistedSubject.id

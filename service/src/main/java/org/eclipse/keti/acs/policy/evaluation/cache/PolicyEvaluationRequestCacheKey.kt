@@ -26,14 +26,14 @@ import java.util.LinkedHashSet
 class PolicyEvaluationRequestCacheKey {
 
     val request: PolicyEvaluationRequestV1?
-    val policySetIds: LinkedHashSet<String>
+    val policySetIds: LinkedHashSet<String?>
     val resourceId: String?
     val subjectId: String?
     val zoneId: String?
 
     constructor(
         request: PolicyEvaluationRequestV1,
-        policySetIds: LinkedHashSet<String>,
+        policySetIds: LinkedHashSet<String?>,
         zoneId: String
     ) {
         this.request = request
@@ -44,7 +44,7 @@ class PolicyEvaluationRequestCacheKey {
     }
 
     constructor(
-        policySetIds: LinkedHashSet<String>,
+        policySetIds: LinkedHashSet<String?>,
         resourceId: String,
         subjectId: String,
         zoneId: String
@@ -98,7 +98,7 @@ class PolicyEvaluationRequestCacheKey {
 
     class Builder {
         private var builderRequest: PolicyEvaluationRequestV1? = null
-        private var builderPolicySetIds = LinkedHashSet<String>()
+        private var builderPolicySetIds = LinkedHashSet<String?>()
         private var builderResourceId: String? = null
         private var builderSubjectId: String? = null
         private var builderZoneId: String? = null
@@ -108,7 +108,7 @@ class PolicyEvaluationRequestCacheKey {
             return this
         }
 
-        fun policySetIds(policySets: LinkedHashSet<String>?): Builder {
+        fun policySetIds(policySets: LinkedHashSet<String?>?): Builder {
             if (null != this.builderRequest && !this.builderRequest!!.policySetsEvaluationOrder.isEmpty()) {
                 throw IllegalStateException(
                     "Cannot set policy sets evaluation order if set in the policy request."

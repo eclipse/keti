@@ -126,7 +126,7 @@ abstract class ExternalAttributeReader(
                 throw AttributeRetrievalException(getAdapterErrorMessage(identifier))
             }
 
-            if (isSizeLimitsExceeded(attributesResponse.attributes)) {
+            if (isSizeLimitsExceeded(attributesResponse.attributes!!)) {
                 LOGGER.debug(getStorageErrorMessage(identifier))
                 cachedAttributes.state = CachedAttributes.State.DO_NOT_RETRY
                 return cachedAttributes

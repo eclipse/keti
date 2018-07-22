@@ -1,11 +1,11 @@
 /*******************************************************************************
- * Copyright 2018 General Electric Company
+ * Copyright 2017 General Electric Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,15 +14,26 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
-
-package org.eclipse.keti.acs.model;
-
-/**
- *
- * @author acs-engineers@ge.com
  */
-@SuppressWarnings("javadoc")
-public enum Effect {
-    PERMIT, DENY, NOT_APPLICABLE, INDETERMINATE
+
+package org.eclipse.keti.acs.rest.attribute.adapter
+
+import org.eclipse.keti.acs.model.Attribute
+
+class AttributesResponse {
+
+    var attributes: Set<Attribute>? = null
+    var id: String? = null
+
+    constructor() {
+        // Default constructor necessary for Jackson
+    }
+
+    constructor(
+        attributes: Set<Attribute>,
+        id: String
+    ) {
+        this.attributes = attributes
+        this.id = id
+    }
 }

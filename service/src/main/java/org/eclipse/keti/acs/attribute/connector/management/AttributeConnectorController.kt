@@ -208,7 +208,7 @@ class AttributeConnectorController : BaseRestApi() {
     }
 
     private fun obfuscateAdapterSecret(connector: AttributeConnector): AttributeConnector {
-        connector.adapters.forEach { adapter -> adapter.uaaClientSecret = "**********" }
+        connector.adapters!!.forEach { adapter -> adapter.uaaClientSecret = "**********" }
         return connector
     }
 }

@@ -109,7 +109,7 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
 
         var result: PolicyEvaluationResult? = null
         try {
-            result = this.cache.get(key)
+            result = this.cache[key]
         } catch (e: Exception) {
             LOGGER.error(String.format("Unable to get cache key '%s'", key), e)
         }
@@ -148,7 +148,7 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
             // even when the transient error is fixed.
             if (result.effect != Effect.INDETERMINATE) {
                 try {
-                    this.cache.set(key, result)
+                    this.cache[key] = result
                 } catch (e: Exception) {
                     LOGGER.error(
                         String.format("Unable to set cache key '%s' to value '%s' due to exception", key, result),
@@ -163,7 +163,7 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
     @Throws(IllegalArgumentException::class)
     fun filterPolicySetsByPriority(
         subjectIdentifier: String, uri: String,
-        allPolicySets: List<PolicySet>, policySetsEvaluationOrder: LinkedHashSet<String>
+        allPolicySets: List<PolicySet>, policySetsEvaluationOrder: LinkedHashSet<String?>
     ): LinkedHashSet<PolicySet> {
 
         if (policySetsEvaluationOrder.isEmpty()) {
@@ -228,8 +228,8 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
                 subjectAttributes = matchedPolicy.subjectAttributes!!
                 val target = policy.target
                 var resourceURITemplate: String? = null
-                if (target != null && target.resource != null) {
-                    resourceURITemplate = target.resource.uriTemplate
+                if (target?.resource != null) {
+                    resourceURITemplate = target.resource!!.uriTemplate
                 }
 
                 var conditionEvaluationResult = true
@@ -246,7 +246,7 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
 
                 LOGGER.debug("Condition Eval: {} Result: {}", policy.conditions, conditionEvaluationResult)
                 if (conditionEvaluationResult) {
-                    effect = policy.effect
+                    effect = policy.effect!!
                     LOGGER.info(
                         "Condition Evaluation success: policy set name='{}', policy name='{}', effect='{}'",
                         policySet.name, policy.name, policy.effect

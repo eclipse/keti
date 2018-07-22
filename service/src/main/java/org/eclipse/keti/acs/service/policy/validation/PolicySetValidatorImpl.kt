@@ -75,13 +75,13 @@ class PolicySetValidatorImpl : PolicySetValidator {
 
     private fun validatePolicyActions(p: Policy) {
 
-        if (p.target != null && p.target.action != null) {
-            val policyActions = p.target.action
+        if (p.target != null && p.target!!.action != null) {
+            val policyActions = p.target!!.action!!
             // Empty actions will be treated as null actions which behave like
             // match any
             // during policy evaluation
             if (policyActions.trim { it <= ' ' }.isEmpty()) {
-                p.target.action = null
+                p.target!!.action = null
                 return
             }
             for (action in policyActions.split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
