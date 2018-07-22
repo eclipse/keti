@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2017 General Electric Company
+ * Copyright 2018 General Electric Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
+
 import org.codehaus.groovy.transform.stc.GroovyTypeCheckingExtensionSupport
 import org.eclipse.keti.acs.commons.policy.condition.ResourceHandler
 import org.eclipse.keti.acs.commons.policy.condition.SubjectHandler
