@@ -18,8 +18,8 @@
 
 package org.eclipse.keti.controller.test;
 
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.ZONE_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.V1;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.ZONE_URL;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -28,6 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.eclipse.keti.acs.rest.Zone;
 import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver;
 import org.eclipse.keti.acs.utils.JsonUtils;
@@ -43,9 +45,6 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")

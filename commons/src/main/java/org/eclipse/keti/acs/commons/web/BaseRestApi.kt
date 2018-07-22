@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,15 +14,22 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.commons.web;
+package org.eclipse.keti.acs.commons.web
 
-public class ZoneDoesNotExistException extends RuntimeException {
+import org.springframework.core.env.Environment
+import javax.annotation.Resource
 
-    private static final long serialVersionUID = 1L;
+const val PARENTS_ATTR_NOT_SUPPORTED_MSG = "The parents attribute isn't supported yet"
 
-    public ZoneDoesNotExistException(final String message) {
-        super(message);
-    }
+/**
+ * Base class for REST Apis that provides common error handler.
+ *
+ * @author acs-engineers@ge.com
+ */
+open class BaseRestApi {
+
+    @Resource
+    lateinit var environment: Environment
 }

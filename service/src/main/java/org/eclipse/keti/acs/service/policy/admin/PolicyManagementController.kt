@@ -22,16 +22,16 @@ import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.apache.commons.lang.StringUtils
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.POLICY_SETS_URL
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.POLICY_SET_URL
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1
 import org.eclipse.keti.acs.commons.web.BaseRestApi
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.created
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.noContent
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.notFound
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.ok
+import org.eclipse.keti.acs.commons.web.POLICY_SETS_URL
+import org.eclipse.keti.acs.commons.web.POLICY_SET_URL
 import org.eclipse.keti.acs.commons.web.RestApiException
-import org.eclipse.keti.acs.commons.web.UriTemplateUtils
+import org.eclipse.keti.acs.commons.web.V1
+import org.eclipse.keti.acs.commons.web.created
+import org.eclipse.keti.acs.commons.web.expand
+import org.eclipse.keti.acs.commons.web.noContent
+import org.eclipse.keti.acs.commons.web.notFound
+import org.eclipse.keti.acs.commons.web.ok
 import org.eclipse.keti.acs.model.PolicySet
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -88,10 +88,10 @@ class PolicyManagementController : BaseRestApi() {
 
         try {
             this.service.upsertPolicySet(policySet)
-            val policySetUri = UriTemplateUtils.expand(POLICY_SET_URL, "policySetId:" + policySet.name)
+            val policySetUri = expand(POLICY_SET_URL, "policySetId:" + policySet.name)
             return created(policySetUri.path)
         } catch (e: PolicyManagementException) {
-            throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.message, e)
+            throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.message!!, e)
         }
     }
 

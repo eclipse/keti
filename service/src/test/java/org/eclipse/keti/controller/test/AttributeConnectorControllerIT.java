@@ -18,10 +18,10 @@
 
 package org.eclipse.keti.controller.test;
 
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.RESOURCE_CONNECTOR_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.SUBJECT_CONNECTOR_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.ZONE_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.RESOURCE_CONNECTOR_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.SUBJECT_CONNECTOR_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.V1;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.ZONE_URL;
 import static org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtilityKt.INCORRECT_PARAMETER_TYPE_ERROR;
 import static org.eclipse.keti.acs.privilege.management.PrivilegeManagementUtilityKt.INCORRECT_PARAMETER_TYPE_MESSAGE;
 import static org.hamcrest.Matchers.equalTo;

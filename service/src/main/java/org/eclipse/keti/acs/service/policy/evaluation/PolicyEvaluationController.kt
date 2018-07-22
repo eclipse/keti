@@ -21,10 +21,10 @@ package org.eclipse.keti.acs.service.policy.evaluation
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.POLICY_EVALUATION_URL
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1
 import org.eclipse.keti.acs.commons.web.BaseRestApi
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.ok
+import org.eclipse.keti.acs.commons.web.POLICY_EVALUATION_URL
+import org.eclipse.keti.acs.commons.web.V1
+import org.eclipse.keti.acs.commons.web.ok
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult
 import org.springframework.beans.factory.annotation.Autowired

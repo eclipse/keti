@@ -18,6 +18,10 @@
 
 package org.eclipse.keti.acs.commons.web;
 
+import static org.eclipse.keti.acs.commons.web.ResponseEntityBuilderKt.created;
+import static org.eclipse.keti.acs.commons.web.ResponseEntityBuilderKt.noContent;
+import static org.eclipse.keti.acs.commons.web.ResponseEntityBuilderKt.ok;
+
 import java.net.URI;
 
 import org.springframework.http.HttpStatus;
@@ -30,7 +34,7 @@ public class ResponseEntityBuilderTest {
 
     @Test
     public void testCreated() {
-        ResponseEntity<Object> created = ResponseEntityBuilder.created();
+        ResponseEntity<Object> created = created();
         Assert.assertNotNull(created);
         Assert.assertNull(created.getBody());
         Assert.assertEquals(created.getStatusCode(), HttpStatus.CREATED);
@@ -38,7 +42,7 @@ public class ResponseEntityBuilderTest {
 
     @Test
     public void testCreatedWithLocation() {
-        ResponseEntity<Object> created = ResponseEntityBuilder.created("/report/1", Boolean.FALSE);
+        ResponseEntity<Object> created = created("/report/1", Boolean.FALSE);
 
         Assert.assertNotNull(created);
         Assert.assertNull(created.getBody());
@@ -51,7 +55,7 @@ public class ResponseEntityBuilderTest {
 
     @Test
     public void testUpdatedWithLocation() {
-        ResponseEntity<Object> created = ResponseEntityBuilder.created("/report/1", Boolean.TRUE);
+        ResponseEntity<Object> created = created("/report/1", Boolean.TRUE);
 
         Assert.assertNotNull(created);
         Assert.assertNull(created.getBody());
@@ -64,7 +68,7 @@ public class ResponseEntityBuilderTest {
 
     @Test
     public void testOk() {
-        ResponseEntity<Object> ok = ResponseEntityBuilder.ok();
+        ResponseEntity<Object> ok = ok();
         Assert.assertNotNull(ok);
         Assert.assertNull(ok.getBody());
         Assert.assertEquals(ok.getStatusCode(), HttpStatus.OK);
@@ -73,7 +77,7 @@ public class ResponseEntityBuilderTest {
     @Test
     public void testOkWithContent() {
         String content = "PredixRocks";
-        ResponseEntity<String> ok = ResponseEntityBuilder.ok(content);
+        ResponseEntity<String> ok = ok(content);
         Assert.assertNotNull(ok);
         Assert.assertEquals(ok.getStatusCode(), HttpStatus.OK);
         Assert.assertEquals(ok.getBody(), "PredixRocks");
@@ -82,7 +86,7 @@ public class ResponseEntityBuilderTest {
 
     @Test
     public void testDeleted() {
-        ResponseEntity<Void> deleted = ResponseEntityBuilder.noContent();
+        ResponseEntity<Void> deleted = noContent();
         Assert.assertNotNull(deleted);
         Assert.assertNull(deleted.getBody());
         Assert.assertEquals(deleted.getStatusCode(), HttpStatus.NO_CONTENT);

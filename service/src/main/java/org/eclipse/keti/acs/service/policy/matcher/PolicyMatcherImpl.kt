@@ -19,7 +19,7 @@
 package org.eclipse.keti.acs.service.policy.matcher
 
 import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory
-import org.eclipse.keti.acs.commons.web.UriTemplateUtils
+import org.eclipse.keti.acs.commons.web.isCanonicalMatch
 import org.eclipse.keti.acs.model.Attribute
 import org.eclipse.keti.acs.model.Policy
 import org.eclipse.keti.acs.service.policy.evaluation.MatchedPolicy
@@ -122,7 +122,7 @@ class PolicyMatcherImpl : PolicyMatcher {
             return true
         }
 
-        val uriTemplateMatch = UriTemplateUtils.isCanonicalMatch(policy.target!!.resource!!.uriTemplate, resourceURI)
+        val uriTemplateMatch = isCanonicalMatch(policy.target!!.resource!!.uriTemplate!!, resourceURI!!)
 
         if (!uriTemplateMatch) {
             return false

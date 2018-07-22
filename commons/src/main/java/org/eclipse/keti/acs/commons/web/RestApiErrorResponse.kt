@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 General Electric Company
+ * Copyright 2017 General Electric Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.eclipse.keti.acs.monitoring
+package org.eclipse.keti.acs.commons.web
 
-import io.swagger.annotations.ApiOperation
-import org.eclipse.keti.acs.commons.web.HEARTBEAT_URL
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod.GET
-import org.springframework.web.bind.annotation.RestController
+import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
+ * Used to provide error payload with code and message.
  *
  * @author acs-engineers@ge.com
  */
-@RestController
-class AcsMonitoringController {
+class RestApiErrorResponse {
 
-    @ApiOperation(value = "Monitoring API that allows to check the ACS heartbeat", tags = ["Monitoring"])
-    @RequestMapping(method = [GET], value = [HEARTBEAT_URL])
-    fun getHeartBeat() = "alive"
+
+    @get:JsonProperty("ErrorDetails")
+    var errorDetails = ErrorDetails()
+
+    inner class ErrorDetails {
+
+        var errorCode = "FAILED"
+        var errorMessage = "Operation Failed"
+
+    }
+
 }

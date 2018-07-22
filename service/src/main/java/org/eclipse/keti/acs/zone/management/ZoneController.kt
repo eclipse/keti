@@ -20,15 +20,15 @@ package org.eclipse.keti.acs.zone.management
 
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
-import org.eclipse.keti.acs.commons.web.ACSWebConstants
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1
+import org.eclipse.keti.acs.commons.web.APP_ROOT_PATH
 import org.eclipse.keti.acs.commons.web.BaseRestApi
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.created
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.noContent
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.notFound
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.ok
 import org.eclipse.keti.acs.commons.web.RestApiException
+import org.eclipse.keti.acs.commons.web.V1
+import org.eclipse.keti.acs.commons.web.ZONE_URL
+import org.eclipse.keti.acs.commons.web.created
+import org.eclipse.keti.acs.commons.web.noContent
+import org.eclipse.keti.acs.commons.web.notFound
+import org.eclipse.keti.acs.commons.web.ok
 import org.eclipse.keti.acs.rest.Zone
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -47,7 +47,7 @@ import org.springframework.web.bind.annotation.RestController
  * @author acs-engineers@ge.com
  */
 @RestController
-@Api(value = ACSWebConstants.APP_ROOT_PATH, hidden = true)
+@Api(value = APP_ROOT_PATH, hidden = true)
 class ZoneController : BaseRestApi() {
 
     @Autowired
@@ -55,7 +55,7 @@ class ZoneController : BaseRestApi() {
 
     @RequestMapping(
         method = [PUT],
-        value = [(V1 + AcsApiUriTemplates.ZONE_URL)],
+        value = [(V1 + ZONE_URL)],
         consumes = [(MediaType.APPLICATION_JSON_VALUE)]
     )
     @ApiOperation(value = "Creates/Updates the zone.", hidden = true)
@@ -67,7 +67,7 @@ class ZoneController : BaseRestApi() {
             val zoneCreated = this.service.upsertZone(zone)
 
             return if (zoneCreated) {
-                created(false, V1 + AcsApiUriTemplates.ZONE_URL, "zoneName:$zoneName")
+                created(false, V1 + ZONE_URL, "zoneName:$zoneName")
             } else created()
         } catch (e: ZoneManagementException) {
             throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e)
@@ -82,7 +82,7 @@ class ZoneController : BaseRestApi() {
 
     @RequestMapping(
         method = [GET],
-        value = [(V1 + AcsApiUriTemplates.ZONE_URL)],
+        value = [(V1 + ZONE_URL)],
         produces = [(MediaType.APPLICATION_JSON_VALUE)]
     )
     @ApiOperation(
@@ -103,7 +103,7 @@ class ZoneController : BaseRestApi() {
         }
     }
 
-    @RequestMapping(method = [DELETE], value = [(V1 + AcsApiUriTemplates.ZONE_URL)])
+    @RequestMapping(method = [DELETE], value = [(V1 + ZONE_URL)])
     @ApiOperation(value = "Deletes the zone.", hidden = true)
     fun deleteZone(@PathVariable("zoneName") zoneName: String): ResponseEntity<Void> {
 

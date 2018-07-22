@@ -22,14 +22,15 @@ import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1
 import org.eclipse.keti.acs.commons.web.BaseRestApi
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.created
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.noContent
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.notFound
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.ok
+import org.eclipse.keti.acs.commons.web.RESOURCE_CONNECTOR_URL
 import org.eclipse.keti.acs.commons.web.RestApiException
+import org.eclipse.keti.acs.commons.web.SUBJECT_CONNECTOR_URL
+import org.eclipse.keti.acs.commons.web.V1
+import org.eclipse.keti.acs.commons.web.created
+import org.eclipse.keti.acs.commons.web.noContent
+import org.eclipse.keti.acs.commons.web.notFound
+import org.eclipse.keti.acs.commons.web.ok
 import org.eclipse.keti.acs.rest.AttributeConnector
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -60,7 +61,7 @@ class AttributeConnectorController : BaseRestApi() {
             message = "Connector configuration for the given zone is not found."
         ))]
     )
-    @RequestMapping(method = [GET], value = [(V1 + AcsApiUriTemplates.RESOURCE_CONNECTOR_URL)])
+    @RequestMapping(method = [GET], value = [(V1 + RESOURCE_CONNECTOR_URL)])
     fun getResourceConnector(): ResponseEntity<AttributeConnector> {
         try {
             val connector = this.service.retrieveResourceConnector()
@@ -83,7 +84,7 @@ class AttributeConnectorController : BaseRestApi() {
             message = "Connector configuration for the given zone is not found."
         ))]
     )
-    @RequestMapping(method = [GET], value = [(V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL)])
+    @RequestMapping(method = [GET], value = [(V1 + SUBJECT_CONNECTOR_URL)])
     fun getSubjectConnector(): ResponseEntity<AttributeConnector> {
         try {
             val connector = this.service.retrieveSubjectConnector()
@@ -107,7 +108,7 @@ class AttributeConnectorController : BaseRestApi() {
     )
     @RequestMapping(
         method = [PUT],
-        value = [(V1 + AcsApiUriTemplates.RESOURCE_CONNECTOR_URL)],
+        value = [(V1 + RESOURCE_CONNECTOR_URL)],
         consumes = [(MediaType.APPLICATION_JSON_VALUE)]
     )
     fun putResourceConnector(
@@ -120,11 +121,11 @@ class AttributeConnectorController : BaseRestApi() {
 
             return if (connectorCreated) {
                 // return 201 with empty response body
-                created(V1 + AcsApiUriTemplates.RESOURCE_CONNECTOR_URL, false)
+                created(V1 + RESOURCE_CONNECTOR_URL, false)
             } else ok()
             // return 200 with empty response body
         } catch (e: AttributeConnectorException) {
-            throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.message, e)
+            throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.message!!, e)
         }
     }
 
@@ -139,7 +140,7 @@ class AttributeConnectorController : BaseRestApi() {
             message = "Connector configuration for the given zone is successfully deleted."
         )), (ApiResponse(code = 404, message = "Connector configuration for the given zone is not found."))]
     )
-    @RequestMapping(method = [DELETE], value = [(V1 + AcsApiUriTemplates.RESOURCE_CONNECTOR_URL)])
+    @RequestMapping(method = [DELETE], value = [(V1 + RESOURCE_CONNECTOR_URL)])
     fun deleteResourceConnector(): ResponseEntity<Void> {
         try {
             val deleted = this.service.deleteResourceConnector()
@@ -147,7 +148,7 @@ class AttributeConnectorController : BaseRestApi() {
                 noContent()
             } else notFound()
         } catch (e: AttributeConnectorException) {
-            throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.message, e)
+            throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.message!!, e)
         }
     }
 
@@ -163,7 +164,7 @@ class AttributeConnectorController : BaseRestApi() {
     )
     @RequestMapping(
         method = [PUT],
-        value = [(V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL)],
+        value = [(V1 + SUBJECT_CONNECTOR_URL)],
         consumes = [(MediaType.APPLICATION_JSON_VALUE)]
     )
     fun putSubjectConnector(
@@ -176,11 +177,11 @@ class AttributeConnectorController : BaseRestApi() {
 
             return if (connectorCreated) {
                 // return 201 with empty response body
-                created(V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL, false)
+                created(V1 + SUBJECT_CONNECTOR_URL, false)
             } else ok()
             // return 200 with empty response body
         } catch (e: AttributeConnectorException) {
-            throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.message, e)
+            throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.message!!, e)
         }
     }
 
@@ -195,7 +196,7 @@ class AttributeConnectorController : BaseRestApi() {
             message = "Connector configuration for the given zone is successfully deleted."
         )), (ApiResponse(code = 404, message = "Connector configuration for the given zone is not found."))]
     )
-    @RequestMapping(method = [DELETE], value = [(V1 + AcsApiUriTemplates.SUBJECT_CONNECTOR_URL)])
+    @RequestMapping(method = [DELETE], value = [(V1 + SUBJECT_CONNECTOR_URL)])
     fun deleteSubjectConnector(): ResponseEntity<Void> {
         try {
             val deleted = this.service.deleteSubjectConnector()
@@ -203,7 +204,7 @@ class AttributeConnectorController : BaseRestApi() {
                 noContent()
             } else notFound()
         } catch (e: AttributeConnectorException) {
-            throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.message, e)
+            throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, e.message!!, e)
         }
     }
 

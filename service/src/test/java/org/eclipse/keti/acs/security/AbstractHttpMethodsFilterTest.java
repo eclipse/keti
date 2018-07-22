@@ -18,11 +18,12 @@
 
 package org.eclipse.keti.acs.security;
 
+import static org.eclipse.keti.acs.commons.web.ResponseEntityBuilderKt.ok;
+
 import java.net.URI;
 import java.util.Collections;
 
 import org.eclipse.jetty.http.MimeTypes;
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpHeaders;
@@ -57,7 +58,7 @@ public final class AbstractHttpMethodsFilterTest {
 
         @RequestMapping(method = RequestMethod.GET, value = V1_DUMMY)
         public ResponseEntity<String> getDummy() {
-            return ResponseEntityBuilder.ok();
+            return ok();
         }
     }
 

@@ -18,7 +18,8 @@
 
 package org.eclipse.keti.controller.test;
 
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.POLICY_SET_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.POLICY_SET_URL;
+import static org.eclipse.keti.acs.commons.web.UriTemplateUtilsKt.expand;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -27,7 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.net.URI;
 
-import org.eclipse.keti.acs.commons.web.UriTemplateUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.eclipse.keti.acs.model.PolicySet;
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
 import org.eclipse.keti.acs.rest.Zone;
@@ -49,10 +52,6 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
@@ -243,7 +242,7 @@ public class PolicyManagementControllerIT extends AbstractTestNGSpringContextTes
         String policySetName = myPolicySet.getName();
         MockMvcContext ctxt = this.testUtils.createWACWithCustomPUTRequestBuilder(this.wac,
                 this.testZone.getSubdomain(), VERSION + "policy-set/" + myPolicySet.getName());
-        URI policySetUri = UriTemplateUtils.expand(POLICY_SET_URL, "policySetId:" + policySetName);
+        URI policySetUri = expand(POLICY_SET_URL, "policySetId:" + policySetName);
         String policySetPath = policySetUri.getPath();
 
         ctxt.getMockMvc().perform(ctxt.getBuilder().content(policySetContent).contentType(MediaType.APPLICATION_JSON))

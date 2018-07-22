@@ -23,16 +23,17 @@ import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang.StringUtils
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.MANAGED_RESOURCES_URL
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.MANAGED_RESOURCE_URL
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1
 import org.eclipse.keti.acs.commons.web.BaseRestApi
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.created
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.noContent
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.notFound
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.ok
+import org.eclipse.keti.acs.commons.web.MANAGED_RESOURCES_URL
+import org.eclipse.keti.acs.commons.web.MANAGED_RESOURCE_URL
+import org.eclipse.keti.acs.commons.web.PARENTS_ATTR_NOT_SUPPORTED_MSG
 import org.eclipse.keti.acs.commons.web.RestApiException
-import org.eclipse.keti.acs.commons.web.UriTemplateUtils
+import org.eclipse.keti.acs.commons.web.V1
+import org.eclipse.keti.acs.commons.web.created
+import org.eclipse.keti.acs.commons.web.expand
+import org.eclipse.keti.acs.commons.web.noContent
+import org.eclipse.keti.acs.commons.web.notFound
+import org.eclipse.keti.acs.commons.web.ok
 import org.eclipse.keti.acs.rest.BaseResource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -91,7 +92,7 @@ class ResourcePrivilegeManagementController : BaseRestApi() {
 
         for (resource in resources) {
             if (!CollectionUtils.isEmpty(resource.parents)) {
-                throw RestApiException(HttpStatus.NOT_IMPLEMENTED, BaseRestApi.PARENTS_ATTR_NOT_SUPPORTED_MSG)
+                throw RestApiException(HttpStatus.NOT_IMPLEMENTED, PARENTS_ATTR_NOT_SUPPORTED_MSG)
             }
         }
     }
@@ -182,7 +183,7 @@ class ResourcePrivilegeManagementController : BaseRestApi() {
         try {
             val createdResource = this.service.upsertResource(resource)
 
-            val resourceUri = UriTemplateUtils.expand(MANAGED_RESOURCE_URL, "resourceIdentifier:$resourceIdentifier")
+            val resourceUri = expand(MANAGED_RESOURCE_URL, "resourceIdentifier:$resourceIdentifier")
 
             return if (createdResource) {
                 created(resourceUri.path, false)

@@ -18,15 +18,15 @@
 
 package org.eclipse.keti.acs.security;
 
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.HEALTH_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.HEARTBEAT_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.MANAGED_RESOURCES_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.POLICY_EVALUATION_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.POLICY_SETS_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.RESOURCE_CONNECTOR_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.SUBJECTS_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.SUBJECT_CONNECTOR_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.HEALTH_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.HEARTBEAT_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.MANAGED_RESOURCES_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.POLICY_EVALUATION_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.POLICY_SETS_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.RESOURCE_CONNECTOR_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.SUBJECTS_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.SUBJECT_CONNECTOR_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.V1;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -36,6 +36,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -54,8 +55,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 @WebAppConfiguration
 @ContextConfiguration("classpath:controller-tests-context.xml")
 public final class SecurityFilterChainTest extends AbstractTestNGSpringContextTests {
@@ -67,7 +66,8 @@ public final class SecurityFilterChainTest extends AbstractTestNGSpringContextTe
     private static final URI POLICY_SET_URI = URI.create(V1 + POLICY_SETS_URL + "/test");
     private static final URI POLICY_SETS_URI = URI.create(V1 + POLICY_SETS_URL);
     private static final URI POLICY_EVAL_URI = URI.create(V1 + POLICY_EVALUATION_URL);
-    private static final URI RESOURCE_CONNECTOR_URI = URI.create(V1 + RESOURCE_CONNECTOR_URL);
+    private static final URI RESOURCE_CONNECTOR_URI = URI.create(
+        V1 + RESOURCE_CONNECTOR_URL);
     private static final URI SUBJECT_CONNECTOR_URI = URI.create(V1 + SUBJECT_CONNECTOR_URL);
     private static final URI ZONE_URI = URI.create(V1 + "/zone/test");
     private static final URI HEALTH_URI = URI.create(HEALTH_URL);
@@ -115,7 +115,7 @@ public final class SecurityFilterChainTest extends AbstractTestNGSpringContextTe
 
     private Object[][] testAnonymousHealth() {
         return new Object[][] { { MockMvcRequestBuilders.get(HEALTH_URL), status().isServiceUnavailable(),
-                content().string("{\"status\":\"DOWN\"}") } };
+                                  content().string("{\"status\":\"DOWN\"}") } };
     }
 
     @DataProvider

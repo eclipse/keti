@@ -18,7 +18,7 @@
 
 package org.eclipse.keti.controller.test;
 
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.HEARTBEAT_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.HEARTBEAT_URL;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,8 +57,8 @@ public class AcsMonitoringControllerIT extends AbstractTestNGSpringContextTests 
 
     public void testMonitoringHeartBeat() throws Exception {
         this.mockMvc.perform(get(HEARTBEAT_URL).accept(MediaType.TEXT_PLAIN_VALUE)).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"))
-                .andExpect(content().string("alive"));
+                    .andExpect(content().contentType(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"))
+                    .andExpect(content().string("alive"));
     }
 
 }

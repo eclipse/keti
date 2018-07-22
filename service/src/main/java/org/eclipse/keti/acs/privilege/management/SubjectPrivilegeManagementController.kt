@@ -23,16 +23,17 @@ import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang.StringUtils
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.SUBJECTS_URL
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.SUBJECT_URL
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1
 import org.eclipse.keti.acs.commons.web.BaseRestApi
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.created
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.noContent
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.notFound
-import org.eclipse.keti.acs.commons.web.ResponseEntityBuilder.ok
+import org.eclipse.keti.acs.commons.web.PARENTS_ATTR_NOT_SUPPORTED_MSG
 import org.eclipse.keti.acs.commons.web.RestApiException
-import org.eclipse.keti.acs.commons.web.UriTemplateUtils
+import org.eclipse.keti.acs.commons.web.SUBJECTS_URL
+import org.eclipse.keti.acs.commons.web.SUBJECT_URL
+import org.eclipse.keti.acs.commons.web.V1
+import org.eclipse.keti.acs.commons.web.created
+import org.eclipse.keti.acs.commons.web.expand
+import org.eclipse.keti.acs.commons.web.noContent
+import org.eclipse.keti.acs.commons.web.notFound
+import org.eclipse.keti.acs.commons.web.ok
 import org.eclipse.keti.acs.rest.BaseSubject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -86,7 +87,7 @@ class SubjectPrivilegeManagementController : BaseRestApi() {
 
         for (subject in subjects) {
             if (!CollectionUtils.isEmpty(subject.parents)) {
-                throw RestApiException(HttpStatus.NOT_IMPLEMENTED, BaseRestApi.PARENTS_ATTR_NOT_SUPPORTED_MSG)
+                throw RestApiException(HttpStatus.NOT_IMPLEMENTED, PARENTS_ATTR_NOT_SUPPORTED_MSG)
             }
         }
     }
@@ -158,7 +159,7 @@ class SubjectPrivilegeManagementController : BaseRestApi() {
 
             val createdSubject = this.service.upsertSubject(subject)
 
-            val subjectUri = UriTemplateUtils.expand(SUBJECT_URL, "subjectIdentifier:$subjectIdentifier")
+            val subjectUri = expand(SUBJECT_URL, "subjectIdentifier:$subjectIdentifier")
 
             return if (createdSubject) {
                 created(subjectUri.rawPath, false)

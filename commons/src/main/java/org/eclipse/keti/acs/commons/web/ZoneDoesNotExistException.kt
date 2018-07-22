@@ -16,22 +16,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.eclipse.keti.acs.monitoring
+package org.eclipse.keti.acs.commons.web
 
-import io.swagger.annotations.ApiOperation
-import org.eclipse.keti.acs.commons.web.HEARTBEAT_URL
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod.GET
-import org.springframework.web.bind.annotation.RestController
-
-/**
- *
- * @author acs-engineers@ge.com
- */
-@RestController
-class AcsMonitoringController {
-
-    @ApiOperation(value = "Monitoring API that allows to check the ACS heartbeat", tags = ["Monitoring"])
-    @RequestMapping(method = [GET], value = [HEARTBEAT_URL])
-    fun getHeartBeat() = "alive"
-}
+class ZoneDoesNotExistException(message: String) : RuntimeException(message)

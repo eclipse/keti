@@ -95,7 +95,7 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
         RestTemplate restTemplate = new RestTemplate();
         try {
             ResponseEntity<String> heartbeatResponse = restTemplate.exchange(
-                    this.acsBaseUrl + AcsApiUriTemplates.HEARTBEAT_URL, HttpMethod.GET,
+                    this.acsBaseUrl + HEARTBEAT_URL, HttpMethod.GET,
                     new HttpEntity<>(this.headersWithZoneSubdomain), String.class);
             Assert.assertEquals(heartbeatResponse.getBody(), "alive", "ACS Heartbeat Check Failed");
         } catch (Exception e) {
@@ -181,7 +181,7 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
     }
 
     private ResponseEntity<String> getMonitoringApiResponse(final HttpHeaders headers) {
-        return new RestTemplate().exchange(URI.create(this.acsBaseUrl + AcsApiUriTemplates.HEARTBEAT_URL),
+        return new RestTemplate().exchange(URI.create(this.acsBaseUrl + HEARTBEAT_URL),
                 HttpMethod.GET, new HttpEntity<>(headers), String.class);
     }
 

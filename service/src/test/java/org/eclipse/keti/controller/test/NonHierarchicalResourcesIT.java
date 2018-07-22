@@ -18,11 +18,11 @@
 
 package org.eclipse.keti.controller.test;
 
+import static org.eclipse.keti.acs.commons.web.BaseRestApiKt.PARENTS_ATTR_NOT_SUPPORTED_MSG;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
 
-import org.eclipse.keti.acs.commons.web.BaseRestApi;
 import org.eclipse.keti.acs.rest.BaseResource;
 import org.eclipse.keti.acs.rest.Zone;
 import org.eclipse.keti.acs.testutils.MockAcsRequestContext;
@@ -90,7 +90,7 @@ public final class NonHierarchicalResourcesIT extends AbstractTestNGSpringContex
                                            .andReturn();
 
         Assert.assertEquals(result.getResponse().getContentAsString(),
-                            "{\"ErrorDetails\":{\"errorCode\":\"FAILURE\","
-                            + "\"errorMessage\":\"" + BaseRestApi.PARENTS_ATTR_NOT_SUPPORTED_MSG + "\"}}");
+            "{\"ErrorDetails\":{\"errorCode\":\"FAILURE\","
+            + "\"errorMessage\":\"" + PARENTS_ATTR_NOT_SUPPORTED_MSG + "\"}}");
     }
 }
