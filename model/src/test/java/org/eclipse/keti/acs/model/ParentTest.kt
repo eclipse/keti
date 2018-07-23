@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,23 +14,20 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.acs.model;
+package org.eclipse.keti.acs.model
 
-import org.eclipse.keti.acs.rest.Parent;
-import org.testng.annotations.Test;
+import org.eclipse.keti.acs.rest.Parent
+import org.testng.annotations.Test
 
-import java.util.Arrays;
-import java.util.HashSet;
+class ParentTest {
 
-public class ParentTest {
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testMultipleScopesNotAllowed() {
-        Attribute a1 = new Attribute("issuer", "a1");
-        Attribute a2 = new Attribute("issuer", "a2");
-        new Parent("testParent", new HashSet<Attribute>(Arrays.asList(new Attribute[] {  a1, a2 })));
+    @Test(expectedExceptions = [(IllegalArgumentException::class)])
+    fun testMultipleScopesNotAllowed() {
+        val a1 = Attribute("issuer", "a1")
+        val a2 = Attribute("issuer", "a2")
+        Parent("testParent", setOf(a1, a2))
     }
 
 }
