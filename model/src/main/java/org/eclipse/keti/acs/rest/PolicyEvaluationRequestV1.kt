@@ -26,7 +26,7 @@ import org.eclipse.keti.acs.model.Attribute
 import java.util.LinkedHashSet
 
 @Deprecated("")
-val EMPTY_POLICY_EVALUATION_ORDER = LinkedHashSet<String>()
+val EMPTY_POLICY_EVALUATION_ORDER = LinkedHashSet<String?>()
 
 @ApiModel(description = "Policy evaluation request for V1.")
 class PolicyEvaluationRequestV1 {
