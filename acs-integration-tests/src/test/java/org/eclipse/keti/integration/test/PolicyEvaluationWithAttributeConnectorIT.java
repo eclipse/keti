@@ -156,7 +156,7 @@ public class PolicyEvaluationWithAttributeConnectorIT extends AbstractTestNGSpri
                         this.adapterUaaClientSecret));
 
         AttributeConnector attributeConnector = new AttributeConnector();
-        attributeConnector.setIsActive(isActive);
+        attributeConnector.setActive(isActive);
         attributeConnector.setAdapters(new HashSet<>(adapters));
         this.acsAdminRestTemplate.exchange(this.resourceAttributeConnectorUrl, HttpMethod.PUT,
                 new HttpEntity<>(attributeConnector, zoneHeader()), AttributeConnector.class);

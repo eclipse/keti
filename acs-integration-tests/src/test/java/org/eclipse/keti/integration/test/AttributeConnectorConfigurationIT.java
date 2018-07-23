@@ -18,12 +18,15 @@
 
 package org.eclipse.keti.integration.test;
 
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.RESOURCE_CONNECTOR_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.SUBJECT_CONNECTOR_URL;
-import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplates.V1;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.RESOURCE_CONNECTOR_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.SUBJECT_CONNECTOR_URL;
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.V1;
 
 import java.util.Collections;
 
+import org.eclipse.keti.acs.rest.AttributeAdapterConnection;
+import org.eclipse.keti.acs.rest.AttributeConnector;
+import org.eclipse.keti.test.utils.ACSITSetUpFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -41,10 +44,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.rest.AttributeAdapterConnection;
-import org.eclipse.keti.acs.rest.AttributeConnector;
-import org.eclipse.keti.test.utils.ACSITSetUpFactory;
 
 @ContextConfiguration("classpath:integration-test-spring-context.xml")
 @Test

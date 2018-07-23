@@ -18,6 +18,8 @@
 
 package org.eclipse.keti.acceptance.test;
 
+import static org.eclipse.keti.acs.commons.web.AcsApiUriTemplatesKt.HEARTBEAT_URL;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -43,7 +45,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.model.Effect;
 import org.eclipse.keti.acs.rest.BaseResource;
