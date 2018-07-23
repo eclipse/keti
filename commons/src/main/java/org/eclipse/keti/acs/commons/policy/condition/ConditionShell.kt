@@ -36,5 +36,5 @@ interface ConditionShell {
      * on validation error
      */
     @Throws(ConditionParsingException::class)
-    fun parse(script: String): ConditionScript
+    fun parse(script: String?): ConditionScript
 }

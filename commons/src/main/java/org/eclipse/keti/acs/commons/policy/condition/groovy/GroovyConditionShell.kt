@@ -63,7 +63,7 @@ class GroovyConditionShell : ConditionShell {
      * @see org.eclipse.keti.acs.commons.conditions.ConditionShell#parse(java.lang. String )
      */
     @Throws(ConditionParsingException::class)
-    override fun parse(script: String): ConditionScript {
+    override fun parse(script: String?): ConditionScript {
         if (StringUtils.isEmpty(script)) {
             throw IllegalArgumentException("Script is null or empty.")
         }
