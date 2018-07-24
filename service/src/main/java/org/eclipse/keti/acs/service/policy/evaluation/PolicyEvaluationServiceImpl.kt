@@ -283,7 +283,7 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
 
     fun evaluateConditions(
         subjectAttributes: Set<Attribute>, resourceAttributes: Set<Attribute>,
-        resourceURI: String, conditions: List<Condition>, resourceURITemplate: String?
+        resourceURI: String, conditions: List<Condition>?, resourceURITemplate: String?
     ): Boolean {
         val validatedConditionScripts: List<ConditionScript>
         try {
@@ -309,7 +309,7 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
                 LOGGER.debug("Condition Assertion Failed", e)
                 false
             } catch (e: Exception) {
-                LOGGER.error("Unable to evualate condition: {}", conditions[i], e)
+                LOGGER.error("Unable to evualate condition: {}", conditions!![i], e)
                 throw PolicyEvaluationException("Condition Evaluation failed", e)
             }
         }

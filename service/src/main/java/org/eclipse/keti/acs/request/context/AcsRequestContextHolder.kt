@@ -92,7 +92,7 @@ private constructor() : ApplicationContextAware {
         }
 
         internal fun build(): AcsRequestContext {
-            return AcsRequestContext(this.requestContextMap.toMap())
+            return AcsRequestContext(this.requestContextMap)
         }
     }
 }

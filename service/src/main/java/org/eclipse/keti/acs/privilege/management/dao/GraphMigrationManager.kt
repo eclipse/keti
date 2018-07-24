@@ -99,6 +99,6 @@ class GraphMigrationManager {
     }
 
     fun isMigrationComplete(): Boolean {
-        return this.isMigrationComplete!!
+        return this.isMigrationComplete
     }
 }
