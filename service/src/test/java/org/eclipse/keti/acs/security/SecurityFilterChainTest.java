@@ -74,6 +74,7 @@ public final class SecurityFilterChainTest extends AbstractTestNGSpringContextTe
 
     private static final String CONTENT = "test content";
     private static final String MALFORMED_BEARER_TOKEN = "Bearer foo";
+    private static final String EMPTY_BEARER_TOKEN = "Bearer";
 
     @Autowired
     private WebApplicationContext wac;
@@ -90,7 +91,7 @@ public final class SecurityFilterChainTest extends AbstractTestNGSpringContextTe
                 .alwaysDo(print()).build();
     }
 
-    @Test(dataProvider = "anonymousRequestBuilder", enabled = false)
+    @Test(dataProvider = "anonymousRequestBuilder")
     public void testAnonymousAccess(final RequestBuilder request, final ResultMatcher expectedStatus,
             final ResultMatcher expectedContent) throws Exception {
         this.mockMvc.perform(request).andExpect(expectedStatus).andExpect(expectedContent);
@@ -125,47 +126,62 @@ public final class SecurityFilterChainTest extends AbstractTestNGSpringContextTe
     }
 
     private Object[][] testHealth() {
-        return new Object[][] { get(HEALTH_URI, httpHeaders(MALFORMED_BEARER_TOKEN)) };
+        return new Object[][] { get(HEALTH_URI, httpHeaders(MALFORMED_BEARER_TOKEN)),
+                get(HEALTH_URI, httpHeaders(EMPTY_BEARER_TOKEN)) };
     }
 
     private Object[][] testZoneController() {
         return new Object[][] { put(ZONE_URI, httpHeaders(MALFORMED_BEARER_TOKEN)),
                 get(ZONE_URI, httpHeaders(MALFORMED_BEARER_TOKEN)),
-                delete(ZONE_URI, httpHeaders(MALFORMED_BEARER_TOKEN)) };
+                delete(ZONE_URI, httpHeaders(MALFORMED_BEARER_TOKEN)), put(ZONE_URI, httpHeaders(EMPTY_BEARER_TOKEN)),
+                get(ZONE_URI, httpHeaders(EMPTY_BEARER_TOKEN)), delete(ZONE_URI, httpHeaders(EMPTY_BEARER_TOKEN)) };
     }
 
     private Object[][] testAttributeConnectorController() {
         return new Object[][] { putWithMalformedBearerToken(RESOURCE_CONNECTOR_URI),
                 getWithMalformedBearerToken(RESOURCE_CONNECTOR_URI),
-                deleteWithMalformedBearerToken(RESOURCE_CONNECTOR_URI),
+                deleteWithMalformedBearerToken(RESOURCE_CONNECTOR_URI), putWithEmptyBearerToken(RESOURCE_CONNECTOR_URI),
+                getWithEmptyBearerToken(RESOURCE_CONNECTOR_URI), deleteWithEmptyBearerToken(RESOURCE_CONNECTOR_URI),
                 putWithMalformedBearerToken(SUBJECT_CONNECTOR_URI), getWithMalformedBearerToken(SUBJECT_CONNECTOR_URI),
-                deleteWithMalformedBearerToken(SUBJECT_CONNECTOR_URI) };
+                deleteWithMalformedBearerToken(SUBJECT_CONNECTOR_URI), putWithEmptyBearerToken(SUBJECT_CONNECTOR_URI),
+                getWithEmptyBearerToken(SUBJECT_CONNECTOR_URI), deleteWithEmptyBearerToken(SUBJECT_CONNECTOR_URI) };
     }
 
     private Object[][] testPolicyEvaluationController() {
-        return new Object[][] { postWithMalformedBearerToken(POLICY_EVAL_URI) };
+        return new Object[][] { postWithMalformedBearerToken(POLICY_EVAL_URI),
+                postWithEmptyBearerToken(POLICY_EVAL_URI) };
     }
 
     private Object[][] testPolicyManagementController() {
         return new Object[][] { putWithMalformedBearerToken(POLICY_SET_URI),
                 getWithMalformedBearerToken(POLICY_SET_URI), deleteWithMalformedBearerToken(POLICY_SET_URI),
-                getWithMalformedBearerToken(POLICY_SETS_URI) };
+                getWithMalformedBearerToken(POLICY_SETS_URI), putWithEmptyBearerToken(POLICY_SET_URI),
+                getWithEmptyBearerToken(POLICY_SET_URI), deleteWithEmptyBearerToken(POLICY_SET_URI),
+                getWithEmptyBearerToken(POLICY_SETS_URI) };
     }
 
     private Object[][] testResourcePrivilegeManagementController() {
         return new Object[][] { postWithMalformedBearerToken(RESOURCES_URI), getWithMalformedBearerToken(RESOURCES_URI),
                 getWithMalformedBearerToken(RESOURCE_URI), putWithMalformedBearerToken(RESOURCE_URI),
-                deleteWithMalformedBearerToken(RESOURCE_URI) };
+                deleteWithMalformedBearerToken(RESOURCE_URI), postWithEmptyBearerToken(RESOURCES_URI),
+                getWithEmptyBearerToken(RESOURCES_URI), getWithEmptyBearerToken(RESOURCE_URI),
+                putWithEmptyBearerToken(RESOURCE_URI), deleteWithEmptyBearerToken(RESOURCE_URI) };
     }
 
     private Object[][] testSubjectPrivilegeManagementController() {
         return new Object[][] { postWithMalformedBearerToken(SUBJECTS_URI), getWithMalformedBearerToken(SUBJECTS_URI),
                 getWithMalformedBearerToken(SUBJECT_URI), putWithMalformedBearerToken(SUBJECT_URI),
-                deleteWithMalformedBearerToken(SUBJECT_URI) };
+                deleteWithMalformedBearerToken(SUBJECT_URI), postWithEmptyBearerToken(SUBJECTS_URI),
+                getWithEmptyBearerToken(SUBJECTS_URI), getWithEmptyBearerToken(SUBJECT_URI),
+                putWithEmptyBearerToken(SUBJECT_URI), deleteWithEmptyBearerToken(SUBJECT_URI) };
     }
 
     private static Object[] postWithMalformedBearerToken(final URI uri) {
         return post(uri, httpZoneHeaders(MALFORMED_BEARER_TOKEN));
+    }
+
+    private static Object[] postWithEmptyBearerToken(final URI uri) {
+        return post(uri, httpZoneHeaders(EMPTY_BEARER_TOKEN));
     }
 
     private static Object[] post(final URI uri, final HttpHeaders headers) {
@@ -177,6 +193,10 @@ public final class SecurityFilterChainTest extends AbstractTestNGSpringContextTe
         return put(uri, httpZoneHeaders(MALFORMED_BEARER_TOKEN));
     }
 
+    private static Object[] putWithEmptyBearerToken(final URI uri) {
+        return put(uri, httpZoneHeaders(EMPTY_BEARER_TOKEN));
+    }
+
     private static Object[] put(final URI uri, final HttpHeaders headers) {
         return new Object[] { MockMvcRequestBuilders.put(uri).headers(headers).content(CONTENT)
                 .contentType(MediaType.APPLICATION_JSON) };
@@ -186,12 +206,20 @@ public final class SecurityFilterChainTest extends AbstractTestNGSpringContextTe
         return get(uri, httpZoneHeaders(MALFORMED_BEARER_TOKEN));
     }
 
+    private static Object[] getWithEmptyBearerToken(final URI uri) {
+        return get(uri, httpZoneHeaders(EMPTY_BEARER_TOKEN));
+    }
+
     private static Object[] get(final URI uri, final HttpHeaders headers) {
         return new Object[] { MockMvcRequestBuilders.get(uri).headers(headers).accept(MediaType.APPLICATION_JSON) };
     }
 
     private static Object[] deleteWithMalformedBearerToken(final URI uri) {
         return delete(uri, httpZoneHeaders(MALFORMED_BEARER_TOKEN));
+    }
+
+    private static Object[] deleteWithEmptyBearerToken(final URI uri) {
+        return delete(uri, httpZoneHeaders(EMPTY_BEARER_TOKEN));
     }
 
     private static Object[] delete(final URI uri, final HttpHeaders headers) {
