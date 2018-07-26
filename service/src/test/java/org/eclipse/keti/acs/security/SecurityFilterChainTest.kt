@@ -69,9 +69,14 @@ private val HEALTH_URI = URI.create(HEALTH_URL)
 
 private const val CONTENT = "test content"
 private const val MALFORMED_BEARER_TOKEN = "Bearer foo"
+private const val EMPTY_BEARER_TOKEN = "Bearer"
 
 private fun postWithMalformedBearerToken(uri: URI): Array<Any?> {
     return post(uri, httpZoneHeaders(MALFORMED_BEARER_TOKEN))
+}
+
+private fun postWithEmptyBearerToken(uri: URI): Array<Any?> {
+    return post(uri, httpZoneHeaders(EMPTY_BEARER_TOKEN))
 }
 
 private fun post(
@@ -88,6 +93,10 @@ private fun putWithMalformedBearerToken(uri: URI): Array<Any?> {
     return put(uri, httpZoneHeaders(MALFORMED_BEARER_TOKEN))
 }
 
+private fun putWithEmptyBearerToken(uri: URI): Array<Any?> {
+    return put(uri, httpZoneHeaders(EMPTY_BEARER_TOKEN))
+}
+
 private fun put(
     uri: URI,
     headers: HttpHeaders
@@ -102,6 +111,10 @@ private fun getWithMalformedBearerToken(uri: URI): Array<Any?> {
     return get(uri, httpZoneHeaders(MALFORMED_BEARER_TOKEN))
 }
 
+private fun getWithEmptyBearerToken(uri: URI): Array<Any?> {
+    return get(uri, httpZoneHeaders(EMPTY_BEARER_TOKEN))
+}
+
 private fun get(
     uri: URI,
     headers: HttpHeaders
@@ -111,6 +124,10 @@ private fun get(
 
 private fun deleteWithMalformedBearerToken(uri: URI): Array<Any?> {
     return delete(uri, httpZoneHeaders(MALFORMED_BEARER_TOKEN))
+}
+
+private fun deleteWithEmptyBearerToken(uri: URI): Array<Any?> {
+    return delete(uri, httpZoneHeaders(EMPTY_BEARER_TOKEN))
 }
 
 private fun delete(
@@ -160,7 +177,7 @@ class SecurityFilterChainTest : AbstractTestNGSpringContextTests() {
             .alwaysDo<DefaultMockMvcBuilder>(print()).build()
     }
 
-    @Test(dataProvider = "anonymousRequestBuilder", enabled = false)
+    @Test(dataProvider = "anonymousRequestBuilder")
     @Throws(Exception::class)
     fun testAnonymousAccess(
         request: RequestBuilder,
@@ -207,14 +224,20 @@ class SecurityFilterChainTest : AbstractTestNGSpringContextTests() {
     }
 
     private fun testHealth(): Array<Array<Any?>> {
-        return arrayOf(get(HEALTH_URI, httpHeaders(MALFORMED_BEARER_TOKEN)))
+        return arrayOf(
+            get(HEALTH_URI, httpHeaders(MALFORMED_BEARER_TOKEN)),
+            get(HEALTH_URI, httpHeaders(EMPTY_BEARER_TOKEN))
+        )
     }
 
     private fun testZoneController(): Array<Array<Any?>> {
         return arrayOf(
             put(ZONE_URI, httpHeaders(MALFORMED_BEARER_TOKEN)),
             get(ZONE_URI, httpHeaders(MALFORMED_BEARER_TOKEN)),
-            delete(ZONE_URI, httpHeaders(MALFORMED_BEARER_TOKEN))
+            delete(ZONE_URI, httpHeaders(MALFORMED_BEARER_TOKEN)),
+            put(ZONE_URI, httpHeaders(EMPTY_BEARER_TOKEN)),
+            get(ZONE_URI, httpHeaders(EMPTY_BEARER_TOKEN)),
+            delete(ZONE_URI, httpHeaders(EMPTY_BEARER_TOKEN))
         )
     }
 
@@ -223,14 +246,20 @@ class SecurityFilterChainTest : AbstractTestNGSpringContextTests() {
             putWithMalformedBearerToken(RESOURCE_CONNECTOR_URI),
             getWithMalformedBearerToken(RESOURCE_CONNECTOR_URI),
             deleteWithMalformedBearerToken(RESOURCE_CONNECTOR_URI),
+            putWithEmptyBearerToken(RESOURCE_CONNECTOR_URI),
+            getWithEmptyBearerToken(RESOURCE_CONNECTOR_URI),
+            deleteWithEmptyBearerToken(RESOURCE_CONNECTOR_URI),
             putWithMalformedBearerToken(SUBJECT_CONNECTOR_URI),
             getWithMalformedBearerToken(SUBJECT_CONNECTOR_URI),
-            deleteWithMalformedBearerToken(SUBJECT_CONNECTOR_URI)
+            deleteWithMalformedBearerToken(SUBJECT_CONNECTOR_URI),
+            putWithEmptyBearerToken(SUBJECT_CONNECTOR_URI),
+            getWithEmptyBearerToken(SUBJECT_CONNECTOR_URI),
+            deleteWithEmptyBearerToken(SUBJECT_CONNECTOR_URI)
         )
     }
 
     private fun testPolicyEvaluationController(): Array<Array<Any?>> {
-        return arrayOf(postWithMalformedBearerToken(POLICY_EVAL_URI))
+        return arrayOf(postWithMalformedBearerToken(POLICY_EVAL_URI), postWithEmptyBearerToken(POLICY_EVAL_URI))
     }
 
     private fun testPolicyManagementController(): Array<Array<Any?>> {
@@ -238,7 +267,11 @@ class SecurityFilterChainTest : AbstractTestNGSpringContextTests() {
             putWithMalformedBearerToken(POLICY_SET_URI),
             getWithMalformedBearerToken(POLICY_SET_URI),
             deleteWithMalformedBearerToken(POLICY_SET_URI),
-            getWithMalformedBearerToken(POLICY_SETS_URI)
+            getWithMalformedBearerToken(POLICY_SETS_URI),
+            putWithEmptyBearerToken(POLICY_SET_URI),
+            getWithEmptyBearerToken(POLICY_SET_URI),
+            deleteWithEmptyBearerToken(POLICY_SET_URI),
+            getWithEmptyBearerToken(POLICY_SETS_URI)
         )
     }
 
@@ -248,7 +281,12 @@ class SecurityFilterChainTest : AbstractTestNGSpringContextTests() {
             getWithMalformedBearerToken(RESOURCES_URI),
             getWithMalformedBearerToken(RESOURCE_URI),
             putWithMalformedBearerToken(RESOURCE_URI),
-            deleteWithMalformedBearerToken(RESOURCE_URI)
+            deleteWithMalformedBearerToken(RESOURCE_URI),
+            postWithEmptyBearerToken(RESOURCES_URI),
+            getWithEmptyBearerToken(RESOURCES_URI),
+            getWithEmptyBearerToken(RESOURCE_URI),
+            putWithEmptyBearerToken(RESOURCE_URI),
+            deleteWithEmptyBearerToken(RESOURCE_URI)
         )
     }
 
@@ -258,7 +296,12 @@ class SecurityFilterChainTest : AbstractTestNGSpringContextTests() {
             getWithMalformedBearerToken(SUBJECTS_URI),
             getWithMalformedBearerToken(SUBJECT_URI),
             putWithMalformedBearerToken(SUBJECT_URI),
-            deleteWithMalformedBearerToken(SUBJECT_URI)
+            deleteWithMalformedBearerToken(SUBJECT_URI),
+            postWithEmptyBearerToken(SUBJECTS_URI),
+            getWithEmptyBearerToken(SUBJECTS_URI),
+            getWithEmptyBearerToken(SUBJECT_URI),
+            putWithEmptyBearerToken(SUBJECT_URI),
+            deleteWithEmptyBearerToken(SUBJECT_URI)
         )
     }
 }
