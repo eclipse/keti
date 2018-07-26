@@ -18,6 +18,7 @@
 
 package org.eclipse.keti.acs.service.policy.matcher
 
+import com.nhaarman.mockito_kotlin.any
 import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory
 import org.eclipse.keti.acs.attribute.readers.PrivilegeServiceResourceAttributeReader
 import org.eclipse.keti.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader
@@ -29,7 +30,6 @@ import org.eclipse.keti.acs.model.Effect
 import org.eclipse.keti.acs.rest.BaseResource
 import org.eclipse.keti.acs.rest.BaseSubject
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.any
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -84,7 +84,7 @@ class PolicyMatcherImplTest {
         `when`(
             this.defaultSubjectAttributeReader.getAttributesByScope(
                 ArgumentMatchers.anyString(),
-                any<Set<Attribute>>()
+                any()
             )
         )
             .thenReturn(subject.attributes)
