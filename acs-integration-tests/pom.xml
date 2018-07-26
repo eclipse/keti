@@ -215,7 +215,7 @@
         <dependency>
             <groupId>org.eclipse.keti</groupId>
             <artifactId>acs-service</artifactId>
-            <version>5.0.3-SNAPSHOT</version>
+            <version>5.0.5-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
