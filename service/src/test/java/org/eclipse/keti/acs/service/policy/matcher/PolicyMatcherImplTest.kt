@@ -29,7 +29,7 @@ import org.eclipse.keti.acs.model.Attribute
 import org.eclipse.keti.acs.model.Effect
 import org.eclipse.keti.acs.rest.BaseResource
 import org.eclipse.keti.acs.rest.BaseSubject
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -78,12 +78,12 @@ class PolicyMatcherImplTest {
             .thenReturn(this.defaultResourceAttributeReader)
         `when`<SubjectAttributeReader>(this.attributeReaderFactory.subjectAttributeReader)
             .thenReturn(this.defaultSubjectAttributeReader)
-        `when`(this.defaultResourceAttributeReader.getAttributes(ArgumentMatchers.anyString())).thenReturn(emptySet())
+        `when`(this.defaultResourceAttributeReader.getAttributes(anyString())).thenReturn(emptySet())
         val subject = BaseSubject("test-subject")
         subject.attributes = HashSet()
         `when`(
             this.defaultSubjectAttributeReader.getAttributesByScope(
-                ArgumentMatchers.anyString(),
+                anyString(),
                 any()
             )
         )

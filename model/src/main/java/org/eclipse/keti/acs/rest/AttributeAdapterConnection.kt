@@ -46,8 +46,8 @@ class AttributeAdapterConnection {
     }
 
     constructor(
-        adapterEndpoint: String,
-        uaaTokenUrl: String,
+        adapterEndpoint: String?,
+        uaaTokenUrl: String?,
         uaaClientId: String,
         uaaClientSecret: String
     ) {
