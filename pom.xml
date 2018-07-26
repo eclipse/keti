@@ -27,7 +27,7 @@
     <!-- Project information necessary to deploy to Maven Central (see: http://central.sonatype.org/pages/requirements.html) -->
     <groupId>org.eclipse.keti</groupId>
     <artifactId>acs</artifactId>
-    <version>5.0.3-SNAPSHOT</version>
+    <version>5.0.5-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Predix Access Control Services Parent</name>
     <description>Service to enforce authentication and/or authorization of certain resources</description>
@@ -81,7 +81,7 @@
         <flyway.version>3.0</flyway.version>
         <spring-security.version>4.2.0.RELEASE</spring-security.version>
         <openjpa.version>2.4.2</openjpa.version>
-        <uaa-token-lib.version>3.3.6</uaa-token-lib.version>
+        <uaa-token-lib.version>4.0.1</uaa-token-lib.version>
 
         <!-- Test Dependency Version -->
         <mockito.version>1.10.19</mockito.version>
