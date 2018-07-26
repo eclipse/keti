@@ -46,8 +46,9 @@ import java.util.Arrays
 class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
 
     private val jsonUtils = JsonUtils()
+
     @Autowired
-    private val policySetValidator: PolicySetValidator? = null
+    private lateinit var policySetValidator: PolicySetValidator
 
     val invalidPolicies: Array<Array<Any?>>
         @DataProvider(name = "invalidPolicyProvider")
@@ -71,9 +72,9 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
 
     @BeforeClass
     fun setup() {
-        (this.policySetValidator as PolicySetValidatorImpl)
-            .setValidAcsPolicyHttpActions("GET, POST, PUT, DELETE, PATCH, SUBSCRIBE, MESSAGE")
-        this.policySetValidator.init()
+        val policySetValidatorImpl = (this.policySetValidator as PolicySetValidatorImpl)
+        policySetValidatorImpl.setValidAcsPolicyHttpActions("GET, POST, PUT, DELETE, PATCH, SUBSCRIBE, MESSAGE")
+        policySetValidatorImpl.init()
     }
 
     @Test
@@ -81,7 +82,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
 
         val policySet = this.jsonUtils.deserializeFromFile("set-with-2-policy.json", PolicySet::class.java)
 
-        this.policySetValidator!!.validatePolicySet(policySet!!)
+        this.policySetValidator.validatePolicySet(policySet!!)
     }
 
     @Test(dataProvider = "invalidPolicyProvider")
@@ -93,7 +94,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
         val policySet = this.jsonUtils.deserializeFromFile(fileName, PolicySet::class.java)
         Assert.assertNotNull(policySet)
         try {
-            this.policySetValidator!!.validatePolicySet(policySet!!)
+            this.policySetValidator.validatePolicySet(policySet!!)
             Assert.fail("Negative test case should have failed for file $fileName")
         } catch (e: PolicySetValidationException) {
             Assert.assertTrue(
@@ -110,7 +111,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
         val policySet = this.jsonUtils
             .deserializeFromFile("policyset/validator/test/empty-attributes-target-subject.json", PolicySet::class.java)
         Assert.assertNotNull(policySet)
-        this.policySetValidator!!.validatePolicySet(policySet!!)
+        this.policySetValidator.validatePolicySet(policySet!!)
     }
 
     @Test
@@ -119,7 +120,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
         val policySet = this.jsonUtils
             .deserializeFromFile("policyset/validator/test/empty-conditions-policy.json", PolicySet::class.java)
         Assert.assertNotNull(policySet)
-        this.policySetValidator!!.validatePolicySet(policySet!!)
+        this.policySetValidator.validatePolicySet(policySet!!)
     }
 
     @Test
@@ -128,7 +129,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
         val policySet = this.jsonUtils
             .deserializeFromFile("policyset/validator/test/missing-condition-name-policy.json", PolicySet::class.java)
         Assert.assertNotNull(policySet)
-        this.policySetValidator!!.validatePolicySet(policySet!!)
+        this.policySetValidator.validatePolicySet(policySet!!)
     }
 
     @Test
@@ -137,7 +138,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
         val policySet = this.jsonUtils
             .deserializeFromFile("policyset/validator/test/missing-target-name-policy.json", PolicySet::class.java)
         Assert.assertNotNull(policySet)
-        this.policySetValidator!!.validatePolicySet(policySet!!)
+        this.policySetValidator.validatePolicySet(policySet!!)
     }
 
     @Test
@@ -149,23 +150,23 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
                 PolicySet::class.java
             )
         Assert.assertNotNull(policySet)
-        this.policySetValidator!!.validatePolicySet(policySet!!)
+        this.policySetValidator.validatePolicySet(policySet!!)
     }
 
     @Test
     fun testEmptyPolicyConditions() {
-        this.policySetValidator!!.validatePolicyConditions(ArrayList())
+        this.policySetValidator.validatePolicyConditions(ArrayList())
     }
 
     @Test
     fun testNullPolicyConditions() {
-        this.policySetValidator!!.validatePolicyConditions(null)
+        this.policySetValidator.validatePolicyConditions(null)
     }
 
     @Test
     fun testPolicyConditionsWithOneValidCondition() {
         val condition = Condition("'a'.equals('b')")
-        val conditionScripts = this.policySetValidator!!
+        val conditionScripts = this.policySetValidator
             .validatePolicyConditions(Arrays.asList(condition))
         Assert.assertEquals(conditionScripts.size, 1)
         Assert.assertNotNull(conditionScripts[0])
@@ -175,7 +176,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
     fun testPolicyConditionsWithMultipleValidCondition() {
         val condition = Condition("'a'.equals('b')")
         val condition2 = Condition("'a'.equals('c')")
-        val conditionScripts = this.policySetValidator!!
+        val conditionScripts = this.policySetValidator
             .validatePolicyConditions(Arrays.asList(condition, condition2))
         Assert.assertEquals(conditionScripts.size, 2)
         Assert.assertNotNull(conditionScripts[0])
@@ -186,7 +187,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
     fun testPolicyConditionsWithOneInvalidCondition() {
         val condition = Condition("System.exit(0)")
         val condition2 = Condition("'a'.equals('c')")
-        this.policySetValidator!!.validatePolicyConditions(Arrays.asList(condition, condition2))
+        this.policySetValidator.validatePolicyConditions(Arrays.asList(condition, condition2))
 
     }
 
@@ -196,7 +197,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
             "policyset/validator/test/testMatchPolicyWithMultipleActions.json", PolicySet::class.java
         )
         Assert.assertNotNull(policySet)
-        this.policySetValidator!!.validatePolicySet(policySet!!)
+        this.policySetValidator.validatePolicySet(policySet!!)
 
     }
 
@@ -205,7 +206,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
         val policySet = this.jsonUtils
             .deserializeFromFile("policyset/validator/test/policyWithNullTargetAction.json", PolicySet::class.java)
         Assert.assertNotNull(policySet)
-        this.policySetValidator!!.validatePolicySet(policySet!!)
+        this.policySetValidator.validatePolicySet(policySet!!)
         Assert.assertNull(policySet.policies[0].target!!.action)
     }
 
@@ -214,7 +215,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
         val policySet = this.jsonUtils
             .deserializeFromFile("policyset/validator/test/policyWithEmptyTargetAction.json", PolicySet::class.java)
         Assert.assertNotNull(policySet)
-        this.policySetValidator!!.validatePolicySet(policySet!!)
+        this.policySetValidator.validatePolicySet(policySet!!)
         Assert.assertNull(policySet.policies[0].target!!.action)
     }
 
@@ -224,7 +225,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
             "policyset/validator/test/multiple-policies-with-multiple-conditions.json", PolicySet::class.java
         )
         Assert.assertNotNull(policySet)
-        this.policySetValidator!!.validatePolicySet(policySet!!)
+        this.policySetValidator.validatePolicySet(policySet!!)
         val conditionCache =
             ReflectionTestUtils.getField(this.policySetValidator, "conditionCache") as GroovyConditionCache
         val cache = ReflectionTestUtils.getField(conditionCache, "cache") as Map<String, ConditionShell>

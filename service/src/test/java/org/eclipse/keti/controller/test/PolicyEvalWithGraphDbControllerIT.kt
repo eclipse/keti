@@ -106,12 +106,12 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
     private var testZone2: Zone? = null
 
     @Autowired
-    private val env: ConfigurableEnvironment? = null
+    private lateinit var env: ConfigurableEnvironment
 
     @BeforeClass
     @Throws(Exception::class)
     fun setup() {
-        if (!Arrays.asList(*this.env!!.activeProfiles).contains("graph")) {
+        if (!Arrays.asList(*this.env.activeProfiles).contains("graph")) {
             throw SkipException("This test only applies when using graph profile.")
         }
 
