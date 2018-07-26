@@ -18,6 +18,7 @@
 
 package org.eclipse.keti.acs.attribute.connector.management
 
+import com.nhaarman.mockito_kotlin.any
 import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory
 import org.eclipse.keti.acs.rest.AttributeAdapterConnection
 import org.eclipse.keti.acs.rest.AttributeConnector
@@ -284,7 +285,7 @@ class AttributeConnectorServiceTest {
         val zoneEntity = ZoneEntity()
         Mockito.doReturn(zoneEntity).`when`<ZoneResolver>(this.zoneResolver).zoneEntityOrFail
         Mockito.doAnswer { _ -> throw Exception() }.`when`<ZoneRepository>(this.zoneRepository)
-            .save(Mockito.any(ZoneEntity::class.java))
+            .save(any<ZoneEntity>())
         this.connectorService.upsertResourceConnector(connector)
     }
 
@@ -330,7 +331,7 @@ class AttributeConnectorServiceTest {
         zoneEntity.resourceAttributeConnector = AttributeConnector()
         Mockito.doReturn(zoneEntity).`when`<ZoneResolver>(this.zoneResolver).zoneEntityOrFail
         Mockito.doAnswer { _ -> throw Exception() }.`when`<ZoneRepository>(this.zoneRepository)
-            .save(Mockito.any(ZoneEntity::class.java))
+            .save(any<ZoneEntity>())
         this.connectorService.deleteResourceConnector()
     }
 
@@ -357,7 +358,7 @@ class AttributeConnectorServiceTest {
         val zoneEntity = ZoneEntity()
         Mockito.doReturn(zoneEntity).`when`<ZoneResolver>(this.zoneResolver).zoneEntityOrFail
         Mockito.doAnswer { _ -> throw Exception() }.`when`<ZoneRepository>(this.zoneRepository)
-            .save(Mockito.any(ZoneEntity::class.java))
+            .save(any<ZoneEntity>())
         this.connectorService.upsertSubjectConnector(connector)
     }
 
@@ -394,7 +395,7 @@ class AttributeConnectorServiceTest {
         zoneEntity.subjectAttributeConnector = AttributeConnector()
         Mockito.doReturn(zoneEntity).`when`<ZoneResolver>(this.zoneResolver).zoneEntityOrFail
         Mockito.doAnswer { _ -> throw Exception() }.`when`<ZoneRepository>(this.zoneRepository)
-            .save(Mockito.any(ZoneEntity::class.java))
+            .save(any<ZoneEntity>())
         this.connectorService.deleteSubjectConnector()
     }
 

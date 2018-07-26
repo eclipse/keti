@@ -18,10 +18,13 @@
 
 package org.eclipse.keti.acs.attribute.readers
 
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.eq
 import org.eclipse.keti.acs.attribute.cache.AttributeCache
 import org.eclipse.keti.acs.model.Attribute
 import org.eclipse.keti.acs.rest.AttributeAdapterConnection
 import org.eclipse.keti.acs.rest.attribute.adapter.AttributesResponse
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -43,14 +46,14 @@ object ExternalAttributeReaderHelper {
         )
         val mockRestTemplate = Mockito.mock(OAuth2RestTemplate::class.java)
         Mockito.doReturn(attributeResponseResponseEntity).`when`(mockRestTemplate)
-            .getForEntity(Mockito.anyString(), Mockito.eq(AttributesResponse::class.java))
+            .getForEntity(anyString(), eq(AttributesResponse::class.java))
 
         Mockito
             .doReturn(setOf(AttributeAdapterConnection("https://my-url", "https://my-uaa", "my-client", "my-secret")))
             .`when`(externalAttributeReader).attributeAdapterConnections
 
         Mockito.doReturn(mockRestTemplate).`when`(externalAttributeReader)
-            .getAdapterOauth2RestTemplate(Mockito.any(AttributeAdapterConnection::class.java))
+            .getAdapterOauth2RestTemplate(any())
         Mockito.`when`<CachedAttributes>(attributeCache.getAttributes(identifier)).thenReturn(null)
     }
 

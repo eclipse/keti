@@ -46,7 +46,6 @@ import org.eclipse.keti.acs.zone.resolver.ZoneResolver
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.springframework.beans.factory.annotation.Autowired
@@ -150,7 +149,7 @@ class PolicyEvaluationWithAttributeReaderTest : AbstractTestNGSpringContextTests
     @Throws(Exception::class)
     fun testPolicyEvaluationWhenAdaptersTimeOut() {
         val attributeRetrievalExceptionMessage = "attribute retrieval exception"
-        `when`<Set<Attribute>>(this.externalResourceAttributeReader.getAttributes(Mockito.anyString()))
+        `when`<Set<Attribute>>(this.externalResourceAttributeReader.getAttributes(anyString()))
             .thenAnswer { _ ->
                 throw AttributeRetrievalException(
                     attributeRetrievalExceptionMessage,
