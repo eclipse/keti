@@ -19,18 +19,18 @@
 package org.eclipse.keti.controller.test
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.eclipse.keti.acs.testutils.MockAcsRequestContext
-import org.eclipse.keti.acs.testutils.MockSecurityContext
+import org.eclipse.keti.acs.testutils.ASCENSION_ID
+import org.eclipse.keti.acs.testutils.BASEMENT_SITE_ID
+import org.eclipse.keti.acs.testutils.EVIDENCE_SCULLYS_TESTIMONY_ID
+import org.eclipse.keti.acs.testutils.SITE_BASEMENT
+import org.eclipse.keti.acs.testutils.SPECIAL_AGENTS_GROUP_ATTRIBUTE
+import org.eclipse.keti.acs.testutils.TOP_SECRET_CLASSIFICATION
+import org.eclipse.keti.acs.testutils.TYPE_MYTHARC
 import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver
 import org.eclipse.keti.acs.testutils.TestUtils
-import org.eclipse.keti.acs.testutils.XFiles.ASCENSION_ID
-import org.eclipse.keti.acs.testutils.XFiles.BASEMENT_SITE_ID
-import org.eclipse.keti.acs.testutils.XFiles.EVIDENCE_SCULLYS_TESTIMONY_ID
-import org.eclipse.keti.acs.testutils.XFiles.SITE_BASEMENT
-import org.eclipse.keti.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTE
-import org.eclipse.keti.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION
-import org.eclipse.keti.acs.testutils.XFiles.TYPE_MYTHARC
-import org.eclipse.keti.acs.testutils.XFiles.createThreeLevelResourceHierarchy
+import org.eclipse.keti.acs.testutils.createThreeLevelResourceHierarchy
+import org.eclipse.keti.acs.testutils.mockAcsRequestContext
+import org.eclipse.keti.acs.testutils.mockSecurityContext
 import org.eclipse.keti.acs.zone.management.ZoneService
 import org.hamcrest.Matchers.`is`
 import org.springframework.beans.factory.annotation.Autowired
@@ -76,8 +76,8 @@ class HierarchicalResourcesIT : AbstractTestNGSpringContextTests() {
         }
 
         this.zoneService.upsertZone(TEST_ZONE)
-        MockSecurityContext.mockSecurityContext(TEST_ZONE)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(TEST_ZONE)
+        mockAcsRequestContext()
     }
 
     @Test

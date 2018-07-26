@@ -28,10 +28,10 @@ import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult
 import org.eclipse.keti.acs.rest.Zone
 import org.eclipse.keti.acs.service.policy.admin.PolicyManagementService
-import org.eclipse.keti.acs.testutils.MockAcsRequestContext
-import org.eclipse.keti.acs.testutils.MockSecurityContext
 import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver
 import org.eclipse.keti.acs.testutils.TestUtils
+import org.eclipse.keti.acs.testutils.mockAcsRequestContext
+import org.eclipse.keti.acs.testutils.mockSecurityContext
 import org.eclipse.keti.acs.utils.JsonUtils
 import org.eclipse.keti.acs.zone.management.ZoneService
 import org.hamcrest.MatcherAssert.assertThat
@@ -104,8 +104,8 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
     @Test
     @Throws(Exception::class)
     fun testPolicyZoneDoesNotExistException() {
-        MockSecurityContext.mockSecurityContext(null)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(null)
+        mockAcsRequestContext()
         val policyEvalRequest = createPolicyEvalRequest(
             this.testResource!!.resourceIdentifier, this.testSubject!!.subjectIdentifier, LinkedHashSet()
         )
@@ -121,8 +121,8 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
         resultActions.andReturn().response.contentAsString!!.contentEquals("Zone not found")
         resultActions.andExpect(status().isBadRequest)
 
-        MockSecurityContext.mockSecurityContext(this.testZone)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(this.testZone)
+        mockAcsRequestContext()
     }
 
     @Test

@@ -64,13 +64,13 @@ import org.testng.annotations.Test
 class ZoneServiceTest : AbstractTransactionalTestNGSpringContextTests() {
 
     @Autowired
-    private val zoneService: ZoneService? = null
+    private lateinit var zoneService: ZoneService
 
     private val testUtils = TestUtils()
 
     @BeforeMethod
     fun createSampleData() {
-        this.zoneService!!.upsertZone(this.testUtils.createZone("zone1", "subdomain1"))
+        this.zoneService.upsertZone(this.testUtils.createZone("zone1", "subdomain1"))
         val acsAuth = ZoneOAuth2Authentication(
             Mockito.mock(OAuth2Request::class.java), null,
             "subdomain1"
@@ -81,7 +81,7 @@ class ZoneServiceTest : AbstractTransactionalTestNGSpringContextTests() {
     @Test(dataProvider = "badSubDomainDataProvider")
     fun testZoneCreationWithIllegalZoneNames(zoneSubdomain: String) {
         try {
-            this.zoneService!!.upsertZone(Zone("illegal_zone", zoneSubdomain, "desc"))
+            this.zoneService.upsertZone(Zone("illegal_zone", zoneSubdomain, "desc"))
             Assert.fail("Expected an exception for invalid zone name")
         } catch (e: ZoneManagementException) {
             Assert.assertTrue(e.message?.contains("Invalid Zone Subdomain")!!)
@@ -104,7 +104,7 @@ class ZoneServiceTest : AbstractTransactionalTestNGSpringContextTests() {
         this.testUtils.setField(this.zoneService, "subjectRepository", subjectRepository)
         this.testUtils.setField(this.zoneService, "resourceRepository", resourceRepository)
         this.testUtils.setField(this.zoneService, "zoneRepository", zoneRepository)
-        this.zoneService!!.deleteZone("test-zone")
+        this.zoneService.deleteZone("test-zone")
     }
 
     @DataProvider(name = "badSubDomainDataProvider")

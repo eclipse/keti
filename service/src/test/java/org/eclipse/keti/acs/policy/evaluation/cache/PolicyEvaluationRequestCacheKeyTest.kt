@@ -19,8 +19,8 @@
 package org.eclipse.keti.acs.policy.evaluation.cache
 
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
-import org.eclipse.keti.acs.testutils.XFiles.AGENT_MULDER
-import org.eclipse.keti.acs.testutils.XFiles.XFILES_ID
+import org.eclipse.keti.acs.testutils.AGENT_MULDER
+import org.eclipse.keti.acs.testutils.XFILES_ID
 import org.testng.Assert.assertEquals
 import org.testng.Assert.assertFalse
 import org.testng.Assert.assertNull

@@ -22,8 +22,8 @@ import org.codehaus.jackson.map.ObjectMapper
 import org.eclipse.keti.acs.model.Effect
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult
-import org.eclipse.keti.acs.testutils.XFiles.AGENT_MULDER
-import org.eclipse.keti.acs.testutils.XFiles.XFILES_ID
+import org.eclipse.keti.acs.testutils.AGENT_MULDER
+import org.eclipse.keti.acs.testutils.XFILES_ID
 import org.joda.time.DateTime
 import org.springframework.test.util.ReflectionTestUtils
 import org.testng.Assert.assertEquals

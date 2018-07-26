@@ -36,9 +36,9 @@ import org.eclipse.keti.acs.rest.BaseResource
 import org.eclipse.keti.acs.rest.BaseSubject
 import org.eclipse.keti.acs.rest.Parent
 import org.eclipse.keti.acs.rest.Zone
-import org.eclipse.keti.acs.testutils.MockSecurityContext
 import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver
 import org.eclipse.keti.acs.testutils.TestUtils
+import org.eclipse.keti.acs.testutils.mockSecurityContext
 import org.eclipse.keti.acs.zone.management.ZoneService
 import org.eclipse.keti.acs.zone.management.ZoneServiceImpl
 import org.eclipse.keti.acs.zone.resolver.SpringSecurityZoneResolver
@@ -261,7 +261,7 @@ class PrivilegeManagementServiceImplTest : AbstractTransactionalTestNGSpringCont
         Assert.assertTrue(created)
         Assert.assertTrue(this.service.getBySubjectIdentifier(subjectIdentifier) == subject)
 
-        MockSecurityContext.mockSecurityContext(this.testZone)
+        mockSecurityContext(this.testZone)
         val returnedSubject = this.service.getBySubjectIdentifier(subjectIdentifier)
         Assert.assertNull(returnedSubject)
     }
@@ -276,7 +276,7 @@ class PrivilegeManagementServiceImplTest : AbstractTransactionalTestNGSpringCont
         Assert.assertTrue(created)
         Assert.assertTrue(this.service.getByResourceIdentifier(resourceIdentifier) == resource)
 
-        MockSecurityContext.mockSecurityContext(this.testZone)
+        mockSecurityContext(this.testZone)
         val returnedResource = this.service.getByResourceIdentifier(resourceIdentifier)
         Assert.assertNull(returnedResource)
     }

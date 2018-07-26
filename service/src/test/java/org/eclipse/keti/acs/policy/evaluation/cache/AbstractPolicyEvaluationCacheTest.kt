@@ -28,8 +28,8 @@ import org.eclipse.keti.acs.privilege.management.dao.SubjectEntity
 import org.eclipse.keti.acs.rest.AttributeConnector
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult
-import org.eclipse.keti.acs.testutils.XFiles.AGENT_MULDER
-import org.eclipse.keti.acs.testutils.XFiles.XFILES_ID
+import org.eclipse.keti.acs.testutils.AGENT_MULDER
+import org.eclipse.keti.acs.testutils.XFILES_ID
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity
 import org.joda.time.DateTime
 import org.mockito.Mockito

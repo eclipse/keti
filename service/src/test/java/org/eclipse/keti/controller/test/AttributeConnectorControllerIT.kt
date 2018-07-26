@@ -30,10 +30,10 @@ import org.eclipse.keti.acs.request.context.AcsRequestContext
 import org.eclipse.keti.acs.request.context.acsRequestContext
 import org.eclipse.keti.acs.rest.AttributeConnector
 import org.eclipse.keti.acs.rest.Zone
-import org.eclipse.keti.acs.testutils.MockAcsRequestContext
-import org.eclipse.keti.acs.testutils.MockSecurityContext
 import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver
 import org.eclipse.keti.acs.testutils.TestUtils
+import org.eclipse.keti.acs.testutils.mockAcsRequestContext
+import org.eclipse.keti.acs.testutils.mockSecurityContext
 import org.eclipse.keti.acs.utils.JsonUtils
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.equalTo
@@ -177,7 +177,7 @@ class AttributeConnectorControllerIT : AbstractTestNGSpringContextTests() {
     @Throws(Exception::class)
     fun testZoneDoesNotExist() {
         val testZone3 = Zone("name", "subdomain", "description")
-        MockSecurityContext.mockSecurityContext(testZone3)
+        mockSecurityContext(testZone3)
 
         val newMap = HashMap<AcsRequestContext.ACSRequestContextAttribute, Any?>()
         newMap[AcsRequestContext.ACSRequestContextAttribute.ZONE_ENTITY] = null
@@ -206,8 +206,8 @@ class AttributeConnectorControllerIT : AbstractTestNGSpringContextTests() {
             .perform(put(V1_ZONE_URL, zone!!.name).contentType(MediaType.APPLICATION_JSON).content(zoneContent))
             .andExpect(status().isCreated)
 
-        MockSecurityContext.mockSecurityContext(zone)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(zone)
+        mockAcsRequestContext()
     }
 
     @DataProvider

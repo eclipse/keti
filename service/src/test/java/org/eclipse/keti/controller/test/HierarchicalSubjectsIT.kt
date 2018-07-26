@@ -19,19 +19,19 @@
 package org.eclipse.keti.controller.test
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.eclipse.keti.acs.testutils.MockAcsRequestContext
-import org.eclipse.keti.acs.testutils.MockSecurityContext
+import org.eclipse.keti.acs.testutils.AGENT_MULDER
+import org.eclipse.keti.acs.testutils.FBI
+import org.eclipse.keti.acs.testutils.SITE_BASEMENT
+import org.eclipse.keti.acs.testutils.SITE_QUANTICO
+import org.eclipse.keti.acs.testutils.SPECIAL_AGENTS_GROUP
+import org.eclipse.keti.acs.testutils.SPECIAL_AGENTS_GROUP_ATTRIBUTE
+import org.eclipse.keti.acs.testutils.TOP_SECRET_CLASSIFICATION
+import org.eclipse.keti.acs.testutils.TOP_SECRET_GROUP
 import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver
 import org.eclipse.keti.acs.testutils.TestUtils
-import org.eclipse.keti.acs.testutils.XFiles.AGENT_MULDER
-import org.eclipse.keti.acs.testutils.XFiles.FBI
-import org.eclipse.keti.acs.testutils.XFiles.SITE_BASEMENT
-import org.eclipse.keti.acs.testutils.XFiles.SITE_QUANTICO
-import org.eclipse.keti.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP
-import org.eclipse.keti.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTE
-import org.eclipse.keti.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION
-import org.eclipse.keti.acs.testutils.XFiles.TOP_SECRET_GROUP
-import org.eclipse.keti.acs.testutils.XFiles.createSubjectHierarchy
+import org.eclipse.keti.acs.testutils.createSubjectHierarchy
+import org.eclipse.keti.acs.testutils.mockAcsRequestContext
+import org.eclipse.keti.acs.testutils.mockSecurityContext
 import org.eclipse.keti.acs.zone.management.ZoneService
 import org.hamcrest.Matchers.`is`
 import org.springframework.beans.factory.annotation.Autowired
@@ -77,8 +77,8 @@ class HierarchicalSubjectsIT : AbstractTestNGSpringContextTests() {
         }
 
         this.zoneService.upsertZone(TEST_ZONE)
-        MockSecurityContext.mockSecurityContext(TEST_ZONE)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(TEST_ZONE)
+        mockAcsRequestContext()
     }
 
     @Test
@@ -115,7 +115,7 @@ class HierarchicalSubjectsIT : AbstractTestNGSpringContextTests() {
         val getContext1 = TEST_UTILS.createWACWithCustomGETRequestBuilder(
             this.wac,
             TEST_ZONE.subdomain,
-            SUBJECT_BASE_URL + "/" + URLEncoder.encode(
+            "$SUBJECT_BASE_URL/" + URLEncoder.encode(
                 AGENT_MULDER,
                 "UTF-8"
             ) + "?includeInheritedAttributes=false"

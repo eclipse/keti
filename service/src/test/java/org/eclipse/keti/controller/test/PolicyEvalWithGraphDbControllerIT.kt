@@ -30,20 +30,20 @@ import org.eclipse.keti.acs.rest.BaseSubject
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult
 import org.eclipse.keti.acs.rest.Zone
-import org.eclipse.keti.acs.testutils.MockAcsRequestContext
-import org.eclipse.keti.acs.testutils.MockSecurityContext
+import org.eclipse.keti.acs.testutils.AGENT_MULDER
+import org.eclipse.keti.acs.testutils.EVIDENCE_IMPLANT_ID
+import org.eclipse.keti.acs.testutils.EVIDENCE_SCULLYS_TESTIMONY_ID
+import org.eclipse.keti.acs.testutils.SPECIAL_AGENTS_GROUP_ATTRIBUTE
+import org.eclipse.keti.acs.testutils.TOP_SECRET_CLASSIFICATION
 import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver
 import org.eclipse.keti.acs.testutils.TestUtils
-import org.eclipse.keti.acs.testutils.XFiles.AGENT_MULDER
-import org.eclipse.keti.acs.testutils.XFiles.EVIDENCE_IMPLANT_ID
-import org.eclipse.keti.acs.testutils.XFiles.EVIDENCE_SCULLYS_TESTIMONY_ID
-import org.eclipse.keti.acs.testutils.XFiles.SPECIAL_AGENTS_GROUP_ATTRIBUTE
-import org.eclipse.keti.acs.testutils.XFiles.TOP_SECRET_CLASSIFICATION
-import org.eclipse.keti.acs.testutils.XFiles.createScopedSubjectHierarchy
-import org.eclipse.keti.acs.testutils.XFiles.createSubjectHierarchy
-import org.eclipse.keti.acs.testutils.XFiles.createThreeLevelResourceHierarchy
-import org.eclipse.keti.acs.testutils.XFiles.createTwoLevelResourceHierarchy
-import org.eclipse.keti.acs.testutils.XFiles.createTwoParentResourceHierarchy
+import org.eclipse.keti.acs.testutils.createScopedSubjectHierarchy
+import org.eclipse.keti.acs.testutils.createSubjectHierarchy
+import org.eclipse.keti.acs.testutils.createThreeLevelResourceHierarchy
+import org.eclipse.keti.acs.testutils.createTwoLevelResourceHierarchy
+import org.eclipse.keti.acs.testutils.createTwoParentResourceHierarchy
+import org.eclipse.keti.acs.testutils.mockAcsRequestContext
+import org.eclipse.keti.acs.testutils.mockSecurityContext
 import org.eclipse.keti.acs.utils.JsonUtils
 import org.eclipse.keti.acs.zone.management.ZoneService
 import org.hamcrest.MatcherAssert.assertThat
@@ -119,8 +119,8 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
         this.testZone2 = TestUtils().createTestZone("PolicyEvalWithGraphDbControllerIT2")
         this.zoneService.upsertZone(this.testZone1!!)
         this.zoneService.upsertZone(this.testZone2!!)
-        MockSecurityContext.mockSecurityContext(this.testZone1)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(this.testZone1)
+        mockAcsRequestContext()
         this.policySet = this.jsonUtils.deserializeFromFile("complete-sample-policy-set-2.json", PolicySet::class.java)
         Assert.assertNotNull(this.policySet, "complete-sample-policy-set-2.json file not found or invalid")
     }

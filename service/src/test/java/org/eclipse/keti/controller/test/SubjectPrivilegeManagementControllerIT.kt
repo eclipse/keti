@@ -26,10 +26,10 @@ import org.eclipse.keti.acs.request.context.AcsRequestContext
 import org.eclipse.keti.acs.request.context.acsRequestContext
 import org.eclipse.keti.acs.rest.BaseSubject
 import org.eclipse.keti.acs.rest.Zone
-import org.eclipse.keti.acs.testutils.MockAcsRequestContext
-import org.eclipse.keti.acs.testutils.MockSecurityContext
 import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver
 import org.eclipse.keti.acs.testutils.TestUtils
+import org.eclipse.keti.acs.testutils.mockAcsRequestContext
+import org.eclipse.keti.acs.testutils.mockSecurityContext
 import org.eclipse.keti.acs.utils.JsonUtils
 import org.eclipse.keti.acs.zone.management.ZoneService
 import org.hamcrest.Matchers.`is`
@@ -89,8 +89,8 @@ class SubjectPrivilegeManagementControllerIT : AbstractTestNGSpringContextTests(
     fun subjectZoneDoesNotExistException() {
         // NOTE: To throw a ZoneDoesNotExistException, we must ensure that the AcsRequestContext in the
         //       SpringSecurityZoneResolver class returns a null ZoneEntity
-        MockSecurityContext.mockSecurityContext(null)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(null)
+        mockAcsRequestContext()
 
         val subject = JSON_UTILS.deserializeFromFile("controller-test/a-subject.json", BaseSubject::class.java)
         val putContext = TEST_UTILS.createWACWithCustomPUTRequestBuilder(
@@ -103,8 +103,8 @@ class SubjectPrivilegeManagementControllerIT : AbstractTestNGSpringContextTests(
         )
         resultActions.andExpect(status().isBadRequest)
         resultActions.andReturn().response.contentAsString!!.contentEquals("Zone not found")
-        MockSecurityContext.mockSecurityContext(this.testZone)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(this.testZone)
+        mockAcsRequestContext()
     }
 
     @Test
@@ -132,7 +132,7 @@ class SubjectPrivilegeManagementControllerIT : AbstractTestNGSpringContextTests(
         ).andExpect(status().isCreated)
         // we expect both subjects to be create in each zone
         // set security context back to first test zone
-        MockSecurityContext.mockSecurityContext(this.testZone)
+        mockSecurityContext(this.testZone)
     }
 
     @Test
@@ -423,7 +423,7 @@ class SubjectPrivilegeManagementControllerIT : AbstractTestNGSpringContextTests(
     @Throws(Exception::class)
     fun testZoneDoesNotExist() {
         val testZone3 = Zone("name", "subdomain", "description")
-        MockSecurityContext.mockSecurityContext(testZone3)
+        mockSecurityContext(testZone3)
 
         val newMap = HashMap<AcsRequestContext.ACSRequestContextAttribute, Any?>()
         newMap[AcsRequestContext.ACSRequestContextAttribute.ZONE_ENTITY] = null

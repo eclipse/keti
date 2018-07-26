@@ -21,10 +21,10 @@ package org.eclipse.keti.controller.test
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.eclipse.keti.acs.commons.web.PARENTS_ATTR_NOT_SUPPORTED_MSG
 import org.eclipse.keti.acs.rest.BaseResource
-import org.eclipse.keti.acs.testutils.MockAcsRequestContext
-import org.eclipse.keti.acs.testutils.MockSecurityContext
 import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver
 import org.eclipse.keti.acs.testutils.TestUtils
+import org.eclipse.keti.acs.testutils.mockAcsRequestContext
+import org.eclipse.keti.acs.testutils.mockSecurityContext
 import org.eclipse.keti.acs.utils.JsonUtils
 import org.eclipse.keti.acs.zone.management.ZoneService
 import org.springframework.beans.factory.annotation.Autowired
@@ -70,8 +70,8 @@ class NonHierarchicalResourcesIT : AbstractTestNGSpringContextTests() {
         }
 
         this.zoneService.upsertZone(TEST_ZONE)
-        MockSecurityContext.mockSecurityContext(TEST_ZONE)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(TEST_ZONE)
+        mockAcsRequestContext()
     }
 
     @Test

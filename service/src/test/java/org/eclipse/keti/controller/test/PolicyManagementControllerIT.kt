@@ -25,10 +25,10 @@ import org.eclipse.keti.acs.commons.web.expand
 import org.eclipse.keti.acs.model.PolicySet
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
 import org.eclipse.keti.acs.rest.Zone
-import org.eclipse.keti.acs.testutils.MockAcsRequestContext
-import org.eclipse.keti.acs.testutils.MockSecurityContext
 import org.eclipse.keti.acs.testutils.TestActiveProfilesResolver
 import org.eclipse.keti.acs.testutils.TestUtils
+import org.eclipse.keti.acs.testutils.mockAcsRequestContext
+import org.eclipse.keti.acs.testutils.mockSecurityContext
 import org.eclipse.keti.acs.utils.JsonUtils
 import org.eclipse.keti.acs.zone.management.ZoneService
 import org.hamcrest.Matchers.`is`
@@ -96,8 +96,8 @@ class PolicyManagementControllerIT : AbstractTestNGSpringContextTests() {
     fun policyZoneDoesNotExistException() {
         // NOTE: To throw a ZoneDoesNotExistException, we must ensure that the AcsRequestContext in the
         //       SpringSecurityZoneResolver class returns a null ZoneEntity
-        MockSecurityContext.mockSecurityContext(null)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(null)
+        mockAcsRequestContext()
         val thisUri = VERSION + "/policy-set/" + this.policySet!!.name
         // create policy-set in first zone
         val putContext = this.testUtils.createWACWithCustomPUTRequestBuilder(
@@ -109,8 +109,8 @@ class PolicyManagementControllerIT : AbstractTestNGSpringContextTests() {
         resultActions.andExpect(status().isUnprocessableEntity)
         resultActions.andReturn().response.contentAsString.contains("zone 'null' does not exist")
 
-        MockSecurityContext.mockSecurityContext(this.testZone)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(this.testZone)
+        mockAcsRequestContext()
     }
 
     @Throws(Exception::class)
@@ -127,7 +127,7 @@ class PolicyManagementControllerIT : AbstractTestNGSpringContextTests() {
         // create policy set in second zone
         this.testZone2 = TestUtils().createTestZone("PolicyMgmtControllerIT2")
         this.zoneService.upsertZone(this.testZone2!!)
-        MockSecurityContext.mockSecurityContext(this.testZone2)
+        mockSecurityContext(this.testZone2)
         putContext = this.testUtils.createWACWithCustomPUTRequestBuilder(
             this.wac, this.testZone2!!.subdomain, thisUri
         )
@@ -136,8 +136,8 @@ class PolicyManagementControllerIT : AbstractTestNGSpringContextTests() {
         ).andExpect(status().isCreated)
         // we expect both policy sets to be create in each zone
         // set security context back to first test zone
-        MockSecurityContext.mockSecurityContext(this.testZone)
-        MockAcsRequestContext.mockAcsRequestContext()
+        mockSecurityContext(this.testZone)
+        mockAcsRequestContext()
     }
 
     @Throws(Exception::class)
