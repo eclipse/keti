@@ -83,7 +83,7 @@ class PolicyMatcherImpl : PolicyMatcher {
 
     /**
      * @param candidate policy match candidate
-     * @param policy    to match
+     * @param policy to match
      * @return true if the policy meets the criteria
      */
     private fun isPolicyMatch(

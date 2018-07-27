@@ -108,7 +108,6 @@ class UaaAcsClientsUtil(
             restTemplate.resource.clientSecret, zoneName
         )
         return restTemplate
-
     }
 
     fun createReadOnlyConnectorScopeClient(zoneName: String): OAuth2RestTemplate {

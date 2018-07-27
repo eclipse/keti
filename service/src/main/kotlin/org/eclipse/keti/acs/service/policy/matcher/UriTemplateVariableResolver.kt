@@ -31,5 +31,4 @@ class UriTemplateVariableResolver {
         val variables = uriTemplate.match(uri)
         return variables[uriTemplateVariableName]
     }
-
 }

@@ -75,5 +75,4 @@ class PolicyEvaluationCacheConfigTest {
         val redisEnvironment = arrayOf(springProfileActive)
         Mockito.doReturn(redisEnvironment).`when`<Environment>(mockEnvironment).activeProfiles
     }
-
 }

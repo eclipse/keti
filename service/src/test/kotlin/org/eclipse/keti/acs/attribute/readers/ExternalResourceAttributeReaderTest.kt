@@ -99,8 +99,8 @@ class ExternalResourceAttributeReaderTest {
         dataProviderClass = ExternalAttributeReaderHelper::class,
         dataProvider = "attributeSizeConstraintDataProvider",
         expectedExceptions = [(AttributeRetrievalException::class)],
-        expectedExceptionsMessageRegExp = "Total size of attributes or "
-                                          + "number of attributes too large for id: '" + IDENTIFIER + "'.*"
+        expectedExceptionsMessageRegExp = "Total size of attributes or " +
+            "number of attributes too large for id: '" + IDENTIFIER + "'.*"
     )
     @Throws(Exception::class)
     fun testGetAttributesThatAreToLarge(

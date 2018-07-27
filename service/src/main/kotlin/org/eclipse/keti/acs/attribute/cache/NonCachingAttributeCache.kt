@@ -26,7 +26,7 @@ class NonCachingAttributeCache : AttributeCache {
         key: String,
         value: CachedAttributes
     ) {
-        //Intentionally left empty to satisfy interface
+        // Intentionally left empty to satisfy interface
     }
 
     override fun get(key: String): CachedAttributes? {
@@ -34,6 +34,6 @@ class NonCachingAttributeCache : AttributeCache {
     }
 
     override fun flushAll() {
-        //Intentionally left empty to satisfy interface
+        // Intentionally left empty to satisfy interface
     }
 }

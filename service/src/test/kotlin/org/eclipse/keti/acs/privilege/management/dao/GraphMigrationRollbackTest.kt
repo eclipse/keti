@@ -89,5 +89,4 @@ class GraphMigrationRollbackTest {
         Mockito.verify<ResourceMigrationManager>(this.resourceMigrationManager, times(0))
             .rollbackMigratedData(any())
     }
-
 }

@@ -61,5 +61,4 @@ class AcsMonitoringControllerIT : AbstractTestNGSpringContextTests() {
             .andExpect(content().contentType(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"))
             .andExpect(content().string("alive"))
     }
-
 }

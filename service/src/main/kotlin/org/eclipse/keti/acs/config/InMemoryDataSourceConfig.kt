@@ -51,7 +51,7 @@ class InMemoryDataSourceConfig {
 
     private val acsConfigUtil = AcsConfigUtil()
 
-    //$NON-NLS-1$
+    // $NON-NLS-1$
     val dataSourceConfig: DataSource
         @Bean get() {
             LOGGER.info("Starting ACS with H2 database")

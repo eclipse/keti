@@ -45,5 +45,4 @@ class Policy {
     override fun toString(): String {
         return ("Policy [name=" + this.name + ", target=" + this.target + ", conditions=" + this.conditions + ", effect=" + this.effect + "]")
     }
-
 }

@@ -94,7 +94,6 @@ class PolicyHelper {
         } catch (e: RestClientException) {
             return CreatePolicyStatus.ACS_ERROR
         }
-
     }
 
     fun getPolicySet(

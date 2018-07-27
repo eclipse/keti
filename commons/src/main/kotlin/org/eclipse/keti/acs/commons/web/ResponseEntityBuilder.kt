@@ -54,7 +54,7 @@ fun <T> created(location: String): ResponseEntity<T> {
 /**
  * Creates a typed ResponseEntity with HTTP status code 201/204 with a given location.
  *
- * @param location  The location of the created resource
+ * @param location The location of the created resource
  * @param noContent false means updated resource which returns 204, true means created resource which returns 201
  * @return The corresponding ResponseEntity
  */

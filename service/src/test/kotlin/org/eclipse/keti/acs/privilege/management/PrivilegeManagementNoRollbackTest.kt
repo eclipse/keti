@@ -112,7 +112,7 @@ class PrivilegeManagementNoRollbackTest : AbstractTestNGSpringContextTests() {
             // not checking id in toString(), just validating rest of error
             // message due to id mismatch on CI
             val checkMessage = e.message?.contains("Unable to persist Subject(s) for zone")!! ||
-                               e.message?.contains("Duplicate Subject(s)")!!
+                e.message?.contains("Duplicate Subject(s)")!!
             Assert.assertTrue(checkMessage, "Invalid Error Message: " + e.message)
             Assert.assertEquals(this.service.subjects.size, 0)
             return
@@ -132,10 +132,9 @@ class PrivilegeManagementNoRollbackTest : AbstractTestNGSpringContextTests() {
 
         try {
             this.service.appendResources(resourceList)
-
         } catch (e: PrivilegeManagementException) {
             val checkMessage = e.message?.contains("Unable to persist Resource(s) for zone")!! ||
-                               e.message?.contains("Duplicate Resource(s)")!!
+                e.message?.contains("Duplicate Resource(s)")!!
             Assert.assertTrue(checkMessage, "Invalid Error Message: " + e.message)
             Assert.assertEquals(this.service.resources.size, 0)
             return

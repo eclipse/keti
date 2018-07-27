@@ -120,7 +120,6 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         Assert.assertEquals(postForEntity.statusCode, HttpStatus.OK)
         responseBody = postForEntity.body
         Assert.assertEquals(responseBody.effect, Effect.DENY)
-
     }
 
     /**
@@ -180,7 +179,6 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         Assert.assertEquals(postForEntity.statusCode, HttpStatus.OK)
         responseBody = postForEntity.body
         Assert.assertEquals(responseBody.effect, Effect.PERMIT)
-
     }
 
     /**
@@ -286,7 +284,6 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         Assert.assertEquals(postForEntity.statusCode, HttpStatus.OK)
         responseBody = postForEntity.body
         Assert.assertEquals(responseBody.effect, Effect.NOT_APPLICABLE)
-
     }
 
     /**
@@ -298,7 +295,7 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
     fun testPolicyEvalCacheWhenSubjectAdded() {
         val endpoint = this.acsUrl
 
-        //create test resource
+        // create test resource
         val resource = BaseResource("/secured-by-value/sites/sanramon")
         this.privilegeHelper.putResource(
             this.acsAdminRestTemplate!!, resource, endpoint!!, this.acsZone1Headers!!,
@@ -433,12 +430,10 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         Assert.assertEquals(postForEntity.statusCode, HttpStatus.OK)
         responseBody = postForEntity.body
         Assert.assertEquals(responseBody.effect, Effect.PERMIT)
-
     }
 
     @AfterClass
     fun destroy() {
         this.acsitSetUpFactory.destroy()
     }
-
 }

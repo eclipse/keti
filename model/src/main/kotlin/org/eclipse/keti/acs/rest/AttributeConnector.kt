@@ -41,7 +41,7 @@ class AttributeConnector {
 
     @JsonProperty(required = false)
     @get:ApiModelProperty(value = "Maximum time in minutes before remote attributes are refreshed. Set to 480 minutes by default")
-    var maxCachedIntervalMinutes = 480 //default value
+    var maxCachedIntervalMinutes = 480 // default value
 
     @get:ApiModelProperty(
         value = "A set of adapters used to retrieve attributes from. Only one adapter is currently supported",

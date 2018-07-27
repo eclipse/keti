@@ -73,7 +73,6 @@ class ResponseEntityBuilderTest {
         Assert.assertNotNull(ok)
         Assert.assertEquals(ok.statusCode, HttpStatus.OK)
         Assert.assertEquals(ok.body, "PredixRocks")
-
     }
 
     @Test
@@ -83,5 +82,4 @@ class ResponseEntityBuilderTest {
         Assert.assertNull(deleted.body)
         Assert.assertEquals(deleted.statusCode, HttpStatus.NO_CONTENT)
     }
-
 }

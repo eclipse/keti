@@ -50,7 +50,6 @@ class JsonUtils {
             LOGGER.error(UNEXPECTED_EXCEPTION, e)
             return null
         }
-
     }
 
     fun <T> serialize(jsonObject: T): String? {
@@ -60,7 +59,6 @@ class JsonUtils {
             LOGGER.error(UNEXPECTED_EXCEPTION, e)
             null
         }
-
     }
 
     fun <T> deserialize(
@@ -73,7 +71,6 @@ class JsonUtils {
             LOGGER.error(UNEXPECTED_EXCEPTION, e)
             null
         }
-
     }
 
     fun <C : Collection<T>, T> deserialize(
@@ -89,7 +86,6 @@ class JsonUtils {
             LOGGER.error(UNEXPECTED_EXCEPTION, e)
             null
         }
-
     }
 
     fun readJsonNodeFromFile(jsonFileName: String): JsonNode? {
@@ -100,7 +96,6 @@ class JsonUtils {
             LOGGER.error(UNEXPECTED_EXCEPTION, e)
             return null
         }
-
     }
 
     fun <T> readJsonNodeFromObject(jsonObject: T): JsonNode? {
@@ -112,7 +107,6 @@ class JsonUtils {
             LOGGER.error(UNEXPECTED_EXCEPTION, e)
             return null
         }
-
     }
 
     @Throws(IOException::class)

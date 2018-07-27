@@ -178,5 +178,4 @@ class GroovyConditionShellTest {
         val script = "'env'.execute();"
         this.shell!!.parse(script)
     }
-
 }

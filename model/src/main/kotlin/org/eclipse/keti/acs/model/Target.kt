@@ -59,5 +59,4 @@ class Target {
         this.action = action
         this.resource = resource
     }
-
 }

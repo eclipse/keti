@@ -483,7 +483,6 @@ class AbstractPolicyEvaluationCacheTest {
             this.cache.haveConnectorCacheIntervalsLapsed(connectorService, currentTime),
             haveConnectorCacheIntervalsLapsed
         )
-
     }
 
     @DataProvider

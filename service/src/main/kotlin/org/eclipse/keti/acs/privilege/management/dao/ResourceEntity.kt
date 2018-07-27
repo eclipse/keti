@@ -93,8 +93,8 @@ open class ResourceEntity : ZonableEntity {
     }
 
     override fun toString(): String {
-        return ("ResourceEntity [id=" + this.id + ", zone=" + this.zone + ", resourceIdentifier="
-                + this.resourceIdentifier + ", attributesAsJson=" + this.attributesAsJson + "]")
+        return ("ResourceEntity [id=" + this.id + ", zone=" + this.zone + ", resourceIdentifier=" +
+                this.resourceIdentifier + ", attributesAsJson=" + this.attributesAsJson + "]")
     }
 
     override fun hashCode(): Int {

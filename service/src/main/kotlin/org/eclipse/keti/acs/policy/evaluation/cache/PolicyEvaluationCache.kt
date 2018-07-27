@@ -26,7 +26,6 @@ const val DECISION = "decision"
 
 interface PolicyEvaluationCache {
 
-
     operator fun get(key: PolicyEvaluationRequestCacheKey): PolicyEvaluationResult?
 
     operator fun set(

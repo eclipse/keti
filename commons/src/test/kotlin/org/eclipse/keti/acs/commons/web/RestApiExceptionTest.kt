@@ -114,5 +114,4 @@ class RestApiExceptionTest {
         Assert.assertEquals(apiException.message, "message")
         Assert.assertEquals(apiException.cause, runtimeException)
     }
-
 }

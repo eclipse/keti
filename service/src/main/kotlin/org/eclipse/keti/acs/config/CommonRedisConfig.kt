@@ -40,13 +40,11 @@ class CommonRedisConfig @Autowired constructor(
     @Bean(name = ["redisTemplate", "decisionCacheRedisTemplate"])
     fun decisionCacheRedisTemplate(): RedisTemplate<String, String> {
         return createCacheRedisTemplate(this.decisionRedisConnectionFactory, "Decision")
-
     }
 
     @Bean(name = ["resourceCacheRedisTemplate"])
     fun resourceCacheRedisTemplate(): RedisTemplate<String, String> {
         return createCacheRedisTemplate(this.resourceRedisConnectionFactory, "Resource")
-
     }
 
     @Bean(name = ["subjectCacheRedisTemplate"])

@@ -36,9 +36,9 @@ class GroovySecureExtension(typeCheckingVisitor: StaticTypeCheckingVisitor) :
         target: MethodNode?
     ) {
         // First the white list.
-        if ("org.eclipse.keti.acs.commons.policy.condition.AbstractHandler" != target!!.declaringClass.name && "org.eclipse.keti.acs.commons.policy.condition.AbstractHandlers" != target.declaringClass.name && "org.eclipse.keti.acs.commons.policy.condition.ResourceHandler" != target.declaringClass.name && "org.eclipse.keti.acs.commons.policy.condition.SubjectHandler" != target.declaringClass.name && "org.eclipse.keti.acs.commons.policy.condition.groovy.AttributeMatcher" != target.declaringClass.name && "java.lang.Boolean" != target.declaringClass.name && "java.lang.Integer" != target.declaringClass.name && "java.lang.Iterable" != target.declaringClass.name && "java.lang.Object" != target.declaringClass.name
+        if ("org.eclipse.keti.acs.commons.policy.condition.AbstractHandler" != target!!.declaringClass.name && "org.eclipse.keti.acs.commons.policy.condition.AbstractHandlers" != target.declaringClass.name && "org.eclipse.keti.acs.commons.policy.condition.ResourceHandler" != target.declaringClass.name && "org.eclipse.keti.acs.commons.policy.condition.SubjectHandler" != target.declaringClass.name && "org.eclipse.keti.acs.commons.policy.condition.groovy.AttributeMatcher" != target.declaringClass.name && "java.lang.Boolean" != target.declaringClass.name && "java.lang.Integer" != target.declaringClass.name && "java.lang.Iterable" != target.declaringClass.name && "java.lang.Object" != target.declaringClass.name &&
             // This means we allow collections of type Object.
-            && "[Ljava.lang.Object;" != target.declaringClass.name && "java.lang.String" != target.declaringClass.name && "java.util.Collection" != target.declaringClass.name && "java.util.Set" != target.declaringClass.name
+            "[Ljava.lang.Object;" != target.declaringClass.name && "java.lang.String" != target.declaringClass.name && "java.util.Collection" != target.declaringClass.name && "java.util.Set" != target.declaringClass.name
         ) {
             addStaticTypeError(
                 "Method call for '" + target.declaringClass.name + "' class is not allowed!", expression

@@ -138,8 +138,8 @@ abstract class ExternalAttributeReader(
         return cachedAttributes
     }
 
-    //Matching mechanism of a resource/subject id to a adapter is yet to be defined. Current implementation only
-    //supports exactly one adapterConnection per connector.
+    // Matching mechanism of a resource/subject id to a adapter is yet to be defined. Current implementation only
+    // supports exactly one adapterConnection per connector.
     private fun matchAdapterConnection(
         adapterConnections: Set<AttributeAdapterConnection>
     ): AttributeAdapterConnection? {

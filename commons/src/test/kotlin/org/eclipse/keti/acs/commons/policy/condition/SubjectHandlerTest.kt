@@ -56,5 +56,4 @@ class SubjectHandlerTest {
         Assert.assertFalse(subjectHandler.attributes("acs", "site").contains("newyork"))
         Assert.assertTrue(subjectHandler.attributes("acs", "region").isEmpty())
     }
-
 }

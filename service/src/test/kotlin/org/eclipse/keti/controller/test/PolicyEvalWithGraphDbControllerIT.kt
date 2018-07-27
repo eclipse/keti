@@ -144,7 +144,6 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
         putPolicySetContext.mockMvc.perform(
             putPolicySetContext.builder.contentType(MediaType.TEXT_HTML_VALUE).content("testString")
         ).andExpect(status().isUnsupportedMediaType)
-
     }
 
     @Test(dataProvider = "policyEvalDataProvider")

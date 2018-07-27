@@ -50,7 +50,7 @@ class GroovyConditionScriptTest {
     @Test
     @Throws(ConditionParsingException::class)
     fun testScriptExecutionPositiveEqualsNoBinding() {
-        val script = "\"a\".equals(\"a\")" //$NON-NLS-1$
+        val script = "\"a\".equals(\"a\")" // $NON-NLS-1$
         val parsedScript = this.shell!!.parse(script)
         Assert.assertEquals(parsedScript.execute(HashMap()), true)
     }
@@ -89,7 +89,7 @@ class GroovyConditionScriptTest {
     @Test
     @Throws(ConditionParsingException::class)
     fun testScriptExecutionPositiveEqualsSingleBinding() {
-        val script = "resource == \"b\"" //$NON-NLS-1$
+        val script = "resource == \"b\"" // $NON-NLS-1$
         val parsedScript = this.shell!!.parse(script)
         val parameter = HashMap<String, Any>()
         parameter["resource"] = ResourceHandler(HashSet(), "", "")
@@ -105,7 +105,7 @@ class GroovyConditionScriptTest {
     @Test
     @Throws(ConditionParsingException::class)
     fun testScriptExecutionPositiveEqualsMultipleBindings() {
-        val script = "resource != subject" //$NON-NLS-1$
+        val script = "resource != subject" // $NON-NLS-1$
         val parsedScript = this.shell!!.parse(script)
         val parameter = HashMap<String, Any>()
         parameter["resource"] = ResourceHandler(HashSet(), "", "")
@@ -122,7 +122,7 @@ class GroovyConditionScriptTest {
     @Test
     @Throws(ConditionParsingException::class)
     fun testScriptExecutionPositiveEqualsMultipleBindingsWithMatcher() {
-        val script = "match.any(resource.attributes(\"\",\"\"), subject.attributes(\"\",\"\"))" //$NON-NLS-1$
+        val script = "match.any(resource.attributes(\"\",\"\"), subject.attributes(\"\",\"\"))" // $NON-NLS-1$
         val parsedScript = this.shell!!.parse(script)
         val parameter = HashMap<String, Any>()
         parameter["resource"] = ResourceHandler(HashSet(), "", "")

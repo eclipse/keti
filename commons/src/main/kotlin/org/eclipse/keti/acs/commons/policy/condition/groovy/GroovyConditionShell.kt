@@ -74,7 +74,6 @@ class GroovyConditionShell : ConditionShell {
         } catch (e: CompilationFailedException) {
             throw ConditionParsingException("Failed to validate the condition script.", e)
         }
-
     }
 
     private fun createImportCustomizer(): ImportCustomizer {

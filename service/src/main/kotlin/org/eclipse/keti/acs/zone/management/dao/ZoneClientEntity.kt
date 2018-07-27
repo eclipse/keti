@@ -81,11 +81,11 @@ class ZoneClientEntity {
     }
 
     override fun toString(): String {
-        return ("ZoneClientEntity [id=" + this.id + ", issuer=" + this.issuer + ", clientId=" + this.clientId
-                + ", zoneName=" + this.zone!!.name
+        return ("ZoneClientEntity [id=" + this.id + ", issuer=" + this.issuer + ", clientId=" + this.clientId +
+                ", zoneName=" + this.zone!!.name +
                 /*
                  * Note: do not iterate the zone object, or will cause stackoverflow error
                  */
-                + "]")
+                "]")
     }
 }

@@ -111,7 +111,6 @@ abstract class AbstractHttpMethodsFilter(uriPatternsAndAllowedHttpMethods: Map<S
                             sendNotAcceptableError(response)
                             return
                         }
-
                     }
 
                     break

@@ -258,7 +258,6 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
                 )
             ), this.notApplicableAndDenyPolicySets, Effect.DENY
         )
-
     }
 
     @DataProvider(name = "policyEvalBadRequestDataProvider")

@@ -29,5 +29,4 @@ class UrlPathHelperNonDecoding : UrlPathHelper() {
     init {
         super.setUrlDecode(false)
     }
-
 }

@@ -55,5 +55,4 @@ class AcsConfigUtil {
         transactionManager.entityManagerFactory = emf
         return transactionManager
     }
-
 }

@@ -145,8 +145,8 @@ class ZoneEntity {
     }
 
     override fun toString(): String {
-        return ("ZoneEntity [id=" + this.id + ", name=" + this.name + ", description=" + this.description
-                + ", subdomain=" + this.subdomain + "]")
+        return ("ZoneEntity [id=" + this.id + ", name=" + this.name + ", description=" + this.description +
+                ", subdomain=" + this.subdomain + "]")
     }
 
     private fun jsonFromConnector(connector: AttributeConnector?): String? {

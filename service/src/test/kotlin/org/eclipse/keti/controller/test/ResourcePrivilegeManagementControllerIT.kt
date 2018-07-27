@@ -75,7 +75,6 @@ class ResourcePrivilegeManagementControllerIT : AbstractTestNGSpringContextTests
     @Throws(Exception::class)
     fun setup() {
         this.testZone = TEST_UTILS.setupTestZone("ResourceMgmtControllerIT", zoneService)
-
     }
 
     @Test
@@ -88,7 +87,6 @@ class ResourcePrivilegeManagementControllerIT : AbstractTestNGSpringContextTests
         putContext.mockMvc.perform(
             putContext.builder.contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE).content("testString")
         ).andExpect(status().isUnsupportedMediaType)
-
     }
 
     @Test
@@ -276,7 +274,6 @@ class ResourcePrivilegeManagementControllerIT : AbstractTestNGSpringContextTests
                 )
             )
         ).andExpect(status().isUnprocessableEntity)
-
     }
 
     @Test
@@ -297,7 +294,6 @@ class ResourcePrivilegeManagementControllerIT : AbstractTestNGSpringContextTests
                 )
             )
         ).andExpect(status().isUnprocessableEntity)
-
     }
 
     @Test
@@ -336,7 +332,6 @@ class ResourcePrivilegeManagementControllerIT : AbstractTestNGSpringContextTests
         putContext.mockMvc.perform(
             putContext.builder.contentType(MediaType.APPLICATION_JSON).content(OBJECT_MAPPER.writeValueAsString(resource))
         ).andExpect(status().isUnprocessableEntity)
-
     }
 
     @Test
@@ -360,7 +355,6 @@ class ResourcePrivilegeManagementControllerIT : AbstractTestNGSpringContextTests
                     )
                 )
             )
-
     }
 
     @Test
@@ -445,7 +439,6 @@ class ResourcePrivilegeManagementControllerIT : AbstractTestNGSpringContextTests
         val deleteContext =
             TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac, this.testZone!!.subdomain, thisUri)
         deleteContext.mockMvc.perform(deleteContext.builder).andExpect(status().isNoContent)
-
     }
 
     @Test

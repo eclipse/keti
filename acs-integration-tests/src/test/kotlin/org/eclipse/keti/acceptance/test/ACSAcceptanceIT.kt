@@ -98,7 +98,6 @@ class ACSAcceptanceIT : AbstractTestNGSpringContextTests() {
         this.headersWithZoneSubdomain = this.acsitSetUpFactory.zone1Headers
         this.acsZoneRestTemplate = this.acsitSetUpFactory.acsZoneAdminRestTemplate
         this.acsBaseUrl = this.acsitSetUpFactory.acsUrl
-
     }
 
     @Test
@@ -127,7 +126,6 @@ class ACSAcceptanceIT : AbstractTestNGSpringContextTests() {
         } catch (e: Exception) {
             Assert.fail("Could not perform ACS Health Check: " + e.message)
         }
-
     }
 
     @Test(dataProvider = "endpointProvider")
@@ -226,12 +224,10 @@ class ACSAcceptanceIT : AbstractTestNGSpringContextTests() {
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.NOT_ACCEPTABLE)
         }
-
     }
 
     @AfterClass
     fun tearDown() {
         this.acsitSetUpFactory.destroy()
     }
-
 }

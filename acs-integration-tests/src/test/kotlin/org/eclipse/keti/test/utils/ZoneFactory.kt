@@ -95,7 +95,6 @@ class ZoneFactory {
         } catch (e: RestClientException) {
             HttpStatus.INTERNAL_SERVER_ERROR
         }
-
     }
 
     fun getZoneSpecificUrl(zoneId: String): String {

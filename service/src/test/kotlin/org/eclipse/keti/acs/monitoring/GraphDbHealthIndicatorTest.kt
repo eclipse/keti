@@ -96,7 +96,6 @@ class GraphDbHealthIndicatorTest {
                 true
             )
         )
-
     }
 
     private fun mockGraphDbWithUp(): GraphResourceRepository {

@@ -36,5 +36,4 @@ class ResourceType {
         "If this is not specified, ACS uses resourceURI in the evaluation request as the resource URI to lookup " + "resource attributes. This URI template can be used to extract a contiguous subset of resourceURI. " + "For example, /region/us/report/asset/12 in evaluation request can be mapped to a resource /asset/12 by " + "defining attributeUriTemplate as /region/us/report{attribute_uri}. ACS extracts the value of URI " + "Template variable 'attribute_uri' as the resourceURI. "
     )
     var attributeUriTemplate: String? = null
-
 }

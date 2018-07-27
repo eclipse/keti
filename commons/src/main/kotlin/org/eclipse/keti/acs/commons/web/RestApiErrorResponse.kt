@@ -27,7 +27,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
  */
 class RestApiErrorResponse {
 
-
     @get:JsonProperty("ErrorDetails")
     var errorDetails = ErrorDetails()
 
@@ -35,7 +34,5 @@ class RestApiErrorResponse {
 
         var errorCode = "FAILED"
         var errorMessage = "Operation Failed"
-
     }
-
 }

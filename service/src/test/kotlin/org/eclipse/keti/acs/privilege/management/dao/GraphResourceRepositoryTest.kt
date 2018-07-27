@@ -64,8 +64,8 @@ private val TEST_ZONE_2 = ZoneEntity(2L, "testzone2")
 private const val CONCURRENT_TEST_THREAD_COUNT = 3
 private const val CONCURRENT_TEST_INVOCATIONS = 20
 
-//Because of unique indices, saves on ZonableEntity can throw a lock exception due to contention on the index
-//update. This method allows does a sleep and retry the save.
+// Because of unique indices, saves on ZonableEntity can throw a lock exception due to contention on the index
+// update. This method allows does a sleep and retry the save.
 
 /*
 * Sample Exception: [Z: C:] 2016-11-03 15:13:33 ERROR [TestNG] database.StandardTitanGraph
@@ -268,8 +268,8 @@ class GraphResourceRepositoryTest {
         assertThat<ResourceEntity>(resource, equalTo(resourceEntity1))
         assertThat(resource!!.attributes!!.contains(TYPE_MONSTER_OF_THE_WEEK), equalTo(true))
 
-        //Check that the result does not contain inherited attribute. use getResourceWithInheritedAttributes inherit
-        //attributes
+        // Check that the result does not contain inherited attribute. use getResourceWithInheritedAttributes inherit
+        // attributes
         assertThat(resource.attributes!!.contains(SITE_BASEMENT), equalTo(false))
         deleteTwoLevelEntityAndParents(resourceEntity1, TEST_ZONE_1, this.resourceRepository)
     }
@@ -494,7 +494,6 @@ class GraphResourceRepositoryTest {
         }
 
         Assert.fail("save() did not throw the expected IllegalStateException exception.")
-
     }
 
     @Test(enabled = false)
@@ -649,7 +648,6 @@ class GraphResourceRepositoryTest {
             TEST_ZONE_2, DRIVE_ID + randomNumber, DRIVE_ATTRIBUTES,
             HashSet(listOf(Parent(basement.resourceIdentifier!!)))
         )
-
     }
 
     @Test

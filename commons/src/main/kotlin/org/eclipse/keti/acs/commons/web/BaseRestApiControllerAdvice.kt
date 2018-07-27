@@ -33,5 +33,4 @@ abstract class BaseRestApiControllerAdvice(private val logger: Logger) {
         }
         return restApiErrorResponse
     }
-
 }

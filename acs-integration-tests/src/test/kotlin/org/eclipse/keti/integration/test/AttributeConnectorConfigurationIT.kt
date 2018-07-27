@@ -69,7 +69,6 @@ class AttributeConnectorConfigurationIT : AbstractTestNGSpringContextTests() {
             .getAcsZoneConnectorReadRestTemplate(this.acsitSetUpFactory.acsZone1Name)
 
         this.zone1Headers = this.acsitSetUpFactory.zone1Headers
-
     }
 
     @Test(dataProvider = "requestUrlProvider")
@@ -121,7 +120,6 @@ class AttributeConnectorConfigurationIT : AbstractTestNGSpringContextTests() {
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.UNAUTHORIZED)
         }
-
     }
 
     @Test(dataProvider = "requestUrlProvider")
@@ -136,12 +134,11 @@ class AttributeConnectorConfigurationIT : AbstractTestNGSpringContextTests() {
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.FORBIDDEN)
         }
-
     }
 
     // Due to the issue in spring security, 403 Forbidden response from the server, is received as a 400 Bad Request
     // error code because error is not correctly translated by the JSON deserializer
-    //https://github.com/spring-projects/spring-security-oauth/issues/191
+    // https://github.com/spring-projects/spring-security-oauth/issues/191
     @Test(dataProvider = "requestUrlProvider")
     @Throws(Exception::class)
     fun testGetConnectorDeniedWithoutSufficientScope(endpointUrl: String) {
@@ -158,7 +155,6 @@ class AttributeConnectorConfigurationIT : AbstractTestNGSpringContextTests() {
             e.printStackTrace()
             Assert.assertEquals(e.httpErrorCode, HttpStatus.BAD_REQUEST.value())
         }
-
     }
 
     @Test(dataProvider = "requestUrlProvider")
@@ -173,7 +169,6 @@ class AttributeConnectorConfigurationIT : AbstractTestNGSpringContextTests() {
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.FORBIDDEN)
         }
-
     }
 
     @DataProvider(name = "requestUrlProvider")

@@ -95,7 +95,6 @@ class BaseRestApiControllerAdviceTest {
 
         Assert.assertNotNull(actualErrorResponse)
         Assert.assertTrue(actualErrorResponse.errorDetails.errorMessage == "Not a trusted Issuer")
-
     }
 
     @Test
@@ -109,7 +108,6 @@ class BaseRestApiControllerAdviceTest {
 
         Assert.assertNotNull(actualErrorResponse)
         Assert.assertTrue(actualErrorResponse.errorDetails.errorMessage == "Not a trusted Issuer")
-
     }
 
     @Test

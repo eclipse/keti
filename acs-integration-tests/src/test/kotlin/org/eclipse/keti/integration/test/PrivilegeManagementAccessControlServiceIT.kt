@@ -383,7 +383,6 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.NOT_FOUND, "Subject was not deleted.")
         }
-
     }
 
     // To test cascade delete for postgres, comment out delete-db-service and delete executions. Run integration with
@@ -403,7 +402,6 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
                 this.acsAdminRestTemplate!!, MARISSA_V1, this.acsUrl, this.zone3Headers!!,
                 this.privilegeHelper.defaultAttribute
             )
-
         } catch (e: HttpClientErrorException) {
             Assert.fail("Unable to create subject.", e)
         }
@@ -438,7 +436,6 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         } catch (e: Exception) {
             Assert.fail("Failed with unexpected exception.", e)
         }
-
     }
 
     fun testPutSubjectMismatchURI() {
@@ -469,7 +466,6 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
 
             this.privilegeHelper
                 .postMultipleSubjects(this.acsAdminRestTemplate!!, endpoint, this.zone1Headers!!, subject)
-
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.UNPROCESSABLE_ENTITY)
             return
@@ -492,7 +488,6 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         } catch (e: Exception) {
             Assert.fail("Unable to create subject.")
         }
-
     }
 
     @Test(dataProvider = "subjectPostProvider")
@@ -552,7 +547,6 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         } catch (e: Exception) {
             Assert.fail("Unable to create subject.")
         }
-
     }
 
     @Test(dataProvider = "resourcePostProvider")
@@ -567,7 +561,6 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         } catch (e: Exception) {
             Assert.fail("Unable to create resource.")
         }
-
     }
 
     @Test(dataProvider = "invalidResourcePostProvider")
@@ -629,7 +622,6 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.NOT_FOUND)
         }
-
     }
 
     @Throws(Exception::class)

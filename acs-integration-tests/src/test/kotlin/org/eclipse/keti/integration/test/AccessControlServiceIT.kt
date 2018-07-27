@@ -183,7 +183,6 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
             Assert.assertEquals(postForEntity.statusCode, HttpStatus.OK)
             responseBody = postForEntity.body
             Assert.assertEquals(responseBody.effect, Effect.NOT_APPLICABLE)
-
         } finally {
             if (testPolicyName != null) {
                 this.policyHelper.deletePolicySet(
@@ -247,7 +246,6 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
             )
             Assert.assertEquals(postForEntity.statusCode, HttpStatus.OK)
             Assert.assertEquals(postForEntity.body.effect, Effect.PERMIT)
-
         } finally {
             if (testPolicyName != null) {
                 this.policyHelper.deletePolicySet(
@@ -256,7 +254,6 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
                 )
             }
         }
-
     }
 
     @Test(dataProvider = "endpointProvider")
@@ -403,7 +400,6 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.UNAUTHORIZED)
         }
-
     }
 
     @Test(dataProvider = "endpointProvider")
@@ -423,7 +419,6 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.UNAUTHORIZED)
         }
-
     }
 
     @Test(dataProvider = "endpointProvider")
@@ -444,7 +439,6 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.FORBIDDEN)
         }
-
     }
 
     @Test(dataProvider = "endpointProvider")
@@ -459,7 +453,6 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.FORBIDDEN)
         }
-
     }
 
     @Test(dataProvider = "endpointProvider")

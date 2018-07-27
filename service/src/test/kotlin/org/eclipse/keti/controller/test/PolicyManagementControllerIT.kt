@@ -155,14 +155,14 @@ class PolicyManagementControllerIT : AbstractTestNGSpringContextTests() {
     @Test
     @Throws(Exception::class)
     fun testCreateMultiplePolicySets() {
-        //create first policy set
+        // create first policy set
         val policySetName = upsertPolicySet(this.policySet)
 
         var mockMvcContext = this.testUtils.createWACWithCustomGETRequestBuilder(
             this.wac, this.testZone!!.subdomain, VERSION + "policy-set/" + policySetName
         )
 
-        //assert first policy set
+        // assert first policy set
         mockMvcContext.mockMvc.perform(mockMvcContext.builder).andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
             .andExpect(jsonPath("name").value(policySetName)).andExpect(jsonPath("policies").isArray)
@@ -170,7 +170,7 @@ class PolicyManagementControllerIT : AbstractTestNGSpringContextTests() {
 
         var policySet2Name: String? = ""
         try {
-            //create second policy set
+            // create second policy set
             val policySet2 = this.jsonUtils.deserializeFromFile(
                 "controller-test/multiple-policy-set-test.json", PolicySet::class.java
             )
@@ -181,12 +181,12 @@ class PolicyManagementControllerIT : AbstractTestNGSpringContextTests() {
                 this.wac, this.testZone!!.subdomain, VERSION + "policy-set/" + policySet2Name
             )
 
-            //assert second policy set
+            // assert second policy set
             mockMvcContext.mockMvc.perform(mockMvcContext.builder).andExpect(status().isOk)
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("name").value(policySet2Name))
 
-            //assert that policy evaluation fails
+            // assert that policy evaluation fails
             val evalRequest = PolicyEvaluationRequestV1()
             evalRequest.action = "GET"
             evalRequest.subjectIdentifier = "test-user"
@@ -249,7 +249,6 @@ class PolicyManagementControllerIT : AbstractTestNGSpringContextTests() {
         mockMvcContext.mockMvc.perform(mockMvcContext.builder.accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
             .andExpect(jsonPath("$[0].name", `is`<String>(firstPolicySetName)))
-
     }
 
     @Throws(JsonProcessingException::class, Exception::class)
@@ -296,7 +295,6 @@ class PolicyManagementControllerIT : AbstractTestNGSpringContextTests() {
         val policySetPayload = this.jsonUtils.serialize(simplePolicyNoName!!)
         ctxt.mockMvc.perform(ctxt.builder.contentType(MediaType.APPLICATION_JSON).content(policySetPayload!!))
             .andExpect(status().isUnprocessableEntity)
-
     }
 
     @Throws(Exception::class)

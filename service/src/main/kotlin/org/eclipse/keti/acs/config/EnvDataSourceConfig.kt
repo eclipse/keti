@@ -64,7 +64,7 @@ class EnvDataSourceConfig {
 
     @Bean
     fun dataSource(): DataSource {
-        LOGGER.info("Starting ACS with the database connection: '{}'.", this.url) //$NON-NLS-1$
+        LOGGER.info("Starting ACS with the database connection: '{}'.", this.url) // $NON-NLS-1$
         val poolProperties = PoolProperties()
         poolProperties.driverClassName = this.driverClassName
         poolProperties.url = this.url

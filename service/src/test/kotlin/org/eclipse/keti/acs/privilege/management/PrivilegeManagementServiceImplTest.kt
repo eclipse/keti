@@ -336,7 +336,6 @@ class PrivilegeManagementServiceImplTest : AbstractTransactionalTestNGSpringCont
         this.service.appendSubjects(asList(r1, r2))
         val subjects = this.service.subjects
         Assert.assertEquals(subjects.size, 2)
-
     }
 
     private fun createSubject(
@@ -393,7 +392,6 @@ class PrivilegeManagementServiceImplTest : AbstractTransactionalTestNGSpringCont
 
         Assert.assertEquals(fetchedResource1, r1)
         Assert.assertEquals(fetchedResource2, r2)
-
     }
 
     private fun doCreateResourceAndAssert(resourceIdentifier: String): BaseResource {
@@ -405,5 +403,4 @@ class PrivilegeManagementServiceImplTest : AbstractTransactionalTestNGSpringCont
         Assert.assertTrue(this.service.getByResourceIdentifier(resourceIdentifier) == resource)
         return resource
     }
-
 }

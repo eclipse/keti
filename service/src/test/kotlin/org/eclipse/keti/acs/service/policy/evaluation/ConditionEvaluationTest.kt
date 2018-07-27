@@ -241,10 +241,10 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
                 ),
                 Arrays.asList(
                     Condition(
-                        "match.single(subject.attributes(\"acs\", \"site\"),"
-                        + " resource.uriVariable(\"site_id\")) "
-                        + "and match.single(subject.attributes(\"acs\", \"department\"),"
-                        + " resource.uriVariable(\"department_id\"))"
+                        "match.single(subject.attributes(\"acs\", \"site\")," +
+                        " resource.uriVariable(\"site_id\")) " +
+                        "and match.single(subject.attributes(\"acs\", \"department\")," +
+                        " resource.uriVariable(\"department_id\"))"
                     )
                 ),
                 true,
@@ -283,7 +283,6 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
                 Assert.assertTrue(e is PolicyEvaluationException)
             }
         }
-
     }
 
     @Test(dataProvider = "conditionsWithVariablesProvider")
@@ -313,7 +312,6 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
                     conditions, resourceURITemplate
                 ), expectedResult
             )
-
         } catch (e: Exception) {
 
             if (throwsException) {
@@ -321,9 +319,6 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             } else {
                 Assert.fail("Unexpected exception.", e)
             }
-
         }
-
     }
-
 }

@@ -47,6 +47,5 @@ class EncryptorTest {
         } catch (e: Throwable) {
             Assert.fail()
         }
-
     }
 }

@@ -78,5 +78,4 @@ class Parent {
     override fun toString(): String {
         return "Parent [identifier=" + identifier + ", scopes=" + this.scopes + "]"
     }
-
 }

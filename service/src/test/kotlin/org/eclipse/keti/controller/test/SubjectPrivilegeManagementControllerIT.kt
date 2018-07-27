@@ -260,7 +260,6 @@ class SubjectPrivilegeManagementControllerIT : AbstractTestNGSpringContextTests(
                     .content(OBJECT_MAPPER.writeValueAsString(subjects))
             )
             .andExpect(status().isUnprocessableEntity)
-
     }
 
     @Test
@@ -281,7 +280,6 @@ class SubjectPrivilegeManagementControllerIT : AbstractTestNGSpringContextTests(
                     .content(OBJECT_MAPPER.writeValueAsString(subject))
             )
             .andExpect(status().isUnprocessableEntity)
-
     }
 
     @Test
@@ -306,12 +304,11 @@ class SubjectPrivilegeManagementControllerIT : AbstractTestNGSpringContextTests(
                 jsonPath(
                     INCORRECT_PARAMETER_TYPE_MESSAGE,
                     `is`(
-                        "Request Parameter " + INHERITED_ATTRIBUTES_REQUEST_PARAMETER
-                        + " must be a boolean value"
+                        "Request Parameter " + INHERITED_ATTRIBUTES_REQUEST_PARAMETER +
+                        " must be a boolean value"
                     )
                 )
             )
-
     }
 
     /*
@@ -412,7 +409,6 @@ class SubjectPrivilegeManagementControllerIT : AbstractTestNGSpringContextTests(
         val deleteContext =
             TEST_UTILS.createWACWithCustomDELETERequestBuilder(this.wac, this.testZone!!.subdomain, thisUri)
         deleteContext.mockMvc.perform(deleteContext.builder).andExpect(status().isNoContent)
-
     }
 
     @Test
@@ -511,7 +507,6 @@ class SubjectPrivilegeManagementControllerIT : AbstractTestNGSpringContextTests(
             "$SUBJECT_BASE_URL/vineet"
         )
         deleteContext.mockMvc.perform(deleteContext.builder).andExpect(status().isNoContent)
-
     }
 
     @Test

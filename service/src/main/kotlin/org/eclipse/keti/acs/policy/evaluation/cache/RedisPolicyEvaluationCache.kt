@@ -48,7 +48,6 @@ class RedisPolicyEvaluationCache : AbstractPolicyEvaluationCache(), Initializing
         } catch (ex: RedisConnectionFailureException) {
             LOGGER.error("Redis server ping failed.", ex)
         }
-
     }
 
     override fun delete(key: String) {

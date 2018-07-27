@@ -90,7 +90,7 @@ class IssuerEntity {
     }
 
     override fun toString(): String {
-        return ("IssuerEntity [id=" + this.id + ", issuerId=" + this.issuerId + ", issuerCheckTokenUrl="
-                + this.issuerCheckTokenUrl + "]")
+        return ("IssuerEntity [id=" + this.id + ", issuerId=" + this.issuerId + ", issuerCheckTokenUrl=" +
+                this.issuerCheckTokenUrl + "]")
     }
 }

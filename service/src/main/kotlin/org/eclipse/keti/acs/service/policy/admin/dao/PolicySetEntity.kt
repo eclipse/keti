@@ -72,8 +72,8 @@ class PolicySetEntity {
     constructor() : super()
 
     override fun toString(): String {
-        return ("PolicySetEntity [id=" + this.id + ", zone=" + this.zone + ", policySetId=" + this.policySetId
-                + ", policySetJson=" + this.policySetJson + "]")
+        return ("PolicySetEntity [id=" + this.id + ", zone=" + this.zone + ", policySetId=" + this.policySetId +
+                ", policySetJson=" + this.policySetJson + "]")
     }
 
     override fun hashCode(): Int {

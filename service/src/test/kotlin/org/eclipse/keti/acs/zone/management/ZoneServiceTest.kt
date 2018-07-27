@@ -86,7 +86,6 @@ class ZoneServiceTest : AbstractTransactionalTestNGSpringContextTests() {
         } catch (e: ZoneManagementException) {
             Assert.assertTrue(e.message?.contains("Invalid Zone Subdomain")!!)
         }
-
     }
 
     @Test(

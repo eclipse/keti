@@ -69,11 +69,11 @@ class GraphMigrationManager {
                 try {
                     LOGGER.info("Starting attribute migration process to graph.")
 
-                    //Rollback in the beginning to start with a clean state
+                    // Rollback in the beginning to start with a clean state
                     resourceMigrationManager.rollbackMigratedData(resourceHierarchicalRepository)
                     subjectMigrationManager.rollbackMigratedData(subjectHierarchicalRepository)
 
-                    //Run migration
+                    // Run migration
                     resourceMigrationManager.doResourceMigration(
                         resourceRepository,
                         resourceHierarchicalRepository, PAGE_SIZE
@@ -83,7 +83,7 @@ class GraphMigrationManager {
                         subjectHierarchicalRepository, PAGE_SIZE
                     )
 
-                    //Create version vertex, to record completion.
+                    // Create version vertex, to record completion.
                     resourceHierarchicalRepository.createVersionVertex(INITIAL_ATTRIBUTE_GRAPH_VERSION)
                     isMigrationComplete = true
 

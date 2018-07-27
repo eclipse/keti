@@ -435,8 +435,8 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
         if (attributes.size > this.traversalLimit) {
             val exceptionMessage = String
                 .format(
-                    "The number of attributes on this " + e.entityType + " '" + e.entityId
-                    + "' has exceeded the maximum limit of %d", this.traversalLimit
+                    "The number of attributes on this " + e.entityType + " '" + e.entityId +
+                    "' has exceeded the maximum limit of %d", this.traversalLimit
                 )
             throw AttributeLimitExceededException(exceptionMessage)
         }
@@ -465,7 +465,6 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
             }
 
             parentSet.add(parent)
-
         }
         return parentSet
     }

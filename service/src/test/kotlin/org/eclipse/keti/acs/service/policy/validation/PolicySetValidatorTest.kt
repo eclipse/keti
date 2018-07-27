@@ -103,7 +103,6 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
                 String.format("Expected %s vs Actual %s", causeSubstring, e.message)
             )
         }
-
     }
 
     @Test
@@ -189,7 +188,6 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
         val condition = Condition("System.exit(0)")
         val condition2 = Condition("'a'.equals('c')")
         this.policySetValidator.validatePolicyConditions(Arrays.asList(condition, condition2))
-
     }
 
     @Test
@@ -199,7 +197,6 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
         )
         Assert.assertNotNull(policySet)
         this.policySetValidator.validatePolicySet(policySet!!)
-
     }
 
     @Test
@@ -240,5 +237,4 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
             }
         }
     }
-
 }

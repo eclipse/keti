@@ -59,7 +59,6 @@ class DefaultZoneAuthorizationIT : AbstractTestNGSpringContextTests() {
     @AfterClass
     fun cleanup() {
         this.acsitSetUpFactory.destroy()
-
     }
 
     /**
@@ -106,7 +105,5 @@ class DefaultZoneAuthorizationIT : AbstractTestNGSpringContextTests() {
         } catch (e: InvalidRequestException) {
             // expected
         }
-
     }
-
 }

@@ -92,8 +92,8 @@ open class SubjectEntity : ZonableEntity {
     }
 
     override fun toString(): String {
-        return ("SubjectEntity [id=" + this.id + ", zone=" + this.zone + ", subjectIdentifier=" + this.subjectIdentifier
-                + ", attributesAsJson=" + this.attributesAsJson + ", parents=" + this.parents + "]")
+        return ("SubjectEntity [id=" + this.id + ", zone=" + this.zone + ", subjectIdentifier=" + this.subjectIdentifier +
+                ", attributesAsJson=" + this.attributesAsJson + ", parents=" + this.parents + "]")
     }
 
     override fun hashCode(): Int {

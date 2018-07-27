@@ -61,5 +61,4 @@ class UriTemplateVariableResolverTest {
             arrayOf("/v1/site/123/asset/345", UriTemplate("/v1{attribute_uri}/{attribute_uri}"), "345")
         )
     }
-
 }

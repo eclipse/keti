@@ -29,5 +29,4 @@ class ParentTest {
         val a2 = Attribute("issuer", "a2")
         Parent("testParent", setOf(a1, a2))
     }
-
 }

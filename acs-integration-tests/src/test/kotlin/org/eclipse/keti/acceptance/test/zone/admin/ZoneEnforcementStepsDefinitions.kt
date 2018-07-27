@@ -134,11 +134,9 @@ class ZoneEnforcementStepsDefinitions {
                 }
                 else -> Assert.fail("Api $api does not match/is not yet implemented for this test code.")
             }
-
         } catch (e: HttpClientErrorException) {
             Assert.fail("Unable to PUT identifier: $identifier for api: $api", e)
         }
-
     }
 
     @When("^client_two does a GET on (.*?) with (.*?) in zone (.*?)$")
@@ -186,7 +184,6 @@ class ZoneEnforcementStepsDefinitions {
         } catch (e: HttpClientErrorException) {
             this.status = HttpStatus.FORBIDDEN.value()
         }
-
     }
 
     @When("^client_one does a PUT on (.*?) with (.*?) in zone 1$")
@@ -218,7 +215,6 @@ class ZoneEnforcementStepsDefinitions {
         } catch (e: HttpClientErrorException) {
             Assert.fail("Unable to PUT identifier: $identifier for api: $api")
         }
-
     }
 
     @When("^client_one does a GET on (.*?) with (.*?) in zone 1$")
@@ -260,7 +256,6 @@ class ZoneEnforcementStepsDefinitions {
             e.printStackTrace()
             Assert.fail("Unable to GET identifier: $identifier for api: $api")
         }
-
     }
 
     @When("^client_one does a DELETE on (.*?) with (.*?) in zone 1$")
@@ -278,7 +273,6 @@ class ZoneEnforcementStepsDefinitions {
         } catch (e: HttpClientErrorException) {
             Assert.fail("Unable to DELETE identifier: $identifier for api: $api")
         }
-
     }
 
     @When("^client_two does a DELETE on (.*?) with (.*?) in zone (.*?)$")
@@ -304,7 +298,6 @@ class ZoneEnforcementStepsDefinitions {
         } catch (e: HttpClientErrorException) {
             Assert.fail("Unable to DELETE identifier: $identifier for api: $api")
         }
-
     }
 
     private fun getZoneName(subdomain: String): String? {

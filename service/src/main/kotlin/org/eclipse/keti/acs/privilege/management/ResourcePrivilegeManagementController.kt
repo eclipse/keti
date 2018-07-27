@@ -145,8 +145,8 @@ class ResourcePrivilegeManagementController : BaseRestApi() {
     }
 
     @ApiOperation(
-        value = "Creates/Updates a given resource for a given zone. "
-                + "The resourceIdentifier must be URL encoded in application/x-www-form-urlencoded format with " + "UTF-8.",
+        value = "Creates/Updates a given resource for a given zone. " +
+                "The resourceIdentifier must be URL encoded in application/x-www-form-urlencoded format with " + "UTF-8.",
         tags = ["Attribute Management"]
     )
     @RequestMapping(

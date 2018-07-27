@@ -85,7 +85,6 @@ class ZoneEntityTest : AbstractTransactionalTestNGSpringContextTests() {
         try {
             this.service.upsertZone(testzone1)
             this.service.upsertZone(zone2SameSubdomain)
-
         } catch (e: ZoneManagementException) {
 
             Assert.assertEquals(e.message, "Subdomain subdomain1 for zoneName = zone2 is already being used.")
@@ -151,6 +150,5 @@ class ZoneEntityTest : AbstractTransactionalTestNGSpringContextTests() {
         Assert.assertEquals(this.policySetRepository.getByZoneAndPolicySetId(testZoneEntity, "policy-set-2"), null)
         testZoneEntity = this.zoneRepository.getByName(testZone.name!!)
         Assert.assertEquals(testZoneEntity, null)
-
     }
 }

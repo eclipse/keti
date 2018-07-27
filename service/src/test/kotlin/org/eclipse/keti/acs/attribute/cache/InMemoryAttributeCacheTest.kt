@@ -59,7 +59,6 @@ class InMemoryAttributeCacheTest {
         ReflectionTestUtils.setField(inMemoryAttributeCache, "attributeCache", cachedAttributesMap)
 
         Assert.assertEquals(inMemoryAttributeCache[TEST_KEY], cachedAttributes)
-
     }
 
     @Test
@@ -80,6 +79,5 @@ class InMemoryAttributeCacheTest {
             (ReflectionTestUtils.getField(inMemoryAttributeCache, "attributeCache") as Map<String, CachedAttributes>)
                 .isEmpty()
         )
-
     }
 }

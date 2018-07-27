@@ -42,5 +42,4 @@ interface PolicySetValidator {
      * @return A list of the corresponding ConditionScript for validated conditions
      */
     fun validatePolicyConditions(conditions: List<Condition>?): List<ConditionScript>
-
 }

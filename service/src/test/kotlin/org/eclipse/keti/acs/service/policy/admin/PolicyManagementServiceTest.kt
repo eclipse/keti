@@ -201,7 +201,6 @@ class PolicyManagementServiceTest : AbstractTransactionalTestNGSpringContextTest
 
         this.policyService.deletePolicySet(policySet.name)
         Assert.assertEquals(this.policyService.allPolicySets.size, 0)
-
     }
 
     fun testCreateMultiplePolicySets() {
@@ -306,7 +305,6 @@ class PolicyManagementServiceTest : AbstractTransactionalTestNGSpringContextTest
         Mockito.`when`(this.mockZoneResolver.zoneEntityOrFail).thenReturn(this.zone1)
         this.policyService.deletePolicySet(issuer1PolicySet.name)
         Assert.assertEquals(this.policyService.allPolicySets.size, 0)
-
     }
 
     private fun createSimplePolicySet() {

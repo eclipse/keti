@@ -61,5 +61,4 @@ class ResourceHandler(
         val pathVariableValue = match[pathVariable]
         return pathVariableValue ?: ""
     }
-
 }

@@ -94,7 +94,6 @@ private fun timestampUTC(): String {
     } catch (e: IOException) {
         throw IllegalStateException("Failed to write timestamp as JSON.", e)
     }
-
 }
 
 private fun timestampToDateUTC(timestamp: Long): DateTime {
@@ -121,7 +120,7 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
      * @return The Policy Evaluation Result if the key is in the cache and the result isn't invalidated, or null
      */
     override fun get(key: PolicyEvaluationRequestCacheKey): PolicyEvaluationResult? {
-        //Get all result related entries
+        // Get all result related entries
         val cachedEntries = DecisionCacheEntries(key)
 
         val cachedEvalResultString = cachedEntries.decisionString ?: return null
@@ -134,7 +133,7 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
 
         val cachedResolvedResourceUris = cachedEvalResult.resolvedResourceUris
 
-        //is requested resource id same as resolved resource uri ?
+        // is requested resource id same as resolved resource uri ?
         if (cachedResolvedResourceUris.size == 1 && cachedResolvedResourceUris.iterator().next() == key.resourceId) {
             attributeInvalidationTimeStamps.add(cachedEntries.requestedResourceLastModified)
         } else {
@@ -164,7 +163,6 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
         } catch (e: IOException) {
             throw IllegalStateException("Failed to read policy evaluation result as JSON.", e)
         }
-
     }
 
     private inner class DecisionCacheEntries
@@ -196,34 +194,34 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
             get() = this.policySetTimestamps
 
         init {
-            //Get all values with a batch get
+            // Get all values with a batch get
             this.entryKeys = prepareKeys(evalRequestKey)
             this.entryValues = multiGet(this.entryKeys)
             this.lastValueIndex = this.entryValues.size - 1
 
             logCacheGetDebugMessages(evalRequestKey, this.decisionKey, this.entryKeys, this.entryValues)
 
-            //create separate list of policySetTimes to prevent mutation on entryValues
+            // create separate list of policySetTimes to prevent mutation on entryValues
             for (i in 0 until evalRequestKey.policySetIds.size) {
                 this.policySetTimestamps.add(this.entryValues[i])
             }
         }
 
-        //Prepare keys to fetch in one batch
+        // Prepare keys to fetch in one batch
         private fun prepareKeys(evalRequestKey: PolicyEvaluationRequestCacheKey): List<String> {
             val keys = ArrayList<String>()
 
-            //Add 'n' Policy Set keys
+            // Add 'n' Policy Set keys
             val policySetIds = evalRequestKey.policySetIds
             policySetIds.forEach { policySetId -> keys.add(policySetKey(evalRequestKey.zoneId!!, policySetId!!)) }
 
             // n+1
             keys.add(subjectKey(evalRequestKey.zoneId!!, evalRequestKey.subjectId!!))
 
-            //n+2
+            // n+2
             keys.add(resourceKey(evalRequestKey.zoneId, evalRequestKey.resourceId!!))
 
-            //n+3
+            // n+3
             keys.add(this.decisionKey)
 
             return keys
@@ -269,7 +267,6 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
         } catch (e: IOException) {
             throw IllegalArgumentException("Failed to write policy evaluation result as JSON.", e)
         }
-
     }
 
     private fun setEntityTimestamps(
@@ -491,7 +488,7 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
      * This method checks to see if any objects related to the policy evaluation have been changed since the Policy
      * Evaluation Result was cached.
      *
-     * @param values                 List of values which contain subject, policy sets and resolved resource URI's.
+     * @param values List of values which contain subject, policy sets and resolved resource URI's.
      * @param policyEvalTimestampUTC The timestamp to compare against.
      * @return true or false depending on whether any of the objects in values has a timestamp after
      * policyEvalTimestampUTC.

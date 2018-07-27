@@ -24,7 +24,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import java.util.HashSet
 
-//Naming convention for the class name is being enforced by spring
+// Naming convention for the class name is being enforced by spring
 class V2_0_1__InitializeIdentityZones : SpringJdbcMigration {
 
     @Throws(Exception::class)

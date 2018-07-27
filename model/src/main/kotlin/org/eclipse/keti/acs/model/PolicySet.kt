@@ -48,5 +48,4 @@ class PolicySet {
     override fun toString(): String {
         return "PolicySet [policies=" + this.policies + ", name=" + this.name + "]"
     }
-
 }

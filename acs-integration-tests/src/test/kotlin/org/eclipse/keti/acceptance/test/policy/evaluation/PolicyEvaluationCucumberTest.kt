@@ -37,5 +37,4 @@ class PolicyEvaluationCucumberTest : AbstractTestNGCucumberTests() {
     fun setup() {
         TestConfig.setupForEclipse() // Starts ACS when running the test in eclipse.
     }
-
 }

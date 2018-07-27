@@ -139,8 +139,8 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
             }
 
             LOGGER.info(
-                "Processed Policy Evaluation for: " + "resourceUri='{}', subjectIdentifier='{}', action='{}',"
-                + " result='{}'", uri, subjectIdentifier, action, result!!.effect
+                "Processed Policy Evaluation for: " + "resourceUri='{}', subjectIdentifier='{}', action='{}'," +
+                " result='{}'", uri, subjectIdentifier, action, result!!.effect
             )
 
             // A policy evaluation result with an INDETERMINATE effect is almost always due to transient errors.
@@ -175,9 +175,9 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
                     subjectIdentifier, uri
                 )
                 throw IllegalArgumentException(
-                    "More than one policy set exists for this zone. "
-                    + "Please provide an ordered list of policy set names to consider for this evaluation and "
-                    + "resubmit the request."
+                    "More than one policy set exists for this zone. " +
+                    "Please provide an ordered list of policy set names to consider for this evaluation and " +
+                    "resubmit the request."
                 )
             } else {
                 return LinkedHashSet(allPolicySets)

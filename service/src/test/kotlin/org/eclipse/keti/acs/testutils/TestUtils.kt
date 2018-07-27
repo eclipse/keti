@@ -50,7 +50,6 @@ class TestUtils {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-
         } else {
             ReflectionTestUtils.setField(target, name, value)
         }

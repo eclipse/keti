@@ -119,7 +119,6 @@ class PolicyEvaluationWithAttributeUriTemplateTest {
             .evalPolicy(createRequest("/v1/no-match/asset/123", "test-subject", "GET"))
         // second policy will match.
         Assert.assertEquals(evalResult.effect, Effect.DENY)
-
     }
 
     private fun createRequest(

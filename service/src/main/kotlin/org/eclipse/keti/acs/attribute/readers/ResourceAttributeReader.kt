@@ -18,5 +18,5 @@
 
 package org.eclipse.keti.acs.attribute.readers
 
-//tagging interface to create explicit type for ResourceAttributeReader
+// tagging interface to create explicit type for ResourceAttributeReader
 interface ResourceAttributeReader : AttributeReader

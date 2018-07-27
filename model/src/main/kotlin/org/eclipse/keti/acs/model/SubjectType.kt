@@ -38,5 +38,4 @@ class SubjectType {
      * @return the attributes
      */
     var attributes = emptyList<Attribute>()
-
 }

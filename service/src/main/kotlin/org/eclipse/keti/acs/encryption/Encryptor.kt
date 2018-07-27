@@ -66,7 +66,6 @@ class Encryptor {
                 "Could not initialize instance of cipher with algorithm: $ALGO_WITH_PADDING", e
             )
         }
-
     }
 
     fun encrypt(value: String): String {
@@ -82,7 +81,6 @@ class Encryptor {
         } catch (e: Exception) {
             throw EncryptionFailureException("Unable to encrypt", e)
         }
-
     }
 
     fun decrypt(encrypted: String): String {
@@ -97,7 +95,6 @@ class Encryptor {
         } catch (e: Exception) {
             throw DecryptionFailureException("Unable to decrypt", e)
         }
-
     }
 
     fun setEncryptionKey(encryptionKey: String) {
@@ -109,6 +106,5 @@ class Encryptor {
                 "Encryption key must be string of length: $KEY_LENGTH_IN_BYTES", e
             )
         }
-
     }
 }

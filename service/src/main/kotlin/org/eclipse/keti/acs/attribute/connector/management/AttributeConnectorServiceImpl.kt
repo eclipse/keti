@@ -238,8 +238,8 @@ class AttributeConnectorServiceImpl : AttributeConnectorService {
         if (connector == null) {
             throw AttributeConnectorException("Attribute connector configuration requires a valid connector")
         }
-        if (connector.adapters == null || connector.adapters!!.isEmpty()
-            || connector.adapters!!.size > 1
+        if (connector.adapters == null || connector.adapters!!.isEmpty() ||
+            connector.adapters!!.size > 1
         ) {
             throw AttributeConnectorException("Attribute connector configuration requires one adapter")
         }

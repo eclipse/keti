@@ -215,7 +215,6 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
         for (attribute in subjectAttributes) {
             Assert.assertTrue(evalPolicyResponse.subjectAttributes.contains(attribute))
         }
-
     }
 
     @Test(

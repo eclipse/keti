@@ -121,7 +121,6 @@ class PolicySetValidatorImpl : PolicySetValidator {
         } catch (e: Exception) {
             throw PolicySetValidationException("Error while validating JSON schema", e)
         }
-
     }
 
     override fun validatePolicyConditions(conditions: List<Condition>?): List<ConditionScript> {
@@ -148,17 +147,14 @@ class PolicySetValidatorImpl : PolicySetValidator {
                         "Condition : [" + conditionScript + "] validation failed with error : " + e.message, e
                     )
                 }
-
             }
 
             return conditionScripts
-
         } catch (e: PolicySetValidationException) {
             throw e
         } catch (e: Exception) {
             throw PolicySetValidationException("Unexpected exception while validating policy conditions", e)
         }
-
     }
 
     /**
