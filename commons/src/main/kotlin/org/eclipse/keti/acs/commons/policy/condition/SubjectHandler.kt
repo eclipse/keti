@@ -21,7 +21,6 @@ package org.eclipse.keti.acs.commons.policy.condition
 import org.eclipse.keti.acs.model.Attribute
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 

@@ -24,7 +24,6 @@ import org.testng.annotations.Test
 import java.util.HashSet
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 class BeanUtilTests {

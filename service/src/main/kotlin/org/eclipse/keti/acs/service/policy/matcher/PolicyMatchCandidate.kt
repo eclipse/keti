@@ -21,7 +21,6 @@ package org.eclipse.keti.acs.service.policy.matcher
 import org.eclipse.keti.acs.model.Attribute
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 class PolicyMatchCandidate {

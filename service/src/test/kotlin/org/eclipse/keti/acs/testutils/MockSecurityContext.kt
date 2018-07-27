@@ -24,7 +24,6 @@ import org.mockito.Mockito
 import org.springframework.security.core.context.SecurityContextHolder
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 

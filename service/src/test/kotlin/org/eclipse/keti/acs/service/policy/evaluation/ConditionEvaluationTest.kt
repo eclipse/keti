@@ -38,7 +38,6 @@ import java.util.Arrays
 import java.util.HashSet
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 @ContextConfiguration(

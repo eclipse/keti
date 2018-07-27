@@ -43,7 +43,6 @@ import org.springframework.web.bind.annotation.RequestMethod.PUT
 import org.springframework.web.bind.annotation.RestController
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 @RestController

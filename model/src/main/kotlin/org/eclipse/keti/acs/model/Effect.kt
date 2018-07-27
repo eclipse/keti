@@ -19,7 +19,6 @@
 package org.eclipse.keti.acs.model
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 enum class Effect {

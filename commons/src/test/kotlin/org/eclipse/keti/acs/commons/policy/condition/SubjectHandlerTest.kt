@@ -24,7 +24,6 @@ import org.testng.annotations.Test
 import java.util.Collections
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 class SubjectHandlerTest {

@@ -19,7 +19,6 @@
 package org.eclipse.keti.acs.service
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 class InvalidACSRequestException : RuntimeException {

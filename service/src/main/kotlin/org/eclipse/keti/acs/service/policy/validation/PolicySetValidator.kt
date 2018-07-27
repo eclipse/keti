@@ -23,7 +23,6 @@ import org.eclipse.keti.acs.model.Condition
 import org.eclipse.keti.acs.model.PolicySet
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 interface PolicySetValidator {

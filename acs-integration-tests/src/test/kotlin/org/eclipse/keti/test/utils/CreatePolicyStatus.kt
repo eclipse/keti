@@ -19,7 +19,6 @@
 package org.eclipse.keti.test.utils
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 enum class CreatePolicyStatus {

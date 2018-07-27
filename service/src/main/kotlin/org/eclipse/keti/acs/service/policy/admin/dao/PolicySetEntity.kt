@@ -32,7 +32,6 @@ import javax.persistence.Table
 import javax.persistence.UniqueConstraint
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 @Entity

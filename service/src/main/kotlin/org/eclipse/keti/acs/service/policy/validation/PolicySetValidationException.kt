@@ -19,7 +19,6 @@
 package org.eclipse.keti.acs.service.policy.validation
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 class PolicySetValidationException : RuntimeException {

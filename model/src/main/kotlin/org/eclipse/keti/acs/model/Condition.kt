@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 @ApiModel(description = "A boolean groovy expression which determines whether the policy effect applies to the" + " access control request.")

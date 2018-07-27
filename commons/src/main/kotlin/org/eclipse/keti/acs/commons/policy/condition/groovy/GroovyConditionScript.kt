@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory
 private val LOGGER = LoggerFactory.getLogger(GroovyConditionScript::class.java)
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 

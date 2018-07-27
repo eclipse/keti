@@ -21,7 +21,6 @@ package org.eclipse.keti.acs.config
 import org.springframework.web.util.UrlPathHelper
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 class UrlPathHelperNonDecoding : UrlPathHelper() {

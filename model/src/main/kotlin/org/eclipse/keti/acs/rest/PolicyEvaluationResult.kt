@@ -24,7 +24,6 @@ import org.eclipse.keti.acs.model.Attribute
 import org.eclipse.keti.acs.model.Effect
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 @ApiModel(description = "Policy evaluation result")

@@ -34,7 +34,6 @@ import org.testng.Assert
 import java.io.IOException
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 class PolicyCreationStepsDefinitions {

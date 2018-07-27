@@ -22,7 +22,6 @@ import org.eclipse.keti.acs.zone.management.dao.ZoneEntity
 import org.springframework.data.jpa.repository.JpaRepository
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 interface PolicySetRepository : JpaRepository<PolicySetEntity, Long> {

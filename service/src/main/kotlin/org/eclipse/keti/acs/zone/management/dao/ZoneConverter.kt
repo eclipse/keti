@@ -21,7 +21,6 @@ package org.eclipse.keti.acs.zone.management.dao
 import org.eclipse.keti.acs.rest.Zone
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 class ZoneConverter {

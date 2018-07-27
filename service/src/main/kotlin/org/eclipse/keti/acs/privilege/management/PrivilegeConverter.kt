@@ -27,7 +27,6 @@ import org.eclipse.keti.acs.utils.JsonUtils
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 class PrivilegeConverter {

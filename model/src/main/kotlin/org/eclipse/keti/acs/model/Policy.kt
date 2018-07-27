@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 @ApiModel(description = "An access control policy.")

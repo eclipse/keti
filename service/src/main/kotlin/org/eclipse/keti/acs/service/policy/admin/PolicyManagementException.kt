@@ -19,7 +19,6 @@
 package org.eclipse.keti.acs.service.policy.admin
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 class PolicyManagementException : RuntimeException {

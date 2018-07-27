@@ -58,7 +58,6 @@ private val JSON_UTILS = JsonUtils()
 private val TEST_UTILS = TestUtils()
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 @WebAppConfiguration

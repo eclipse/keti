@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiParam
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 @ApiModel("The resource the access control operation would read, create, delete, or modify. Typically used" + " within a policy definition")

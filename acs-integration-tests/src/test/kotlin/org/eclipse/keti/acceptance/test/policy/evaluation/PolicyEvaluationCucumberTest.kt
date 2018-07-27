@@ -25,7 +25,6 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 @Test

@@ -27,7 +27,6 @@ import javax.sql.DataSource
 private val LOGGER = LoggerFactory.getLogger(AcsMonitoringRepository::class.java)
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 @Repository

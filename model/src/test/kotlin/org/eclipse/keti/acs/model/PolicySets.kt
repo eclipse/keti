@@ -23,7 +23,6 @@ import java.io.File
 import java.io.IOException
 
 /**
- *
  * @author acs-engineers@ge.com
  */
 object PolicySets {
