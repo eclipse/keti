@@ -23,6 +23,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
+import org.eclipse.keti.acs.commons.policy.condition.ConditionShell;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.InMemoryGroovyConditionCache;
+import org.eclipse.keti.acs.model.Condition;
+import org.eclipse.keti.acs.model.Policy;
+import org.eclipse.keti.acs.model.PolicySet;
+import org.eclipse.keti.acs.utils.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -32,22 +41,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
-import org.eclipse.keti.acs.commons.policy.condition.ConditionShell;
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
-import org.eclipse.keti.acs.model.Condition;
-import org.eclipse.keti.acs.model.Policy;
-import org.eclipse.keti.acs.model.PolicySet;
-import org.eclipse.keti.acs.utils.JsonUtils;
-
 /**
  *
  * @author acs-engineers@ge.com
  */
 @Test
 @ContextConfiguration(
-        classes = { GroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
+        classes = { InMemoryGroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
 public class PolicySetValidatorTest extends AbstractTestNGSpringContextTests {
 
     private final JsonUtils jsonUtils = new JsonUtils();

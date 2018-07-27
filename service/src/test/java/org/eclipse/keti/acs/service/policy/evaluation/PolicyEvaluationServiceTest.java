@@ -35,28 +35,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.internal.util.reflection.Whitebox;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.keti.acs.PolicyContextResolver;
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.model.Effect;
 import org.eclipse.keti.acs.model.Policy;
@@ -77,6 +58,25 @@ import org.eclipse.keti.acs.service.policy.validation.PolicySetValidatorImpl;
 import org.eclipse.keti.acs.utils.JsonUtils;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.internal.util.reflection.Whitebox;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for PolicyEvaluationService. Uses mocks, no external dependencies.
@@ -85,7 +85,7 @@ import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
  */
 @Test
 @ContextConfiguration(
-        classes = { GroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
+        classes = { NonCachingGroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
 public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTests {
     private static final String ISSUER = "https://acs.attributes.int";
     private static final String SUBJECT_ATTRIB_NAME_ROLE = "role";
@@ -95,6 +95,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     private static final String RES_ATTRIB_ROLE_REQUIRED = "role_required";
     private static final String RES_ATTRIB_LOCATION = "location";
     private static final String RES_ATTRIB_LOCATION_VALUE = "sanramon";
+    private static final Set<String> EMPTY_POLICY_EVALUATION_ORDER = new LinkedHashSet<>();
 
     private final JsonUtils jsonUtils = new JsonUtils();
 
@@ -222,6 +223,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
         when(this.policyService.getAllPolicySets()).thenReturn(allPolicySets);
         when(this.policyMatcher.matchForResult(any(PolicyMatchCandidate.class), anyListOf(Policy.class)))
                 .thenAnswer(new Answer<MatchResult>() {
+                    @Override
                     public MatchResult answer(final InvocationOnMock invocation) {
                         Object[] args = invocation.getArguments();
                         @SuppressWarnings("unchecked")
@@ -384,7 +386,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     }
 
     private Object[] filterTwoPolisySetsByEmptyList(final List<PolicySet> twoPolicySets) {
-        return new Object[] { twoPolicySets, PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER };
+        return new Object[] { twoPolicySets, EMPTY_POLICY_EVALUATION_ORDER };
     }
 
     private Object[] filterTwoPolicySetsByByNonexistentPolicySet(final List<PolicySet> twoPolicySets) {
@@ -429,7 +431,7 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     }
 
     private Object[] filterOnePolicySetByEmptyEvaluationOrder(final List<PolicySet> onePolicySet) {
-        return new Object[] { onePolicySet, PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER,
+        return new Object[] { onePolicySet, EMPTY_POLICY_EVALUATION_ORDER,
                 onePolicySet.stream().collect(Collectors.toCollection(LinkedHashSet::new)) };
     }
 
@@ -471,23 +473,23 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     }
 
     private Object[] requestEvaluationWithOnePolicySetAndEmptyPriorityList(final List<PolicySet> onePolicySet) {
-        return new Object[] { onePolicySet, PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER, Effect.DENY };
+        return new Object[] { onePolicySet, EMPTY_POLICY_EVALUATION_ORDER, Effect.DENY };
     }
 
     private Object[] requestEvaluationWithEmptyPolicySetsListAndEmptyPriorityList() {
-        return new Object[] { Collections.emptyList(), PolicyEvaluationRequestV1.EMPTY_POLICY_EVALUATION_ORDER,
+        return new Object[] { Collections.emptyList(), EMPTY_POLICY_EVALUATION_ORDER,
                 Effect.NOT_APPLICABLE };
     }
 
     private List<PolicySet> createDenyPolicySet() {
-        List<PolicySet> policySets = new ArrayList<PolicySet>();
+        List<PolicySet> policySets = new ArrayList<>();
         policySets.add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalDeny.json", PolicySet.class));
         Assert.assertNotNull(policySets, "Policy set file is not found or invalid");
         return policySets;
     }
 
     private List<PolicySet> createNotApplicableAndDenyPolicySets() {
-        List<PolicySet> policySets = new ArrayList<PolicySet>();
+        List<PolicySet> policySets = new ArrayList<>();
         policySets
                 .add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalNotApplicable.json", PolicySet.class));
         policySets.add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalDeny.json", PolicySet.class));

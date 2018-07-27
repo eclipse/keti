@@ -18,17 +18,16 @@
 
 package org.eclipse.keti.acs.commons.policy.condition.groovy;
 
+import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
 
 public class GroovyConditionCacheTest {
 
     @Test
     public void testPutGetAndRemove() {
-        GroovyConditionCache cache = new GroovyConditionCache();
+        GroovyConditionCache cache = new InMemoryGroovyConditionCache();
         ConditionScript compiledScript = Mockito.mock(ConditionScript.class);
         String testScript = "1 == 1";
         cache.put(testScript, compiledScript);
@@ -37,4 +36,14 @@ public class GroovyConditionCacheTest {
         Assert.assertNull(cache.get(testScript));
     }
 
+    @Test
+    public void testPutGetAndRemoveIfDisabled() {
+        GroovyConditionCache cache = new NonCachingGroovyConditionCache();
+        ConditionScript compiledScript = Mockito.mock(ConditionScript.class);
+        String testScript = "1 == 1";
+        cache.put(testScript, compiledScript);
+        Assert.assertNull(cache.get(testScript));
+        cache.remove(testScript);
+        Assert.assertNull(cache.get(testScript));
+    }
 }
