@@ -49,11 +49,17 @@ class GraphResourceRepository : GraphGenericRepository<ResourceEntity>(), Resour
     override val relationshipKey: String
         get() = HAS_RESOURCE_RELATIONSHIP_KEY
 
-    override fun getByZoneAndResourceIdentifier(zone: ZoneEntity, resourceIdentifier: String): ResourceEntity? {
+    override fun getByZoneAndResourceIdentifier(
+        zone: ZoneEntity,
+        resourceIdentifier: String
+    ): ResourceEntity? {
         return getEntity(zone, resourceIdentifier)
     }
 
-    override fun getResourceWithInheritedAttributes(zone: ZoneEntity, resourceIdentifier: String): ResourceEntity? {
+    override fun getResourceWithInheritedAttributes(
+        zone: ZoneEntity,
+        resourceIdentifier: String
+    ): ResourceEntity? {
         return getEntityWithInheritedAttributes(zone, resourceIdentifier, emptySet())
     }
 
@@ -61,7 +67,10 @@ class GraphResourceRepository : GraphGenericRepository<ResourceEntity>(), Resour
         return entity.resourceIdentifier
     }
 
-    override fun updateVertexProperties(entity: ResourceEntity, vertex: Vertex) {
+    override fun updateVertexProperties(
+        entity: ResourceEntity,
+        vertex: Vertex
+    ) {
         var resourceAttributesJson = entity.attributesAsJson
         if (StringUtils.isEmpty(resourceAttributesJson)) {
             resourceAttributesJson = EMPTY_ATTRIBUTES
@@ -95,7 +104,10 @@ class GraphResourceRepository : GraphGenericRepository<ResourceEntity>(), Resour
         throw UnsupportedOperationException(MESSAGE)
     }
 
-    override fun <S : ResourceEntity> findAll(example: Example<S>, sort: Sort): List<S> {
+    override fun <S : ResourceEntity> findAll(
+        example: Example<S>,
+        sort: Sort
+    ): List<S> {
         throw UnsupportedOperationException(MESSAGE)
     }
 
@@ -103,7 +115,10 @@ class GraphResourceRepository : GraphGenericRepository<ResourceEntity>(), Resour
         throw UnsupportedOperationException(MESSAGE)
     }
 
-    override fun <S : ResourceEntity> findAll(example: Example<S>, pageable: Pageable): Page<S> {
+    override fun <S : ResourceEntity> findAll(
+        example: Example<S>,
+        pageable: Pageable
+    ): Page<S> {
         throw UnsupportedOperationException(MESSAGE)
     }
 

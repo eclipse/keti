@@ -162,8 +162,10 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
 
     @Throws(IllegalArgumentException::class)
     fun filterPolicySetsByPriority(
-        subjectIdentifier: String, uri: String,
-        allPolicySets: List<PolicySet>, policySetsEvaluationOrder: LinkedHashSet<String?>
+        subjectIdentifier: String,
+        uri: String,
+        allPolicySets: List<PolicySet>,
+        policySetsEvaluationOrder: LinkedHashSet<String?>
     ): LinkedHashSet<PolicySet> {
 
         if (policySetsEvaluationOrder.isEmpty()) {
@@ -203,8 +205,11 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
     }
 
     private fun evalPolicySet(
-        policySet: PolicySet, subjectIdentifier: String,
-        resourceURI: String, action: String, supplementalResourceAttributes: Set<Attribute>,
+        policySet: PolicySet,
+        subjectIdentifier: String,
+        resourceURI: String,
+        action: String,
+        supplementalResourceAttributes: Set<Attribute>,
         supplementalSubjectAttributes: Set<Attribute>
     ): PolicyEvaluationResult {
 
@@ -267,7 +272,9 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
 
     private fun handlePolicyEvaluationException(
         policySet: PolicySet,
-        subjectIdentifier: String, resourceURI: String, e: Throwable
+        subjectIdentifier: String,
+        resourceURI: String,
+        e: Throwable
     ): PolicyEvaluationResult {
         val result = PolicyEvaluationResult(Effect.INDETERMINATE)
         val logMessage = StringBuilder()
@@ -282,8 +289,11 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
     }
 
     fun evaluateConditions(
-        subjectAttributes: Set<Attribute>, resourceAttributes: Set<Attribute>,
-        resourceURI: String, conditions: List<Condition>?, resourceURITemplate: String?
+        subjectAttributes: Set<Attribute>,
+        resourceAttributes: Set<Attribute>,
+        resourceURI: String,
+        conditions: List<Condition>?,
+        resourceURITemplate: String?
     ): Boolean {
         val validatedConditionScripts: List<ConditionScript>
         try {
@@ -318,7 +328,9 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
 
     private fun getAttributeBindingsMap(
         subjectAttributes: Set<Attribute>,
-        resourceAttributes: Set<Attribute>, resourceURI: String, resourceURITemplate: String?
+        resourceAttributes: Set<Attribute>,
+        resourceURI: String,
+        resourceURITemplate: String?
     ): Map<String, Any> {
         val subjectHandler = SubjectHandler(subjectAttributes)
         val resourceHandler = ResourceHandler(resourceAttributes, resourceURI, resourceURITemplate)
@@ -331,8 +343,11 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
     }
 
     private fun matchPolicies(
-        subjectIdentifier: String, resourceURI: String, action: String,
-        allPolicies: List<Policy>, supplementalResourceAttributes: Set<Attribute>,
+        subjectIdentifier: String,
+        resourceURI: String,
+        action: String,
+        allPolicies: List<Policy>,
+        supplementalResourceAttributes: Set<Attribute>,
         supplementalSubjectAttributes: Set<Attribute>
     ): MatchResult {
         val criteria = PolicyMatchCandidate(
@@ -342,7 +357,10 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
         return this.policyMatcher.matchForResult(criteria, allPolicies)
     }
 
-    private fun debugAttributes(subjectAttributes: Set<Attribute>, resourceAttributes: Set<Attribute>) {
+    private fun debugAttributes(
+        subjectAttributes: Set<Attribute>,
+        resourceAttributes: Set<Attribute>
+    ) {
         if (LOGGER.isDebugEnabled) {
             val sb = StringBuilder()
             sb.append("Subject Attributes :\n")

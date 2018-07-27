@@ -35,7 +35,10 @@ class PrivilegeServiceSubjectAttributeReader : SubjectAttributeReader {
         return this.getAttributesByScope(identifier, emptySet())
     }
 
-    override fun getAttributesByScope(identifier: String, scopes: Set<Attribute>?): Set<Attribute> {
+    override fun getAttributesByScope(
+        identifier: String,
+        scopes: Set<Attribute>?
+    ): Set<Attribute> {
         var subjectAttributes = emptySet<Attribute>()
         val subject = this.privilegeManagementService.getBySubjectIdentifierAndScopes(identifier, scopes)
         if (null != subject) {

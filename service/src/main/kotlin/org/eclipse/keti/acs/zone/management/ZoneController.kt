@@ -122,7 +122,10 @@ class ZoneController : BaseRestApi() {
     /**
      * @param zone
      */
-    private fun validateAndSanitizeInputOrFail(zone: Zone, zoneName: String) {
+    private fun validateAndSanitizeInputOrFail(
+        zone: Zone,
+        zoneName: String
+    ) {
         if (zone.name != null && zoneName != zone.name) {
             throw RestApiException(
                 HttpStatus.UNPROCESSABLE_ENTITY,

@@ -62,7 +62,7 @@ internal fun initAcsRequestContextBuilderRepos(applicationContext: ApplicationCo
  * @author acs-engineers@ge.com
  */
 @Component
-class AcsRequestContextHolder// Hide Constructor
+class AcsRequestContextHolder // Hide Constructor
 private constructor() : ApplicationContextAware {
 
     @Throws(BeansException::class)

@@ -207,7 +207,8 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
 
     private fun requestEvaluationWithSecondOfTwoPolicySets(): Array<Any?> {
         return arrayOf(
-            createPolicyEvalRequest(this.testResource!!.resourceIdentifier,
+            createPolicyEvalRequest(
+                this.testResource!!.resourceIdentifier,
                 this.testSubject!!.subjectIdentifier,
                 LinkedHashSet(Arrays.asList(this.notApplicableAndDenyPolicySets!![1].name))
             ), this.notApplicableAndDenyPolicySets, Effect.DENY
@@ -216,7 +217,8 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
 
     private fun requestEvaluationWithFirstOfTwoPolicySets(): Array<Any?> {
         return arrayOf(
-            createPolicyEvalRequest(this.testResource!!.resourceIdentifier,
+            createPolicyEvalRequest(
+                this.testResource!!.resourceIdentifier,
                 this.testSubject!!.subjectIdentifier,
                 LinkedHashSet(Arrays.asList(this.notApplicableAndDenyPolicySets!![0].name))
             ), this.notApplicableAndDenyPolicySets, Effect.NOT_APPLICABLE
@@ -225,7 +227,8 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
 
     private fun requestEvaluationWithOnePolicySetAndPriorityList(): Array<Any?> {
         return arrayOf(
-            createPolicyEvalRequest(this.testResource!!.resourceIdentifier,
+            createPolicyEvalRequest(
+                this.testResource!!.resourceIdentifier,
                 this.testSubject!!.subjectIdentifier,
                 LinkedHashSet(Arrays.asList(this.denyPolicySet!![0].name))
             ), this.denyPolicySet, Effect.DENY
@@ -243,11 +246,17 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
     }
 
     private fun requestEvaluationWithAllOfTwoPolicySets(): Array<Any?> {
-        return arrayOf(createPolicyEvalRequest(this.testResource!!.resourceIdentifier,
-            this.testSubject!!.subjectIdentifier,
-            LinkedHashSet(Arrays.asList(this.notApplicableAndDenyPolicySets!![0].name,
-                this.notApplicableAndDenyPolicySets!![1].name))
-        ), this.notApplicableAndDenyPolicySets, Effect.DENY
+        return arrayOf(
+            createPolicyEvalRequest(
+                this.testResource!!.resourceIdentifier,
+                this.testSubject!!.subjectIdentifier,
+                LinkedHashSet(
+                    Arrays.asList(
+                        this.notApplicableAndDenyPolicySets!![0].name,
+                        this.notApplicableAndDenyPolicySets!![1].name
+                    )
+                )
+            ), this.notApplicableAndDenyPolicySets, Effect.DENY
         )
 
     }
@@ -262,11 +271,17 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
     }
 
     private fun requestEvaluationWithExistentAndNonExistentPolicySets(): Array<Any?> {
-        return arrayOf(createPolicyEvalRequest(this.testResource!!.resourceIdentifier,
-            this.testSubject!!.subjectIdentifier,
-            LinkedHashSet(Arrays.asList(this.notApplicableAndDenyPolicySets!![0].name,
-                "noexistent-policy-set"))
-        ), this.notApplicableAndDenyPolicySets
+        return arrayOf(
+            createPolicyEvalRequest(
+                this.testResource!!.resourceIdentifier,
+                this.testSubject!!.subjectIdentifier,
+                LinkedHashSet(
+                    Arrays.asList(
+                        this.notApplicableAndDenyPolicySets!![0].name,
+                        "noexistent-policy-set"
+                    )
+                )
+            ), this.notApplicableAndDenyPolicySets
         )
     }
 
@@ -281,10 +296,12 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
     }
 
     private fun requestEvaluationWithNonExistentPolicySet(): Array<Any?> {
-        return arrayOf(createPolicyEvalRequest(this.testResource!!.resourceIdentifier,
-            this.testSubject!!.subjectIdentifier,
-            LinkedHashSet(Arrays.asList("nonexistent-policy-set"))
-        ), this.denyPolicySet
+        return arrayOf(
+            createPolicyEvalRequest(
+                this.testResource!!.resourceIdentifier,
+                this.testSubject!!.subjectIdentifier,
+                LinkedHashSet(Arrays.asList("nonexistent-policy-set"))
+            ), this.denyPolicySet
         )
     }
 
@@ -311,7 +328,12 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
     private fun createNotApplicableAndDenyPolicySets(): List<PolicySet> {
         val policySets = ArrayList<PolicySet>()
         policySets
-            .add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalNotApplicable.json", PolicySet::class.java)!!)
+            .add(
+                this.jsonUtils.deserializeFromFile(
+                    "policies/testPolicyEvalNotApplicable.json",
+                    PolicySet::class.java
+                )!!
+            )
         policySets.add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalDeny.json", PolicySet::class.java)!!)
         Assert.assertNotNull(policySets, "Policy set files are not found or invalid")
         Assert.assertTrue(policySets.size == 2, "One or more policy set files are not found or invalid")

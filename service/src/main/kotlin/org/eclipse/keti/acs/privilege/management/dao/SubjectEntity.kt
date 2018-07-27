@@ -83,7 +83,10 @@ open class SubjectEntity : ZonableEntity {
 
     constructor()
 
-    constructor(zone: ZoneEntity, subjectIdentifier: String) {
+    constructor(
+        zone: ZoneEntity,
+        subjectIdentifier: String
+    ) {
         this.zone = zone
         this.subjectIdentifier = subjectIdentifier
     }

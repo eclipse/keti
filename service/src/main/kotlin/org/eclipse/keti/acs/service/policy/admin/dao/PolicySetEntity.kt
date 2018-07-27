@@ -59,7 +59,11 @@ class PolicySetEntity {
     @Column(name = "policy_set_json", columnDefinition = "CLOB NOT NULL")
     var policySetJson: String? = null
 
-    constructor(zone: ZoneEntity?, policySetId: String?, policySetJson: String?) : super() {
+    constructor(
+        zone: ZoneEntity?,
+        policySetId: String?,
+        policySetJson: String?
+    ) : super() {
         this.zone = zone
         this.policySetId = policySetId
         this.policySetJson = policySetJson

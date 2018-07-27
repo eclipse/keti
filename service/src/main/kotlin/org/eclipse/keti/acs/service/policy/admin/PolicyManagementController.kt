@@ -117,7 +117,10 @@ class PolicyManagementController : BaseRestApi() {
      * @param policySet
      * @param policySetId
      */
-    private fun validatePolicyIdOrFail(policySet: PolicySet?, policySetId: String) {
+    private fun validatePolicyIdOrFail(
+        policySet: PolicySet?,
+        policySetId: String
+    ) {
         if (policySet == null) {
             throw RestApiException(HttpStatus.UNPROCESSABLE_ENTITY, "Policy Set cannot be empty or null")
         }

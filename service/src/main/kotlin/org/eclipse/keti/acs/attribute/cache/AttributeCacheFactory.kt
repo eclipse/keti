@@ -49,10 +49,12 @@ class AttributeCacheFactory {
     }
 
     fun createResourceAttributeCache(
-        maxCachedIntervalMinutes: Long, zoneName: String,
+        maxCachedIntervalMinutes: Long,
+        zoneName: String,
         resourceCacheRedisTemplate: RedisTemplate<String, String>?
     ): AttributeCache {
-        return createAttributeCache(RESOURCE,
+        return createAttributeCache(
+            RESOURCE,
             maxCachedIntervalMinutes,
             zoneName,
             resourceCacheRedisTemplate,
@@ -62,10 +64,12 @@ class AttributeCacheFactory {
     }
 
     fun createSubjectAttributeCache(
-        maxCachedIntervalMinutes: Long, zoneName: String,
+        maxCachedIntervalMinutes: Long,
+        zoneName: String,
         subjectCacheRedisTemplate: RedisTemplate<String, String>?
     ): AttributeCache {
-        return createAttributeCache(SUBJECT,
+        return createAttributeCache(
+            SUBJECT,
             maxCachedIntervalMinutes,
             zoneName,
             subjectCacheRedisTemplate,
@@ -75,9 +79,12 @@ class AttributeCacheFactory {
     }
 
     private fun createAttributeCache(
-        cacheType: String, maxCachedIntervalMinutes: Long,
-        zoneName: String, cacheRedisTemplate: RedisTemplate<String, String>?,
-        getKey: (String, String) -> String, enableAttributeCaching: Boolean
+        cacheType: String,
+        maxCachedIntervalMinutes: Long,
+        zoneName: String,
+        cacheRedisTemplate: RedisTemplate<String, String>?,
+        getKey: (String, String) -> String,
+        enableAttributeCaching: Boolean
     ): AttributeCache {
         val profiles = environment.activeProfiles
 

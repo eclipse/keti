@@ -25,7 +25,10 @@ const val SUBJECT = "subject"
 
 interface AttributeCache {
 
-    fun setAttributes(identifier: String, value: CachedAttributes) {
+    fun setAttributes(
+        identifier: String,
+        value: CachedAttributes
+    ) {
         this[identifier] = value
     }
 
@@ -33,7 +36,10 @@ interface AttributeCache {
         return this[identifier]
     }
 
-    operator fun set(key: String, value: CachedAttributes)
+    operator fun set(
+        key: String,
+        value: CachedAttributes
+    )
 
     // get should return null if value is not found in the cache
     operator fun get(key: String): CachedAttributes?

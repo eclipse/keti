@@ -124,7 +124,10 @@ class ZoneEntity {
         this.id = id!!
     }
 
-    constructor(id: Long?, name: String) {
+    constructor(
+        id: Long?,
+        name: String
+    ) {
         this.id = id!!
         this.name = name
     }

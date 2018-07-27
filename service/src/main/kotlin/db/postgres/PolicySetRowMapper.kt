@@ -26,7 +26,10 @@ import java.sql.SQLException
 class PolicySetRowMapper : RowMapper<PolicySetEntity> {
 
     @Throws(SQLException::class)
-    override fun mapRow(rs: ResultSet, rowNum: Int): PolicySetEntity {
+    override fun mapRow(
+        rs: ResultSet,
+        rowNum: Int
+    ): PolicySetEntity {
         return PolicySetEntity(null, rs.getString("policy_set_id"), rs.getString("policy_set_json"))
     }
 }

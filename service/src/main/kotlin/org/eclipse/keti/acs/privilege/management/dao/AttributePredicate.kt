@@ -31,4 +31,4 @@ object AttributePredicate {
             u.contains(element)
         }
     }
-}// Prevents instantiation.
+} // Prevents instantiation.

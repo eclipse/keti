@@ -30,12 +30,16 @@ private val LOGGER = LoggerFactory.getLogger(RedisAttributeCache::class.java)
 private val OBJECT_MAPPER = ObjectMapper()
 
 class RedisAttributeCache internal constructor(
-    private val maxCachedIntervalMinutes: Long, private val zoneName: String,
+    private val maxCachedIntervalMinutes: Long,
+    private val zoneName: String,
     private val getKey: (String, String) -> String,
     private val resourceCacheRedisTemplate: RedisTemplate<String, String>?
 ) : AbstractAttributeCache {
 
-    override fun set(key: String, value: CachedAttributes) {
+    override fun set(
+        key: String,
+        value: CachedAttributes
+    ) {
         val cachedValueString: String
         try {
             cachedValueString = OBJECT_MAPPER.writeValueAsString(value)

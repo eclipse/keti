@@ -51,7 +51,8 @@ val TOP_SECRET_GROUP_ATTRIBUTES: MutableSet<Attribute> =
     Collections.unmodifiableSet(HashSet(Arrays.asList(TOP_SECRET_CLASSIFICATION)))
 
 const val SECRET_GROUP = "secret-clearance"
-val SECRET_GROUP_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(SECRET_CLASSIFICATION)))
+val SECRET_GROUP_ATTRIBUTES: MutableSet<Attribute> =
+    Collections.unmodifiableSet(HashSet(Arrays.asList(SECRET_CLASSIFICATION)))
 
 const val AGENT_MULDER = "mulder"
 val MULDERS_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(SITE_BASEMENT)))
@@ -71,7 +72,8 @@ val ASCENSION_ATTRIBUTES: MutableSet<Attribute> =
     Collections.unmodifiableSet(HashSet(Arrays.asList(SPECIAL_AGENTS_GROUP_ATTRIBUTE, TYPE_MYTHARC)))
 
 const val DRIVE_ID = "/x-files/drive"
-val DRIVE_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(TYPE_MONSTER_OF_THE_WEEK)))
+val DRIVE_ATTRIBUTES: MutableSet<Attribute> =
+    Collections.unmodifiableSet(HashSet(Arrays.asList(TYPE_MONSTER_OF_THE_WEEK)))
 
 const val JOSECHUNG_ID = "/x-files/josechung"
 

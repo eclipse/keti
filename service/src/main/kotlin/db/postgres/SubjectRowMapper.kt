@@ -26,7 +26,10 @@ import java.sql.SQLException
 class SubjectRowMapper : RowMapper<SubjectEntity> {
 
     @Throws(SQLException::class)
-    override fun mapRow(rs: ResultSet, rowNum: Int): SubjectEntity {
+    override fun mapRow(
+        rs: ResultSet,
+        rowNum: Int
+    ): SubjectEntity {
         val subject = SubjectEntity()
         subject.subjectIdentifier = rs.getString("subject_identifier")
         subject.attributesAsJson = rs.getString("attributes")

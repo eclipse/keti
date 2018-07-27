@@ -21,9 +21,7 @@ package org.eclipse.keti.acceptance.test.zone.admin
 import org.eclipse.keti.acs.rest.BaseResource
 import org.eclipse.keti.acs.rest.Zone
 import org.eclipse.keti.test.utils.ACSITSetUpFactory
-import org.eclipse.keti.test.utils.ACSTestUtil
 import org.eclipse.keti.test.utils.PREDIX_ZONE_ID
-import org.eclipse.keti.test.utils.PolicyHelper
 import org.eclipse.keti.test.utils.PrivilegeHelper
 import org.eclipse.keti.test.utils.httpHeaders
 import org.springframework.beans.factory.annotation.Autowired

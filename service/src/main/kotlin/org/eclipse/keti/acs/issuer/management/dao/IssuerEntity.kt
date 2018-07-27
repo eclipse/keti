@@ -36,7 +36,11 @@ import javax.persistence.UniqueConstraint
 @Entity
 @Table(
     name = "issuer",
-    uniqueConstraints = [(UniqueConstraint(columnNames = arrayOf("issuer_id"))), (UniqueConstraint(columnNames = arrayOf("issuer_check_token_url")))]
+    uniqueConstraints = [(UniqueConstraint(columnNames = arrayOf("issuer_id"))), (UniqueConstraint(
+        columnNames = arrayOf(
+            "issuer_check_token_url"
+        )
+    ))]
 )
 @Deprecated("")
 class IssuerEntity {
@@ -64,7 +68,10 @@ class IssuerEntity {
 
     constructor()
 
-    constructor(issuerId: String, issuerCheckTokenUrl: String) : super() {
+    constructor(
+        issuerId: String,
+        issuerCheckTokenUrl: String
+    ) : super() {
         this.issuerId = issuerId
         this.issuerCheckTokenUrl = issuerCheckTokenUrl
     }

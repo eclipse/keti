@@ -73,11 +73,17 @@ class ResourceRepositoryProxy : ResourceRepository, ResourceHierarchicalReposito
         throw UnsupportedOperationException(MESSAGE)
     }
 
-    override fun <S : ResourceEntity> findAll(example: Example<S>, pageable: Pageable): Page<S> {
+    override fun <S : ResourceEntity> findAll(
+        example: Example<S>,
+        pageable: Pageable
+    ): Page<S> {
         throw UnsupportedOperationException(MESSAGE)
     }
 
-    override fun <S : ResourceEntity> findAll(example: Example<S>, sort: Sort): List<S> {
+    override fun <S : ResourceEntity> findAll(
+        example: Example<S>,
+        sort: Sort
+    ): List<S> {
         throw UnsupportedOperationException(MESSAGE)
     }
 
@@ -157,7 +163,10 @@ class ResourceRepositoryProxy : ResourceRepository, ResourceHierarchicalReposito
         throw UnsupportedOperationException(MESSAGE)
     }
 
-    override fun getResourceWithInheritedAttributes(zone: ZoneEntity, resourceIdentifier: String): ResourceEntity? {
+    override fun getResourceWithInheritedAttributes(
+        zone: ZoneEntity,
+        resourceIdentifier: String
+    ): ResourceEntity? {
         return if (this.activeRepository === this.graphRepository) { // i.e. graph is enabled
             this.graphRepository!!.getResourceWithInheritedAttributes(zone, resourceIdentifier)
         } else {
@@ -169,7 +178,10 @@ class ResourceRepositoryProxy : ResourceRepository, ResourceHierarchicalReposito
         return this.activeRepository!!.findByZone(zoneEntity)
     }
 
-    override fun getByZoneAndResourceIdentifier(zone: ZoneEntity, resourceIdentifier: String): ResourceEntity? {
+    override fun getByZoneAndResourceIdentifier(
+        zone: ZoneEntity,
+        resourceIdentifier: String
+    ): ResourceEntity? {
         return this.activeRepository!!.getByZoneAndResourceIdentifier(zone, resourceIdentifier)
     }
 

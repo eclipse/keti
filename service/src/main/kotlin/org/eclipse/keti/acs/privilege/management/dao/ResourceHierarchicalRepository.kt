@@ -22,7 +22,10 @@ import org.eclipse.keti.acs.zone.management.dao.ZoneEntity
 
 interface ResourceHierarchicalRepository {
 
-    fun getResourceWithInheritedAttributes(zone: ZoneEntity, resourceIdentifier: String): ResourceEntity?
+    fun getResourceWithInheritedAttributes(
+        zone: ZoneEntity,
+        resourceIdentifier: String
+    ): ResourceEntity?
 
     fun getResourceEntityAndDescendantsIds(entity: ResourceEntity?): Set<String>
 }

@@ -86,7 +86,13 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
 
     val subjectProvider: Array<Array<Any?>>
         @DataProvider(name = "subjectProvider")
-        get() = arrayOf<Array<Any?>>(arrayOf(MARISSA_V1), arrayOf(JOE_V1), arrayOf(PETE_V1), arrayOf(JLO_V1), arrayOf(BOB_V1))
+        get() = arrayOf<Array<Any?>>(
+            arrayOf(MARISSA_V1),
+            arrayOf(JOE_V1),
+            arrayOf(PETE_V1),
+            arrayOf(JLO_V1),
+            arrayOf(BOB_V1)
+        )
 
     // empty subjectIdentifier
     val invalidSubjectsPost: Array<Array<Any?>>
@@ -461,7 +467,8 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
     ) {
         try {
 
-            this.privilegeHelper.postMultipleSubjects(this.acsAdminRestTemplate!!, endpoint, this.zone1Headers!!, subject)
+            this.privilegeHelper
+                .postMultipleSubjects(this.acsAdminRestTemplate!!, endpoint, this.zone1Headers!!, subject)
 
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.UNPROCESSABLE_ENTITY)

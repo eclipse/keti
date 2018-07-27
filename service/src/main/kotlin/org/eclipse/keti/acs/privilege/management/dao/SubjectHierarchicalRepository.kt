@@ -23,11 +23,15 @@ import org.eclipse.keti.acs.zone.management.dao.ZoneEntity
 
 interface SubjectHierarchicalRepository {
     fun getSubjectWithInheritedAttributesForScopes(
-        zone: ZoneEntity, subjectIdentifier: String,
+        zone: ZoneEntity,
+        subjectIdentifier: String,
         scopes: Set<Attribute>?
     ): SubjectEntity?
 
-    fun getSubjectWithInheritedAttributes(zone: ZoneEntity, subjectIdentifier: String): SubjectEntity?
+    fun getSubjectWithInheritedAttributes(
+        zone: ZoneEntity,
+        subjectIdentifier: String
+    ): SubjectEntity?
 
     fun getSubjectEntityAndDescendantsIds(entity: SubjectEntity?): Set<String>
 }

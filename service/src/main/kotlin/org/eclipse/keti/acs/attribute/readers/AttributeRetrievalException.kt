@@ -33,7 +33,10 @@ internal fun getStorageErrorMessage(id: String): String {
 
 class AttributeRetrievalException : RuntimeException {
 
-    constructor(message: String, cause: Throwable) : super(message, cause)
+    constructor(
+        message: String,
+        cause: Throwable
+    ) : super(message, cause)
 
     constructor(message: String) : super(message)
 }

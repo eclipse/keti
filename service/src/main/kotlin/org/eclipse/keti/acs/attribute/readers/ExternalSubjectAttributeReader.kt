@@ -25,13 +25,17 @@ import org.eclipse.keti.acs.rest.AttributeAdapterConnection
 
 class ExternalSubjectAttributeReader(
     connectorService: AttributeConnectorService?,
-    subjectAttributeCache: AttributeCache, adapterTimeoutMillis: Int
+    subjectAttributeCache: AttributeCache,
+    adapterTimeoutMillis: Int
 ) : ExternalAttributeReader(connectorService, subjectAttributeCache, adapterTimeoutMillis), SubjectAttributeReader {
 
     override val attributeAdapterConnections: Set<AttributeAdapterConnection>?
         get() = this.connectorService?.subjectAttributeConnector?.adapters
 
-    override fun getAttributesByScope(identifier: String, scopes: Set<Attribute>?): Set<Attribute>? {
+    override fun getAttributesByScope(
+        identifier: String,
+        scopes: Set<Attribute>?
+    ): Set<Attribute>? {
         // Connectors have no notion of scoped attributes
         return this.getAttributes(identifier)
     }

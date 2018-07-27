@@ -179,7 +179,10 @@ class ResourcePrivilegeManagementController : BaseRestApi() {
         }
     }
 
-    private fun doPutResource(resource: BaseResource, resourceIdentifier: String): ResponseEntity<BaseResource> {
+    private fun doPutResource(
+        resource: BaseResource,
+        resourceIdentifier: String
+    ): ResponseEntity<BaseResource> {
         try {
             val createdResource = this.service.upsertResource(resource)
 
@@ -206,7 +209,10 @@ class ResourcePrivilegeManagementController : BaseRestApi() {
         return noContent()
     }
 
-    private fun validResourceIdentifierOrFail(resource: BaseResource, resourceIdentifier: String) {
+    private fun validResourceIdentifierOrFail(
+        resource: BaseResource,
+        resourceIdentifier: String
+    ) {
         if (resourceIdentifier != resource.resourceIdentifier) {
             throw RestApiException(
                 HttpStatus.UNPROCESSABLE_ENTITY,

@@ -96,7 +96,10 @@ class AcsHealthAggregator internal constructor() : HealthAggregator {
     private inner class StatusComparator internal constructor(private val statusOrder: List<String>) :
         Comparator<Status> {
 
-        override fun compare(s1: Status, s2: Status): Int {
+        override fun compare(
+            s1: Status,
+            s2: Status
+        ): Int {
             val i1 = this.statusOrder.indexOf(s1.code)
             val i2 = this.statusOrder.indexOf(s2.code)
             return when {

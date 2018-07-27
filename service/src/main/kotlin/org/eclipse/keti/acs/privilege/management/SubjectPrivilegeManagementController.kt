@@ -183,7 +183,10 @@ class SubjectPrivilegeManagementController : BaseRestApi() {
         return noContent()
     }
 
-    private fun validSubjectIdentifierOrFail(subject: BaseSubject, subjectIdentifier: String) {
+    private fun validSubjectIdentifierOrFail(
+        subject: BaseSubject,
+        subjectIdentifier: String
+    ) {
         if (subjectIdentifier != subject.subjectIdentifier) {
             throw RestApiException(
                 HttpStatus.UNPROCESSABLE_ENTITY,

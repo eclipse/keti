@@ -382,7 +382,8 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
     ) {
         val map = HashMap<String, String>()
         for (resourceId in resourceIds) {
-            createMutliSetEntityMap(zoneId,
+            createMutliSetEntityMap(
+                zoneId,
                 map,
                 resourceId,
                 EntityType.RESOURCE
@@ -397,7 +398,8 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
     ) {
         val map = HashMap<String, String>()
         for (resourceEntity in entities) {
-            createMutliSetEntityMap(zoneId,
+            createMutliSetEntityMap(
+                zoneId,
                 map,
                 resourceEntity.resourceIdentifier!!,
                 EntityType.RESOURCE
@@ -430,7 +432,8 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
     ) {
         val map = HashMap<String, String>()
         for (subjectId in subjectIds) {
-            createMutliSetEntityMap(zoneId,
+            createMutliSetEntityMap(
+                zoneId,
                 map,
                 subjectId,
                 EntityType.SUBJECT
@@ -445,7 +448,8 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
     ) {
         val map = HashMap<String, String>()
         for (subjectEntity in subjectEntities) {
-            createMutliSetEntityMap(zoneId,
+            createMutliSetEntityMap(
+                zoneId,
                 map,
                 subjectEntity.subjectIdentifier!!,
                 EntityType.SUBJECT

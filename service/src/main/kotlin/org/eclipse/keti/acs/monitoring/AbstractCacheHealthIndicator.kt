@@ -72,7 +72,8 @@ internal fun cacheHealth(
 
 @Profile("cloud-redis", "redis")
 abstract class AbstractCacheHealthIndicator(
-    private val redisConnectionFactory: RedisConnectionFactory, private val cacheType: String,
+    private val redisConnectionFactory: RedisConnectionFactory,
+    private val cacheType: String,
     private val cachingEnabled: Boolean
 ) : CacheHealthIndicator {
 

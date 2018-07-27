@@ -72,7 +72,8 @@ class V2_0_1__InitializeIdentityZones : SpringJdbcMigration {
     }
 
     private fun addOAuthClientsToDefaultAuthzZone(
-        jdbcTemplate: JdbcTemplate, acsAuthorizationZoneId: Long?,
+        jdbcTemplate: JdbcTemplate,
+        acsAuthorizationZoneId: Long?,
         existingOAuthClients: Set<ZoneClientEntity>
     ) {
 
@@ -101,7 +102,10 @@ class V2_0_1__InitializeIdentityZones : SpringJdbcMigration {
         jdbcTemplate.execute("ALTER TABLE policy_set DROP COLUMN client_id;")
     }
 
-    private fun removeDuplicateRows(jdbcTemplate: JdbcTemplate, zone: Long?) {
+    private fun removeDuplicateRows(
+        jdbcTemplate: JdbcTemplate,
+        zone: Long?
+    ) {
         val subjects = jdbcTemplate
             .query("SELECT DISTINCT subject_identifier, attributes FROM subject", SubjectRowMapper())
         jdbcTemplate.update("DELETE FROM subject *")

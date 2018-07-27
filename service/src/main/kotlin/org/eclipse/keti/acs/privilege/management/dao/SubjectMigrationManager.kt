@@ -34,7 +34,8 @@ class SubjectMigrationManager {
 
     fun doSubjectMigration(
         subjectRepository: SubjectRepository,
-        subjectHierarchicalRepository: GraphSubjectRepository, pageSize: Int
+        subjectHierarchicalRepository: GraphSubjectRepository,
+        pageSize: Int
     ) {
         var numOfSubjectsSaved = 0
         var pageRequest: Pageable? = PageRequest(0, pageSize, Sort("id"))

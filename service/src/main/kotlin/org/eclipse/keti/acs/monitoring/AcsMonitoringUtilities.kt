@@ -28,7 +28,11 @@ internal const val ERROR_MESSAGE_FORMAT = "Unexpected exception while checking h
 const val DESCRIPTION_KEY = "description"
 const val CODE_KEY = "code"
 
-internal fun health(status: Status, healthCode: HealthCode, description: String): Health {
+internal fun health(
+    status: Status,
+    healthCode: HealthCode,
+    description: String
+): Health {
     val healthBuilder = Health.status(status)
     if (healthCode != HealthCode.AVAILABLE) {
         healthBuilder.withDetail(CODE_KEY, healthCode)
@@ -55,7 +59,9 @@ internal fun health(
 }
 
 internal fun logError(
-    healthCode: HealthCode, logger: Logger, format: String,
+    healthCode: HealthCode,
+    logger: Logger,
+    format: String,
     throwable: Throwable
 ): HealthCode {
     logger.error(format, healthCode, throwable)

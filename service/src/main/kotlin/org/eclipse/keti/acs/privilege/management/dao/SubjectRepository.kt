@@ -25,5 +25,8 @@ interface SubjectRepository : JpaRepository<SubjectEntity, Long> {
 
     fun findByZone(zoneEntity: ZoneEntity): List<SubjectEntity>
 
-    fun getByZoneAndSubjectIdentifier(zone: ZoneEntity, subjectIdentifier: String): SubjectEntity?
+    fun getByZoneAndSubjectIdentifier(
+        zone: ZoneEntity,
+        subjectIdentifier: String
+    ): SubjectEntity?
 }

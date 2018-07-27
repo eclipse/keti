@@ -22,7 +22,10 @@ import org.eclipse.keti.acs.attribute.readers.CachedAttributes
 
 class NonCachingAttributeCache : AttributeCache {
 
-    override fun set(key: String, value: CachedAttributes) {
+    override fun set(
+        key: String,
+        value: CachedAttributes
+    ) {
         //Intentionally left empty to satisfy interface
     }
 

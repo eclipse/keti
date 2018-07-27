@@ -33,7 +33,7 @@ private const val ATTRIBUTE_URI_TEMPLATE_VARIABLE = "attribute_uri"
  * @param requestResourceUri
  * URI of the resource from the policy evaluation request
  */
-class ResourceAttributeResolver (
+class ResourceAttributeResolver(
     private val resourceAttributeReader: ResourceAttributeReader,
     private val requestResourceUri: String,
     supplementalResourceAttributes: Set<Attribute>?

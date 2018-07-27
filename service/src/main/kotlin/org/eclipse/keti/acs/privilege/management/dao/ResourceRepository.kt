@@ -25,5 +25,8 @@ interface ResourceRepository : JpaRepository<ResourceEntity, Long> {
 
     fun findByZone(zoneEntity: ZoneEntity): List<ResourceEntity>
 
-    fun getByZoneAndResourceIdentifier(zone: ZoneEntity, resourceIdentifier: String): ResourceEntity?
+    fun getByZoneAndResourceIdentifier(
+        zone: ZoneEntity,
+        resourceIdentifier: String
+    ): ResourceEntity?
 }

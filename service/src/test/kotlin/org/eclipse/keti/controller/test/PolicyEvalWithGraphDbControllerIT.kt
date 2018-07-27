@@ -165,10 +165,10 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
         )
         putPolicySetContext.mockMvc.perform(
             putPolicySetContext.builder.contentType(MediaType.APPLICATION_JSON).content(
-                    OBJECT_WRITER.writeValueAsString(
-                        testPolicySet
-                    )
+                OBJECT_WRITER.writeValueAsString(
+                    testPolicySet
                 )
+            )
         ).andExpect(status().isCreated)
 
         // Create resource hierarchy.
@@ -240,10 +240,10 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
             )
             putPolicySetContext.mockMvc.perform(
                 putPolicySetContext.builder.contentType(MediaType.APPLICATION_JSON).content(
-                        OBJECT_WRITER.writeValueAsString(
-                            testPolicySet
-                        )
+                    OBJECT_WRITER.writeValueAsString(
+                        testPolicySet
                     )
+                )
             ).andExpect(status().isCreated)
 
             // Create resource hierarchy.

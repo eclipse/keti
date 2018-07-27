@@ -26,7 +26,10 @@ import java.sql.SQLException
 class ResourceRowMapper : RowMapper<ResourceEntity> {
 
     @Throws(SQLException::class)
-    override fun mapRow(rs: ResultSet, rowNum: Int): ResourceEntity {
+    override fun mapRow(
+        rs: ResultSet,
+        rowNum: Int
+    ): ResourceEntity {
         val resource = ResourceEntity()
         resource.resourceIdentifier = rs.getString("resource_identifier")
         resource.attributesAsJson = rs.getString("attributes")

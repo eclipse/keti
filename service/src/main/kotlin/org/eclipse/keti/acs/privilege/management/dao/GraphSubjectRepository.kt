@@ -49,17 +49,24 @@ class GraphSubjectRepository : GraphGenericRepository<SubjectEntity>(), SubjectR
     override val relationshipKey: String
         get() = HAS_SUBJECT_RELATIONSHIP_KEY
 
-    override fun getByZoneAndSubjectIdentifier(zone: ZoneEntity, subjectIdentifier: String): SubjectEntity? {
+    override fun getByZoneAndSubjectIdentifier(
+        zone: ZoneEntity,
+        subjectIdentifier: String
+    ): SubjectEntity? {
         return getEntity(zone, subjectIdentifier)
     }
 
-    override fun getSubjectWithInheritedAttributes(zone: ZoneEntity, subjectIdentifier: String): SubjectEntity? {
+    override fun getSubjectWithInheritedAttributes(
+        zone: ZoneEntity,
+        subjectIdentifier: String
+    ): SubjectEntity? {
         return getEntityWithInheritedAttributes(zone, subjectIdentifier, emptySet())
     }
 
     override fun getSubjectWithInheritedAttributesForScopes(
         zone: ZoneEntity,
-        subjectIdentifier: String, scopes: Set<Attribute>?
+        subjectIdentifier: String,
+        scopes: Set<Attribute>?
     ): SubjectEntity? {
         return getEntityWithInheritedAttributes(zone, subjectIdentifier, scopes)
     }
@@ -68,7 +75,10 @@ class GraphSubjectRepository : GraphGenericRepository<SubjectEntity>(), SubjectR
         return entity.subjectIdentifier
     }
 
-    override fun updateVertexProperties(entity: SubjectEntity, vertex: Vertex) {
+    override fun updateVertexProperties(
+        entity: SubjectEntity,
+        vertex: Vertex
+    ) {
         var subjectAttributesJson = entity.attributesAsJson
         if (StringUtils.isEmpty(subjectAttributesJson)) {
             subjectAttributesJson = EMPTY_ATTRIBUTES
@@ -102,7 +112,10 @@ class GraphSubjectRepository : GraphGenericRepository<SubjectEntity>(), SubjectR
         throw UnsupportedOperationException(MESSAGE)
     }
 
-    override fun <S : SubjectEntity> findAll(example: Example<S>, sort: Sort): List<S> {
+    override fun <S : SubjectEntity> findAll(
+        example: Example<S>,
+        sort: Sort
+    ): List<S> {
         throw UnsupportedOperationException(MESSAGE)
     }
 
@@ -110,7 +123,10 @@ class GraphSubjectRepository : GraphGenericRepository<SubjectEntity>(), SubjectR
         throw UnsupportedOperationException(MESSAGE)
     }
 
-    override fun <S : SubjectEntity> findAll(example: Example<S>, pageable: Pageable): Page<S> {
+    override fun <S : SubjectEntity> findAll(
+        example: Example<S>,
+        pageable: Pageable
+    ): Page<S> {
         throw UnsupportedOperationException(MESSAGE)
     }
 

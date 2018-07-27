@@ -84,7 +84,8 @@ class PolicyManagementServiceImpl : PolicyManagementService {
 
     @Transactional
     internal fun upsertPolicySetInTransaction(
-        policySetName: String, zone: ZoneEntity,
+        policySetName: String,
+        zone: ZoneEntity,
         policySetPayload: String?
     ) {
         val existingPolicySetEntity = this.policySetRepository.getByZoneAndPolicySetId(zone, policySetName)
@@ -108,7 +109,10 @@ class PolicyManagementServiceImpl : PolicyManagementService {
         this.policySetRepository.save(policySetEntity)
     }
 
-    private fun handleException(e: Exception, policySetName: String?) {
+    private fun handleException(
+        e: Exception,
+        policySetName: String?
+    ) {
 
         val message = String
             .format("Creation of Policy set %s failed with the following error %s", policySetName, e.message)
@@ -156,7 +160,10 @@ class PolicyManagementServiceImpl : PolicyManagementService {
         }
     }
 
-    private fun validatePolicySet(zone: ZoneEntity, policySet: PolicySet) {
+    private fun validatePolicySet(
+        zone: ZoneEntity,
+        policySet: PolicySet
+    ) {
         val policySetName = policySet.name
         if (StringUtils.isEmpty(policySetName)) {
             throw PolicyManagementException("Failed to add policy set because the policy set name is missing")

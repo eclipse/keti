@@ -21,5 +21,8 @@ package org.eclipse.keti.acs.attribute.readers
 import org.eclipse.keti.acs.model.Attribute
 
 interface SubjectAttributeReader : AttributeReader {
-    fun getAttributesByScope(identifier: String, scopes: Set<Attribute>?): Set<Attribute>?
+    fun getAttributesByScope(
+        identifier: String,
+        scopes: Set<Attribute>?
+    ): Set<Attribute>?
 }

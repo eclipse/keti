@@ -270,7 +270,8 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
             .thenAnswer { _ -> throw RuntimeException("This policy matcher is designed to throw an exception.") }
 
         val result = this.evaluationService.evalPolicy(
-            createRequest("anyresource", "anysubject", "GET", LinkedHashSet(listOf(twoPolicySets[0].name, twoPolicySets[1].name))
+            createRequest(
+                "anyresource", "anysubject", "GET", LinkedHashSet(listOf(twoPolicySets[0].name, twoPolicySets[1].name))
             )
         )
 
@@ -452,7 +453,8 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
     }
 
     private fun filterTwoPolicySetsByItself(twoPolicySets: List<PolicySet>): Array<Any?> {
-        return arrayOf(twoPolicySets,
+        return arrayOf(
+            twoPolicySets,
             LinkedHashSet(listOf(twoPolicySets[0].name, twoPolicySets[1].name)),
             LinkedHashSet(twoPolicySets)
         )
@@ -555,7 +557,12 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
     private fun createNotApplicableAndDenyPolicySets(): List<PolicySet> {
         val policySets = ArrayList<PolicySet>()
         policySets
-            .add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalNotApplicable.json", PolicySet::class.java)!!)
+            .add(
+                this.jsonUtils.deserializeFromFile(
+                    "policies/testPolicyEvalNotApplicable.json",
+                    PolicySet::class.java
+                )!!
+            )
         policySets.add(this.jsonUtils.deserializeFromFile("policies/testPolicyEvalDeny.json", PolicySet::class.java)!!)
         Assert.assertNotNull(policySets, "Policy set files are not found or invalid")
         Assert.assertTrue(policySets.size == 2, "One or more policy set files are not found or invalid")

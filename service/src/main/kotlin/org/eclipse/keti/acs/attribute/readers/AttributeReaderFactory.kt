@@ -47,8 +47,10 @@ class AttributeReaderFactory {
     private lateinit var subjectCacheRedisTemplate: RedisTemplate<String, String>
 
     // Caches that use the multiton design pattern (keyed off the zone name)
-    private val externalResourceAttributeReaderCache = ConcurrentReferenceHashMap<String, ExternalResourceAttributeReader>()
-    private val externalSubjectAttributeReaderCache = ConcurrentReferenceHashMap<String, ExternalSubjectAttributeReader>()
+    private val externalResourceAttributeReaderCache =
+        ConcurrentReferenceHashMap<String, ExternalResourceAttributeReader>()
+    private val externalSubjectAttributeReaderCache =
+        ConcurrentReferenceHashMap<String, ExternalSubjectAttributeReader>()
 
     val resourceAttributeReader: ResourceAttributeReader?
         get() {
@@ -57,7 +59,8 @@ class AttributeReaderFactory {
             }
 
             val zoneName = zoneName
-            var externalResourceAttributeReader: ExternalResourceAttributeReader? = this.externalResourceAttributeReaderCache[zoneName]
+            var externalResourceAttributeReader: ExternalResourceAttributeReader? =
+                this.externalResourceAttributeReaderCache[zoneName]
             if (externalResourceAttributeReader != null) {
                 return externalResourceAttributeReader
             }
@@ -80,7 +83,8 @@ class AttributeReaderFactory {
             }
 
             val zoneName = zoneName
-            var externalSubjectAttributeReader: ExternalSubjectAttributeReader? = this.externalSubjectAttributeReaderCache[zoneName]
+            var externalSubjectAttributeReader: ExternalSubjectAttributeReader? =
+                this.externalSubjectAttributeReaderCache[zoneName]
             if (externalSubjectAttributeReader != null) {
                 return externalSubjectAttributeReader
             }

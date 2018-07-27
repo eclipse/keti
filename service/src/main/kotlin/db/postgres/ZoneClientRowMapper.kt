@@ -27,7 +27,10 @@ import java.sql.SQLException
 class ZoneClientRowMapper : RowMapper<ZoneClientEntity> {
 
     @Throws(SQLException::class)
-    override fun mapRow(rs: ResultSet, rowNum: Int): ZoneClientEntity {
+    override fun mapRow(
+        rs: ResultSet,
+        rowNum: Int
+    ): ZoneClientEntity {
         val zoneClient = ZoneClientEntity()
         zoneClient.clientId = rs.getString("client_id")
         val issuer = IssuerEntity()

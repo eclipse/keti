@@ -62,14 +62,20 @@ private fun iterableToArray(iterable: Iterable<Any>): Array<Any> {
     return idList.toTypedArray()
 }
 
-fun getPropertyOrEmptyString(vertex: Vertex, propertyKey: String): String {
+fun getPropertyOrEmptyString(
+    vertex: Vertex,
+    propertyKey: String
+): String {
     val property = vertex.property<String>(propertyKey)
     return if (property.isPresent) {
         property.value()
     } else ""
 }
 
-fun getPropertyOrFail(vertex: Vertex, propertyKey: String): String {
+fun getPropertyOrFail(
+    vertex: Vertex,
+    propertyKey: String
+): String {
     val property = vertex.property<String>(propertyKey)
     if (property.isPresent) {
         return property.value()
@@ -257,14 +263,22 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
             }
     }
 
-    internal fun saveParentRelationships(entity: E, vertex: Vertex, update: Boolean) {
+    internal fun saveParentRelationships(
+        entity: E,
+        vertex: Vertex,
+        update: Boolean
+    ) {
         if (update) { // If this is an update remove all existing edges.
             vertex.edges(Direction.OUT, PARENT_EDGE_LABEL).forEachRemaining { it.remove() }
         }
         entity.parents.forEach { parent -> saveParentRelationship(entity, vertex, parent) }
     }
 
-    private fun saveParentRelationship(entity: E, vertex: Vertex, parent: Parent) {
+    private fun saveParentRelationship(
+        entity: E,
+        vertex: Vertex,
+        parent: Parent
+    ) {
         val traversal = this.graphTraversal.V().has(ZONE_ID_KEY, entity.zone!!.name)
             .has(entityIdKey, parent.identifier)
         if (!traversal.hasNext()) {
@@ -322,7 +336,10 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
     /**
      * Returns the entity with attributes only on the requested vertex. No parent attributes are included.
      */
-    fun getEntity(zone: ZoneEntity, identifier: String): E? {
+    fun getEntity(
+        zone: ZoneEntity,
+        identifier: String
+    ): E? {
         try {
             val traversal = this.graphTraversal.V().has(ZONE_ID_KEY, zone.name)
                 .has(entityIdKey, identifier)
@@ -344,7 +361,8 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
     }
 
     fun getEntityWithInheritedAttributes(
-        zone: ZoneEntity, identifier: String,
+        zone: ZoneEntity,
+        identifier: String,
         scopes: Set<Attribute>?
     ): E? {
         try {
@@ -369,7 +387,11 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun searchAttributesWithScopes(entity: E, vertex: Vertex, scopes: Set<Attribute>?) {
+    private fun searchAttributesWithScopes(
+        entity: E,
+        vertex: Vertex,
+        scopes: Set<Attribute>?
+    ) {
         val attributes = HashSet<Attribute>()
 
         // First add all attributes inherited from non-scoped relationships.
@@ -395,7 +417,8 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
             ).until(eq<Traverser<Vertex>>(null)).limit(this.traversalLimit + 1)
             .values<Any>(ATTRIBUTES_PROPERTY_KEY).toStream().forEach { it ->
                 val deserializedAttributes =
-                    JSON_UTILS.deserialize(it as String, Set::class.java as Class<Set<Attribute>>, Attribute::class.java)
+                    JSON_UTILS
+                        .deserialize(it as String, Set::class.java as Class<Set<Attribute>>, Attribute::class.java)
                 if (deserializedAttributes != null) {
                     attributes.addAll(deserializedAttributes)
                     checkTraversalLimitOrFail(entity, attributes)
@@ -405,7 +428,10 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
         entity.attributesAsJson = JSON_UTILS.serialize<Set<Attribute>>(attributes)
     }
 
-    private fun checkTraversalLimitOrFail(e: E, attributes: Set<Attribute>) {
+    private fun checkTraversalLimitOrFail(
+        e: E,
+        attributes: Set<Attribute>
+    ) {
         if (attributes.size > this.traversalLimit) {
             val exceptionMessage = String
                 .format(
@@ -416,7 +442,10 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
         }
     }
 
-    fun getParents(vertex: Vertex, identifierKey: String): Set<Parent> {
+    fun getParents(
+        vertex: Vertex,
+        identifierKey: String
+    ): Set<Parent> {
         val parentSet = HashSet<Parent>()
         vertex.edges(Direction.OUT, PARENT_EDGE_LABEL).forEachRemaining { edge ->
             val parentIdentifier = getPropertyOrFail(edge.inVertex(), identifierKey)
@@ -450,7 +479,10 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
 
     abstract fun getEntityId(entity: E): String?
 
-    abstract fun updateVertexProperties(entity: E, vertex: Vertex)
+    abstract fun updateVertexProperties(
+        entity: E,
+        vertex: Vertex
+    )
 
     abstract fun vertexToEntity(vertex: Vertex): E
     private fun commitTransaction(graphQuery: Runnable) {

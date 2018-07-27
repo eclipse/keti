@@ -34,7 +34,8 @@ class AcsRequestEnrichingFilter : OncePerRequestFilter() {
 
     @Throws(ServletException::class, IOException::class)
     override fun doFilterInternal(
-        request: HttpServletRequest, response: HttpServletResponse,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
         filterChain: FilterChain
     ) {
         try {

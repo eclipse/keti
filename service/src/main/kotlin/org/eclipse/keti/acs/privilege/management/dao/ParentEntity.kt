@@ -33,7 +33,10 @@ class ParentEntity {
         this.childEntity = entity
     }
 
-    constructor(entity: ZonableEntity, scopes: Set<Attribute>) {
+    constructor(
+        entity: ZonableEntity,
+        scopes: Set<Attribute>
+    ) {
         this.childEntity = entity
         this.scopes = scopes
     }

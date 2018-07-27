@@ -98,7 +98,10 @@ class SubjectRepositoryProxy : SubjectRepository, SubjectHierarchicalRepository,
         throw UnsupportedOperationException(MESSAGE)
     }
 
-    override fun <S : SubjectEntity> findAll(example: Example<S>, sort: Sort): List<S> {
+    override fun <S : SubjectEntity> findAll(
+        example: Example<S>,
+        sort: Sort
+    ): List<S> {
         throw UnsupportedOperationException(MESSAGE)
     }
 
@@ -110,7 +113,10 @@ class SubjectRepositoryProxy : SubjectRepository, SubjectHierarchicalRepository,
         throw UnsupportedOperationException(MESSAGE)
     }
 
-    override fun <S : SubjectEntity> findAll(example: Example<S>, pageable: Pageable): Page<S> {
+    override fun <S : SubjectEntity> findAll(
+        example: Example<S>,
+        pageable: Pageable
+    ): Page<S> {
         throw UnsupportedOperationException(MESSAGE)
     }
 
@@ -156,7 +162,8 @@ class SubjectRepositoryProxy : SubjectRepository, SubjectHierarchicalRepository,
 
     override fun getSubjectWithInheritedAttributesForScopes(
         zone: ZoneEntity,
-        subjectIdentifier: String, scopes: Set<Attribute>?
+        subjectIdentifier: String,
+        scopes: Set<Attribute>?
     ): SubjectEntity? {
         return if (this.activeRepository === this.graphRepository) { // i.e. graph is enabled
             this.graphRepository!!.getSubjectWithInheritedAttributesForScopes(zone, subjectIdentifier, scopes)
@@ -165,7 +172,10 @@ class SubjectRepositoryProxy : SubjectRepository, SubjectHierarchicalRepository,
         }
     }
 
-    override fun getSubjectWithInheritedAttributes(zone: ZoneEntity, subjectIdentifier: String): SubjectEntity? {
+    override fun getSubjectWithInheritedAttributes(
+        zone: ZoneEntity,
+        subjectIdentifier: String
+    ): SubjectEntity? {
         return if (this.activeRepository === this.graphRepository) { // i.e. graph is enabled
             this.graphRepository!!.getSubjectWithInheritedAttributes(zone, subjectIdentifier)
         } else {
@@ -177,7 +187,10 @@ class SubjectRepositoryProxy : SubjectRepository, SubjectHierarchicalRepository,
         return this.activeRepository!!.findByZone(zoneEntity)
     }
 
-    override fun getByZoneAndSubjectIdentifier(zone: ZoneEntity, subjectIdentifier: String): SubjectEntity? {
+    override fun getByZoneAndSubjectIdentifier(
+        zone: ZoneEntity,
+        subjectIdentifier: String
+    ): SubjectEntity? {
         return this.activeRepository!!.getByZoneAndSubjectIdentifier(zone, subjectIdentifier)
     }
 

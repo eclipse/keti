@@ -36,7 +36,6 @@ import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.isIn
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.env.ConfigurableEnvironment
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles

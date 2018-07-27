@@ -22,7 +22,8 @@ import org.apache.commons.collections4.map.PassiveExpiringMap
 import org.eclipse.keti.acs.attribute.readers.CachedAttributes
 
 class InMemoryAttributeCache internal constructor(
-    maxCachedIntervalMinutes: Long, private val zoneName: String,
+    maxCachedIntervalMinutes: Long,
+    private val zoneName: String,
     private val getKey: (String, String) -> String
 ) : AbstractAttributeCache {
 
@@ -32,7 +33,10 @@ class InMemoryAttributeCache internal constructor(
         this.attributeCache = PassiveExpiringMap(maxCachedIntervalMinutes)
     }
 
-    override fun set(key: String, value: CachedAttributes) {
+    override fun set(
+        key: String,
+        value: CachedAttributes
+    ) {
         this.attributeCache[this.getKey(this.zoneName, key)] = value
     }
 

@@ -148,7 +148,8 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
 
         // test with a valid policy set evaluation order list
         var policyEvaluationRequest = this.policyHelper
-            .createMultiplePolicySetsEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon",
+            .createMultiplePolicySetsEvalRequest(
+                MARISSA_V1.subjectIdentifier!!, "sanramon",
                 LinkedHashSet(listOf(indeterminatePolicySet, denyAllPolicySet))
             )
 
@@ -166,7 +167,8 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         val siteBasedPolicySet = this.policyHelper
             .setTestPolicy(this.acsAdminRestTemplate!!, this.acsZone1Headers!!, endpoint, siteBasedPolicyFile)
         policyEvaluationRequest = this.policyHelper
-            .createMultiplePolicySetsEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon",
+            .createMultiplePolicySetsEvalRequest(
+                MARISSA_V1.subjectIdentifier!!, "sanramon",
                 LinkedHashSet(listOf(indeterminatePolicySet, siteBasedPolicySet))
             )
 

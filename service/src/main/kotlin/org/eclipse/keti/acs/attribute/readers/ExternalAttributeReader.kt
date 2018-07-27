@@ -37,7 +37,8 @@ private const val ID = "id"
 
 abstract class ExternalAttributeReader(
     internal val connectorService: AttributeConnectorService?,
-    private val attributeCache: AttributeCache, private val adapterTimeoutMillis: Int
+    private val attributeCache: AttributeCache,
+    private val adapterTimeoutMillis: Int
 ) : AttributeReader {
 
     @Value("\${MAX_NUMBER_OF_ATTRIBUTES:1500}")

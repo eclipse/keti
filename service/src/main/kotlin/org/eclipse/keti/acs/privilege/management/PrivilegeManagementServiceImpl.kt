@@ -106,7 +106,8 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
 
     @Transactional
     internal fun appendResourcesInTransaction(
-        resources: List<BaseResource>, zone: ZoneEntity,
+        resources: List<BaseResource>,
+        zone: ZoneEntity,
         entities: MutableList<ResourceEntity>
     ) {
         for (resource in resources) {
@@ -158,7 +159,8 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
     }
 
     private fun createResource(
-        resourceIdentifier: String, zone: ZoneEntity,
+        resourceIdentifier: String,
+        zone: ZoneEntity,
         resourceEntity: ResourceEntity?
     ): BaseResource? {
         val resource = this.privilegeConverter.toResource(resourceEntity)
@@ -185,7 +187,8 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
 
     @Transactional
     internal fun upsertResourceInTransaction(
-        resource: BaseResource, zone: ZoneEntity,
+        resource: BaseResource,
+        zone: ZoneEntity,
         updatedResource: ResourceEntity?
     ): ResourceEntity? {
         val persistedResource = this.resourceRepository
@@ -275,7 +278,8 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
 
     @Transactional
     internal fun appendSubjectsInTransaction(
-        subjects: List<BaseSubject>, zone: ZoneEntity,
+        subjects: List<BaseSubject>,
+        zone: ZoneEntity,
         subjectEntities: MutableList<SubjectEntity>
     ) {
         for (subject in subjects) {
@@ -318,7 +322,8 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
     }
 
     private fun createSubject(
-        subjectIdentifier: String, zone: ZoneEntity,
+        subjectIdentifier: String,
+        zone: ZoneEntity,
         subjectEntity: SubjectEntity?
     ): BaseSubject? {
         val subject = this.privilegeConverter.toSubject(subjectEntity)
@@ -329,7 +334,10 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
     }
 
     @Transactional(readOnly = true)
-    override fun getBySubjectIdentifierAndScopes(subjectIdentifier: String, scopes: Set<Attribute>?): BaseSubject? {
+    override fun getBySubjectIdentifierAndScopes(
+        subjectIdentifier: String,
+        scopes: Set<Attribute>?
+    ): BaseSubject? {
         val zone = this.zoneResolver.zoneEntityOrFail
         val subjectEntity = this.subjectRepository
             .getSubjectWithInheritedAttributesForScopes(zone, subjectIdentifier, scopes)
@@ -350,7 +358,8 @@ class PrivilegeManagementServiceImpl : PrivilegeManagementService {
 
     @Transactional
     internal fun upsertSubjectInTransaction(
-        subject: BaseSubject, zone: ZoneEntity,
+        subject: BaseSubject,
+        zone: ZoneEntity,
         updatedSubject: SubjectEntity?
     ): SubjectEntity? {
         val persistedSubject = this.subjectRepository

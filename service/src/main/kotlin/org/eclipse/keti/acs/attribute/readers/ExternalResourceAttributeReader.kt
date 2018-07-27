@@ -24,7 +24,8 @@ import org.eclipse.keti.acs.rest.AttributeAdapterConnection
 
 class ExternalResourceAttributeReader(
     connectorService: AttributeConnectorService?,
-    resourceAttributeCache: AttributeCache, adapterTimeoutMillis: Int
+    resourceAttributeCache: AttributeCache,
+    adapterTimeoutMillis: Int
 ) : ExternalAttributeReader(connectorService, resourceAttributeCache, adapterTimeoutMillis), ResourceAttributeReader {
 
     override val attributeAdapterConnections: Set<AttributeAdapterConnection>?

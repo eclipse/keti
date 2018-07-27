@@ -22,7 +22,8 @@ import java.lang.reflect.InvocationTargetException
 
 fun mockAcsRequestContext() {
     try {
-        val method = Class.forName("org.eclipse.keti.acs.request.context.AcsRequestContextHolderKt").getDeclaredMethod("initialize")
+        val method = Class.forName("org.eclipse.keti.acs.request.context.AcsRequestContextHolderKt")
+            .getDeclaredMethod("initialize")
         method.isAccessible = true
         method.invoke(null)
     } catch (e: NoSuchMethodException) {

@@ -30,7 +30,8 @@ class ResourceMigrationManager {
 
     fun doResourceMigration(
         resourceRepository: ResourceRepository,
-        resourceHierarchicalRepository: GraphResourceRepository, pageSize: Int
+        resourceHierarchicalRepository: GraphResourceRepository,
+        pageSize: Int
     ) {
         var numOfResourcesSaved = 0
         var pageRequest: Pageable? = PageRequest(0, pageSize, Sort("id"))

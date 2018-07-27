@@ -18,7 +18,7 @@
 
 package org.eclipse.keti.acs.request.context
 
-class AcsRequestContext// Hide Constructor
+class AcsRequestContext // Hide Constructor
 internal constructor(private val unModifiableRequestContextMap: Map<ACSRequestContextAttribute, Any?>) {
 
     enum class ACSRequestContextAttribute {

@@ -198,8 +198,8 @@ class PolicyManagementControllerIT : AbstractTestNGSpringContextTests() {
             mockMvcContext.mockMvc.perform(
                 mockMvcContext.builder.content(evalRequestJson).contentType(MediaType.APPLICATION_JSON)
             ).andExpect(status().isBadRequest).andExpect(
-                    jsonPath("ErrorDetails.errorMessage").value("More than one policy set exists for this zone. Please provide an ordered list " + "of policy set names to consider for this evaluation and resubmit the request.")
-                )
+                jsonPath("ErrorDetails.errorMessage").value("More than one policy set exists for this zone. Please provide an ordered list " + "of policy set names to consider for this evaluation and resubmit the request.")
+            )
         } finally {
             mockMvcContext = this.testUtils.createWACWithCustomDELETERequestBuilder(
                 this.wac, this.testZone!!.subdomain, VERSION + "policy-set/" + policySet2Name

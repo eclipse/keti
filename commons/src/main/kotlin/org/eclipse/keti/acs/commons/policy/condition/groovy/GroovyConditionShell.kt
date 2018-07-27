@@ -95,7 +95,10 @@ class GroovyConditionShell : ConditionShell {
         secureASTCustomizer.importsWhitelist = emptyList()
         // Disallow star imports by setting a blank whitelist.
         secureASTCustomizer.starImportsWhitelist = listOf(
-            "org.crsh.command.*", "org.crsh.cli.*", "org.crsh.groovy.*", "org.eclipse.keti.acs.commons.policy.condition.*"
+            "org.crsh.command.*",
+            "org.crsh.cli.*",
+            "org.crsh.groovy.*",
+            "org.eclipse.keti.acs.commons.policy.condition.*"
         )
         // Set white list for constant type classes.
         secureASTCustomizer.setConstantTypesClassesWhiteList(
