@@ -32,13 +32,13 @@ class UriTemplateVariableResolverTest {
     fun testMatch(
         uri: String,
         attributeUriTemplate: UriTemplate,
-        matchedURI: Any
+        matchedURI: Any?
     ) {
         Assert.assertEquals(this.attributeUriResolver.resolve(uri, attributeUriTemplate, "attribute_uri"), matchedURI)
     }
 
     @DataProvider
-    internal fun uriDataProvider(): Array<Array<Any?>> {
+    fun uriDataProvider(): Array<Array<Any?>> {
         return arrayOf<Array<Any?>>(
 
             arrayOf("/v1/site/123", UriTemplate("/v1{attribute_uri}"), "/site/123"),

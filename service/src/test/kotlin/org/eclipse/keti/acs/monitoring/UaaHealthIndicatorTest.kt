@@ -30,7 +30,7 @@ import org.testng.annotations.Test
 class UaaHealthIndicatorTest {
 
     @Value("\${uaaCheckHealthUrl}")
-    private lateinit var uaaCheckHealthUrl: String
+    private var uaaCheckHealthUrl: String? = null
 
     @Test(dataProvider = "statuses")
     @Throws(Exception::class)

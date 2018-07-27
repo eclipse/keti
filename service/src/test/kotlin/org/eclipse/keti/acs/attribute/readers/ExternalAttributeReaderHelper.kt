@@ -58,7 +58,7 @@ object ExternalAttributeReaderHelper {
     }
 
     @DataProvider
-    internal fun attributeSizeConstraintDataProvider(): Array<Array<Any?>> {
+    fun attributeSizeConstraintDataProvider(): Array<Array<Any?>> {
         return arrayOf<Array<Any?>>(arrayOf(0, 100), arrayOf(100, 0))
     }
 } // Hiding constructor because this a test utility class
