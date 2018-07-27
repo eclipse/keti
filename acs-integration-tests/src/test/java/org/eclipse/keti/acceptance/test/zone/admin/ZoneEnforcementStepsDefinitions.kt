@@ -29,11 +29,13 @@ import org.eclipse.keti.acs.model.PolicySet
 import org.eclipse.keti.acs.rest.BaseResource
 import org.eclipse.keti.acs.rest.BaseSubject
 import org.eclipse.keti.test.utils.ACSITSetUpFactory
-import org.eclipse.keti.test.utils.ACSTestUtil
-import org.eclipse.keti.test.utils.ACSTestUtil.ACS_VERSION
+import org.eclipse.keti.test.utils.ACS_POLICY_SET_API_PATH
+import org.eclipse.keti.test.utils.ACS_VERSION
 import org.eclipse.keti.test.utils.CreatePolicyStatus
+import org.eclipse.keti.test.utils.PREDIX_ZONE_ID
 import org.eclipse.keti.test.utils.PolicyHelper
 import org.eclipse.keti.test.utils.PrivilegeHelper
+import org.eclipse.keti.test.utils.httpHeaders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpEntity
@@ -115,24 +117,24 @@ class ZoneEnforcementStepsDefinitions {
         identifier: String,
         subdomainSuffix: String
     ) {
-        val zoneHeaders = ACSTestUtil.httpHeaders()
+        val zoneHeaders = httpHeaders()
         val acsTemplate = this.acsZone2Template
-        zoneHeaders.set(PolicyHelper.PREDIX_ZONE_ID, getZoneName(subdomainSuffix))
+        zoneHeaders.set(PREDIX_ZONE_ID, getZoneName(subdomainSuffix))
 
         try {
             when (api) {
                 "subject" -> this.privilegeHelper.putSubject(
-                    acsTemplate, this.subject, this.acsUrl, zoneHeaders,
+                    acsTemplate!!, this.subject, this.acsUrl, zoneHeaders,
                     this.privilegeHelper.defaultAttribute
                 )
                 "resource" -> this.privilegeHelper.putResource(
-                    acsTemplate, this.resource, this.acsUrl, zoneHeaders,
+                    acsTemplate!!, this.resource, this.acsUrl!!, zoneHeaders,
                     this.privilegeHelper.defaultAttribute
                 )
                 "policy-set" -> {
                     this.testPolicyName = "single-action-defined-policy-set"
                     val s = this.policyHelper.createPolicySet(
-                        "src/test/resources/single-action-defined-policy-set.json", acsTemplate, zoneHeaders
+                        "src/test/resources/single-action-defined-policy-set.json", acsTemplate!!, zoneHeaders
                     )
                     Assert.assertEquals(s, CreatePolicyStatus.SUCCESS)
                 }
@@ -155,9 +157,9 @@ class ZoneEnforcementStepsDefinitions {
 
         val acsTemplate = this.acsZone2Template
         val encodedIdentifier = URLEncoder.encode(identifier, "UTF-8")
-        val zoneHeaders = ACSTestUtil.httpHeaders()
+        val zoneHeaders = httpHeaders()
         // differentiate between zone 1 and zone 2, which will have slightly different uris
-        zoneHeaders.set(PolicyHelper.PREDIX_ZONE_ID, getZoneName(subdomainSuffix))
+        zoneHeaders.set(PREDIX_ZONE_ID, getZoneName(subdomainSuffix))
 
         val uri = URI.create(this.acsUrl + ACS_VERSION + "/" + api + "/" + encodedIdentifier)
         try {
@@ -178,7 +180,7 @@ class ZoneEnforcementStepsDefinitions {
                 }
                 "policy-set" -> {
                     this.policyset = acsTemplate!!.exchange(
-                        this.acsUrl + PolicyHelper.ACS_POLICY_SET_API_PATH + this.testPolicyName, HttpMethod.GET,
+                        this.acsUrl + ACS_POLICY_SET_API_PATH + this.testPolicyName, HttpMethod.GET,
                         HttpEntity<Any>(zoneHeaders), PolicySet::class.java
                     )
                     this.status = this.policyset!!.statusCode.value()
@@ -203,18 +205,18 @@ class ZoneEnforcementStepsDefinitions {
         try {
             when (api) {
                 "subject" -> this.privilegeHelper.putSubject(
-                    acsTemplate, this.subject, this.acsUrl, this.zone1Headers,
+                    acsTemplate!!, this.subject, this.acsUrl, this.zone1Headers!!,
                     this.privilegeHelper.defaultAttribute
                 )
                 "resource" -> this.privilegeHelper.putResource(
-                    acsTemplate, this.resource, this.acsUrl, this.zone1Headers,
+                    acsTemplate!!, this.resource, this.acsUrl!!, this.zone1Headers!!,
                     this.privilegeHelper.defaultAttribute
                 )
                 "policy-set" -> {
                     this.testPolicyName = "single-action-defined-policy-set"
                     this.policyHelper.createPolicySet(
                         "src/test/resources/single-action-defined-policy-set.json",
-                        acsTemplate, this.zone1Headers
+                        acsTemplate!!, this.zone1Headers!!
                     )
                 }
                 else -> Assert.fail("Api $api does not match/is not yet implemented for this test code.")
@@ -253,7 +255,7 @@ class ZoneEnforcementStepsDefinitions {
                 }
                 "policy-set" -> {
                     this.policyset = acsTemplate!!.exchange(
-                        this.acsUrl + PolicyHelper.ACS_POLICY_SET_API_PATH + this.testPolicyName, HttpMethod.GET,
+                        this.acsUrl + ACS_POLICY_SET_API_PATH + this.testPolicyName, HttpMethod.GET,
                         HttpEntity<Any>(this.zone1Headers), PolicySet::class.java
                     )
                     this.status = this.policyset!!.statusCode.value()
@@ -296,8 +298,8 @@ class ZoneEnforcementStepsDefinitions {
         val acsTemplate = this.acsZone2Template
         val zoneName = getZoneName(zone)
 
-        val zoneHeaders = ACSTestUtil.httpHeaders()
-        zoneHeaders.set(PolicyHelper.PREDIX_ZONE_ID, zoneName)
+        val zoneHeaders = httpHeaders()
+        zoneHeaders.set(PREDIX_ZONE_ID, zoneName)
 
         val encodedIdentifier = URLEncoder.encode(identifier, "UTF-8")
         val uri = URI.create(this.acsUrl + ACS_VERSION + "/" + api + "/" + encodedIdentifier)

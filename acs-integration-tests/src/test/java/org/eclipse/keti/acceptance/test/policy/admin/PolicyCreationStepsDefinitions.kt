@@ -26,9 +26,9 @@ import cucumber.api.java.en.Given
 import cucumber.api.java.en.Then
 import org.eclipse.keti.test.utils.ACSITSetUpFactory
 import org.eclipse.keti.test.utils.CreatePolicyStatus
+import org.eclipse.keti.test.utils.DEFAULT_SUBJECT_ID
 import org.eclipse.keti.test.utils.PolicyHelper
 import org.eclipse.keti.test.utils.PrivilegeHelper
-import org.eclipse.keti.test.utils.PrivilegeHelper.DEFAULT_SUBJECT_ID
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
 import org.testng.Assert

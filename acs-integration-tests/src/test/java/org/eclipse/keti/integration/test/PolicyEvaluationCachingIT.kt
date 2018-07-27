@@ -25,6 +25,7 @@ import org.eclipse.keti.acs.rest.BaseResource
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult
 import org.eclipse.keti.test.TestConfig
 import org.eclipse.keti.test.utils.ACSITSetUpFactory
+import org.eclipse.keti.test.utils.ACS_POLICY_EVAL_API_PATH
 import org.eclipse.keti.test.utils.PolicyHelper
 import org.eclipse.keti.test.utils.PrivilegeHelper
 import org.springframework.beans.factory.annotation.Autowired
@@ -74,9 +75,9 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
     @AfterMethod
     @Throws(Exception::class)
     fun cleanup() {
-        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers)
-        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers)
-        this.policyHelper.deletePolicySets(this.acsAdminRestTemplate, this.acsUrl, this.acsZone1Headers)
+        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate!!, this.acsUrl!!, this.acsZone1Headers!!)
+        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate!!, this.acsUrl!!, this.acsZone1Headers!!)
+        this.policyHelper.deletePolicySets(this.acsAdminRestTemplate!!, this.acsUrl!!, this.acsZone1Headers!!)
     }
 
     /**
@@ -88,19 +89,19 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
     fun testPolicyEvalCacheWhenPolicySetChanges() {
         val subject = MARISSA_V1
         val policyEvaluationRequest = this.policyHelper
-            .createEvalRequest(MARISSA_V1.subjectIdentifier, "sanramon")
+            .createEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon")
         val endpoint = this.acsUrl
 
         this.privilegeHelper.putSubject(
-            this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, subject, endpoint, this.acsZone1Headers!!,
             this.privilegeHelper.defaultAttribute
         )
         var policyFile = "src/test/resources/policies/single-site-based.json"
-        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, policyFile)
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate!!, this.acsZone1Headers!!, endpoint!!, policyFile)
 
         var postForEntity = this.acsAdminRestTemplate!!
             .postForEntity(
-                endpoint!! + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
             )
 
@@ -109,10 +110,10 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         Assert.assertEquals(responseBody.effect, Effect.PERMIT)
 
         policyFile = "src/test/resources/policies/deny-all.json"
-        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, policyFile)
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate!!, this.acsZone1Headers!!, endpoint, policyFile)
 
         postForEntity = this.acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
         )
 
@@ -136,24 +137,24 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         val endpoint = this.acsUrl
 
         this.privilegeHelper.putSubject(
-            this.acsAdminRestTemplate, MARISSA_V1, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, MARISSA_V1, endpoint, this.acsZone1Headers!!,
             this.privilegeHelper.defaultAttribute
         )
 
         val indeterminatePolicySet = this.policyHelper
-            .setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, indeterminatePolicyFile)
+            .setTestPolicy(this.acsAdminRestTemplate!!, this.acsZone1Headers!!, endpoint!!, indeterminatePolicyFile)
         val denyAllPolicySet = this.policyHelper
-            .setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, denyAllPolicyFile)
+            .setTestPolicy(this.acsAdminRestTemplate!!, this.acsZone1Headers!!, endpoint, denyAllPolicyFile)
 
         // test with a valid policy set evaluation order list
         var policyEvaluationRequest = this.policyHelper
-            .createMultiplePolicySetsEvalRequest(MARISSA_V1.subjectIdentifier, "sanramon",
+            .createMultiplePolicySetsEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon",
                 LinkedHashSet(listOf(indeterminatePolicySet, denyAllPolicySet))
             )
 
         var postForEntity = this.acsAdminRestTemplate!!
             .postForEntity(
-                endpoint!! + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
             )
 
@@ -163,14 +164,14 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
 
         // test with one of the policy sets changed from the evaluation order list
         val siteBasedPolicySet = this.policyHelper
-            .setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, siteBasedPolicyFile)
+            .setTestPolicy(this.acsAdminRestTemplate!!, this.acsZone1Headers!!, endpoint, siteBasedPolicyFile)
         policyEvaluationRequest = this.policyHelper
-            .createMultiplePolicySetsEvalRequest(MARISSA_V1.subjectIdentifier, "sanramon",
+            .createMultiplePolicySetsEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon",
                 LinkedHashSet(listOf(indeterminatePolicySet, siteBasedPolicySet))
             )
 
         postForEntity = this.acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
         )
 
@@ -192,20 +193,20 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         // create test subject
         val subject = MARISSA_V1
         this.privilegeHelper.putSubject(
-            this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, subject, endpoint, this.acsZone1Headers!!,
             this.privilegeHelper.defaultAttribute, this.privilegeHelper.defaultOrgAttribute
         )
 
         // create test policy set
         val policyFile = "src/test/resources/policies/single-org-based.json"
-        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, policyFile)
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate!!, this.acsZone1Headers!!, endpoint!!, policyFile)
 
         // post policy evaluation request
         val policyEvaluationRequest = this.policyHelper
-            .createEvalRequest(MARISSA_V1.subjectIdentifier, "sanramon")
+            .createEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon")
         var postForEntity = this.acsAdminRestTemplate!!
             .postForEntity(
-                endpoint!! + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
             )
 
@@ -220,13 +221,13 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         // add a resource which is expected to reset resource cached timestamp and invalidate cached decision
         val resource = BaseResource("/secured-by-value/sites/sanramon")
         this.privilegeHelper.putResource(
-            this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, resource, endpoint, this.acsZone1Headers!!,
             this.privilegeHelper.defaultOrgAttribute
         )
 
         // post policy evaluation request; decision should be reevaluated.
         postForEntity = this.acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
         )
 
@@ -245,23 +246,23 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         val resource = BaseResource("/secured-by-value/sites/sanramon")
         val subject = MARISSA_V1
         val policyEvaluationRequest = this.policyHelper
-            .createEvalRequest(MARISSA_V1.subjectIdentifier, "sanramon")
+            .createEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon")
         val endpoint = this.acsUrl
 
         this.privilegeHelper.putResource(
-            this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, resource, endpoint!!, this.acsZone1Headers!!,
             this.privilegeHelper.defaultOrgAttribute
         )
         this.privilegeHelper.putSubject(
-            this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, subject, endpoint, this.acsZone1Headers!!,
             this.privilegeHelper.defaultAttribute, this.privilegeHelper.defaultOrgAttribute
         )
         val policyFile = "src/test/resources/policies/single-org-based.json"
-        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, policyFile)
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate!!, this.acsZone1Headers!!, endpoint, policyFile)
 
         var postForEntity = this.acsAdminRestTemplate!!
             .postForEntity(
-                endpoint!! + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
             )
 
@@ -271,12 +272,12 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
 
         // update resource with different attributes
         this.privilegeHelper.putResource(
-            this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, resource, endpoint, this.acsZone1Headers!!,
             this.privilegeHelper.alternateOrgAttribute
         )
 
         postForEntity = this.acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
         )
 
@@ -298,20 +299,20 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         //create test resource
         val resource = BaseResource("/secured-by-value/sites/sanramon")
         this.privilegeHelper.putResource(
-            this.acsAdminRestTemplate, resource, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, resource, endpoint!!, this.acsZone1Headers!!,
             this.privilegeHelper.defaultAttribute
         )
 
         // create test policy set
         val policyFile = "src/test/resources/policies/single-site-based.json"
-        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, policyFile)
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate!!, this.acsZone1Headers!!, endpoint, policyFile)
 
         // post policy evaluation request
         val policyEvaluationRequest = this.policyHelper
-            .createEvalRequest(MARISSA_V1.subjectIdentifier, "sanramon")
+            .createEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon")
         var postForEntity = this.acsAdminRestTemplate!!
             .postForEntity(
-                endpoint!! + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
             )
 
@@ -326,13 +327,13 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         // add a subject which is expected to reset subject cached timestamp and invalidate cached decision
         val subject = MARISSA_V1
         this.privilegeHelper.putSubject(
-            this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, subject, endpoint, this.acsZone1Headers!!,
             this.privilegeHelper.defaultAttribute, this.privilegeHelper.defaultAttribute
         )
 
         // post policy evaluation request; decision should be reevaluated.
         postForEntity = this.acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
         )
 
@@ -349,19 +350,19 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
     @Throws(Exception::class)
     fun testPolicyEvalCacheWhenSubjectChanges() {
         val policyEvaluationRequest = this.policyHelper
-            .createEvalRequest(MARISSA_V1.subjectIdentifier, "sanramon")
+            .createEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon")
         val endpoint = this.acsUrl
 
         this.privilegeHelper.putSubject(
-            this.acsAdminRestTemplate, MARISSA_V1, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, MARISSA_V1, endpoint, this.acsZone1Headers!!,
             this.privilegeHelper.defaultAttribute
         )
         val policyFile = "src/test/resources/single-site-based-policy-set.json"
-        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, policyFile)
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate!!, this.acsZone1Headers!!, endpoint!!, policyFile)
 
         var postForEntity = this.acsAdminRestTemplate!!
             .postForEntity(
-                endpoint!! + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
             )
 
@@ -370,12 +371,12 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         Assert.assertEquals(responseBody.effect, Effect.PERMIT)
 
         this.privilegeHelper.putSubject(
-            this.acsAdminRestTemplate, MARISSA_V1, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, MARISSA_V1, endpoint, this.acsZone1Headers!!,
             this.privilegeHelper.alternateAttribute
         )
 
         postForEntity = this.acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
         )
 
@@ -397,15 +398,15 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
         val endpoint = this.acsUrl
 
         this.privilegeHelper.putSubject(
-            this.acsAdminRestTemplate, subject, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, subject, endpoint, this.acsZone1Headers!!,
             this.privilegeHelper.defaultAttribute, this.privilegeHelper.defaultOrgAttribute
         )
         val policyFile = "src/test/resources/policies/multiple-attribute-uri-templates.json"
-        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate, this.acsZone1Headers, endpoint, policyFile)
+        this.policyHelper.setTestPolicy(this.acsAdminRestTemplate!!, this.acsZone1Headers!!, endpoint!!, policyFile)
 
         var postForEntity = this.acsAdminRestTemplate!!
             .postForEntity(
-                endpoint!! + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
             )
 
@@ -418,12 +419,12 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
             Arrays.asList(this.privilegeHelper.defaultOrgAttribute)
         )
         this.privilegeHelper.putResource(
-            this.acsAdminRestTemplate, siteResource, endpoint, this.acsZone1Headers,
+            this.acsAdminRestTemplate!!, siteResource, endpoint, this.acsZone1Headers!!,
             this.privilegeHelper.defaultOrgAttribute
         )
 
         postForEntity = this.acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(policyEvaluationRequest, this.acsZone1Headers), PolicyEvaluationResult::class.java
         )
 

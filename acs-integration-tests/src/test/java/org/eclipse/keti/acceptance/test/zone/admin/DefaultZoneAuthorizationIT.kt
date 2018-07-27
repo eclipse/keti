@@ -22,8 +22,10 @@ import org.eclipse.keti.acs.rest.BaseResource
 import org.eclipse.keti.acs.rest.Zone
 import org.eclipse.keti.test.utils.ACSITSetUpFactory
 import org.eclipse.keti.test.utils.ACSTestUtil
+import org.eclipse.keti.test.utils.PREDIX_ZONE_ID
 import org.eclipse.keti.test.utils.PolicyHelper
 import org.eclipse.keti.test.utils.PrivilegeHelper
+import org.eclipse.keti.test.utils.httpHeaders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -74,8 +76,8 @@ class DefaultZoneAuthorizationIT : AbstractTestNGSpringContextTests() {
     fun testAccessGlobalResourceWithZoneIssuer() {
         val zone2AcsTemplate = this.acsitSetUpFactory.acsZone2AdminRestTemplate
 
-        val zoneTwoHeaders = ACSTestUtil.httpHeaders()
-        zoneTwoHeaders.set(PolicyHelper.PREDIX_ZONE_ID, this.zone2Name)
+        val zoneTwoHeaders = httpHeaders()
+        zoneTwoHeaders.set(PREDIX_ZONE_ID, this.zone2Name)
 
         // Write a resource to zone2. This should work
         val responseEntity = this.privilegeHelper.postResources(

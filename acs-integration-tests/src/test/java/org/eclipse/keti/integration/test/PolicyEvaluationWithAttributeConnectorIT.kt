@@ -25,9 +25,11 @@ import org.eclipse.keti.acs.rest.AttributeConnector
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult
 import org.eclipse.keti.acs.rest.Zone
 import org.eclipse.keti.test.utils.ACSITSetUpFactory
-import org.eclipse.keti.test.utils.ACSTestUtil
+import org.eclipse.keti.test.utils.ACS_POLICY_EVAL_API_PATH
+import org.eclipse.keti.test.utils.PREDIX_ZONE_ID
 import org.eclipse.keti.test.utils.PolicyHelper
 import org.eclipse.keti.test.utils.ZoneFactory
+import org.eclipse.keti.test.utils.httpHeaders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cloud.sleuth.DefaultSpanNamer
@@ -145,8 +147,8 @@ class PolicyEvaluationWithAttributeConnectorIT : AbstractTestNGSpringContextTest
 
     @Throws(IOException::class)
     private fun zoneHeader(): HttpHeaders {
-        val httpHeaders = ACSTestUtil.httpHeaders()
-        httpHeaders.set(PolicyHelper.PREDIX_ZONE_ID, this.zone!!.subdomain)
+        val httpHeaders = httpHeaders()
+        httpHeaders.set(PREDIX_ZONE_ID, this.zone!!.subdomain)
         return httpHeaders
     }
 
@@ -201,7 +203,7 @@ class PolicyEvaluationWithAttributeConnectorIT : AbstractTestNGSpringContextTest
     ) {
         val testPolicyName = this.policyHelper!!
             .setTestPolicy(
-                this.acsAdminRestTemplate, zoneHeader(), this.zoneFactory!!.acsBaseURL,
+                this.acsAdminRestTemplate!!, zoneHeader(), this.zoneFactory!!.acsBaseURL,
                 "src/test/resources/policy-set-with-one-policy-using-resource-attributes-from-asset-adapter" + ".json"
             )
 
@@ -214,9 +216,9 @@ class PolicyEvaluationWithAttributeConnectorIT : AbstractTestNGSpringContextTest
                 this.tracer!!.continueSpan(Span.builder().traceId(1L).spanId(2L).parent(3L).build())
             }
 
-            val policyEvaluationResponse = this.acsAdminRestTemplate!!
+            val policyEvaluationResponse = this.acsAdminRestTemplate
                 .postForEntity(
-                    this.zoneFactory.acsBaseURL + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                    this.zoneFactory.acsBaseURL + ACS_POLICY_EVAL_API_PATH,
                     HttpEntity(policyEvaluationRequest, zoneHeader()), PolicyEvaluationResult::class.java
                 )
             Assert.assertEquals(policyEvaluationResponse.statusCode, HttpStatus.OK)

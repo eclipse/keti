@@ -26,6 +26,10 @@ import org.eclipse.keti.acs.rest.BaseSubject
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult
 import org.eclipse.keti.test.utils.ACSITSetUpFactory
+import org.eclipse.keti.test.utils.ACS_POLICY_EVAL_API_PATH
+import org.eclipse.keti.test.utils.ACS_POLICY_SET_API_PATH
+import org.eclipse.keti.test.utils.ACS_RESOURCE_API_PATH
+import org.eclipse.keti.test.utils.ACS_SUBJECT_API_PATH
 import org.eclipse.keti.test.utils.PolicyHelper
 import org.eclipse.keti.test.utils.PrivilegeHelper
 import org.springframework.beans.factory.annotation.Autowired
@@ -140,7 +144,7 @@ class ACSAcceptanceIT : AbstractTestNGSpringContextTests() {
         var testResource: BaseResource? = null
         try {
             testPolicyName = this.policyHelper.setTestPolicy(
-                this.acsZoneRestTemplate, headers, endpoint,
+                this.acsZoneRestTemplate!!, headers, endpoint,
                 "src/test/resources/testCompleteACSFlow.json"
             )
             val subject = BaseSubject(subjectIdentifier)
@@ -149,7 +153,7 @@ class ACSAcceptanceIT : AbstractTestNGSpringContextTests() {
             site.name = "site"
             site.value = "sanramon"
 
-            marissa = this.privilegeHelper.putSubject(this.acsZoneRestTemplate, subject, endpoint, headers, site)
+            marissa = this.privilegeHelper.putSubject(this.acsZoneRestTemplate!!, subject, endpoint, headers, site)
 
             val region = Attribute()
             region.issuer = "issuerId1"
@@ -160,12 +164,12 @@ class ACSAcceptanceIT : AbstractTestNGSpringContextTests() {
             resource.resourceIdentifier = "/alarms/sites/sanramon"
 
             testResource = this.privilegeHelper.putResource(
-                this.acsZoneRestTemplate, resource, endpoint, headers,
+                this.acsZoneRestTemplate!!, resource, endpoint, headers,
                 region
             )
 
             val evalResponse = this.acsZoneRestTemplate!!.postForEntity(
-                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH, HttpEntity(policyEvalRequest, headers),
+                endpoint + ACS_POLICY_EVAL_API_PATH, HttpEntity(policyEvalRequest, headers),
                 PolicyEvaluationResult::class.java
             )
 
@@ -176,7 +180,7 @@ class ACSAcceptanceIT : AbstractTestNGSpringContextTests() {
             // delete policy
             if (null != testPolicyName) {
                 this.acsZoneRestTemplate!!.exchange(
-                    endpoint + PolicyHelper.ACS_POLICY_SET_API_PATH + testPolicyName,
+                    endpoint + ACS_POLICY_SET_API_PATH + testPolicyName,
                     HttpMethod.DELETE, HttpEntity<Any>(headers), String::class.java
                 )
             }
@@ -184,13 +188,13 @@ class ACSAcceptanceIT : AbstractTestNGSpringContextTests() {
             // delete attributes
             if (null != marissa) {
                 this.acsZoneRestTemplate!!.exchange(
-                    endpoint + PrivilegeHelper.ACS_SUBJECT_API_PATH + marissa.subjectIdentifier,
+                    endpoint + ACS_SUBJECT_API_PATH + marissa.subjectIdentifier,
                     HttpMethod.DELETE, HttpEntity<Any>(headers), String::class.java
                 )
             }
             if (null != testResource) {
                 val encodedResource = URLEncoder.encode(testResource.resourceIdentifier!!, "UTF-8")
-                val uri = URI(endpoint + PrivilegeHelper.ACS_RESOURCE_API_PATH + encodedResource)
+                val uri = URI(endpoint + ACS_RESOURCE_API_PATH + encodedResource)
                 this.acsZoneRestTemplate!!
                     .exchange(uri, HttpMethod.DELETE, HttpEntity<Any>(headers), String::class.java)
             }

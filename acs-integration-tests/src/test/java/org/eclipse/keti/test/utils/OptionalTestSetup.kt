@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,15 +14,16 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
-package org.eclipse.keti.test.utils;
+package org.eclipse.keti.test.utils
 
-import java.util.Map;
+interface OptionalTestSetup {
 
-public interface OptionalTestSetup {
+    fun setup(
+        zoneId: String,
+        trustedIssuers: Map<String, Any>
+    )
 
-    void setup(String zoneId, Map<String, Object> trustedIssuers);
-
-    void tearDown(String zoneId);
+    fun tearDown(zoneId: String)
 }

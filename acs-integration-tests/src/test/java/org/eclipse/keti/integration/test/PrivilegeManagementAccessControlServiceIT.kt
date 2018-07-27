@@ -25,10 +25,12 @@ import org.eclipse.keti.acs.rest.BaseResource
 import org.eclipse.keti.acs.rest.BaseSubject
 import org.eclipse.keti.test.TestConfig
 import org.eclipse.keti.test.utils.ACSITSetUpFactory
-import org.eclipse.keti.test.utils.ACSTestUtil
-import org.eclipse.keti.test.utils.PolicyHelper
+import org.eclipse.keti.test.utils.ACS_RESOURCE_API_PATH
+import org.eclipse.keti.test.utils.ACS_SUBJECT_API_PATH
+import org.eclipse.keti.test.utils.PREDIX_ZONE_ID
 import org.eclipse.keti.test.utils.PrivilegeHelper
 import org.eclipse.keti.test.utils.ZoneFactory
+import org.eclipse.keti.test.utils.httpHeaders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -127,7 +129,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         val subjects = ArrayList<BaseSubject>()
         try {
             this.acsAdminRestTemplate!!.postForEntity(
-                this.acsUrl!! + PrivilegeHelper.ACS_SUBJECT_API_PATH,
+                this.acsUrl!! + ACS_SUBJECT_API_PATH,
                 HttpEntity<List<BaseSubject>>(subjects, this.zone1Headers), Array<BaseSubject>::class.java
             )
         } catch (e: HttpClientErrorException) {
@@ -146,7 +148,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
 
         try {
             this.acsAdminRestTemplate!!.postForEntity(
-                this.acsUrl!! + PrivilegeHelper.ACS_SUBJECT_API_PATH,
+                this.acsUrl!! + ACS_SUBJECT_API_PATH,
                 HttpEntity<List<BaseSubject>>(subjects, this.zone1Headers), ResponseEntity::class.java
             )
         } catch (e: HttpClientErrorException) {
@@ -156,7 +158,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
 
         this.acsAdminRestTemplate!!
             .exchange(
-                this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/marissa", HttpMethod.DELETE,
+                this.acsUrl + ACS_SUBJECT_API_PATH + "/marissa", HttpMethod.DELETE,
                 HttpEntity<Any>(this.zone1Headers), ResponseEntity::class.java
             )
         Assert.fail("Expected unprocessable entity http client error.")
@@ -165,12 +167,12 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
     fun testCreateSubjectWithMalformedJSON() {
         try {
             val badSubject = "{\"subject\": bad-subject-form\"}"
-            val headers = ACSTestUtil.httpHeaders()
+            val headers = httpHeaders()
             headers.add("Content-type", "application/json")
-            headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name)
+            headers.add(PREDIX_ZONE_ID, this.acsZone1Name)
             val httpEntity = HttpEntity(badSubject, headers)
             this.acsAdminRestTemplate!!
-                .put(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/bad-subject-form", httpEntity)
+                .put(this.acsUrl + ACS_SUBJECT_API_PATH + "/bad-subject-form", httpEntity)
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.BAD_REQUEST)
             return
@@ -178,7 +180,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
 
         this.acsAdminRestTemplate!!
             .exchange(
-                this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/bad-subject-form", HttpMethod.DELETE,
+                this.acsUrl + ACS_SUBJECT_API_PATH + "/bad-subject-form", HttpMethod.DELETE,
                 HttpEntity<Any>(this.zone1Headers), ResponseEntity::class.java
             )
         Assert.fail("testCreateSubjectWithMalformedJSON should have failed!")
@@ -188,13 +190,13 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         try {
             val badSubject =
                 "{\"subject\":{\"name\" : \"good-subject-brittany\"}," + "{\"subject\": bad-subject-sarah\"}"
-            val headers = ACSTestUtil.httpHeaders()
+            val headers = httpHeaders()
             headers.add("Content-type", "application/json")
-            headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name)
+            headers.add(PREDIX_ZONE_ID, this.acsZone1Name)
             val httpEntity = HttpEntity(badSubject, headers)
             this.acsAdminRestTemplate!!
                 .postForEntity(
-                    this.acsUrl!! + PrivilegeHelper.ACS_SUBJECT_API_PATH,
+                    this.acsUrl!! + ACS_SUBJECT_API_PATH,
                     httpEntity,
                     Array<Subject>::class.java
                 )
@@ -205,12 +207,12 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
 
         this.acsAdminRestTemplate!!
             .exchange(
-                this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/bad-subject-sarah", HttpMethod.DELETE,
+                this.acsUrl + ACS_SUBJECT_API_PATH + "/bad-subject-sarah", HttpMethod.DELETE,
                 HttpEntity<Any>(this.zone1Headers), ResponseEntity::class.java
             )
         this.acsAdminRestTemplate!!
             .exchange(
-                this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + "/good-subject-brittany",
+                this.acsUrl + ACS_SUBJECT_API_PATH + "/good-subject-brittany",
                 HttpMethod.DELETE, HttpEntity<Any>(this.zone1Headers), ResponseEntity::class.java
             )
         Assert.fail("testCreateBatchSubjectsWithMalformedJSON should have failed!")
@@ -219,12 +221,12 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
     fun testCreateResourceWithMalformedJSON() {
         try {
             val badResource = "{\"resource\": bad-resource-form\"}"
-            val headers = ACSTestUtil.httpHeaders()
+            val headers = httpHeaders()
             headers.add("Content-type", "application/json")
-            headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name)
+            headers.add(PREDIX_ZONE_ID, this.acsZone1Name)
             val httpEntity = HttpEntity(badResource, headers)
             this.acsAdminRestTemplate!!
-                .put(this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/bad-resource-form", httpEntity)
+                .put(this.acsUrl + ACS_RESOURCE_API_PATH + "/bad-resource-form", httpEntity)
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.BAD_REQUEST)
             return
@@ -232,7 +234,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
 
         this.acsAdminRestTemplate!!
             .exchange(
-                this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/bad-resource-form", HttpMethod.DELETE,
+                this.acsUrl + ACS_RESOURCE_API_PATH + "/bad-resource-form", HttpMethod.DELETE,
                 HttpEntity<Any>(this.zone1Headers), ResponseEntity::class.java
             )
         Assert.fail("testCreateResourceWithMalformedJSON should have failed!")
@@ -242,12 +244,12 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         try {
             val badResource =
                 "{\"resource\":{\"name\" : \"Site\", \"uriTemplate\" : " + "\"/secured-by-value/sites/{site_id}\"},{\"resource\": bad-resource-form\"}"
-            val headers = ACSTestUtil.httpHeaders()
+            val headers = httpHeaders()
             headers.add("Content-type", "application/json")
-            headers.add(PolicyHelper.PREDIX_ZONE_ID, this.acsZone1Name)
+            headers.add(PREDIX_ZONE_ID, this.acsZone1Name)
             val httpEntity = HttpEntity(badResource, headers)
             this.acsAdminRestTemplate!!.postForEntity(
-                this.acsUrl!! + PrivilegeHelper.ACS_RESOURCE_API_PATH, httpEntity,
+                this.acsUrl!! + ACS_RESOURCE_API_PATH, httpEntity,
                 Array<BaseResource>::class.java
             )
         } catch (e: HttpClientErrorException) {
@@ -257,12 +259,12 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
 
         this.acsAdminRestTemplate!!
             .exchange(
-                this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/bad-resource-form", HttpMethod.DELETE,
+                this.acsUrl + ACS_RESOURCE_API_PATH + "/bad-resource-form", HttpMethod.DELETE,
                 HttpEntity<Any>(this.zone1Headers), ResponseEntity::class.java
             )
         this.acsAdminRestTemplate!!
             .exchange(
-                this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/Site", HttpMethod.DELETE,
+                this.acsUrl + ACS_RESOURCE_API_PATH + "/Site", HttpMethod.DELETE,
                 HttpEntity<Any>(this.zone1Headers), ResponseEntity::class.java
             )
         Assert.fail("testCreateBatchResourcesWithMalformedJSON should have failed!")
@@ -272,7 +274,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         val resources = ArrayList<BaseResource>()
         try {
             this.acsAdminRestTemplate!!.postForEntity(
-                this.acsUrl!! + PrivilegeHelper.ACS_RESOURCE_API_PATH,
+                this.acsUrl!! + ACS_RESOURCE_API_PATH,
                 HttpEntity<List<BaseResource>>(resources, this.zone1Headers), Array<BaseResource>::class.java
             )
         } catch (e: HttpClientErrorException) {
@@ -295,22 +297,22 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         resource2.attributes = attributes
 
         this.acsAdminRestTemplate!!.put(
-            this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa",
+            this.acsUrl + ACS_RESOURCE_API_PATH + "/marissa",
             HttpEntity(resource1, this.zone1Headers)
         )
         this.acsAdminRestTemplate!!.put(
-            this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa",
+            this.acsUrl + ACS_RESOURCE_API_PATH + "/marissa",
             HttpEntity(resource2, this.zone1Headers)
         )
         val response = acsAdminRestTemplate!!
             .exchange(
-                this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa", HttpMethod.GET,
+                this.acsUrl + ACS_RESOURCE_API_PATH + "/marissa", HttpMethod.GET,
                 HttpEntity<Any>(this.zone1Headers), BaseResource::class.java
             )
         Assert.assertEquals(response.body, resource2)
         this.acsAdminRestTemplate!!
             .exchange(
-                this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa", HttpMethod.DELETE,
+                this.acsUrl + ACS_RESOURCE_API_PATH + "/marissa", HttpMethod.DELETE,
                 HttpEntity<Any>(this.zone1Headers), ResponseEntity::class.java
             )
     }
@@ -326,7 +328,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
             // of duplicate
             // resource_identifiers which returns a HTTP 422 error.
             this.acsAdminRestTemplate!!.postForEntity(
-                this.acsUrl!! + PrivilegeHelper.ACS_RESOURCE_API_PATH,
+                this.acsUrl!! + ACS_RESOURCE_API_PATH,
                 HttpEntity<List<BaseResource>>(resources, this.zone1Headers), ResponseEntity::class.java
             )
         } catch (e: HttpClientErrorException) {
@@ -336,7 +338,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
 
         this.acsAdminRestTemplate!!
             .exchange(
-                this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + "/marissa", HttpMethod.DELETE,
+                this.acsUrl + ACS_RESOURCE_API_PATH + "/marissa", HttpMethod.DELETE,
                 HttpEntity<Any>(this.zone1Headers), ResponseEntity::class.java
             )
         Assert
@@ -349,7 +351,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         val responseEntity: ResponseEntity<BaseSubject>
         try {
             this.privilegeHelper.putSubject(
-                this.acsAdminRestTemplate, subject, this.acsUrl, this.zone1Headers,
+                this.acsAdminRestTemplate!!, subject, this.acsUrl, this.zone1Headers!!,
                 this.privilegeHelper.defaultAttribute
             )
         } catch (e: HttpClientErrorException) {
@@ -357,7 +359,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         }
 
         val encodedSubjectIdentifier = URLEncoder.encode(subject.subjectIdentifier!!, "UTF-8")
-        val uri = URI.create(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier)
+        val uri = URI.create(this.acsUrl + ACS_SUBJECT_API_PATH + encodedSubjectIdentifier)
         try {
             responseEntity = this.acsAdminRestTemplate!!
                 .exchange(uri, HttpMethod.GET, HttpEntity<Any>(this.zone1Headers), BaseSubject::class.java)
@@ -385,14 +387,14 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
     fun testPutSubjectDeleteZone() {
 
         this.zoneFactory.createTestZone(
-            this.acsAdminRestTemplate, this.acsZone3Name,
+            this.acsAdminRestTemplate!!, this.acsZone3Name!!,
             listOf(this.primaryZoneIssuerId)
         )
 
         val responseEntity: ResponseEntity<BaseSubject>
         try {
             this.privilegeHelper.putSubject(
-                this.acsAdminRestTemplate, MARISSA_V1, this.acsUrl, this.zone3Headers,
+                this.acsAdminRestTemplate!!, MARISSA_V1, this.acsUrl, this.zone3Headers!!,
                 this.privilegeHelper.defaultAttribute
             )
 
@@ -403,7 +405,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         try {
             responseEntity = this.acsAdminRestTemplate!!
                 .exchange(
-                    this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + MARISSA_V1.subjectIdentifier,
+                    this.acsUrl + ACS_SUBJECT_API_PATH + MARISSA_V1.subjectIdentifier,
                     HttpMethod.GET, HttpEntity<Any>(this.zone3Headers), BaseSubject::class.java
                 )
             Assert.assertEquals(responseEntity.statusCode, HttpStatus.OK)
@@ -412,10 +414,10 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         }
 
         try {
-            this.zoneFactory.deleteZone(this.acsAdminRestTemplate, this.acsZone3Name)
+            this.zoneFactory.deleteZone(this.acsAdminRestTemplate!!, this.acsZone3Name!!)
             this.acsAdminRestTemplate!!
                 .exchange(
-                    this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + MARISSA_V1.subjectIdentifier,
+                    this.acsUrl + ACS_SUBJECT_API_PATH + MARISSA_V1.subjectIdentifier,
                     HttpMethod.GET, HttpEntity<Any>(this.zone3Headers), BaseSubject::class.java
                 )
             Assert.fail("Zone '" + this.acsZone3Name + "' was not properly deleted.")
@@ -437,7 +439,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         try {
             val subjectIdentifier = "marcia"
             val subjectUri = URI.create(
-                this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + URLEncoder
+                this.acsUrl + ACS_SUBJECT_API_PATH + URLEncoder
                     .encode(subjectIdentifier, "UTF-8")
             )
             this.acsAdminRestTemplate!!.put(subjectUri, HttpEntity(BOB_V1, this.zone1Headers))
@@ -459,7 +461,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
     ) {
         try {
 
-            this.privilegeHelper.postMultipleSubjects(this.acsAdminRestTemplate, endpoint, this.zone1Headers, subject)
+            this.privilegeHelper.postMultipleSubjects(this.acsAdminRestTemplate!!, endpoint, this.zone1Headers!!, subject)
 
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.UNPROCESSABLE_ENTITY)
@@ -478,7 +480,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
     ) {
         try {
             val responseEntity = this.privilegeHelper
-                .postMultipleSubjects(this.acsAdminRestTemplate, endpoint, this.zone1Headers, subject)
+                .postMultipleSubjects(this.acsAdminRestTemplate!!, endpoint, this.zone1Headers!!, subject)
             Assert.assertEquals(responseEntity.statusCode, HttpStatus.NO_CONTENT)
         } catch (e: Exception) {
             Assert.fail("Unable to create subject.")
@@ -501,7 +503,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
                 Arrays.asList(this.privilegeHelper.defaultAttribute)
             )
             val responseEntity = this.privilegeHelper
-                .postSubjects(this.acsAdminRestTemplate, endpoint, this.zone1Headers, subject, subject2)
+                .postSubjects(this.acsAdminRestTemplate!!, endpoint, this.zone1Headers!!, subject, subject2)
             Assert.assertEquals(responseEntity.statusCode, HttpStatus.NO_CONTENT)
             subject2.attributes = HashSet(
                 Arrays.asList(this.privilegeHelper.alternateAttribute)
@@ -510,16 +512,16 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
                 Arrays.asList(this.privilegeHelper.alternateAttribute)
             )
             this.privilegeHelper
-                .postSubjects(this.acsAdminRestTemplate, endpoint, this.zone1Headers, subject, subject2)
+                .postSubjects(this.acsAdminRestTemplate!!, endpoint, this.zone1Headers!!, subject, subject2)
             var encodedSubjectIdentifier = URLEncoder.encode(subject.subjectIdentifier!!, "UTF-8")
-            var uri = URI.create(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier)
+            var uri = URI.create(this.acsUrl + ACS_SUBJECT_API_PATH + encodedSubjectIdentifier)
             var forEntity = this.acsAdminRestTemplate!!
                 .exchange(uri, HttpMethod.GET, HttpEntity<Any>(this.zone1Headers), BaseSubject::class.java)
             Assert.assertTrue(
                 forEntity.body.attributes!!.contains(this.privilegeHelper.alternateAttribute)
             )
             encodedSubjectIdentifier = URLEncoder.encode(subject2.subjectIdentifier!!, "UTF-8")
-            uri = URI.create(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier)
+            uri = URI.create(this.acsUrl + ACS_SUBJECT_API_PATH + encodedSubjectIdentifier)
             forEntity = this.acsAdminRestTemplate!!
                 .exchange(uri, HttpMethod.GET, HttpEntity<Any>(this.zone1Headers), BaseSubject::class.java)
             Assert.assertTrue(
@@ -527,14 +529,14 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
             )
 
             encodedSubjectIdentifier = URLEncoder.encode(subject.subjectIdentifier!!, "UTF-8")
-            uri = URI.create(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier)
+            uri = URI.create(this.acsUrl + ACS_SUBJECT_API_PATH + encodedSubjectIdentifier)
             forEntity = this.acsAdminRestTemplate!!
                 .exchange(uri, HttpMethod.GET, HttpEntity<Any>(this.zone1Headers), BaseSubject::class.java)
             Assert.assertTrue(
                 forEntity.body.attributes!!.contains(this.privilegeHelper.alternateAttribute)
             )
             encodedSubjectIdentifier = URLEncoder.encode(subject2.subjectIdentifier!!, "UTF-8")
-            uri = URI.create(this.acsUrl + PrivilegeHelper.ACS_SUBJECT_API_PATH + encodedSubjectIdentifier)
+            uri = URI.create(this.acsUrl + ACS_SUBJECT_API_PATH + encodedSubjectIdentifier)
             forEntity = this.acsAdminRestTemplate!!
                 .exchange(uri, HttpMethod.GET, HttpEntity<Any>(this.zone1Headers), BaseSubject::class.java)
             Assert.assertTrue(
@@ -553,7 +555,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
     ) {
         try {
             val responseEntity = this.privilegeHelper
-                .postResources(this.acsAdminRestTemplate, endpoint, this.zone1Headers, resource)
+                .postResources(this.acsAdminRestTemplate!!, endpoint, this.zone1Headers!!, resource)
             Assert.assertEquals(responseEntity.statusCode, HttpStatus.NO_CONTENT)
         } catch (e: Exception) {
             Assert.fail("Unable to create resource.")
@@ -567,7 +569,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         endpoint: String
     ) {
         try {
-            this.privilegeHelper.postResources(this.acsAdminRestTemplate, endpoint, this.zone1Headers, resource)
+            this.privilegeHelper.postResources(this.acsAdminRestTemplate!!, endpoint, this.zone1Headers!!, resource)
         } catch (e: HttpClientErrorException) {
             Assert.assertEquals(e.statusCode, HttpStatus.UNPROCESSABLE_ENTITY)
             return
@@ -582,7 +584,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
     fun testPutGetDeleteResource() {
         try {
             this.privilegeHelper.putResource(
-                this.acsAdminRestTemplate, SANRAMON, this.acsUrl, this.zone1Headers,
+                this.acsAdminRestTemplate!!, SANRAMON, this.acsUrl!!, this.zone1Headers!!,
                 this.privilegeHelper.defaultAttribute
             )
         } catch (e: Exception) {
@@ -590,7 +592,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         }
 
         val resourceUri = URI.create(
-            this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + URLEncoder
+            this.acsUrl + ACS_RESOURCE_API_PATH + URLEncoder
                 .encode(SANRAMON.resourceIdentifier!!, "UTF-8")
         )
         try {
@@ -627,11 +629,11 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
     fun testUpdateResourceURIMismatch() {
         try {
             this.privilegeHelper.putResource(
-                this.acsAdminRestTemplate, SANRAMON, this.acsUrl, this.zone1Headers,
+                this.acsAdminRestTemplate!!, SANRAMON, this.acsUrl!!, this.zone1Headers!!,
                 this.privilegeHelper.defaultAttribute
             )
             val resourceUri = URI.create(
-                this.acsUrl + PrivilegeHelper.ACS_RESOURCE_API_PATH + URLEncoder
+                this.acsUrl + ACS_RESOURCE_API_PATH + URLEncoder
                     .encode("/different/resource", "UTF-8")
             )
             this.acsAdminRestTemplate!!.put(resourceUri, HttpEntity(SANRAMON, this.zone1Headers))
@@ -646,8 +648,8 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
     @AfterMethod
     @Throws(Exception::class)
     fun cleanup() {
-        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate, this.acsUrl, this.zone1Headers)
-        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate, this.acsUrl, this.zone1Headers)
+        this.privilegeHelper.deleteResources(this.acsAdminRestTemplate!!, this.acsUrl!!, this.zone1Headers!!)
+        this.privilegeHelper.deleteSubjects(this.acsAdminRestTemplate!!, this.acsUrl!!, this.zone1Headers!!)
     }
 
     @AfterClass

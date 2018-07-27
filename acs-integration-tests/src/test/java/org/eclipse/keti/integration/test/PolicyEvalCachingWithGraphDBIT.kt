@@ -27,6 +27,7 @@ import org.eclipse.keti.acs.rest.BaseSubject
 import org.eclipse.keti.acs.rest.Parent
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult
 import org.eclipse.keti.test.utils.ACSITSetUpFactory
+import org.eclipse.keti.test.utils.ACS_POLICY_EVAL_API_PATH
 import org.eclipse.keti.test.utils.PolicyHelper
 import org.eclipse.keti.test.utils.PrivilegeHelper
 import org.springframework.beans.factory.annotation.Autowired
@@ -90,9 +91,9 @@ class PolicyEvalCachingWithGraphDBIT : AbstractTestNGSpringContextTests() {
     @AfterMethod
     @Throws(Exception::class)
     fun cleanup() {
-        privilegeHelper.deleteResources(acsAdminRestTemplate, acsUrl, acsZone1Headers)
-        privilegeHelper.deleteSubjects(acsAdminRestTemplate, acsUrl, acsZone1Headers)
-        policyHelper.deletePolicySets(acsAdminRestTemplate, acsUrl, acsZone1Headers)
+        privilegeHelper.deleteResources(acsAdminRestTemplate!!, acsUrl!!, acsZone1Headers!!)
+        privilegeHelper.deleteSubjects(acsAdminRestTemplate!!, acsUrl!!, acsZone1Headers!!)
+        policyHelper.deletePolicySets(acsAdminRestTemplate!!, acsUrl!!, acsZone1Headers!!)
     }
 
     /**
@@ -124,28 +125,28 @@ class PolicyEvalCachingWithGraphDBIT : AbstractTestNGSpringContextTests() {
         val endpoint = acsUrl
 
         // Set up fbi <-- specialAgentsGroup <-- (agentMulder, agentScully) subject hierarchy
-        privilegeHelper.putSubject(acsAdminRestTemplate, fbi, endpoint, acsZone1Headers)
+        privilegeHelper.putSubject(acsAdminRestTemplate!!, fbi, endpoint, acsZone1Headers!!)
         privilegeHelper.putSubject(
-            acsAdminRestTemplate, specialAgentsGroup, endpoint, acsZone1Headers,
+            acsAdminRestTemplate!!, specialAgentsGroup, endpoint, acsZone1Headers!!,
             SPECIAL_AGENTS_GROUP_ATTRIBUTE
         )
-        privilegeHelper.putSubject(acsAdminRestTemplate, agentMulder, endpoint, acsZone1Headers)
-        privilegeHelper.putSubject(acsAdminRestTemplate, agentScully, endpoint, acsZone1Headers)
+        privilegeHelper.putSubject(acsAdminRestTemplate!!, agentMulder, endpoint, acsZone1Headers!!)
+        privilegeHelper.putSubject(acsAdminRestTemplate!!, agentScully, endpoint, acsZone1Headers!!)
 
         // Set up resource
         privilegeHelper.putResource(
-            acsAdminRestTemplate, scullysTestimony, endpoint, acsZone1Headers,
+            acsAdminRestTemplate!!, scullysTestimony, endpoint!!, acsZone1Headers!!,
             SPECIAL_AGENTS_GROUP_ATTRIBUTE, TOP_SECRET_CLASSIFICATION
         )
 
         // Set up policy
         val policyFile = "src/test/resources/policies/complete-sample-policy-set-2.json"
-        policyHelper.setTestPolicy(acsAdminRestTemplate, acsZone1Headers, endpoint, policyFile)
+        policyHelper.setTestPolicy(acsAdminRestTemplate!!, acsZone1Headers!!, endpoint, policyFile)
 
         // Verify that policy is evaluated to DENY since top secret classification is not set
         var postForEntity = acsAdminRestTemplate!!
             .postForEntity(
-                endpoint!! + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(mulderPolicyEvaluationRequest, acsZone1Headers),
                 PolicyEvaluationResult::class.java
             )
@@ -154,7 +155,7 @@ class PolicyEvalCachingWithGraphDBIT : AbstractTestNGSpringContextTests() {
         Assert.assertEquals(responseBody.effect, Effect.DENY)
 
         postForEntity = acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(scullyPolicyEvaluationRequest, acsZone1Headers), PolicyEvaluationResult::class.java
         )
         Assert.assertEquals(postForEntity.statusCode, HttpStatus.OK)
@@ -163,13 +164,13 @@ class PolicyEvalCachingWithGraphDBIT : AbstractTestNGSpringContextTests() {
 
         // Change parent subject to add top secret classification
         privilegeHelper.putSubject(
-            acsAdminRestTemplate, specialAgentsGroup, endpoint, acsZone1Headers,
+            acsAdminRestTemplate!!, specialAgentsGroup, endpoint, acsZone1Headers!!,
             SPECIAL_AGENTS_GROUP_ATTRIBUTE, TOP_SECRET_CLASSIFICATION
         )
 
         // Verify that policy is evaluated to PERMIT since top secret classification is now propogated from the parent
         postForEntity = acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(mulderPolicyEvaluationRequest, acsZone1Headers), PolicyEvaluationResult::class.java
         )
         Assert.assertEquals(postForEntity.statusCode, HttpStatus.OK)
@@ -177,7 +178,7 @@ class PolicyEvalCachingWithGraphDBIT : AbstractTestNGSpringContextTests() {
         Assert.assertEquals(responseBody.effect, Effect.PERMIT)
 
         postForEntity = acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(scullyPolicyEvaluationRequest, acsZone1Headers), PolicyEvaluationResult::class.java
         )
         Assert.assertEquals(postForEntity.statusCode, HttpStatus.OK)
@@ -203,31 +204,31 @@ class PolicyEvalCachingWithGraphDBIT : AbstractTestNGSpringContextTests() {
         val agentMulder = BaseSubject(AGENT_MULDER)
 
         val sanramonPolicyEvaluationRequest = policyHelper
-            .createEvalRequest(agentMulder.subjectIdentifier, "sanramon")
+            .createEvalRequest(agentMulder.subjectIdentifier!!, "sanramon")
 
         val basementPolicyEvaluationRequest = policyHelper
-            .createEvalRequest(agentMulder.subjectIdentifier, "basement")
+            .createEvalRequest(agentMulder.subjectIdentifier!!, "basement")
 
         val endpoint = acsUrl
 
         privilegeHelper.putResource(
-            acsAdminRestTemplate, grandparentResource, endpoint, acsZone1Headers,
+            acsAdminRestTemplate!!, grandparentResource, endpoint!!, acsZone1Headers!!,
             privilegeHelper.defaultOrgAttribute
         )
-        privilegeHelper.putResource(acsAdminRestTemplate, parentResource, endpoint, acsZone1Headers)
-        privilegeHelper.putResource(acsAdminRestTemplate, childResource, endpoint, acsZone1Headers)
+        privilegeHelper.putResource(acsAdminRestTemplate!!, parentResource, endpoint, acsZone1Headers!!)
+        privilegeHelper.putResource(acsAdminRestTemplate!!, childResource, endpoint, acsZone1Headers!!)
         privilegeHelper.putSubject(
-            acsAdminRestTemplate, agentMulder, endpoint, acsZone1Headers,
+            acsAdminRestTemplate!!, agentMulder, endpoint, acsZone1Headers!!,
             privilegeHelper.defaultAttribute, privilegeHelper.defaultOrgAttribute
         )
 
         val policyFile = "src/test/resources/policies/single-org-based.json"
-        policyHelper.setTestPolicy(acsAdminRestTemplate, acsZone1Headers, endpoint, policyFile)
+        policyHelper.setTestPolicy(acsAdminRestTemplate!!, acsZone1Headers!!, endpoint, policyFile)
 
         // Subject policy evaluation request for site "sanramon"
         var postForEntity = acsAdminRestTemplate!!
             .postForEntity(
-                endpoint!! + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(sanramonPolicyEvaluationRequest, acsZone1Headers),
                 PolicyEvaluationResult::class.java
             )
@@ -238,7 +239,7 @@ class PolicyEvalCachingWithGraphDBIT : AbstractTestNGSpringContextTests() {
 
         // Subject policy evaluation request for site "basement"
         postForEntity = acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(basementPolicyEvaluationRequest, acsZone1Headers), PolicyEvaluationResult::class.java
         )
 
@@ -248,13 +249,13 @@ class PolicyEvalCachingWithGraphDBIT : AbstractTestNGSpringContextTests() {
 
         // Change grandparent resource attributes from DefaultOrgAttribute to AlternateOrgAttribute
         privilegeHelper.putResource(
-            acsAdminRestTemplate, grandparentResource, endpoint, acsZone1Headers,
+            acsAdminRestTemplate!!, grandparentResource, endpoint, acsZone1Headers!!,
             privilegeHelper.alternateOrgAttribute
         )
 
         // Subject policy evaluation request for site "sanramon"
         postForEntity = acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(sanramonPolicyEvaluationRequest, acsZone1Headers), PolicyEvaluationResult::class.java
         )
 
@@ -264,7 +265,7 @@ class PolicyEvalCachingWithGraphDBIT : AbstractTestNGSpringContextTests() {
 
         // Subject policy evaluation request for site "basement"
         postForEntity = acsAdminRestTemplate!!.postForEntity(
-            endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+            endpoint + ACS_POLICY_EVAL_API_PATH,
             HttpEntity(basementPolicyEvaluationRequest, acsZone1Headers), PolicyEvaluationResult::class.java
         )
 

@@ -28,6 +28,8 @@ import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult
 import org.eclipse.keti.test.utils.ACSITSetUpFactory
 import org.eclipse.keti.test.utils.ACSTestUtil
+import org.eclipse.keti.test.utils.ACS_POLICY_EVAL_API_PATH
+import org.eclipse.keti.test.utils.ACS_POLICY_SET_API_PATH
 import org.eclipse.keti.test.utils.PolicyHelper
 import org.eclipse.keti.test.utils.PrivilegeHelper
 import org.springframework.beans.factory.annotation.Autowired
@@ -65,25 +67,25 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
 
     val subject: Array<Array<Any?>>
         @DataProvider(name = "subjectProvider")
-        get() = arrayOf(
+        get() = arrayOf<Array<Any?>>(
             arrayOf(
                 MARISSA_V1,
-                policyHelper.createEvalRequest(MARISSA_V1.subjectIdentifier, "sanramon"),
+                policyHelper.createEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon"),
                 acsitSetUpFactory.acsUrl
             ),
             arrayOf(
                 JOE_V1,
-                policyHelper.createEvalRequest(JOE_V1.subjectIdentifier, "sanramon"),
+                policyHelper.createEvalRequest(JOE_V1.subjectIdentifier!!, "sanramon"),
                 acsitSetUpFactory.acsUrl
             ),
             arrayOf(
                 PETE_V1,
-                policyHelper.createEvalRequest(PETE_V1.subjectIdentifier, "sanramon"),
+                policyHelper.createEvalRequest(PETE_V1.subjectIdentifier!!, "sanramon"),
                 acsitSetUpFactory.acsUrl
             ),
             arrayOf(
                 JLO_V1,
-                policyHelper.createEvalRequest(JLO_V1.subjectIdentifier, "sanramon"),
+                policyHelper.createEvalRequest(JLO_V1.subjectIdentifier!!, "sanramon"),
                 acsitSetUpFactory.acsUrl
             )
         )
@@ -118,7 +120,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
         )
         val postForEntity = this.acsitSetUpFactory.acsZoneAdminRestTemplate
             .postForEntity(
-                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(policyEvaluationRequest, this.acsitSetUpFactory.zone1Headers),
                 PolicyEvaluationResult::class.java
             )
@@ -160,7 +162,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
 
             var postForEntity = this.acsitSetUpFactory.acsZoneAdminRestTemplate
                 .postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                    endpoint + ACS_POLICY_EVAL_API_PATH,
                     HttpEntity(policyEvaluationRequest, this.acsitSetUpFactory.zone1Headers),
                     PolicyEvaluationResult::class.java
                 )
@@ -170,10 +172,10 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
             Assert.assertEquals(responseBody.effect, Effect.PERMIT)
 
             val policyEvaluationRequest2 = this.policyHelper
-                .createEvalRequest(subject.subjectIdentifier, "ny")
+                .createEvalRequest(subject.subjectIdentifier!!, "ny")
 
             postForEntity = this.acsitSetUpFactory.acsZoneAdminRestTemplate.postForEntity(
-                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(policyEvaluationRequest2, this.acsitSetUpFactory.zone1Headers),
                 PolicyEvaluationResult::class.java
             )
@@ -222,7 +224,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
 
             var postForEntity = this.acsitSetUpFactory.acsZoneAdminRestTemplate
                 .postForEntity(
-                    this.acsitSetUpFactory.acsUrl + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                    this.acsitSetUpFactory.acsUrl + ACS_POLICY_EVAL_API_PATH,
                     HttpEntity(evalRequest, this.acsitSetUpFactory.zone1Headers),
                     PolicyEvaluationResult::class.java
                 )
@@ -239,7 +241,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
             )
 
             postForEntity = this.acsitSetUpFactory.acsZoneAdminRestTemplate.postForEntity(
-                this.acsitSetUpFactory.acsUrl + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                this.acsitSetUpFactory.acsUrl + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(evalRequest, this.acsitSetUpFactory.zone1Headers),
                 PolicyEvaluationResult::class.java
             )
@@ -267,7 +269,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
         )
         val policySetSaved = this.getPolicySet(
             this.acsitSetUpFactory.acsZoneAdminRestTemplate,
-            testPolicyName, this.acsitSetUpFactory.zone1Headers, endpoint
+            testPolicyName!!, this.acsitSetUpFactory.zone1Headers, endpoint
         )
         Assert.assertEquals(testPolicyName, policySetSaved.name)
         this.policyHelper.deletePolicySet(
@@ -279,7 +281,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
     @Test(dataProvider = "endpointProvider")
     @Throws(Exception::class)
     fun testPolicyCreationInValidPolicy(endpoint: String) {
-        val testPolicyName: String
+        val testPolicyName: String?
         try {
             val policyFile = "src/test/resources/missing-policy-set-name-policy.json"
             testPolicyName = this.policyHelper.setTestPolicy(
@@ -302,7 +304,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
     @Test(dataProvider = "endpointProvider")
     @Throws(Exception::class)
     fun testPolicyCreationInValidWithBadPolicySetNamePolicy(endpoint: String) {
-        val testPolicyName: String
+        val testPolicyName: String?
         try {
             val policyFile = "src/test/resources/policy-set-with-only-name-effect.json"
             testPolicyName = this.policyHelper.setTestPolicy(
@@ -325,7 +327,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
     @Test(dataProvider = "endpointProvider")
     @Throws(Exception::class)
     fun testPolicyCreationJsonSchemaInvalidPolicySet(endpoint: String) {
-        val testPolicyName: String
+        val testPolicyName: String?
         try {
             val policyFile = "src/test/resources/invalid-json-schema-policy-set.json"
             testPolicyName = this.policyHelper.setTestPolicy(
@@ -363,10 +365,10 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
             )
 
             val policyEvaluationRequest = this.policyHelper
-                .createEvalRequest(MARISSA_V1.subjectIdentifier, "sanramon")
+                .createEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon")
             val postForEntity = this.acsitSetUpFactory.acsZoneAdminRestTemplate
                 .postForEntity(
-                    endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                    endpoint + ACS_POLICY_EVAL_API_PATH,
                     HttpEntity(policyEvaluationRequest, this.acsitSetUpFactory.zone1Headers),
                     PolicyEvaluationResult::class.java
                 )
@@ -410,9 +412,9 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
         // Use vanilla rest template with no oauth token.
         try {
             acs.postForEntity(
-                endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH,
+                endpoint + ACS_POLICY_EVAL_API_PATH,
                 HttpEntity(
-                    this.policyHelper.createEvalRequest(MARISSA_V1.subjectIdentifier, "sanramon"),
+                    this.policyHelper.createEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon"),
                     this.acsitSetUpFactory.zone1Headers
                 ),
                 PolicyEvaluationResult::class.java
@@ -427,7 +429,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
     @Test(dataProvider = "endpointProvider")
     @Throws(Exception::class)
     fun testPolicyUpdateWithInsufficientScope(endpoint: String) {
-        val testPolicyName: String
+        val testPolicyName: String?
         try {
             val policyFile = "src/test/resources/policy-set-with-multiple-policies-na-with-condition.json"
             testPolicyName = this.policyHelper.setTestPolicy(
@@ -470,7 +472,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
         )
 
         val policySetResponse = this.acsitSetUpFactory.acsReadOnlyRestTemplate.exchange(
-            endpoint + PolicyHelper.ACS_POLICY_SET_API_PATH + testPolicyName, HttpMethod.GET,
+            endpoint + ACS_POLICY_SET_API_PATH + testPolicyName, HttpMethod.GET,
             HttpEntity<Any>(this.acsitSetUpFactory.zone1Headers), PolicySet::class.java
         )
         Assert.assertEquals(testPolicyName, policySetResponse.body.name)
@@ -490,7 +492,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
                 .readValue(File("src/test/resources/single-site-based-policy-set.json"), PolicySet::class.java)
             testPolicyName = policySet.name
             this.acsitSetUpFactory.acsZoneAdminRestTemplate.put(
-                this.acsitSetUpFactory.acsUrl + PolicyHelper.ACS_POLICY_SET_API_PATH + testPolicyName,
+                this.acsitSetUpFactory.acsUrl + ACS_POLICY_SET_API_PATH + testPolicyName,
                 HttpEntity(policySet, this.acsitSetUpFactory.zone1Headers)
             )
         } finally {
@@ -510,7 +512,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
             "src/test/resources/single-site-based-policy-set.json"
         )
 
-        val getAllPolicySetsURL = endpoint + PolicyHelper.ACS_POLICY_SET_API_PATH
+        val getAllPolicySetsURL = endpoint + ACS_POLICY_SET_API_PATH
 
         val policySetsResponse = this.acsitSetUpFactory.acsReadOnlyRestTemplate.exchange(
             getAllPolicySetsURL, HttpMethod.GET, HttpEntity<Any>(this.acsitSetUpFactory.zone1Headers),
@@ -535,7 +537,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
         acsEndpointParam: String
     ): PolicySet {
         val policySetResponse = acs.exchange(
-            acsEndpointParam + PolicyHelper.ACS_POLICY_SET_API_PATH + policyName, HttpMethod.GET,
+            acsEndpointParam + ACS_POLICY_SET_API_PATH + policyName, HttpMethod.GET,
             HttpEntity<Any>(headers), PolicySet::class.java
         )
         return policySetResponse.body
