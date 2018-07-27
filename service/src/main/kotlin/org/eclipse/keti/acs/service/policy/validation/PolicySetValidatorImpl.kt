@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.util.ArrayList
-import java.util.Arrays
 import java.util.HashSet
 import javax.annotation.PostConstruct
 
@@ -165,7 +164,7 @@ class PolicySetValidatorImpl : PolicySetValidator {
         val actions =
             this.validAcsPolicyHttpActions.split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         LOGGER.debug("ACS Server configured with validAcsPolicyHttpActions : {}", this.validAcsPolicyHttpActions)
-        this.validAcsPolicyHttpActionsSet = HashSet(Arrays.asList(*actions))
+        this.validAcsPolicyHttpActionsSet = HashSet(listOf(*actions))
     }
 
     fun setValidAcsPolicyHttpActions(validAcsPolicyHttpActions: String) {

@@ -29,7 +29,6 @@ import org.springframework.data.domain.Pageable
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.util.ArrayList
-import java.util.Arrays
 
 class GraphMigrationManagerTest {
 
@@ -87,8 +86,8 @@ class GraphMigrationManagerTest {
         assertThat(this.subjectRepository!!.findAll().size, equalTo(0))
         assertThat(this.subjectHierarchicalRepository!!.findAll().size, equalTo(0))
 
-        fromListForResource.addAll(Arrays.asList(entityResource1, entityResource2))
-        fromListForSubject.addAll(Arrays.asList(entitySubject1, entitySubject2))
+        fromListForResource.addAll(listOf(entityResource1, entityResource2))
+        fromListForSubject.addAll(listOf(entitySubject1, entitySubject2))
 
         // This mocked findAll() takes in a Pageable and returns a Page.
         Mockito

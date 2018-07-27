@@ -34,7 +34,6 @@ import org.springframework.security.oauth2.common.exceptions.InvalidClientExcept
 import org.springframework.security.oauth2.provider.client.BaseClientDetails
 import org.springframework.util.LinkedMultiValueMap
 import java.util.ArrayList
-import java.util.Arrays
 
 private val JSON_UTILS = JsonUtils()
 
@@ -156,7 +155,7 @@ class UaaAcsClientsUtil(
     ) {
         this.createClientWithAuthorities(
             clientId, clientSecret,
-            Arrays.asList(
+            listOf(
                 SimpleGrantedAuthority("predix-acs.zones.$zone.user"),
                 SimpleGrantedAuthority("acs.policies.read")
             )
@@ -170,7 +169,7 @@ class UaaAcsClientsUtil(
     ) {
         this.createClientWithAuthorities(
             clientId, clientSecret,
-            Arrays.asList(
+            listOf(
                 SimpleGrantedAuthority("predix-acs.zones.$zone.user"),
                 SimpleGrantedAuthority("acs.connectors.read")
             )
@@ -184,7 +183,7 @@ class UaaAcsClientsUtil(
     ) {
         this.createClientWithAuthorities(
             clientId, clientSecret,
-            Arrays.asList(
+            listOf(
                 SimpleGrantedAuthority("predix-acs.zones.$zone.user"),
                 SimpleGrantedAuthority("acs.connectors.read"),
                 SimpleGrantedAuthority("acs.connectors.write")

@@ -19,7 +19,6 @@
 package org.eclipse.keti.acs.privilege.management
 
 import org.eclipse.keti.acs.model.Attribute
-import java.util.Arrays
 import java.util.HashSet
 
 /**
@@ -36,7 +35,7 @@ class AttributesUtilities {
      */
     fun getSetOfAttributes(vararg attrs: Attribute): Set<Attribute> {
         val attributes = HashSet<Attribute>()
-        attributes.addAll(Arrays.asList(*attrs))
+        attributes.addAll(listOf(*attrs))
         return attributes
     }
 }

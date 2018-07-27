@@ -21,7 +21,6 @@ package org.eclipse.keti.acs.monitoring
 import org.eclipse.keti.acs.security.AbstractHttpMethodsFilter
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
-import java.util.Arrays
 import java.util.HashSet
 import java.util.LinkedHashMap
 
@@ -30,7 +29,7 @@ private const val HEARTBEAT_URI_REGEX = "\\A/monitoring/heartbeat/??\\Z"
 private fun uriPatternsAndAllowedHttpMethods(): Map<String, Set<HttpMethod>> {
     val uriPatternsAndAllowedHttpMethods = LinkedHashMap<String, Set<HttpMethod>>()
     uriPatternsAndAllowedHttpMethods[HEARTBEAT_URI_REGEX] =
-        HashSet(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD))
+        HashSet(listOf(HttpMethod.GET, HttpMethod.HEAD))
     return uriPatternsAndAllowedHttpMethods
 }
 

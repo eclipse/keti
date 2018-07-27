@@ -24,8 +24,6 @@ import org.eclipse.keti.acs.model.PolicySet
 import org.testng.Assert
 import org.testng.annotations.Test
 
-import java.util.Arrays
-
 private const val STUDENT_AGE = 15
 
 class JsonUtilsTest {
@@ -119,7 +117,7 @@ class JsonUtilsTest {
         s.age = STUDENT_AGE
         s.name = "Joe"
         s.id = "S00001"
-        s.courses = Arrays.asList("Math", "Arts")
+        s.courses = listOf("Math", "Arts")
         return s
     }
 

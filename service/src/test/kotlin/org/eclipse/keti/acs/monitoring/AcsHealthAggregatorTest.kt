@@ -24,7 +24,6 @@ import org.testng.Assert
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
-import java.util.Arrays
 import java.util.HashMap
 
 // Modified version of org.springframework.boot.actuate.health.OrderedHealthAggregatorTests
@@ -84,17 +83,15 @@ class AcsHealthAggregatorTest {
     @DataProvider
     fun statuses(): Array<Array<Any?>> {
         return arrayOf(
-            arrayOf(DEGRADED_STATUS, Arrays.asList(Status.UP, DEGRADED_STATUS, Status.UP)),
-
-            arrayOf(Status.UP, Arrays.asList(Status.UP, Status.UNKNOWN, Status.UP)),
-
-            arrayOf(Status.DOWN, Arrays.asList(Status.UP, DEGRADED_STATUS, Status.DOWN))
+            arrayOf<Any?>(DEGRADED_STATUS, listOf(Status.UP, DEGRADED_STATUS, Status.UP)),
+            arrayOf(Status.UP, listOf(Status.UP, Status.UNKNOWN, Status.UP)),
+            arrayOf(Status.DOWN, listOf(Status.UP, DEGRADED_STATUS, Status.DOWN))
         )
     }
 
     @Test
     fun customOrderWithCustomStatus() {
-        this.healthAggregator!!.setStatusOrder(Arrays.asList("DOWN", "OUT_OF_SERVICE", "UP", "UNKNOWN", "CUSTOM"))
+        this.healthAggregator!!.setStatusOrder(listOf("DOWN", "OUT_OF_SERVICE", "UP", "UNKNOWN", "CUSTOM"))
         val healths = HashMap<String, Health>()
         healths["h1"] = Health.Builder().status(Status.DOWN).build()
         healths["h2"] = Health.Builder().status(Status.UP).build()

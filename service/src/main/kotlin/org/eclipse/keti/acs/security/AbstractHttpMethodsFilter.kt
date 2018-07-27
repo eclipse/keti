@@ -26,7 +26,6 @@ import org.springframework.util.MimeType
 import org.springframework.util.MimeTypeUtils
 import org.springframework.web.filter.OncePerRequestFilter
 import java.io.IOException
-import java.util.Arrays
 import java.util.Collections
 import java.util.HashSet
 import java.util.regex.Pattern
@@ -37,7 +36,7 @@ import javax.servlet.http.HttpServletResponse
 
 private val LOGGER_INSTANCE = LoggerFactory.getLogger(AbstractHttpMethodsFilter::class.java)
 private val ACCEPTABLE_MIME_TYPES =
-    HashSet(Arrays.asList(MimeTypeUtils.ALL, MimeTypeUtils.APPLICATION_JSON, MimeTypeUtils.TEXT_PLAIN))
+    HashSet(listOf(MimeTypeUtils.ALL, MimeTypeUtils.APPLICATION_JSON, MimeTypeUtils.TEXT_PLAIN))
 
 private fun addCommonResponseHeaders(response: HttpServletResponse) {
     if (!response.containsHeader(HttpHeaders.X_CONTENT_TYPE_OPTIONS)) {

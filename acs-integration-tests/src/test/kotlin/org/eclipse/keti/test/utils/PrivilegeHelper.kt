@@ -33,7 +33,6 @@ import java.io.UnsupportedEncodingException
 import java.net.URI
 import java.net.URLEncoder
 import java.util.ArrayList
-import java.util.Arrays
 import java.util.HashSet
 
 private const val ALTERNATE_ATTRIBUTE_VALUE = "sanfrancisco"
@@ -101,7 +100,7 @@ class PrivilegeHelper {
         vararg attributes: Attribute
     ): BaseSubject {
 
-        subject.attributes = HashSet(Arrays.asList(*attributes))
+        subject.attributes = HashSet(listOf(*attributes))
         val subjectUri = URI
             .create(endpoint + ACS_SUBJECT_API_PATH + URLEncoder.encode(subject.subjectIdentifier!!, "UTF-8"))
         acsTemplate.put(subjectUri, HttpEntity(subject, headers))
@@ -186,7 +185,7 @@ class PrivilegeHelper {
         vararg attributes: Attribute
     ): BaseResource {
 
-        resource.attributes = HashSet(Arrays.asList(*attributes))
+        resource.attributes = HashSet(listOf(*attributes))
 
         val value = URLEncoder.encode(resource.resourceIdentifier!!, "UTF-8")
 

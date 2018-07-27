@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
-import java.util.Arrays
 
 private val LOGGER = LoggerFactory.getLogger(PolicyEvaluationCacheConfig::class.java)
 
@@ -47,7 +46,7 @@ class PolicyEvaluationCacheConfig {
             LOGGER.info("Caching disabled for policy evaluation")
             return NonCachingPolicyEvaluationCache()
         }
-        val activeProfiles = Arrays.asList(*this.environment.activeProfiles)
+        val activeProfiles = listOf(*this.environment.activeProfiles)
         if (activeProfiles.contains("redis") || activeProfiles.contains("cloud-redis")) {
             LOGGER.info("Redis caching enabled for policy evaluation.")
             return RedisPolicyEvaluationCache()

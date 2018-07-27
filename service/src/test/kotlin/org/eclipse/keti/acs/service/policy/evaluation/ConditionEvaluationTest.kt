@@ -34,7 +34,6 @@ import org.testng.Assert
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
-import java.util.Arrays
 import java.util.HashSet
 
 /**
@@ -52,33 +51,33 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
     val conditions: Array<Array<Any?>>
         @DataProvider(name = "conditionsProvider")
         get() = arrayOf<Array<Any?>>(
-            arrayOf(Arrays.asList(Condition("\"a\" == \"a\"")), true, false),
-            arrayOf(Arrays.asList(Condition("\"a\" == \"b\"")), false, false),
-            arrayOf(Arrays.asList(Condition("")), false, true),
+            arrayOf(listOf(Condition("\"a\" == \"a\"")), true, false),
+            arrayOf(listOf(Condition("\"a\" == \"b\"")), false, false),
+            arrayOf(listOf(Condition("")), false, true),
             arrayOf(emptyList<Any>(), true, true),
-            arrayOf(Arrays.asList(Condition("\"a\" == \"a\""), Condition("\"b\" == \"b\"")), true, false),
-            arrayOf(Arrays.asList(Condition("\"a\" == \"a\""), Condition("\"a\" == \"b\"")), false, false),
-            arrayOf(Arrays.asList(Condition("\"a\" == \"b\""), Condition("\"c\" == \"b\"")), false, false),
+            arrayOf(listOf(Condition("\"a\" == \"a\""), Condition("\"b\" == \"b\"")), true, false),
+            arrayOf(listOf(Condition("\"a\" == \"a\""), Condition("\"a\" == \"b\"")), false, false),
+            arrayOf(listOf(Condition("\"a\" == \"b\""), Condition("\"c\" == \"b\"")), false, false),
             arrayOf(null, true, false)
         )
 
     @DataProvider(name = "conditionsWithVariablesProvider")
     fun conditionsWithVariables(): Array<Array<Any?>> {
-        return arrayOf(
+        return arrayOf<Array<Any?>>(
             arrayOf(
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "San Ramon"),
                         Attribute("acs", "site", "New York")
                     )
                 ),
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "San Ramon"),
                         Attribute("acs", "site", "Boston")
                     )
                 ),
-                Arrays.asList(Condition("match.any(subject.attributes(\"acs\", \"site\")," + " resource.attributes(\"acs\", \"site\"))")),
+                listOf(Condition("match.any(subject.attributes(\"acs\", \"site\")," + " resource.attributes(\"acs\", \"site\"))")),
                 true,
                 false,
                 "",
@@ -86,18 +85,18 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             ),
             arrayOf(
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "San Ramon"),
                         Attribute("acs", "site", "New York")
                     )
                 ),
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "LA"),
                         Attribute("acs", "site", "Boston")
                     )
                 ),
-                Arrays.asList(Condition("match.any(subject.attributes(\"acs\", \"site\")," + " resource.attributes(\"acs\", \"site\"))")),
+                listOf(Condition("match.any(subject.attributes(\"acs\", \"site\")," + " resource.attributes(\"acs\", \"site\"))")),
                 false,
                 false,
                 "",
@@ -105,18 +104,18 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             ),
             arrayOf(
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "San Ramon"),
                         Attribute("acs", "site", "New York")
                     )
                 ),
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "San Ramon"),
                         Attribute("acs", "site", "New York")
                     )
                 ),
-                Arrays.asList(Condition("match.any(subject.attributes(\"acs\", \"site\")," + " resource.attributes(\"acs\", \"site\"))")),
+                listOf(Condition("match.any(subject.attributes(\"acs\", \"site\")," + " resource.attributes(\"acs\", \"site\"))")),
                 true,
                 false,
                 "",
@@ -124,18 +123,18 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             ),
             arrayOf(
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "location", "San Ramon"),
                         Attribute("acs", "location", "New York")
                     )
                 ),
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "San Ramon"),
                         Attribute("acs", "site", "New York")
                     )
                 ),
-                Arrays.asList(Condition("match.any(resource.attributes(\"acs\", \"location\")," + " subject.attributes(\"acs\", \"site\"))")),
+                listOf(Condition("match.any(resource.attributes(\"acs\", \"location\")," + " subject.attributes(\"acs\", \"site\"))")),
                 true,
                 false,
                 "",
@@ -143,11 +142,11 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             ),
             arrayOf(
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "San Ramon"),
                         Attribute("acs", "site", "New York")
                     )
-                ), emptySet<Any>(), Arrays.asList(
+                ), emptySet<Any>(), listOf(
                     Condition(
                         "match.single(resource.attributes(\"acs\", \"site\"), \"San Ramon\")"
                     )
@@ -156,7 +155,7 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             arrayOf(
                 emptySet<Any>(),
                 emptySet<Any>(),
-                Arrays.asList(Condition("resource.uriVariable(\"site_id\").equals(\"boston\")")),
+                listOf(Condition("resource.uriVariable(\"site_id\").equals(\"boston\")")),
                 true,
                 false,
                 "http://assets.predix.io/site/boston",
@@ -165,7 +164,7 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             arrayOf(
                 emptySet<Any>(),
                 emptySet<Any>(),
-                Arrays.asList(Condition("resource.uriVariable(\"site_id\").equals(\"newyork\")")),
+                listOf(Condition("resource.uriVariable(\"site_id\").equals(\"newyork\")")),
                 false,
                 false,
                 "http://assets.predix.io/site/boston",
@@ -174,12 +173,12 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             arrayOf(
                 emptySet<Any>(),
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "boston"),
                         Attribute("acs", "site", "New York")
                     )
                 ),
-                Arrays.asList(Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\"))")),
+                listOf(Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\"))")),
                 true,
                 false,
                 "http://assets.predix.io/site/boston",
@@ -188,12 +187,12 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             arrayOf(
                 emptySet<Any>(),
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "LA"),
                         Attribute("acs", "site", "New York")
                     )
                 ),
-                Arrays.asList(Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\"))")),
+                listOf(Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\"))")),
                 false,
                 false,
                 "http://assets.predix.io/site/boston",
@@ -202,12 +201,12 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             arrayOf(
                 emptySet<Any>(),
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "LA"),
                         Attribute("acs", "site", "New York")
                     )
                 ),
-                Arrays.asList(Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\"))")),
+                listOf(Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\"))")),
                 false,
                 false,
                 "http://assets.predix.io/site",
@@ -216,12 +215,12 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             arrayOf(
                 emptySet<Any>(),
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "boston"),
                         Attribute("acs", "department", "sales")
                     )
                 ),
-                Arrays.asList(
+                listOf(
                     Condition("match.single(subject.attributes(\"acs\", \"site\")," + " resource.uriVariable(\"site_id\"))"),
                     Condition("match.single(subject.attributes(\"acs\", \"department\")," + " resource.uriVariable(\"department_id\"))")
                 ),
@@ -233,12 +232,12 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             arrayOf(
                 emptySet<Any>(),
                 HashSet(
-                    Arrays.asList(
+                    listOf(
                         Attribute("acs", "site", "boston"),
                         Attribute("acs", "department", "sales")
                     )
                 ),
-                Arrays.asList(
+                listOf(
                     Condition(
                         "match.single(subject.attributes(\"acs\", \"site\")," +
                         " resource.uriVariable(\"site_id\")) " +

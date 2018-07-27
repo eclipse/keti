@@ -22,7 +22,6 @@ import org.eclipse.keti.acs.model.Attribute
 import org.eclipse.keti.acs.rest.BaseResource
 import org.eclipse.keti.acs.rest.BaseSubject
 import org.eclipse.keti.acs.rest.Parent
-import java.util.Arrays
 import java.util.Collections
 import java.util.HashSet
 
@@ -40,50 +39,50 @@ val TYPE_MONSTER_OF_THE_WEEK = Attribute(
 )
 
 const val FBI = "fbi"
-val FBI_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(SITE_QUANTICO)))
+val FBI_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(listOf(SITE_QUANTICO)))
 
 const val SPECIAL_AGENTS_GROUP = "special-agents"
 val SPECIAL_AGENTS_GROUP_ATTRIBUTES: MutableSet<Attribute> =
-    Collections.unmodifiableSet(HashSet(Arrays.asList(SPECIAL_AGENTS_GROUP_ATTRIBUTE)))
+    Collections.unmodifiableSet(HashSet(listOf(SPECIAL_AGENTS_GROUP_ATTRIBUTE)))
 
 const val TOP_SECRET_GROUP = "top-secret-clearance"
 val TOP_SECRET_GROUP_ATTRIBUTES: MutableSet<Attribute> =
-    Collections.unmodifiableSet(HashSet(Arrays.asList(TOP_SECRET_CLASSIFICATION)))
+    Collections.unmodifiableSet(HashSet(listOf(TOP_SECRET_CLASSIFICATION)))
 
 const val SECRET_GROUP = "secret-clearance"
 val SECRET_GROUP_ATTRIBUTES: MutableSet<Attribute> =
-    Collections.unmodifiableSet(HashSet(Arrays.asList(SECRET_CLASSIFICATION)))
+    Collections.unmodifiableSet(HashSet(listOf(SECRET_CLASSIFICATION)))
 
 const val AGENT_MULDER = "mulder"
-val MULDERS_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(SITE_BASEMENT)))
+val MULDERS_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(listOf(SITE_BASEMENT)))
 
 const val AGENT_SCULLY = "scully"
 
 const val BASEMENT_SITE_ID = "/site/basement"
-val BASEMENT_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(SITE_BASEMENT)))
+val BASEMENT_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(listOf(SITE_BASEMENT)))
 
 const val PENTAGON_SITE_ID = "/site/pentagon"
-val PENTAGON_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(SITE_PENTAGON)))
+val PENTAGON_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(listOf(SITE_PENTAGON)))
 
 const val XFILES_ID = "/x-files"
 
 const val ASCENSION_ID = "/x-files/ascension"
 val ASCENSION_ATTRIBUTES: MutableSet<Attribute> =
-    Collections.unmodifiableSet(HashSet(Arrays.asList(SPECIAL_AGENTS_GROUP_ATTRIBUTE, TYPE_MYTHARC)))
+    Collections.unmodifiableSet(HashSet(listOf(SPECIAL_AGENTS_GROUP_ATTRIBUTE, TYPE_MYTHARC)))
 
 const val DRIVE_ID = "/x-files/drive"
 val DRIVE_ATTRIBUTES: MutableSet<Attribute> =
-    Collections.unmodifiableSet(HashSet(Arrays.asList(TYPE_MONSTER_OF_THE_WEEK)))
+    Collections.unmodifiableSet(HashSet(listOf(TYPE_MONSTER_OF_THE_WEEK)))
 
 const val JOSECHUNG_ID = "/x-files/josechung"
 
 const val EVIDENCE_SCULLYS_TESTIMONY_ID = "/evidence/scullys-testimony"
 val SCULLYS_TESTIMONY_ATTRIBUTES: MutableSet<Attribute> =
-    Collections.unmodifiableSet(HashSet(Arrays.asList(TOP_SECRET_CLASSIFICATION)))
+    Collections.unmodifiableSet(HashSet(listOf(TOP_SECRET_CLASSIFICATION)))
 
 const val EVIDENCE_IMPLANT_ID = "/evidence/implant"
 val EVIDENCE_IMPLANT_ATTRIBUTES: MutableSet<Attribute> =
-    Collections.unmodifiableSet(HashSet(Arrays.asList(TOP_SECRET_CLASSIFICATION)))
+    Collections.unmodifiableSet(HashSet(listOf(TOP_SECRET_CLASSIFICATION)))
 
 fun createSubjectHierarchy(): List<BaseSubject> {
     val fbi = BaseSubject(FBI)
@@ -92,7 +91,7 @@ fun createSubjectHierarchy(): List<BaseSubject> {
     val specialAgentsGroup = BaseSubject(SPECIAL_AGENTS_GROUP)
     specialAgentsGroup.attributes = SPECIAL_AGENTS_GROUP_ATTRIBUTES
     specialAgentsGroup
-        .parents = HashSet(Arrays.asList(Parent(fbi.subjectIdentifier!!)))
+        .parents = HashSet(listOf(Parent(fbi.subjectIdentifier!!)))
 
     val topSecretGroup = BaseSubject(TOP_SECRET_GROUP)
     topSecretGroup.attributes = TOP_SECRET_GROUP_ATTRIBUTES
@@ -100,12 +99,12 @@ fun createSubjectHierarchy(): List<BaseSubject> {
     val agentMulder = BaseSubject(AGENT_MULDER)
     agentMulder.attributes = MULDERS_ATTRIBUTES
     agentMulder.parents = HashSet(
-        Arrays.asList(
+        listOf(
             Parent(specialAgentsGroup.subjectIdentifier!!), Parent(topSecretGroup.subjectIdentifier!!)
         )
     )
 
-    return Arrays.asList(fbi, specialAgentsGroup, topSecretGroup, agentMulder)
+    return listOf(fbi, specialAgentsGroup, topSecretGroup, agentMulder)
 }
 
 fun createTwoParentResourceHierarchy(): List<BaseResource> {
@@ -118,12 +117,12 @@ fun createTwoParentResourceHierarchy(): List<BaseResource> {
     val evidenceImplant = BaseResource(EVIDENCE_IMPLANT_ID)
     evidenceImplant.attributes = EVIDENCE_IMPLANT_ATTRIBUTES
     evidenceImplant.parents = HashSet(
-        Arrays.asList(
+        listOf(
             Parent(pentagon.resourceIdentifier!!), Parent(ascension.resourceIdentifier!!)
         )
     )
 
-    return Arrays.asList(pentagon, ascension, evidenceImplant)
+    return listOf(pentagon, ascension, evidenceImplant)
 }
 
 fun createTwoLevelResourceHierarchy(): List<BaseResource> {
@@ -133,9 +132,9 @@ fun createTwoLevelResourceHierarchy(): List<BaseResource> {
 
     val scullysTestimony = BaseResource(EVIDENCE_SCULLYS_TESTIMONY_ID)
     scullysTestimony.attributes = SCULLYS_TESTIMONY_ATTRIBUTES
-    scullysTestimony.parents = HashSet(Arrays.asList(Parent(basement.resourceIdentifier!!)))
+    scullysTestimony.parents = HashSet(listOf(Parent(basement.resourceIdentifier!!)))
 
-    return Arrays.asList(basement, scullysTestimony)
+    return listOf(basement, scullysTestimony)
 }
 
 fun createThreeLevelResourceHierarchy(): List<BaseResource> {
@@ -144,13 +143,13 @@ fun createThreeLevelResourceHierarchy(): List<BaseResource> {
 
     val ascension = BaseResource(ASCENSION_ID)
     ascension.attributes = ASCENSION_ATTRIBUTES
-    ascension.parents = HashSet(Arrays.asList(Parent(basement.resourceIdentifier!!)))
+    ascension.parents = HashSet(listOf(Parent(basement.resourceIdentifier!!)))
 
     val scullysTestimony = BaseResource(EVIDENCE_SCULLYS_TESTIMONY_ID)
     scullysTestimony.attributes = SCULLYS_TESTIMONY_ATTRIBUTES
-    scullysTestimony.parents = HashSet(Arrays.asList(Parent(ascension.resourceIdentifier!!)))
+    scullysTestimony.parents = HashSet(listOf(Parent(ascension.resourceIdentifier!!)))
 
-    return Arrays.asList(basement, ascension, scullysTestimony)
+    return listOf(basement, ascension, scullysTestimony)
 }
 
 fun createScopedSubjectHierarchy(): List<BaseSubject> {
@@ -160,7 +159,7 @@ fun createScopedSubjectHierarchy(): List<BaseSubject> {
     val specialAgentsGroup = BaseSubject(SPECIAL_AGENTS_GROUP)
     specialAgentsGroup.attributes = SPECIAL_AGENTS_GROUP_ATTRIBUTES
     specialAgentsGroup
-        .parents = HashSet(Arrays.asList(Parent(fbi.subjectIdentifier!!)))
+        .parents = HashSet(listOf(Parent(fbi.subjectIdentifier!!)))
 
     val topSecretGroup = BaseSubject(TOP_SECRET_GROUP)
     topSecretGroup.attributes = TOP_SECRET_GROUP_ATTRIBUTES
@@ -168,12 +167,12 @@ fun createScopedSubjectHierarchy(): List<BaseSubject> {
     val agentMulder = BaseSubject(AGENT_MULDER)
     agentMulder.attributes = MULDERS_ATTRIBUTES
     agentMulder.parents = HashSet(
-        Arrays.asList(
+        listOf(
             Parent(specialAgentsGroup.subjectIdentifier!!), Parent(
                 topSecretGroup.subjectIdentifier!!,
-                HashSet(Arrays.asList(SITE_BASEMENT))
+                HashSet(listOf(SITE_BASEMENT))
             )
         )
     )
-    return Arrays.asList(fbi, specialAgentsGroup, topSecretGroup, agentMulder)
+    return listOf(fbi, specialAgentsGroup, topSecretGroup, agentMulder)
 }

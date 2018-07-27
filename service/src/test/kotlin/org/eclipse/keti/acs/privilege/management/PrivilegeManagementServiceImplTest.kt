@@ -53,8 +53,6 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
-import java.util.Arrays
-import java.util.Arrays.asList
 import java.util.Collections
 import java.util.HashSet
 
@@ -118,7 +116,7 @@ class PrivilegeManagementServiceImplTest : AbstractTransactionalTestNGSpringCont
     @Test(dataProvider = "emptyIdDataProvider", expectedExceptions = [(PrivilegeManagementException::class)])
     fun testAppendResourceWithEmptyResourceId(resourceIdentifier: String?) {
         val resource = createResource(resourceIdentifier)
-        this.service.appendResources(asList(resource))
+        this.service.appendResources(listOf(resource))
     }
 
     @DataProvider(name = "emptyIdDataProvider")
@@ -185,7 +183,7 @@ class PrivilegeManagementServiceImplTest : AbstractTransactionalTestNGSpringCont
             val s1 = createSubject("dave", this.fixedAttributes)
             val s2 = createSubject("sanjeev", this.fixedAttributes)
 
-            this.service.appendSubjects(asList(s1, s2))
+            this.service.appendSubjects(listOf(s1, s2))
 
             // able to get subject by identifier
             Assert.assertNotNull(this.service.getBySubjectIdentifier(s1.subjectIdentifier!!))
@@ -232,7 +230,7 @@ class PrivilegeManagementServiceImplTest : AbstractTransactionalTestNGSpringCont
                 this.attributesUtilities.getSetOfAttributes(Attribute("acs", "group", "parent"))
             )
             this.service.upsertSubject(bob)
-            marissa.parents = HashSet(Arrays.asList(Parent(parentSubjectId)))
+            marissa.parents = HashSet(listOf(Parent(parentSubjectId)))
             this.service.upsertSubject(marissa)
 
             Assert.assertEquals(this.service.getBySubjectIdentifier(testSubjectId), marissa)
@@ -333,7 +331,7 @@ class PrivilegeManagementServiceImplTest : AbstractTransactionalTestNGSpringCont
         val r1 = createSubject("/asset/macfarland", this.fixedAttributes)
         val r2 = createSubject("/asset/oregon", this.fixedAttributes)
 
-        this.service.appendSubjects(asList(r1, r2))
+        this.service.appendSubjects(listOf(r1, r2))
         val subjects = this.service.subjects
         Assert.assertEquals(subjects.size, 2)
     }
@@ -382,7 +380,7 @@ class PrivilegeManagementServiceImplTest : AbstractTransactionalTestNGSpringCont
         val r1 = createResource(identifier1)
         val r2 = createResource(identifier2)
 
-        this.service.appendResources(asList(r1, r2))
+        this.service.appendResources(listOf(r1, r2))
 
         val fetchedResource1 = this.service.getByResourceIdentifier(r1.resourceIdentifier!!)
         val fetchedResource2 = this.service.getByResourceIdentifier(r2.resourceIdentifier!!)

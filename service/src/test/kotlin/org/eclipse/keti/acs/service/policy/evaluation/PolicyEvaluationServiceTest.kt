@@ -60,7 +60,6 @@ import org.testng.annotations.Test
 import java.io.File
 import java.io.IOException
 import java.util.ArrayList
-import java.util.Arrays
 import java.util.HashSet
 import java.util.LinkedHashSet
 
@@ -313,7 +312,7 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
         subjectAttributes: Set<Attribute> = emptySet()
     ) {
         val policySet = ObjectMapper().readValue(inputPolicy, PolicySet::class.java)
-        `when`(this.policyService.allPolicySets).thenReturn(Arrays.asList(policySet))
+        `when`(this.policyService.allPolicySets).thenReturn(listOf(policySet))
         val matchedPolicies = ArrayList<MatchedPolicy>()
         for (policy in policySet.policies) {
             matchedPolicies.add(MatchedPolicy(policy, resourceAttributes, subjectAttributes))

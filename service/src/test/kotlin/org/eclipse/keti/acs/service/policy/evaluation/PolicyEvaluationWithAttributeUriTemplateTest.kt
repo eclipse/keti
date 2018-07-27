@@ -49,7 +49,6 @@ import org.testng.Assert
 import org.testng.annotations.Test
 import java.io.File
 import java.io.IOException
-import java.util.Arrays
 import java.util.HashSet
 
 class PolicyEvaluationWithAttributeUriTemplateTest {
@@ -88,7 +87,7 @@ class PolicyEvaluationWithAttributeUriTemplateTest {
         // set policy
         val policySet = ObjectMapper()
             .readValue(File("src/test/resources/policy-set-with-attribute-uri-template.json"), PolicySet::class.java)
-        `when`(this.policyService.allPolicySets).thenReturn(Arrays.asList(policySet))
+        `when`(this.policyService.allPolicySets).thenReturn(listOf(policySet))
 
         // Create 'role' attribute in resource for URI /site/1234. Used in target match for policy 1.
         val testResource = BaseResource("/site/1234")

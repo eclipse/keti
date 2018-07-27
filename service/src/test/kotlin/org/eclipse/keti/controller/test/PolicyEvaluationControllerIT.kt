@@ -50,7 +50,6 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import java.util.ArrayList
-import java.util.Arrays
 import java.util.LinkedHashSet
 
 private val OBJECT_MAPPER = ObjectMapper()
@@ -210,7 +209,7 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
             createPolicyEvalRequest(
                 this.testResource!!.resourceIdentifier,
                 this.testSubject!!.subjectIdentifier,
-                LinkedHashSet(Arrays.asList(this.notApplicableAndDenyPolicySets!![1].name))
+                LinkedHashSet(listOf(this.notApplicableAndDenyPolicySets!![1].name))
             ), this.notApplicableAndDenyPolicySets, Effect.DENY
         )
     }
@@ -220,7 +219,7 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
             createPolicyEvalRequest(
                 this.testResource!!.resourceIdentifier,
                 this.testSubject!!.subjectIdentifier,
-                LinkedHashSet(Arrays.asList(this.notApplicableAndDenyPolicySets!![0].name))
+                LinkedHashSet(listOf(this.notApplicableAndDenyPolicySets!![0].name))
             ), this.notApplicableAndDenyPolicySets, Effect.NOT_APPLICABLE
         )
     }
@@ -230,7 +229,7 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
             createPolicyEvalRequest(
                 this.testResource!!.resourceIdentifier,
                 this.testSubject!!.subjectIdentifier,
-                LinkedHashSet(Arrays.asList(this.denyPolicySet!![0].name))
+                LinkedHashSet(listOf(this.denyPolicySet!![0].name))
             ), this.denyPolicySet, Effect.DENY
         )
     }
@@ -251,7 +250,7 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
                 this.testResource!!.resourceIdentifier,
                 this.testSubject!!.subjectIdentifier,
                 LinkedHashSet(
-                    Arrays.asList(
+                    listOf(
                         this.notApplicableAndDenyPolicySets!![0].name,
                         this.notApplicableAndDenyPolicySets!![1].name
                     )
@@ -275,7 +274,7 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
                 this.testResource!!.resourceIdentifier,
                 this.testSubject!!.subjectIdentifier,
                 LinkedHashSet(
-                    Arrays.asList(
+                    listOf(
                         this.notApplicableAndDenyPolicySets!![0].name,
                         "noexistent-policy-set"
                     )
@@ -299,7 +298,7 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
             createPolicyEvalRequest(
                 this.testResource!!.resourceIdentifier,
                 this.testSubject!!.subjectIdentifier,
-                LinkedHashSet(Arrays.asList("nonexistent-policy-set"))
+                LinkedHashSet(listOf("nonexistent-policy-set"))
             ), this.denyPolicySet
         )
     }

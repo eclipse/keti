@@ -26,7 +26,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.security.oauth2.client.OAuth2RestTemplate
 import org.springframework.stereotype.Component
 import java.io.IOException
-import java.util.Arrays
 
 private const val OAUTH_ENDPOINT = "/oauth/token"
 
@@ -95,7 +94,7 @@ class ACSITSetUpFactoryPublic : ACSITSetUpFactory {
 
         this.acsAdminRestTemplate = this.uaaTestUtil!!.createAcsAdminClientAndGetTemplate(this.acsZone1Name)
         this.acsZonesAdminRestTemplate = this.uaaTestUtil!!
-            .createAcsAdminClient(Arrays.asList<String>(this.acsZone1Name, this.acsZone2Name, this.acsZone3Name))
+            .createAcsAdminClient(listOf<String>(this.acsZone1Name, this.acsZone2Name, this.acsZone3Name))
         this.acsReadOnlyRestTemplate = this.uaaTestUtil!!.createReadOnlyPolicyScopeClient(this.acsZone1Name)
         this.acsNoPolicyScopeRestTemplate = this.uaaTestUtil!!.createNoPolicyScopeClient(this.acsZone1Name)
         this.zone1 = this.zoneFactory.createTestZone(
@@ -133,6 +132,6 @@ class ACSITSetUpFactoryPublic : ACSITSetUpFactory {
     }
 
     override fun getAcsAdminRestTemplate(zone: String): OAuth2RestTemplate {
-        return UaaAcsClientsUtil(this.uaaUrl, this.uaaAdminSecret).createAcsAdminClient(Arrays.asList(zone))
+        return UaaAcsClientsUtil(this.uaaUrl, this.uaaAdminSecret).createAcsAdminClient(listOf(zone))
     }
 }

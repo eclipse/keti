@@ -65,7 +65,6 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import java.net.URLEncoder
-import java.util.Arrays
 import java.util.HashSet
 
 private val OBJECT_MAPPER = ObjectMapper()
@@ -111,7 +110,7 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
     @BeforeClass
     @Throws(Exception::class)
     fun setup() {
-        if (!Arrays.asList(*this.env.activeProfiles).contains("graph")) {
+        if (!listOf(*this.env.activeProfiles).contains("graph")) {
             throw SkipException("This test only applies when using graph profile.")
         }
 
@@ -366,11 +365,11 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
         return arrayOf(
             this.testZone1, this.policySet, null, null, createPolicyEvalRequest(
                 EVIDENCE_IMPLANT_ID, AGENT_MULDER, HashSet(
-                    Arrays.asList(
+                    listOf(
                         SPECIAL_AGENTS_GROUP_ATTRIBUTE, TOP_SECRET_CLASSIFICATION
                     )
                 ), HashSet(
-                    Arrays.asList(
+                    listOf(
                         SPECIAL_AGENTS_GROUP_ATTRIBUTE, TOP_SECRET_CLASSIFICATION
                     )
                 )

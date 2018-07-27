@@ -53,7 +53,6 @@ import org.testng.annotations.Test
 import java.io.IOException
 import java.net.URI
 import java.net.URLEncoder
-import java.util.Arrays
 
 /**
  * @author acs-engineers@ge.com
@@ -213,7 +212,7 @@ class ACSAcceptanceIT : AbstractTestNGSpringContextTests() {
         val headers = HttpHeaders()
         headers.add(HttpHeaders.ACCEPT, MediaType.TEXT_HTML_VALUE)
 
-        if (!Arrays.asList(*this.environment.activeProfiles).contains("httpValidation")) {
+        if (!listOf(*this.environment.activeProfiles).contains("httpValidation")) {
             Assert.assertEquals(this.getMonitoringApiResponse(headers).statusCode, HttpStatus.OK)
             return
         }

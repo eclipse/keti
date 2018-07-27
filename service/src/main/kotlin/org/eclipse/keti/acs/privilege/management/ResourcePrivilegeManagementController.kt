@@ -48,7 +48,6 @@ import org.springframework.web.bind.annotation.RequestMethod.POST
 import org.springframework.web.bind.annotation.RequestMethod.PUT
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.util.Arrays
 
 /**
  * @author acs-engineers@ge.com
@@ -78,7 +77,7 @@ class ResourcePrivilegeManagementController : BaseRestApi() {
 
     private fun getGraphProfileActive(): Boolean? {
         if (this.graphProfileActive == null) {
-            this.graphProfileActive = Arrays.asList(*this.environment.activeProfiles).contains("graph")
+            this.graphProfileActive = listOf(*this.environment.activeProfiles).contains("graph")
         }
 
         return this.graphProfileActive

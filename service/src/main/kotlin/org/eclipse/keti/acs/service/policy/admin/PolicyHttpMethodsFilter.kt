@@ -21,7 +21,6 @@ package org.eclipse.keti.acs.service.policy.admin
 import org.eclipse.keti.acs.security.AbstractHttpMethodsFilter
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
-import java.util.Arrays
 import java.util.HashSet
 import java.util.LinkedHashMap
 
@@ -31,9 +30,9 @@ private const val GET_POLICY_URI_REGEX = "\\A/v1/policy-set/??\\Z"
 private fun uriPatternsAndAllowedHttpMethods(): Map<String, Set<HttpMethod>> {
     val uriPatternsAndAllowedHttpMethods = LinkedHashMap<String, Set<HttpMethod>>()
     uriPatternsAndAllowedHttpMethods[UPDATE_POLICY_URI_REGEX] =
-        HashSet(Arrays.asList(HttpMethod.PUT, HttpMethod.GET, HttpMethod.DELETE, HttpMethod.HEAD))
+        HashSet(listOf(HttpMethod.PUT, HttpMethod.GET, HttpMethod.DELETE, HttpMethod.HEAD))
     uriPatternsAndAllowedHttpMethods[GET_POLICY_URI_REGEX] =
-        HashSet(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD))
+        HashSet(listOf(HttpMethod.GET, HttpMethod.HEAD))
     return uriPatternsAndAllowedHttpMethods
 }
 

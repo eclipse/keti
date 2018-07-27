@@ -54,7 +54,6 @@ import java.io.UnsupportedEncodingException
 import java.net.URI
 import java.net.URLEncoder
 import java.util.ArrayList
-import java.util.Arrays
 import java.util.HashSet
 import javax.security.auth.Subject
 
@@ -499,19 +498,19 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
         try {
             val subject2 = BaseSubject(BOB_V1.subjectIdentifier!!)
             subject2.attributes = HashSet(
-                Arrays.asList(this.privilegeHelper.defaultAttribute)
+                listOf(this.privilegeHelper.defaultAttribute)
             )
             subject.attributes = HashSet(
-                Arrays.asList(this.privilegeHelper.defaultAttribute)
+                listOf(this.privilegeHelper.defaultAttribute)
             )
             val responseEntity = this.privilegeHelper
                 .postSubjects(this.acsAdminRestTemplate!!, endpoint, this.zone1Headers!!, subject, subject2)
             Assert.assertEquals(responseEntity.statusCode, HttpStatus.NO_CONTENT)
             subject2.attributes = HashSet(
-                Arrays.asList(this.privilegeHelper.alternateAttribute)
+                listOf(this.privilegeHelper.alternateAttribute)
             )
             subject.attributes = HashSet(
-                Arrays.asList(this.privilegeHelper.alternateAttribute)
+                listOf(this.privilegeHelper.alternateAttribute)
             )
             this.privilegeHelper
                 .postSubjects(this.acsAdminRestTemplate!!, endpoint, this.zone1Headers!!, subject, subject2)

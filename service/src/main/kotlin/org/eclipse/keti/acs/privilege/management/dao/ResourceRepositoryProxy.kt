@@ -29,7 +29,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
-import java.util.Arrays
 
 private val LOGGER = LoggerFactory.getLogger(ResourceRepositoryProxy::class.java)
 private const val MESSAGE = "method not supported"
@@ -52,7 +51,7 @@ class ResourceRepositoryProxy : ResourceRepository, ResourceHierarchicalReposito
 
     @Throws(Exception::class)
     override fun afterPropertiesSet() {
-        if (Arrays.asList(*this.environment.activeProfiles).contains("graph")) {
+        if (listOf(*this.environment.activeProfiles).contains("graph")) {
             this.activeRepository = this.graphRepository
             LOGGER.info("Resource hierarchical repository enabled.")
         } else {

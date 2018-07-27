@@ -51,7 +51,6 @@ import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import org.testng.collections.Lists
 import java.net.URI
-import java.util.Arrays
 
 private val SUBJECT_URI = URI.create("$V1$SUBJECTS_URL/test")
 private val SUBJECTS_URI = URI.create(V1 + SUBJECTS_URL)
@@ -152,7 +151,7 @@ private fun httpZoneHeaders(token: String): HttpHeaders {
 private fun combine(vararg testData: Array<Array<Any?>>): Array<Array<Any?>> {
     val result = Lists.newArrayList<Array<Any?>>()
     for (t in testData) {
-        result.addAll(Arrays.asList(*t))
+        result.addAll(listOf(*t))
     }
     return result.toTypedArray()
 }

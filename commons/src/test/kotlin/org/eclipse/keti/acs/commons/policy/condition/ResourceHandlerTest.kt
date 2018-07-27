@@ -21,7 +21,6 @@ package org.eclipse.keti.acs.commons.policy.condition
 import org.eclipse.keti.acs.model.Attribute
 import org.testng.Assert
 import org.testng.annotations.Test
-import java.util.Arrays
 import java.util.HashSet
 
 /**
@@ -48,7 +47,7 @@ class ResourceHandlerTest {
     @Test
     fun testUriVariableNegative() {
         val attributes = HashSet(
-            Arrays.asList(Attribute("acs", "site", "boston"), Attribute("acs", "department", "sales"))
+            listOf(Attribute("acs", "site", "boston"), Attribute("acs", "department", "sales"))
         )
         val handler = ResourceHandler(attributes, "", "")
         Assert.assertEquals("", handler.uriVariable(""))
@@ -58,7 +57,7 @@ class ResourceHandlerTest {
     @Test
     fun testUriVariablePositive() {
         val attributes = HashSet(
-            Arrays.asList(Attribute("acs", "site", "boston"), Attribute("acs", "department", "sales"))
+            listOf(Attribute("acs", "site", "boston"), Attribute("acs", "department", "sales"))
         )
         val handler = ResourceHandler(
             attributes,

@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.util.ArrayList
-import java.util.Arrays
 import java.util.HashSet
 
 private val LOGGER = LoggerFactory.getLogger(PolicyMatcherImpl::class.java)
@@ -167,7 +166,7 @@ class PolicyMatcherImpl : PolicyMatcher {
         if (policyActionDefined) {
             val policyActions = policy.target!!.action!!
             policyActionList =
-                Arrays.asList(*policyActions.split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
+                listOf(*policyActions.split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
         }
         return policyActionDefined && requestAction != null && policyActionList.contains(requestAction) || policy.target?.action == null
     }

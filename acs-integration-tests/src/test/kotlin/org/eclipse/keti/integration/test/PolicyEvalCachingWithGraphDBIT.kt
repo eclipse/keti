@@ -43,7 +43,6 @@ import org.testng.annotations.AfterMethod
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.io.IOException
-import java.util.Arrays
 import java.util.HashSet
 
 private const val ISSUER_URI = "acs.example.org"
@@ -107,13 +106,13 @@ class PolicyEvalCachingWithGraphDBIT : AbstractTestNGSpringContextTests() {
 
         val specialAgentsGroup = BaseSubject(SPECIAL_AGENTS_GROUP)
         specialAgentsGroup
-            .parents = HashSet(Arrays.asList(Parent(fbi.subjectIdentifier!!)))
+            .parents = HashSet(listOf(Parent(fbi.subjectIdentifier!!)))
 
         val agentMulder = BaseSubject(AGENT_MULDER)
-        agentMulder.parents = HashSet(Arrays.asList(Parent(specialAgentsGroup.subjectIdentifier!!)))
+        agentMulder.parents = HashSet(listOf(Parent(specialAgentsGroup.subjectIdentifier!!)))
 
         val agentScully = BaseSubject(AGENT_SCULLY)
-        agentScully.parents = HashSet(Arrays.asList(Parent(specialAgentsGroup.subjectIdentifier!!)))
+        agentScully.parents = HashSet(listOf(Parent(specialAgentsGroup.subjectIdentifier!!)))
 
         val scullysTestimony = BaseResource(EVIDENCE_SCULLYS_TESTIMONY_ID)
 
@@ -197,9 +196,9 @@ class PolicyEvalCachingWithGraphDBIT : AbstractTestNGSpringContextTests() {
         val parentResource = BaseResource("/secured-by-value/sites/sanramon")
         val childResource = BaseResource("/secured-by-value/sites/basement")
 
-        parentResource.parents = HashSet(Arrays.asList(Parent(grandparentResource.resourceIdentifier!!)))
+        parentResource.parents = HashSet(listOf(Parent(grandparentResource.resourceIdentifier!!)))
 
-        childResource.parents = HashSet(Arrays.asList(Parent(parentResource.resourceIdentifier!!)))
+        childResource.parents = HashSet(listOf(Parent(parentResource.resourceIdentifier!!)))
 
         val agentMulder = BaseSubject(AGENT_MULDER)
 

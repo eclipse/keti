@@ -33,7 +33,6 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import java.util.ArrayList
-import java.util.Arrays
 
 /**
  * @author acs-engineers@ge.com
@@ -166,7 +165,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
     fun testPolicyConditionsWithOneValidCondition() {
         val condition = Condition("'a'.equals('b')")
         val conditionScripts = this.policySetValidator
-            .validatePolicyConditions(Arrays.asList(condition))
+            .validatePolicyConditions(listOf(condition))
         Assert.assertEquals(conditionScripts.size, 1)
         Assert.assertNotNull(conditionScripts[0])
     }
@@ -176,7 +175,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
         val condition = Condition("'a'.equals('b')")
         val condition2 = Condition("'a'.equals('c')")
         val conditionScripts = this.policySetValidator
-            .validatePolicyConditions(Arrays.asList(condition, condition2))
+            .validatePolicyConditions(listOf(condition, condition2))
         Assert.assertEquals(conditionScripts.size, 2)
         Assert.assertNotNull(conditionScripts[0])
         Assert.assertNotNull(conditionScripts[1])
@@ -186,7 +185,7 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
     fun testPolicyConditionsWithOneInvalidCondition() {
         val condition = Condition("System.exit(0)")
         val condition2 = Condition("'a'.equals('c')")
-        this.policySetValidator.validatePolicyConditions(Arrays.asList(condition, condition2))
+        this.policySetValidator.validatePolicyConditions(listOf(condition, condition2))
     }
 
     @Test

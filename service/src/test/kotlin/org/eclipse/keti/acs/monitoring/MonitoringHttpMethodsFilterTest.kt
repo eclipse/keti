@@ -30,10 +30,9 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import java.net.URI
-import java.util.Arrays
 import java.util.HashSet
 
-private val ALL_HTTP_METHODS = HashSet(Arrays.asList(*HttpMethod.values()))
+private val ALL_HTTP_METHODS = HashSet(listOf(*HttpMethod.values()))
 
 class MonitoringHttpMethodsFilterTest {
 
@@ -68,7 +67,7 @@ class MonitoringHttpMethodsFilterTest {
         return arrayOf<Array<Any?>>(
             arrayOf(
                 "/monitoring/heartbeat",
-                HashSet(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS))
+                HashSet(listOf(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS))
             )
         )
     }

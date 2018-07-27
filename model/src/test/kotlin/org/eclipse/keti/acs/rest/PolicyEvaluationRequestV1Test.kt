@@ -21,12 +21,11 @@ package org.eclipse.keti.acs.rest
 import org.eclipse.keti.acs.model.Attribute
 import org.testng.Assert
 import org.testng.annotations.Test
-import java.util.Arrays
 import java.util.HashSet
 import java.util.LinkedHashSet
 
-val EVALUATION_ORDER_P1_P2 = LinkedHashSet<String?>(Arrays.asList("P1", "P2"))
-val EVALUATION_ORDER_P2_P1 = LinkedHashSet<String?>(Arrays.asList("P2", "P1"))
+val EVALUATION_ORDER_P1_P2 = LinkedHashSet<String?>(listOf("P1", "P2"))
+val EVALUATION_ORDER_P2_P1 = LinkedHashSet<String?>(listOf("P2", "P1"))
 
 class PolicyEvaluationRequestV1Test {
 
@@ -51,7 +50,7 @@ class PolicyEvaluationRequestV1Test {
         a.action = "GET"
         a.resourceIdentifier = "/resource"
         a.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "group")
             )
         )
@@ -62,7 +61,7 @@ class PolicyEvaluationRequestV1Test {
         b.action = "GET"
         b.resourceIdentifier = "/resource"
         b.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "group")
             )
         )
@@ -82,7 +81,7 @@ class PolicyEvaluationRequestV1Test {
         b.action = "GET"
         b.resourceIdentifier = "/resource"
         b.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "group")
             )
         )
@@ -96,7 +95,7 @@ class PolicyEvaluationRequestV1Test {
         a.action = "GET"
         a.resourceIdentifier = "/resource"
         a.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "group")
             )
         )
@@ -115,7 +114,7 @@ class PolicyEvaluationRequestV1Test {
         a.action = "GET"
         a.resourceIdentifier = "/resource"
         a.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role")
             )
         )
@@ -125,7 +124,7 @@ class PolicyEvaluationRequestV1Test {
         b.action = "GET"
         b.resourceIdentifier = "/resource"
         b.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "group")
             )
         )
@@ -139,7 +138,7 @@ class PolicyEvaluationRequestV1Test {
         a.action = "GET"
         a.resourceIdentifier = "/resource"
         a.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "site")
             )
         )
@@ -149,7 +148,7 @@ class PolicyEvaluationRequestV1Test {
         b.action = "GET"
         b.resourceIdentifier = "/resource"
         b.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "group")
             )
         )
@@ -163,7 +162,7 @@ class PolicyEvaluationRequestV1Test {
         a.action = "GET"
         a.resourceIdentifier = "/resource"
         a.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "site")
             )
         )
@@ -174,7 +173,7 @@ class PolicyEvaluationRequestV1Test {
         b.action = "GET"
         b.resourceIdentifier = "/resource"
         b.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "site")
             )
         )
@@ -203,7 +202,7 @@ class PolicyEvaluationRequestV1Test {
         a.action = "GET"
         a.resourceIdentifier = "/resource"
         a.subjectAttributes = HashSet(
-            Arrays.asList(Attribute("issuer", "role"), Attribute("issuer", "group"))
+            listOf(Attribute("issuer", "role"), Attribute("issuer", "group"))
         )
         a.policySetsEvaluationOrder = EVALUATION_ORDER_P1_P2
 
@@ -212,7 +211,7 @@ class PolicyEvaluationRequestV1Test {
         b.action = "GET"
         b.resourceIdentifier = "/resource"
         b.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "group")
             )
         )
@@ -232,7 +231,7 @@ class PolicyEvaluationRequestV1Test {
         b.action = "GET"
         b.resourceIdentifier = "/resource"
         b.subjectAttributes = HashSet(
-            Arrays.asList(Attribute("issuer", "role"), Attribute("issuer", "group"))
+            listOf(Attribute("issuer", "role"), Attribute("issuer", "group"))
         )
         Assert.assertNotEquals(a.hashCode(), b.hashCode())
     }
@@ -244,7 +243,7 @@ class PolicyEvaluationRequestV1Test {
         a.action = "GET"
         a.resourceIdentifier = "/resource"
         a.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "group")
             )
         )
@@ -263,7 +262,7 @@ class PolicyEvaluationRequestV1Test {
         a.action = "GET"
         a.resourceIdentifier = "/resource"
         a.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role")
             )
         )
@@ -273,7 +272,7 @@ class PolicyEvaluationRequestV1Test {
         b.action = "GET"
         b.resourceIdentifier = "/resource"
         b.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "group")
             )
         )
@@ -303,7 +302,7 @@ class PolicyEvaluationRequestV1Test {
         a.action = "GET"
         a.resourceIdentifier = "/resource"
         a.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "site")
             )
         )
@@ -313,7 +312,7 @@ class PolicyEvaluationRequestV1Test {
         b.action = "GET"
         b.resourceIdentifier = "/resource"
         b.subjectAttributes = HashSet(
-            Arrays.asList(
+            listOf(
                 Attribute("issuer", "role"), Attribute("issuer", "group")
             )
         )

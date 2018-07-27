@@ -41,7 +41,6 @@ import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import java.io.File
 import java.io.IOException
-import java.util.Arrays
 import java.util.HashSet
 
 private const val POLICY_DIR_PATH = "src/test/resources/policies"
@@ -179,7 +178,7 @@ class PolicyMatcherImplTest {
         candidate.resourceURI = "/public"
         candidate.subjectIdentifier = "Edward R. Murrow"
         candidate.supplementalSubjectAttributes = HashSet(
-            Arrays.asList(Attribute("https://acs.attributes.int", "role", "admin"))
+            listOf(Attribute("https://acs.attributes.int", "role", "admin"))
         )
         val matchedPolicies = this.policyMatcher.match(candidate, policies)
         Assert.assertEquals(matchedPolicies.size, 1)
@@ -215,7 +214,7 @@ class PolicyMatcherImplTest {
         candidate.action = "GET"
         candidate.resourceURI = "/assets/1123"
         candidate.subjectIdentifier = "Edward R. Murrow"
-        candidate.supplementalSubjectAttributes = HashSet(Arrays.asList(groupAttr))
+        candidate.supplementalSubjectAttributes = HashSet(listOf(groupAttr))
 
         val matchedPolicies = this.policyMatcher.match(candidate, policies)
         Assert.assertEquals(matchedPolicies.size, 1)
@@ -247,7 +246,7 @@ class PolicyMatcherImplTest {
 
         candidate.subjectIdentifier = "Edward R. Murrow"
         candidate.supplementalSubjectAttributes = HashSet(
-            Arrays.asList(Attribute("https://acs.attributes.int", "group", "gog"))
+            listOf(Attribute("https://acs.attributes.int", "group", "gog"))
         )
         val matchedPolicies = this.policyMatcher.match(candidate, policies)
         Assert.assertEquals(matchedPolicies.size, 0)
@@ -271,7 +270,7 @@ class PolicyMatcherImplTest {
 
         candidate.subjectIdentifier = "Edward R. Murrow"
         val siteAttr = Attribute("https://acs.attributes.int", "site", "1123")
-        candidate.supplementalSubjectAttributes = HashSet(Arrays.asList(siteAttr))
+        candidate.supplementalSubjectAttributes = HashSet(listOf(siteAttr))
         val matchedPolicies = this.policyMatcher.match(candidate, policies)
         Assert.assertEquals(matchedPolicies.size, 1)
         Assert.assertEquals(matchedPolicies[0].policy, policies[policies.size - 1])

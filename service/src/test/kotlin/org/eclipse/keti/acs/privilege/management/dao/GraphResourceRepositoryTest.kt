@@ -53,7 +53,6 @@ import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.util.ArrayList
-import java.util.Arrays
 import java.util.HashSet
 import java.util.Random
 import java.util.concurrent.ExecutionException
@@ -569,7 +568,7 @@ class GraphResourceRepositoryTest {
         val implant = persistResourceWithParentsToZoneAndAssert(
             TEST_ZONE_1,
             EVIDENCE_IMPLANT_ID + randomNumber, EVIDENCE_IMPLANT_ATTRIBUTES, HashSet(
-                Arrays.asList(
+                listOf(
                     Parent(drive.resourceIdentifier!!),
                     Parent(ascension.resourceIdentifier!!)
                 )

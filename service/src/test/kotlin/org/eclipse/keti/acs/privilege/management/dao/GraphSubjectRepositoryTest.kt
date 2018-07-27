@@ -51,7 +51,6 @@ import org.janusgraph.core.JanusGraphException
 import org.janusgraph.core.JanusGraphFactory
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
-import java.util.Arrays
 import java.util.HashSet
 import java.util.Random
 
@@ -101,7 +100,7 @@ class GraphSubjectRepositoryTest {
         val subjectIdentifier = expectedSubject.subjectIdentifier
 
         var expectedAttributes = HashSet(
-            Arrays.asList(SECRET_CLASSIFICATION, TOP_SECRET_CLASSIFICATION, SITE_BASEMENT)
+            listOf(SECRET_CLASSIFICATION, TOP_SECRET_CLASSIFICATION, SITE_BASEMENT)
         )
         expectedSubject.attributes = expectedAttributes
         expectedSubject.attributesAsJson = JSON_UTILS.serialize(expectedAttributes)
@@ -113,7 +112,7 @@ class GraphSubjectRepositoryTest {
             )
         assertThat<SubjectEntity>(actualSubject, equalTo(expectedSubject))
 
-        expectedAttributes = HashSet(Arrays.asList(SECRET_CLASSIFICATION, SITE_BASEMENT))
+        expectedAttributes = HashSet(listOf(SECRET_CLASSIFICATION, SITE_BASEMENT))
         expectedSubject.attributes = expectedAttributes
         expectedSubject.attributesAsJson = JSON_UTILS.serialize(expectedAttributes)
         actualSubject = this.subjectRepository!!
@@ -241,7 +240,7 @@ class GraphSubjectRepositoryTest {
         val agentMulder = persistSubjectWithParentsToZoneAndAssert(
             TEST_ZONE_1,
             AGENT_MULDER + randomNumber, MULDERS_ATTRIBUTES, HashSet(
-                Arrays.asList(
+                listOf(
                     Parent(specialAgentsGroup.subjectIdentifier!!),
                     Parent(topSecretGroup.subjectIdentifier!!)
                 )
@@ -339,7 +338,7 @@ class GraphSubjectRepositoryTest {
         agentMulder.attributes = MULDERS_ATTRIBUTES
         agentMulder.attributesAsJson = JSON_UTILS.serialize(agentMulder.attributes!!)
         agentMulder.parents = HashSet(
-            Arrays.asList(
+            listOf(
                 Parent(topSecretGroup.subjectIdentifier!!, HashSet(listOf(scope))),
                 Parent(secretGroup.subjectIdentifier!!)
             )

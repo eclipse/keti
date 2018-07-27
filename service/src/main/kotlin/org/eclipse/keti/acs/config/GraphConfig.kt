@@ -44,7 +44,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.util.Assert
-import java.util.Arrays
 import javax.annotation.PostConstruct
 
 private val LOGGER = LoggerFactory.getLogger(GraphConfig::class.java)
@@ -211,7 +210,7 @@ class GraphConfig {
             var graphBuilder = JanusGraphFactory.build().set("storage.backend", "cassandra")
                 .set("storage.cassandra.keyspace", this.cassandraKeyspace).set(
                     "storage.hostname",
-                    Arrays.asList(*hostname.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
+                    listOf(*hostname.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
                 ).set("storage.port", this.port).set("cache.db-cache", this.cacheEnabled)
                 .set("cache.db-cache-clean-wait", this.graphCacheCleanWait)
                 .set("cache.db-cache-time", this.graphCacheTime).set("cache.db-cache-size", this.graphCacheSize)

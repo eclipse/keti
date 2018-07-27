@@ -21,7 +21,6 @@ package org.eclipse.keti.acs.zone.management
 import org.eclipse.keti.acs.security.AbstractHttpMethodsFilter
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
-import java.util.Arrays
 import java.util.HashSet
 import java.util.LinkedHashMap
 
@@ -30,7 +29,7 @@ private const val ZONE_MANAGEMENT_URI_REGEX = "\\A/v1/zone/[^/]+?/??\\Z"
 private fun uriPatternsAndAllowedHttpMethods(): Map<String, Set<HttpMethod>> {
     val uriPatternsAndAllowedHttpMethods = LinkedHashMap<String, Set<HttpMethod>>()
     uriPatternsAndAllowedHttpMethods[ZONE_MANAGEMENT_URI_REGEX] =
-        HashSet(Arrays.asList(HttpMethod.PUT, HttpMethod.GET, HttpMethod.DELETE, HttpMethod.HEAD))
+        HashSet(listOf(HttpMethod.PUT, HttpMethod.GET, HttpMethod.DELETE, HttpMethod.HEAD))
     return uriPatternsAndAllowedHttpMethods
 }
 

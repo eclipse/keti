@@ -41,7 +41,6 @@ import org.testng.annotations.AfterMethod
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.io.IOException
-import java.util.Arrays
 import java.util.HashSet
 import java.util.LinkedHashSet
 
@@ -415,7 +414,7 @@ class PolicyEvaluationCachingIT : AbstractTestNGSpringContextTests() {
 
         val siteResource = BaseResource("/site/1")
         siteResource.attributes = HashSet(
-            Arrays.asList(this.privilegeHelper.defaultOrgAttribute)
+            listOf(this.privilegeHelper.defaultOrgAttribute)
         )
         this.privilegeHelper.putResource(
             this.acsAdminRestTemplate!!, siteResource, endpoint, this.acsZone1Headers!!,

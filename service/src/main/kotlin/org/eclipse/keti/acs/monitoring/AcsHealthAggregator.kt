@@ -24,7 +24,6 @@ import org.springframework.boot.actuate.health.Status
 import org.springframework.stereotype.Component
 import org.springframework.util.Assert
 import java.util.ArrayList
-import java.util.Arrays
 import java.util.Comparator
 import java.util.LinkedHashMap
 
@@ -45,11 +44,7 @@ class AcsHealthAggregator internal constructor() : HealthAggregator {
     }
 
     fun setStatusOrder(vararg statusOrder: Status) {
-        val order = arrayOfNulls<String>(statusOrder.size)
-        for (i in statusOrder.indices) {
-            order[i] = statusOrder[i].code
-        }
-        this.setStatusOrder(Arrays.asList<String>(*order))
+        this.setStatusOrder(statusOrder.map { it.code }.toList())
     }
 
     fun setStatusOrder(statusOrder: List<String>) {

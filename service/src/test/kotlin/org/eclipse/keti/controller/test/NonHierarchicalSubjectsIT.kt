@@ -40,7 +40,6 @@ import org.testng.Assert
 import org.testng.SkipException
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
-import java.util.Arrays
 
 private val OBJECT_MAPPER = ObjectMapper()
 private val JSON_UTILS = JsonUtils()
@@ -65,7 +64,7 @@ class NonHierarchicalSubjectsIT : AbstractTestNGSpringContextTests() {
     @BeforeClass
     @Throws(Exception::class)
     fun beforeClass() {
-        if (Arrays.asList(*this.configurableEnvironment.activeProfiles).contains("graph")) {
+        if (listOf(*this.configurableEnvironment.activeProfiles).contains("graph")) {
             throw SkipException("This test only applies when NOT using the \"graph\" profile")
         }
 

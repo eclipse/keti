@@ -30,10 +30,9 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import java.net.URI
-import java.util.Arrays
 import java.util.HashSet
 
-private val ALL_HTTP_METHODS = HashSet(Arrays.asList(*HttpMethod.values()))
+private val ALL_HTTP_METHODS = HashSet(listOf(*HttpMethod.values()))
 
 class PolicyHttpMethodsFilterTest {
 
@@ -68,13 +67,13 @@ class PolicyHttpMethodsFilterTest {
         return arrayOf<Array<Any?>>(
             arrayOf(
                 "/v1/policy-set/foo", HashSet(
-                    Arrays.asList(
+                    listOf(
                         HttpMethod.PUT, HttpMethod.GET, HttpMethod.DELETE, HttpMethod.HEAD,
                         HttpMethod.OPTIONS
                     )
                 )
             ),
-            arrayOf("/v1/policy-set", HashSet(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS)))
+            arrayOf("/v1/policy-set", HashSet(listOf(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS)))
         )
     }
 }
