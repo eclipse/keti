@@ -19,7 +19,6 @@
 package org.eclipse.keti.acs.zone.management.dao
 
 import org.eclipse.keti.acs.rest.Zone
-import java.util.HashSet
 
 /**
  *
@@ -51,13 +50,5 @@ class ZoneConverter {
         zone.subdomain = zoneEntity.subdomain!!
         zone.description = zoneEntity.description
         return zone
-    }
-
-    fun toZone(zoneEntities: Set<ZoneEntity>): Set<Zone> {
-        val result = HashSet<Zone>()
-        for (ze in zoneEntities) {
-            result.add(toZone(ze)!!)
-        }
-        return result
     }
 }

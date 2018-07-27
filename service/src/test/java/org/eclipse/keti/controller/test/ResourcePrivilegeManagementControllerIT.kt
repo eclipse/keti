@@ -72,9 +72,6 @@ class ResourcePrivilegeManagementControllerIT : AbstractTestNGSpringContextTests
 
     private var testZone2: Zone? = null
 
-    @Autowired
-    private lateinit var env: ConfigurableEnvironment
-
     @BeforeClass
     @Throws(Exception::class)
     fun setup() {

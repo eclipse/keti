@@ -73,20 +73,20 @@ class URLPathMatchingIT : AbstractTestNGSpringContextTests() {
         Assert.assertNotNull(this.zone, "createZone.json file not found or invalid")
         val zoneContent = this.objectWriter.writeValueAsString(this.zone)
 
-        return arrayOf(
-            arrayOf<Any?>(
+        return arrayOf<Array<Any?>>(
+            arrayOf(
                 put("/ /v1/zone/zone-1", "zone-1").contentType(MediaType.APPLICATION_JSON).content(
                     zoneContent
                 )
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 put(
                     "/v1/ /zone/zone-1",
                     "zone-1"
                 ).contentType(MediaType.APPLICATION_JSON).content(zoneContent)
             ),
-            arrayOf<Any?>(get("/ /v1/zone/zone-2").contentType(MediaType.APPLICATION_JSON)),
-            arrayOf<Any?>(get("/v1/ /zone/zone-2").contentType(MediaType.APPLICATION_JSON))
+            arrayOf(get("/ /v1/zone/zone-2").contentType(MediaType.APPLICATION_JSON)),
+            arrayOf(get("/v1/ /zone/zone-2").contentType(MediaType.APPLICATION_JSON))
         )
     }
 }

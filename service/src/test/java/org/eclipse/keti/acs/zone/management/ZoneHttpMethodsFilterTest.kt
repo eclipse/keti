@@ -65,8 +65,8 @@ class ZoneHttpMethodsFilterTest {
 
     @DataProvider
     fun urisAndTheirAllowedHttpMethods(): Array<Array<Any?>> {
-        return arrayOf(
-            arrayOf<Any?>(
+        return arrayOf<Array<Any?>>(
+            arrayOf(
                 "/v1/zone/foo", HashSet(
                     Arrays.asList(
                         HttpMethod.PUT,

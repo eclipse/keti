@@ -50,25 +50,26 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
     @Autowired
     private lateinit var policySetValidator: PolicySetValidator
 
-    val invalidPolicies: Array<Array<Any?>>
-        @DataProvider(name = "invalidPolicyProvider")
-        get() = arrayOf(
-            arrayOf<Any?>("policyset/validator/test/missing-effect-policy.json", "missing: [\"effect\"]"),
-            arrayOf<Any?>("policyset/validator/test/missing-name-policy-set.json", "missing: [\"name\"]"),
-            arrayOf<Any?>("policyset/validator/test/empty-policies-policy-set.json", "/properties/policies"),
-            arrayOf<Any?>("policyset/validator/test/no-policies-policy-set.json", "/properties/policies"),
-            arrayOf<Any?>("policyset/validator/test/missing-resource-policy-target.json", "missing: [\"resource\"]"),
-            arrayOf<Any?>("policyset/validator/test/missing-uritemplate-policy-resource.json", "missing: [\"uriTemplate\"]"),
-            arrayOf<Any?>("policyset/validator/test/missing-condition-policy-condition.json", "missing: [\"condition\"]"),
-            arrayOf<Any?>(
+    @DataProvider(name = "invalidPolicyProvider")
+    fun invalidPolicies(): Array<Array<Any?>> {
+        return arrayOf<Array<Any?>>(
+            arrayOf("policyset/validator/test/missing-effect-policy.json", "missing: [\"effect\"]"),
+            arrayOf("policyset/validator/test/missing-name-policy-set.json", "missing: [\"name\"]"),
+            arrayOf("policyset/validator/test/empty-policies-policy-set.json", "/properties/policies"),
+            arrayOf("policyset/validator/test/no-policies-policy-set.json", "/properties/policies"),
+            arrayOf("policyset/validator/test/missing-resource-policy-target.json", "missing: [\"resource\"]"),
+            arrayOf("policyset/validator/test/missing-uritemplate-policy-resource.json", "missing: [\"uriTemplate\"]"),
+            arrayOf("policyset/validator/test/missing-condition-policy-condition.json", "missing: [\"condition\"]"),
+            arrayOf(
                 "policyset/validator/test/testMatchPolicyWithInvalidAction.json",
                 "Policy Action validation failed"
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 "policyset/validator/test/testMatchPolicyWithMultipleActionsOneInvalid.json",
                 "Policy Action validation failed"
             )
         )
+    }
 
     @BeforeClass
     fun setup() {

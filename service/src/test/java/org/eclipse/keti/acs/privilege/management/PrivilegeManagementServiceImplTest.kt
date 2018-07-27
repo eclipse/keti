@@ -123,8 +123,8 @@ class PrivilegeManagementServiceImplTest : AbstractTransactionalTestNGSpringCont
 
     @DataProvider(name = "emptyIdDataProvider")
     private fun emptyIdDataProvider(): Array<Array<Any?>> {
-        return arrayOf(
-            arrayOf<Any?>(""), arrayOf<Any?>(null)
+        return arrayOf<Array<Any?>>(
+            arrayOf(""), arrayOf(null)
         )
     }
 

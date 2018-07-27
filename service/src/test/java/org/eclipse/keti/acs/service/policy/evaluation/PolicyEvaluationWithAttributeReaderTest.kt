@@ -20,7 +20,6 @@ package org.eclipse.keti.acs.service.policy.evaluation
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.nhaarman.mockito_kotlin.any
-import org.eclipse.keti.acs.PolicyContextResolver
 import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory
 import org.eclipse.keti.acs.attribute.readers.AttributeRetrievalException
 import org.eclipse.keti.acs.attribute.readers.ExternalResourceAttributeReader
@@ -72,8 +71,6 @@ class PolicyEvaluationWithAttributeReaderTest : AbstractTestNGSpringContextTests
     private lateinit var evaluationService: PolicyEvaluationServiceImpl
     @Mock
     private lateinit var policyService: PolicyManagementService
-    @Mock
-    private lateinit var policyScopeResolver: PolicyContextResolver
     @Mock
     private lateinit var zoneResolver: ZoneResolver
     @Mock

@@ -57,7 +57,6 @@ const val AGENT_MULDER = "mulder"
 val MULDERS_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(SITE_BASEMENT)))
 
 const val AGENT_SCULLY = "scully"
-val SCULLYS_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(SITE_BASEMENT)))
 
 const val BASEMENT_SITE_ID = "/site/basement"
 val BASEMENT_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(SITE_BASEMENT)))
@@ -75,7 +74,6 @@ const val DRIVE_ID = "/x-files/drive"
 val DRIVE_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(TYPE_MONSTER_OF_THE_WEEK)))
 
 const val JOSECHUNG_ID = "/x-files/josechung"
-val JOSECHUNG_ATTRIBUTES: MutableSet<Attribute> = Collections.unmodifiableSet(HashSet(Arrays.asList(TYPE_MONSTER_OF_THE_WEEK)))
 
 const val EVIDENCE_SCULLYS_TESTIMONY_ID = "/evidence/scullys-testimony"
 val SCULLYS_TESTIMONY_ATTRIBUTES: MutableSet<Attribute> =

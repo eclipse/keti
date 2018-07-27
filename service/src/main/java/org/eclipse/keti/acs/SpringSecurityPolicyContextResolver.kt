@@ -70,6 +70,5 @@ class SpringSecurityPolicyContextResolver : PolicyContextResolver {
     // null
     val authentication: OAuth2Authentication
         get() = SecurityContextHolder.getContext().authentication as OAuth2Authentication
-                ?: throw InvalidACSRequestException("OAuth2Authentication cannot be null")
 
 }

@@ -19,6 +19,7 @@
 package org.eclipse.keti.acs.attribute.connector.management
 
 import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.mock
 import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory
 import org.eclipse.keti.acs.rest.AttributeAdapterConnection
 import org.eclipse.keti.acs.rest.AttributeConnector
@@ -29,6 +30,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import org.springframework.test.util.ReflectionTestUtils
 import org.testng.Assert
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.DataProvider
@@ -44,8 +46,6 @@ class AttributeConnectorServiceTest {
     private lateinit var zoneResolver: ZoneResolver
     @Mock
     private lateinit var zoneRepository: ZoneRepository
-    @Mock
-    private lateinit var attributeReaderFactory: AttributeReaderFactory
 
     private val validConnector: Array<Any?>
         get() {
@@ -259,6 +259,7 @@ class AttributeConnectorServiceTest {
     @BeforeMethod
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        ReflectionTestUtils.setField(connectorService, "attributeReaderFactory", mock<AttributeReaderFactory>())
         this.connectorService.setEncryptionKey("1234567890123456")
     }
 

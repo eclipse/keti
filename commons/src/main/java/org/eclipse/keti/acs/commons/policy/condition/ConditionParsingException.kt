@@ -26,6 +26,5 @@ package org.eclipse.keti.acs.commons.policy.condition
  */
 class ConditionParsingException(
     message: String,
-    val failedScript: String?,
     cause: Throwable
 ) : Exception(message, cause)

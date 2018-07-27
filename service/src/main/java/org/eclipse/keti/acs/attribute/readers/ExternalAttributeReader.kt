@@ -109,7 +109,7 @@ abstract class ExternalAttributeReader(
         val cachedAttributes = CachedAttributes(emptySet())
 
         val adapterConnections = this.attributeAdapterConnections
-        val adapterConnection = matchAdapterConnection(adapterConnections!!, identifier)
+        val adapterConnection = matchAdapterConnection(adapterConnections!!)
 
         if (null != adapterConnection) {
 
@@ -140,8 +140,7 @@ abstract class ExternalAttributeReader(
     //Matching mechanism of a resource/subject id to a adapter is yet to be defined. Current implementation only
     //supports exactly one adapterConnection per connector.
     private fun matchAdapterConnection(
-        adapterConnections: Set<AttributeAdapterConnection>,
-        identifier: String
+        adapterConnections: Set<AttributeAdapterConnection>
     ): AttributeAdapterConnection? {
         return if (1 == adapterConnections.size) {
             adapterConnections.iterator().next()

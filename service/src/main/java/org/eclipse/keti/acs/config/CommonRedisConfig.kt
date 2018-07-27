@@ -18,7 +18,6 @@
 
 package org.eclipse.keti.acs.config
 
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean

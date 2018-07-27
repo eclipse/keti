@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-import org.codehaus.groovy.transform.stc.GroovyTypeCheckingExtensionSupport
+import org.codehaus.groovy.transform.stc.GroovyTypeCheckingExtensionSupport.TypeCheckingDSL
 import org.eclipse.keti.acs.commons.policy.condition.ResourceHandler
 import org.eclipse.keti.acs.commons.policy.condition.SubjectHandler
 import org.eclipse.keti.acs.commons.policy.condition.groovy.AttributeMatcher
 
-class SecureExtension extends GroovyTypeCheckingExtensionSupport.TypeCheckingDSL {
+class SecureExtension extends TypeCheckingDSL {
     @Override
     Object run() {
         // disallow calls on System

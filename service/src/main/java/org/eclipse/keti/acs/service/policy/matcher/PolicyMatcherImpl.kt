@@ -144,7 +144,7 @@ class PolicyMatcherImpl : PolicyMatcher {
         subjectAttributes: Set<Attribute>,
         policy: Policy
     ): Boolean {
-        if (null == policy.target?.subject || null == policy.target!!.subject!!.attributes) {
+        if (null == policy.target?.subject) {
             return true
         }
 

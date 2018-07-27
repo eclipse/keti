@@ -29,8 +29,7 @@ class PolicyManagementException : RuntimeException {
         cause: Throwable,
         enableSuppression: Boolean,
         writableStackTrace: Boolean
-    ) : super(message, cause, enableSuppression, writableStackTrace) {
-    }
+    ) : super(message, cause, enableSuppression, writableStackTrace)
 
     constructor(cause: Throwable) : super(cause)
 

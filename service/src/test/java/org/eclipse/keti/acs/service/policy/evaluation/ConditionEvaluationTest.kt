@@ -63,10 +63,9 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             arrayOf(null, true, false)
         )
 
-    val conditionsWithVariables: Array<Array<Any?>>
-        @DataProvider(name = "conditionsWithVariablesProvider")
-        get() = arrayOf(
-
+    @DataProvider(name = "conditionsWithVariablesProvider")
+    fun conditionsWithVariables(): Array<Array<Any?>> {
+        return arrayOf(
             arrayOf(
                 HashSet(
                     Arrays.asList(
@@ -254,6 +253,7 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
                 "site/{site_id}/department/{department_id}"
             )
         )
+    }
 
     @BeforeClass
     fun setup() {

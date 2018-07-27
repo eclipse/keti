@@ -39,7 +39,7 @@ import javax.persistence.UniqueConstraint
     name = "subject",
     uniqueConstraints = [(UniqueConstraint(columnNames = arrayOf("authorization_zone_id", "subject_identifier")))]
 )
-class SubjectEntity : ZonableEntity {
+open class SubjectEntity : ZonableEntity {
 
     @Id
     @Column(name = "id")
@@ -48,7 +48,7 @@ class SubjectEntity : ZonableEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "authorization_zone_id", referencedColumnName = "id", nullable = false, updatable = false)
-    override var zone: ZoneEntity? = null
+    final override var zone: ZoneEntity? = null
 
     @Column(name = "subject_identifier", nullable = false)
     var subjectIdentifier: String? = null

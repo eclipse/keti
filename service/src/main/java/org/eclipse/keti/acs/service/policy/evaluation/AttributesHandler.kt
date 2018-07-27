@@ -68,21 +68,4 @@ class AttributesHandler
     ): String? {
         return this.attributeMap[getKey(issuer, name)]
     }
-
-    /**
-     * @param issuer
-     * claim issuer
-     * @param name
-     * claim name
-     * @param value
-     * claim value
-     * @return true if has claim
-     */
-    fun hasAttribute(
-        issuer: String,
-        name: String,
-        value: String
-    ): Boolean {
-        return this.attributeMap.containsKey(getKey(issuer, name))
-    }
 }

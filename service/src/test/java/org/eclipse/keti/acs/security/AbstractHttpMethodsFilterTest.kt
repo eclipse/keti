@@ -56,9 +56,10 @@ class AbstractHttpMethodsFilterTest {
     @RestController
     private class DummyController {
 
-        val dummy: ResponseEntity<String>
-            @RequestMapping(method = [(RequestMethod.GET)], value = [V1_DUMMY])
-            get() = ok()
+        @RequestMapping(method = [(RequestMethod.GET)], value = [V1_DUMMY])
+        fun dummy(): ResponseEntity<String> {
+            return ok()
+        }
     }
 
     @BeforeClass

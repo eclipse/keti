@@ -323,7 +323,7 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
             this.policySet,
             createThreeLevelResourceHierarchy(),
             createSubjectHierarchy(),
-            createPolicyEvalRequest("GET", EVIDENCE_SCULLYS_TESTIMONY_ID, AGENT_MULDER),
+            createPolicyEvalRequest(EVIDENCE_SCULLYS_TESTIMONY_ID, AGENT_MULDER),
             Effect.PERMIT
         )
     }
@@ -339,7 +339,7 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
             this.policySet,
             createTwoParentResourceHierarchy(),
             createScopedSubjectHierarchy(),
-            createPolicyEvalRequest("GET", EVIDENCE_IMPLANT_ID, AGENT_MULDER),
+            createPolicyEvalRequest(EVIDENCE_IMPLANT_ID, AGENT_MULDER),
             Effect.DENY
         )
     }
@@ -354,7 +354,7 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
             this.policySet,
             null,
             null,
-            createPolicyEvalRequest("GET", EVIDENCE_IMPLANT_ID, AGENT_MULDER),
+            createPolicyEvalRequest(EVIDENCE_IMPLANT_ID, AGENT_MULDER),
             Effect.DENY
         )
     }
@@ -366,7 +366,7 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
     private fun evaluationWithSupplementalAttributesData(): Array<Any?> {
         return arrayOf(
             this.testZone1, this.policySet, null, null, createPolicyEvalRequest(
-                "GET", EVIDENCE_IMPLANT_ID, AGENT_MULDER, HashSet(
+                EVIDENCE_IMPLANT_ID, AGENT_MULDER, HashSet(
                     Arrays.asList(
                         SPECIAL_AGENTS_GROUP_ATTRIBUTE, TOP_SECRET_CLASSIFICATION
                     )
@@ -391,7 +391,7 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
             this.policySet,
             createThreeLevelResourceHierarchy(),
             null,
-            createPolicyEvalRequest("GET", EVIDENCE_SCULLYS_TESTIMONY_ID, AGENT_MULDER),
+            createPolicyEvalRequest(EVIDENCE_SCULLYS_TESTIMONY_ID, AGENT_MULDER),
             Effect.INDETERMINATE,
             errorMessage
         )
@@ -409,14 +409,13 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
             this.policySet,
             createTwoLevelResourceHierarchy(),
             createSubjectHierarchy(),
-            createPolicyEvalRequest("GET", EVIDENCE_SCULLYS_TESTIMONY_ID, AGENT_MULDER),
+            createPolicyEvalRequest(EVIDENCE_SCULLYS_TESTIMONY_ID, AGENT_MULDER),
             Effect.INDETERMINATE,
             errorMessage
         )
     }
 
     private fun createPolicyEvalRequest(
-        action: String,
         resourceIdentifier: String,
         subjectIdentifier: String
     ): PolicyEvaluationRequestV1 {
@@ -428,7 +427,6 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
     }
 
     private fun createPolicyEvalRequest(
-        action: String,
         resourceIdentifier: String,
         subjectIdentifier: String,
         supplementalResourceAttributes: Set<Attribute>,

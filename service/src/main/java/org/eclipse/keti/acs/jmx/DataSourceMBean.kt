@@ -39,52 +39,54 @@ class DataSourceMBean {
     @Autowired
     private lateinit var entityManagerFactory: LocalContainerEntityManagerFactoryBean
 
-    val dataSourceImpl: String
-        @ManagedAttribute get() = if (this.entityManagerFactory == null || this.entityManagerFactory.dataSource == null) {
+    @ManagedAttribute
+    fun dataSourceImpl(): String {
+        return if (this.entityManagerFactory.dataSource == null) {
             ""
         } else this.entityManagerFactory.dataSource.javaClass.name
+    }
 
     // For TOMCAT_POOL_DATASOURCE
     // in case it is not TOMCAT_POOL_DATASOURCE
-    val connectionPool: Map<String, Any>
-        @ManagedAttribute get() {
-            val connectionPool = HashMap<String, Any>()
-            if (this.entityManagerFactory == null || this.entityManagerFactory.dataSource == null) {
-                return connectionPool
-            }
-            if (this.entityManagerFactory.dataSource.javaClass.isAssignableFrom(DataSource::class.java)) {
-                val tomcatDs = this.entityManagerFactory.dataSource as org.apache.tomcat.jdbc.pool.DataSource
-                connectionPool["driverClassName"] = tomcatDs.driverClassName
-                connectionPool["numActive"] = tomcatDs.numActive
-                connectionPool["maxActive"] = tomcatDs.maxActive
-                connectionPool["numIdle"] = tomcatDs.numIdle
-                connectionPool["minIdle"] = tomcatDs.minIdle
-                connectionPool["maxIdle"] = tomcatDs.maxIdle
-                connectionPool["maxWait"] = tomcatDs.maxWait
-                return connectionPool
-            }
-            val str = this.entityManagerFactory.dataSource.toString()
-            var start = str.indexOf('[')
-            if (start == -1) {
-                start = str.indexOf('=') - 16
-                if (start <= 0) {
-                    return connectionPool
-                }
-            }
-            val poolString = str.substring(start + 1)
-            val array = poolString.split(DELIMITER.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            for (prop in array) {
-                if (prop.contains("=") || prop.contains(":")) {
-                    val nameValue =
-                        prop.trim { it <= ' ' }.split(PROP_DELIMITER.toRegex()).dropLastWhile { it.isEmpty() }
-                            .toTypedArray()
-                    if (nameValue.size == 2) {
-                        connectionPool[nameValue[0]] = nameValue[1]
-                    } else {
-                        connectionPool[nameValue[0]] = "null"
-                    }
-                }
-            }
+    @ManagedAttribute
+    fun connectionPool(): Map<String, Any> {
+        val connectionPool = HashMap<String, Any>()
+        if (this.entityManagerFactory.dataSource == null) {
             return connectionPool
         }
+        if (this.entityManagerFactory.dataSource.javaClass.isAssignableFrom(DataSource::class.java)) {
+            val tomcatDs = this.entityManagerFactory.dataSource as org.apache.tomcat.jdbc.pool.DataSource
+            connectionPool["driverClassName"] = tomcatDs.driverClassName
+            connectionPool["numActive"] = tomcatDs.numActive
+            connectionPool["maxActive"] = tomcatDs.maxActive
+            connectionPool["numIdle"] = tomcatDs.numIdle
+            connectionPool["minIdle"] = tomcatDs.minIdle
+            connectionPool["maxIdle"] = tomcatDs.maxIdle
+            connectionPool["maxWait"] = tomcatDs.maxWait
+            return connectionPool
+        }
+        val str = this.entityManagerFactory.dataSource.toString()
+        var start = str.indexOf('[')
+        if (start == -1) {
+            start = str.indexOf('=') - 16
+            if (start <= 0) {
+                return connectionPool
+            }
+        }
+        val poolString = str.substring(start + 1)
+        val array = poolString.split(DELIMITER.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        for (prop in array) {
+            if (prop.contains("=") || prop.contains(":")) {
+                val nameValue =
+                    prop.trim { it <= ' ' }.split(PROP_DELIMITER.toRegex()).dropLastWhile { it.isEmpty() }
+                        .toTypedArray()
+                if (nameValue.size == 2) {
+                    connectionPool[nameValue[0]] = nameValue[1]
+                } else {
+                    connectionPool[nameValue[0]] = "null"
+                }
+            }
+        }
+        return connectionPool
+    }
 }

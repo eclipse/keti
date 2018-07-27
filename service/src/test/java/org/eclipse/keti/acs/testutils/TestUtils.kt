@@ -20,7 +20,6 @@ package org.eclipse.keti.acs.testutils
 
 import org.eclipse.keti.acs.rest.Zone
 import org.eclipse.keti.acs.zone.management.ZoneService
-import org.eclipse.keti.acs.zone.management.dao.ZoneEntity
 import org.springframework.aop.framework.Advised
 import org.springframework.aop.support.AopUtils
 import org.springframework.http.MediaType
@@ -29,7 +28,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
-import org.testng.Assert
 import java.net.URI
 import java.net.URISyntaxException
 
@@ -66,17 +64,6 @@ class TestUtils {
         zone.name = name
         zone.subdomain = subdomain
         return zone
-    }
-
-    /**
-     * @returns a zone entity for a name 'Default acs Zone' and subdomain 'default_subdomain'
-     */
-    fun createDefaultZoneEntity(): ZoneEntity {
-        val zoneEntity = ZoneEntity()
-        zoneEntity.description = "default zoneEnity for test"
-        zoneEntity.name = "Default Acs Zone"
-        zoneEntity.subdomain = "default-subdomain"
-        return zoneEntity
     }
 
     fun createTestZone(testName: String): Zone {
@@ -145,28 +132,5 @@ class TestUtils {
         result.mockMvc =
             MockMvcBuilders.webAppContextSetup(wac).defaultRequest<DefaultMockMvcBuilder>(result.builder).build()
         return result
-    }
-
-    object TestAssertion {
-        fun assertDoesNotThrow(
-            unexpectedException: Class<*>,
-            executableCode: Runnable
-        ) {
-
-            /*
-            TODO We should Start moving tests to use this assertDoesNotThrow method wherever we use the try { ...
-            } catch (Exception e) { Assert.fail(); }
-
-            */
-            try {
-                executableCode.run()
-            } catch (e: Exception) {
-                if (e.javaClass == unexpectedException) {
-                    Assert.fail()
-                }
-                throw e
-            }
-
-        }
     }
 }

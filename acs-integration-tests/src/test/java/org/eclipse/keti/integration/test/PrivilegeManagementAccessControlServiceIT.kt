@@ -86,7 +86,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
 
     val subjectProvider: Array<Array<Any?>>
         @DataProvider(name = "subjectProvider")
-        get() = arrayOf(arrayOf<Any?>(MARISSA_V1), arrayOf<Any?>(JOE_V1), arrayOf<Any?>(PETE_V1), arrayOf<Any?>(JLO_V1), arrayOf<Any?>(BOB_V1))
+        get() = arrayOf<Array<Any?>>(arrayOf(MARISSA_V1), arrayOf(JOE_V1), arrayOf(PETE_V1), arrayOf(JLO_V1), arrayOf(BOB_V1))
 
     // empty subjectIdentifier
     val invalidSubjectsPost: Array<Array<Any?>>
@@ -110,7 +110,7 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
 
     val acsEndpoint: Array<Array<Any?>>
         @DataProvider(name = "endpointProvider")
-        get() = arrayOf(arrayOf<Any?>(acsUrl))
+        get() = arrayOf<Array<Any?>>(arrayOf(acsUrl))
 
     @BeforeClass
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)

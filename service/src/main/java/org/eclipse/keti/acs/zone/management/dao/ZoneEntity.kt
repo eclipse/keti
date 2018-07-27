@@ -42,10 +42,10 @@ private val OBJECT_MAPPER = ObjectMapper()
 @Entity
 @Table(
     name = "authorization_zone",
-    uniqueConstraints = arrayOf(
+    uniqueConstraints = [
         UniqueConstraint(columnNames = arrayOf("name")),
         UniqueConstraint(columnNames = arrayOf("subdomain"))
-    )
+    ]
 )
 class ZoneEntity {
 
@@ -65,21 +65,21 @@ class ZoneEntity {
 
     @OneToMany(
         mappedBy = "zone",
-        cascade = arrayOf(CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE),
+        cascade = [(CascadeType.MERGE), (CascadeType.REFRESH), (CascadeType.REMOVE)],
         fetch = FetchType.LAZY
     )
     private val subjects: Set<SubjectEntity>? = null
 
     @OneToMany(
         mappedBy = "zone",
-        cascade = arrayOf(CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE),
+        cascade = [(CascadeType.MERGE), (CascadeType.REFRESH), (CascadeType.REMOVE)],
         fetch = FetchType.LAZY
     )
     private val resources: Set<ResourceEntity>? = null
 
     @OneToMany(
         mappedBy = "zone",
-        cascade = arrayOf(CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE),
+        cascade = [(CascadeType.MERGE), (CascadeType.REFRESH), (CascadeType.REMOVE)],
         fetch = FetchType.LAZY
     )
     private val policySets: Set<PolicySetEntity>? = null
@@ -118,7 +118,7 @@ class ZoneEntity {
             this.cachedSubjectConnector = connector
         }
 
-    constructor() {}
+    constructor()
 
     constructor(id: Long?) {
         this.id = id!!

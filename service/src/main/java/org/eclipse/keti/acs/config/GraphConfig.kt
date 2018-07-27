@@ -36,7 +36,6 @@ import org.janusgraph.core.JanusGraph
 import org.janusgraph.core.JanusGraphFactory
 import org.janusgraph.core.PropertyKey
 import org.janusgraph.core.schema.JanusGraphManagement
-import org.janusgraph.core.schema.SchemaAction
 import org.janusgraph.core.schema.SchemaStatus
 import org.janusgraph.graphdb.database.management.ManagementSystem
 import org.slf4j.LoggerFactory
@@ -46,14 +45,11 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.util.Assert
 import java.util.Arrays
-import java.util.concurrent.ExecutionException
 import javax.annotation.PostConstruct
 
 private val LOGGER = LoggerFactory.getLogger(GraphConfig::class.java)
 
 const val BY_SCOPE_INDEX_NAME = "byScopeIndex"
-const val BY_SUBJECT_UNIQUE_INDEX_NAME = "bySubjectUnique"
-const val BY_RESOURCE_UNIQUE_INDEX_NAME = "byResourceUnique"
 const val BY_ZONE_INDEX_NAME = "byZone"
 const val BY_VERSION_UNIQUE_INDEX_NAME = "byVersion"
 const val BY_ZONE_AND_RESOURCE_UNIQUE_INDEX_NAME = "byZoneAndResourceUnique"
@@ -94,27 +90,6 @@ fun createIndex(
     if (!mgmt.containsGraphIndex(indexName)) {
         val indexPropertyKey = mgmt.makePropertyKey(indexKey).dataType(String::class.java).make()
         mgmt.buildIndex(indexName, Vertex::class.java).addKey(indexPropertyKey).buildCompositeIndex()
-    }
-    mgmt.commit()
-    // Wait for the index to become available
-    ManagementSystem.awaitGraphIndexStatus(newGraph, indexName).status(SchemaStatus.ENABLED).call()
-}
-
-@Throws(InterruptedException::class)
-fun createUniqueIndexForLabel(
-    newGraph: Graph,
-    indexName: String,
-    indexKey: String,
-    label: String
-) {
-    newGraph.tx().rollback() // Never create new indexes while a transaction is active
-    val mgmt = (newGraph as JanusGraph).openManagement()
-    if (!mgmt.containsGraphIndex(indexName)) {
-        val indexPropertyKey = mgmt.makePropertyKey(indexKey).dataType(Integer::class.java).make()
-        val versionLabel = mgmt.makeVertexLabel(label).make()
-        // Create a unique composite index for the property key that indexes only vertices with a given label
-        mgmt.buildIndex(indexName, Vertex::class.java).addKey(indexPropertyKey).indexOnly(versionLabel).unique()
-            .buildCompositeIndex()
     }
     mgmt.commit()
     // Wait for the index to become available
@@ -194,16 +169,6 @@ fun createVertexLabel(
     val mgmt = (newGraph as JanusGraph).openManagement()
     mgmt.getOrCreateVertexLabel(vertexLabel)
     mgmt.commit()
-}
-
-@Throws(InterruptedException::class, ExecutionException::class)
-fun reIndex(
-    newGraph: Graph,
-    indexName: String
-) {
-    val mgmt = (newGraph as JanusGraph).openManagement()
-    mgmt.updateIndex(mgmt.getGraphIndex(indexName), SchemaAction.REINDEX).get()
-    newGraph.tx().commit()
 }
 
 @Configuration

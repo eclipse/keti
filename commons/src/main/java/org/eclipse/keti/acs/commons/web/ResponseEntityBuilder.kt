@@ -23,7 +23,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.HttpStatus.OK
-import org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 import org.springframework.http.ResponseEntity
 import java.net.URI
 
@@ -120,14 +119,4 @@ fun noContent(): ResponseEntity<Void> {
  */
 fun <T> notFound(): ResponseEntity<T> {
     return ResponseEntity(NOT_FOUND)
-}
-
-/**
- * Response entity usually to reflect semantically invalid input data. Creates a typed ResponseEntity with HTTP
- * status code 422 with no response payload.
- *
- * @return The corresponding ResponseEntity
- */
-fun unprocessable(): ResponseEntity<Void> {
-    return ResponseEntity(UNPROCESSABLE_ENTITY)
 }

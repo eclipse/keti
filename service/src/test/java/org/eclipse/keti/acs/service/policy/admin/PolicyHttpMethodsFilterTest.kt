@@ -65,8 +65,8 @@ class PolicyHttpMethodsFilterTest {
 
     @DataProvider
     fun urisAndTheirAllowedHttpMethods(): Array<Array<Any?>> {
-        return arrayOf(
-            arrayOf<Any?>(
+        return arrayOf<Array<Any?>>(
+            arrayOf(
                 "/v1/policy-set/foo", HashSet(
                     Arrays.asList(
                         HttpMethod.PUT, HttpMethod.GET, HttpMethod.DELETE, HttpMethod.HEAD,
@@ -74,7 +74,7 @@ class PolicyHttpMethodsFilterTest {
                     )
                 )
             ),
-            arrayOf<Any?>("/v1/policy-set", HashSet(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS)))
+            arrayOf("/v1/policy-set", HashSet(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS)))
         )
     }
 }

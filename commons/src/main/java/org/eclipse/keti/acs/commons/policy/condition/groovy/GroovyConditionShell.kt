@@ -72,7 +72,7 @@ class GroovyConditionShell : ConditionShell {
             val groovyScript = this.shell.parse(script)
             return GroovyConditionScript(groovyScript)
         } catch (e: CompilationFailedException) {
-            throw ConditionParsingException("Failed to validate the condition script.", script, e)
+            throw ConditionParsingException("Failed to validate the condition script.", e)
         }
 
     }

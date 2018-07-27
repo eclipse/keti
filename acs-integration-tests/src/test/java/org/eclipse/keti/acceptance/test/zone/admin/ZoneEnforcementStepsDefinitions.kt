@@ -37,7 +37,6 @@ import org.eclipse.keti.test.utils.PolicyHelper
 import org.eclipse.keti.test.utils.PrivilegeHelper
 import org.eclipse.keti.test.utils.httpHeaders
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.env.Environment
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -51,8 +50,6 @@ import java.io.IOException
 import java.net.URI
 import java.net.URLEncoder
 
-//CHECKSTYLE:OFF
-//Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules.
 class ZoneEnforcementStepsDefinitions {
 
     private var zone1Name: String? = null
@@ -66,9 +63,6 @@ class ZoneEnforcementStepsDefinitions {
 
     @Autowired
     private lateinit var acsitSetUpFactory: ACSITSetUpFactory
-
-    @Autowired
-    internal lateinit var env: Environment
 
     private var acsUrl: String? = null
 

@@ -65,15 +65,15 @@ class SubjectHttpMethodsFilterTest {
 
     @DataProvider
     fun urisAndTheirAllowedHttpMethods(): Array<Array<Any?>> {
-        return arrayOf(
-            arrayOf<Any?>(
+        return arrayOf<Array<Any?>>(
+            arrayOf(
                 "/v1/subject/foo", HashSet(
                     Arrays.asList(
                         HttpMethod.PUT, HttpMethod.GET, HttpMethod.DELETE, HttpMethod.HEAD,
                         HttpMethod.OPTIONS
                     )
                 )
-            ), arrayOf<Any?>(
+            ), arrayOf(
                 "/v1/subject", HashSet(
                     Arrays.asList(HttpMethod.POST, HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS)
                 )

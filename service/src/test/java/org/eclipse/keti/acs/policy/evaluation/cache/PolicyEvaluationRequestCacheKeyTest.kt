@@ -86,7 +86,7 @@ class PolicyEvaluationRequestCacheKeyTest {
     fun testIllegalStateExceptionForSettingPolicySetIds() {
         val request = PolicyEvaluationRequestV1()
         request.policySetsEvaluationOrder = LinkedHashSet(listOf("policyOne"))
-        val policyEvaluationRequestCacheKey = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
+        PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
             .request(request)
             .policySetIds(request.policySetsEvaluationOrder)
             .build()
@@ -95,7 +95,7 @@ class PolicyEvaluationRequestCacheKeyTest {
     @Test(expectedExceptions = [(IllegalStateException::class)])
     fun testIllegalStateExceptionForSettingSubjectId() {
         val request = PolicyEvaluationRequestV1()
-        val policyEvaluationRequestCacheKey = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
+        PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
             .request(request)
             .subjectId("subject")
             .build()
@@ -104,7 +104,7 @@ class PolicyEvaluationRequestCacheKeyTest {
     @Test(expectedExceptions = [(IllegalStateException::class)])
     fun testIllegalStateExceptionForSettingResourceId() {
         val request = PolicyEvaluationRequestV1()
-        val policyEvaluationRequestCacheKey = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
+        PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
             .request(request)
             .resourceId("resource")
             .build()

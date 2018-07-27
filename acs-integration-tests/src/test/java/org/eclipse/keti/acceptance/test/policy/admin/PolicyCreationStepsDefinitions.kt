@@ -30,7 +30,6 @@ import org.eclipse.keti.test.utils.DEFAULT_SUBJECT_ID
 import org.eclipse.keti.test.utils.PolicyHelper
 import org.eclipse.keti.test.utils.PrivilegeHelper
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.env.Environment
 import org.testng.Assert
 import java.io.IOException
 
@@ -38,8 +37,6 @@ import java.io.IOException
  *
  * @author acs-engineers@ge.com
  */
-// CHECKSTYLE:OFF
-// Turning checkstyle off because the way these cucumber tests are named do not conform to the checkstyle rules.
 class PolicyCreationStepsDefinitions {
 
     @Autowired
@@ -47,9 +44,6 @@ class PolicyCreationStepsDefinitions {
 
     @Autowired
     private lateinit var privilegeHelper: PrivilegeHelper
-
-    @Autowired
-    internal lateinit var env: Environment
 
     @Autowired
     private lateinit var acsitSetUpFactory: ACSITSetUpFactory

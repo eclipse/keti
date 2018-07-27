@@ -39,26 +39,26 @@ class UriTemplateVariableResolverTest {
 
     @DataProvider
     internal fun uriDataProvider(): Array<Array<Any?>> {
-        return arrayOf(
+        return arrayOf<Array<Any?>>(
 
-            arrayOf<Any?>("/v1/site/123", UriTemplate("/v1{attribute_uri}"), "/site/123"),
-            arrayOf<Any?>("/v1/site/123/asset/345", UriTemplate("/v1{attribute_uri}/asset/345"), "/site/123"),
-            arrayOf<Any?>("/v1/site/123/asset/345", UriTemplate("/v1{attribute_uri}/asset/{site_id}"), "/site/123"),
-            arrayOf<Any?>("/v1/site/123/asset/345", UriTemplate("/v1/site/123{attribute_uri}"), "/asset/345"),
-            arrayOf<Any?>("/v1/site/123/asset/345", UriTemplate("/v1{attribute_uri}"), "/site/123/asset/345"),
+            arrayOf("/v1/site/123", UriTemplate("/v1{attribute_uri}"), "/site/123"),
+            arrayOf("/v1/site/123/asset/345", UriTemplate("/v1{attribute_uri}/asset/345"), "/site/123"),
+            arrayOf("/v1/site/123/asset/345", UriTemplate("/v1{attribute_uri}/asset/{site_id}"), "/site/123"),
+            arrayOf("/v1/site/123/asset/345", UriTemplate("/v1/site/123{attribute_uri}"), "/asset/345"),
+            arrayOf("/v1/site/123/asset/345", UriTemplate("/v1{attribute_uri}"), "/site/123/asset/345"),
 
-            arrayOf<Any?>(
+            arrayOf(
                 "/v1/site/123/asset/345/report",
                 UriTemplate("/v1{attribute_uri}/report"),
                 "/site/123/asset/345"
             ),
 
             // template doesnt match uri
-            arrayOf<Any?>("/v1/site/123/asset/345/report", UriTemplate("/v2{attribute_uri}"), null),
+            arrayOf("/v1/site/123/asset/345/report", UriTemplate("/v2{attribute_uri}"), null),
             // no attribute_uri variable in template
-            arrayOf<Any?>("/v1/site/123/asset/345/report", UriTemplate("/v1{non_existent_variable}"), null),
+            arrayOf("/v1/site/123/asset/345/report", UriTemplate("/v1{non_existent_variable}"), null),
             // multiple attribute_uri variables in template
-            arrayOf<Any?>("/v1/site/123/asset/345", UriTemplate("/v1{attribute_uri}/{attribute_uri}"), "345")
+            arrayOf("/v1/site/123/asset/345", UriTemplate("/v1{attribute_uri}/{attribute_uri}"), "345")
         )
     }
 

@@ -36,16 +36,8 @@ class AttributeMatcher {
         return this.resourceHandler
     }
 
-    fun setResourceHandler(resourceHandler: ResourceHandler) {
-        this.resourceHandler = resourceHandler
-    }
-
     fun subject(): SubjectHandler? {
         return this.subjectHandler
-    }
-
-    fun setSubjectHandler(subjectHandler: SubjectHandler) {
-        this.subjectHandler = subjectHandler
     }
 
     /**

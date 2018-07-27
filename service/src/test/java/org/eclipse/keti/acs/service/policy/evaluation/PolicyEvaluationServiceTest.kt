@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.nhaarman.mockito_kotlin.any
-import org.eclipse.keti.acs.PolicyContextResolver
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell
 import org.eclipse.keti.acs.model.Attribute
@@ -101,8 +100,6 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
     private lateinit var privilegeManagementService: PrivilegeManagementService
     @Mock
     private lateinit var policyMatcher: PolicyMatcher
-    @Mock
-    private lateinit var policyScopeResolver: PolicyContextResolver
     @Mock
     private lateinit var zoneResolver: ZoneResolver
     @Mock
@@ -378,28 +375,28 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
 
     @DataProvider(name = "policyDataProvider")
     private fun policyDataProvider(): Array<Array<Any?>> {
-        return arrayOf(
-            arrayOf<Any?>(File("src/test/resources/policy-set-with-one-policy-nocondition.json"), Effect.DENY),
-            arrayOf<Any?>(File("src/test/resources/policy-set-with-one-policy-one-condition.json"), Effect.PERMIT),
-            arrayOf<Any?>(File("src/test/resources/policy-set-with-multiple-policies-first-match.json"), Effect.DENY),
-            arrayOf<Any?>(
+        return arrayOf<Array<Any?>>(
+            arrayOf(File("src/test/resources/policy-set-with-one-policy-nocondition.json"), Effect.DENY),
+            arrayOf(File("src/test/resources/policy-set-with-one-policy-one-condition.json"), Effect.PERMIT),
+            arrayOf(File("src/test/resources/policy-set-with-multiple-policies-first-match.json"), Effect.DENY),
+            arrayOf(
                 File("src/test/resources/policy-set-with-multiple-policies-permit-with-condition.json"),
                 Effect.PERMIT
             ),
-            arrayOf<Any?>(File("src/test/resources/policy-set-with-multiple-policies-deny-with-condition.json"), Effect.DENY),
-            arrayOf<Any?>(
+            arrayOf(File("src/test/resources/policy-set-with-multiple-policies-deny-with-condition.json"), Effect.DENY),
+            arrayOf(
                 File("src/test/resources/policy-set-with-multiple-policies-na-with-condition.json"),
                 Effect.NOT_APPLICABLE
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 File("src/test/resources/policy-set-with-multiple-policies-default-deny-with-condition.json"),
                 Effect.DENY
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 File("src/test/resources/policy-set-with-one-policy-one-condition-indeterminate.json"),
                 Effect.INDETERMINATE
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 File("src/test/resources/policy-set-with-multiple-policies-deny-missing-optional-tags.json"),
                 Effect.DENY
             )
@@ -408,7 +405,7 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
 
     @DataProvider(name = "policyRequestParameterProvider")
     private fun policyRequestParameterProvider(): Array<Array<Any?>> {
-        return arrayOf(arrayOf<Any?>(null, "s1", "a1"), arrayOf<Any?>("r1", null, "a1"), arrayOf<Any?>("r1", "s1", null))
+        return arrayOf<Array<Any?>>(arrayOf(null, "s1", "a1"), arrayOf("r1", null, "a1"), arrayOf("r1", "s1", null))
     }
 
     @DataProvider(name = "filterPolicySetsInvalidRequestDataProvider")

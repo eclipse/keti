@@ -34,6 +34,4 @@ interface PolicySetRepository : JpaRepository<PolicySetEntity, Long> {
     fun getByZoneAndPolicySetId(zone: ZoneEntity, policySetId: String?): PolicySetEntity?
 
     fun findByZone(zone: ZoneEntity): List<PolicySetEntity>
-
-    fun countByZone(zone: ZoneEntity): Long?
 }

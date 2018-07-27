@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.Status
 
-const val STATUS = "status"
 private val LOGGER = LoggerFactory.getLogger(AcsMonitoringUtilities::class.java)
 internal const val ERROR_MESSAGE_FORMAT = "Unexpected exception while checking health: {}"
 const val DESCRIPTION_KEY = "description"

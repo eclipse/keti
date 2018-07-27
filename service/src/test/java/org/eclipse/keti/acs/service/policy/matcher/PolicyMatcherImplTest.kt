@@ -477,17 +477,17 @@ class PolicyMatcherImplTest {
 
     @DataProvider(name = "uriTemplateMatchDataProvider")
     private fun uriTemplateMatchDataProvider(): Array<Array<Any?>> {
-        return arrayOf(
+        return arrayOf<Array<Any?>>(
             /**
              * Each entry has the following data: uriTemplate, HTTP request URI, URITemplate expected match
              * result, Expected expanded URITemplate variable values
              */
             // exact match
-            arrayOf<Any?>("/one/{var1}", "/one/two", java.lang.Boolean.TRUE, arrayOf("var1"), arrayOf("two")),
-            arrayOf<Any?>("/one/{var1}", "/one", java.lang.Boolean.FALSE, arrayOf("n/a"), arrayOf("n/a")),
+            arrayOf("/one/{var1}", "/one/two", java.lang.Boolean.TRUE, arrayOf("var1"), arrayOf("two")),
+            arrayOf("/one/{var1}", "/one", java.lang.Boolean.FALSE, arrayOf("n/a"), arrayOf("n/a")),
 
             // extra sub-path
-            arrayOf<Any?>(
+            arrayOf(
                 "/one/{var1}",
                 "/one/two/three",
                 java.lang.Boolean.TRUE,
@@ -496,7 +496,7 @@ class PolicyMatcherImplTest {
             ),
 
             // var matches multiple sub-paths.
-            arrayOf<Any?>(
+            arrayOf(
                 "/one/{var1}/two",
                 "/one/stuff/in/between/two",
                 java.lang.Boolean.TRUE,
@@ -505,7 +505,7 @@ class PolicyMatcherImplTest {
             ),
 
             // variable matches right-most sub-path
-            arrayOf<Any?>(
+            arrayOf(
                 "/one/{var1}/two/{var2}/four",
                 "/one/two/two/two/three/three/four",
                 java.lang.Boolean.TRUE,
@@ -514,18 +514,18 @@ class PolicyMatcherImplTest {
             ),
 
             // no match
-            arrayOf<Any?>("/one/{var1}/two", "/one/two/three", java.lang.Boolean.FALSE, arrayOf("n/a"), arrayOf("n/a")),
-            arrayOf<Any?>("/one", "/one/two", java.lang.Boolean.FALSE, arrayOf("n/a"), arrayOf("n/a")),
+            arrayOf("/one/{var1}/two", "/one/two/three", java.lang.Boolean.FALSE, arrayOf("n/a"), arrayOf("n/a")),
+            arrayOf("/one", "/one/two", java.lang.Boolean.FALSE, arrayOf("n/a"), arrayOf("n/a")),
 
             // Eager match of sub-paths (default behavior)
-            arrayOf<Any?>(
+            arrayOf(
                 "/customer/{customer_id}",
                 "/customer/c1",
                 java.lang.Boolean.TRUE,
                 arrayOf("customer_id"),
                 arrayOf("c1")
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 "/customer/{customer_id}",
                 "/customer/c1site/s1",
                 java.lang.Boolean.TRUE,
@@ -534,14 +534,14 @@ class PolicyMatcherImplTest {
             ),
 
             // Exact match with sub-paths
-            arrayOf<Any?>(
+            arrayOf(
                 "/customer/{customer_id:\\w*}",
                 "/customer/c1",
                 java.lang.Boolean.TRUE,
                 arrayOf("customer_id"),
                 arrayOf("c1")
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 "/customer/{customer_id:\\w*}",
                 "/customer/c1/site/s1",
                 java.lang.Boolean.FALSE,
@@ -549,14 +549,14 @@ class PolicyMatcherImplTest {
                 arrayOf("n/a")
             ),
 
-            arrayOf<Any?>(
+            arrayOf(
                 "/customer/{customer_id:\\w*}/",
                 "/customer/c1/",
                 java.lang.Boolean.TRUE,
                 arrayOf("customer_id"),
                 arrayOf("c1")
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 "/customer/{customer_id:\\w*}/",
                 "/customer/c1/site/s1/",
                 java.lang.Boolean.FALSE,
@@ -564,7 +564,7 @@ class PolicyMatcherImplTest {
                 arrayOf("n/a")
             ),
 
-            arrayOf<Any?>(
+            arrayOf(
                 "/customer/{customer_id:\\w*}/site/{site_id:\\w*}",
                 "/customer/c1/site/s1",
                 java.lang.Boolean.TRUE,
@@ -572,7 +572,7 @@ class PolicyMatcherImplTest {
                 arrayOf("c1", "s1")
             ),
 
-            arrayOf<Any?>(
+            arrayOf(
                 "/customer/{customer_id:\\w*}",
                 "/customer/c1/site/s1",
                 java.lang.Boolean.FALSE,
@@ -580,32 +580,32 @@ class PolicyMatcherImplTest {
                 arrayOf("n/a")
             ),
 
-            arrayOf<Any?>("/asset/", "/asset/", java.lang.Boolean.TRUE, arrayOf("n/a"), arrayOf("n/a")),
-            arrayOf<Any?>("/asset", "/asset", java.lang.Boolean.TRUE, arrayOf("n/a"), arrayOf("n/a")),
-            arrayOf<Any?>("/asset", "/asset//", java.lang.Boolean.FALSE, arrayOf("n/a"), arrayOf("n/a")),
-            arrayOf<Any?>("/asset/", "/asset//", java.lang.Boolean.FALSE, arrayOf("n/a"), arrayOf("n/a")),
-            arrayOf<Any?>(
+            arrayOf("/asset/", "/asset/", java.lang.Boolean.TRUE, arrayOf("n/a"), arrayOf("n/a")),
+            arrayOf("/asset", "/asset", java.lang.Boolean.TRUE, arrayOf("n/a"), arrayOf("n/a")),
+            arrayOf("/asset", "/asset//", java.lang.Boolean.FALSE, arrayOf("n/a"), arrayOf("n/a")),
+            arrayOf("/asset/", "/asset//", java.lang.Boolean.FALSE, arrayOf("n/a"), arrayOf("n/a")),
+            arrayOf(
                 "/sites/{site_id}",
                 "/sites/sanramon/",
                 java.lang.Boolean.TRUE,
                 arrayOf("site_id"),
                 arrayOf("sanramon/")
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 "/sites/{site_id}",
                 "/sites/sanramon",
                 java.lang.Boolean.TRUE,
                 arrayOf("site_id"),
                 arrayOf("sanramon")
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 "/sites/{site_id}/",
                 "/sites/sanramon/",
                 java.lang.Boolean.TRUE,
                 arrayOf("site_id"),
                 arrayOf("sanramon")
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 "/myservice/{version}/stuff",
                 "/myservice/v1/stuff",
                 java.lang.Boolean.TRUE,
@@ -708,13 +708,13 @@ class PolicyMatcherImplTest {
 
     @DataProvider(name = "uriDataProviderDifferentMatchBehavior")
     private fun uriDataProviderWithSlash(): Array<Array<Any?>> {
-        return arrayOf(
+        return arrayOf<Array<Any?>>(
             /**
              * Each entry has the following data: uriTemplate, HTTP request URI, URITemplate expected match
              * result, Policy Matcher expected match result, Expected expanded URITemplate variable values
              */
 
-            arrayOf<Any?>(
+            arrayOf(
                 "/asset/",
                 "/asset",
                 java.lang.Boolean.FALSE,
@@ -722,7 +722,7 @@ class PolicyMatcherImplTest {
                 arrayOf("n/a"),
                 arrayOf("n/a")
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 "/asset",
                 "/asset/",
                 java.lang.Boolean.FALSE,
@@ -730,7 +730,7 @@ class PolicyMatcherImplTest {
                 arrayOf("n/a"),
                 arrayOf("n/a")
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 "/sites/{site_id}/",
                 "/sites/sanramon",
                 java.lang.Boolean.FALSE,
@@ -738,7 +738,7 @@ class PolicyMatcherImplTest {
                 arrayOf("n/a"),
                 arrayOf("n/a")
             ),
-            arrayOf<Any?>(
+            arrayOf(
                 "/myservice/{version}/stuff",
                 "/myservice/v1/stuff/",
                 java.lang.Boolean.FALSE,

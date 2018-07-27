@@ -76,9 +76,6 @@ class SubjectPrivilegeManagementControllerIT : AbstractTestNGSpringContextTests(
     private var testZone: Zone? = null
     private var testZone2: Zone? = null
 
-    @Autowired
-    private lateinit var env: ConfigurableEnvironment
-
     @BeforeClass
     fun setup() {
         this.testZone = TEST_UTILS.setupTestZone("SubjectMgmtControllerIT", zoneService)

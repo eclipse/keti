@@ -92,7 +92,7 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
 
     val acsEndpoint: Array<Array<Any?>>
         @DataProvider(name = "endpointProvider")
-        get() = arrayOf(arrayOf<Any?>(acsitSetUpFactory.acsUrl))
+        get() = arrayOf<Array<Any?>>(arrayOf(acsitSetUpFactory.acsUrl))
 
     @BeforeClass
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)

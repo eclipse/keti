@@ -52,7 +52,6 @@ private val JSON_UTILS = JsonUtils()
 const val ATTRIBUTES_PROPERTY_KEY = "attributes"
 const val PARENT_EDGE_LABEL = "parent"
 const val SCOPE_PROPERTY_KEY = "scope"
-const val ZONE_NAME_PROPERTY_KEY = "zoneName"
 const val ZONE_ID_KEY = "zoneId"
 const val VERSION_PROPERTY_KEY = "schemaVersion"
 const val VERSION_VERTEX_LABEL = "version"
@@ -81,13 +80,6 @@ fun getPropertyOrFail(vertex: Vertex, propertyKey: String): String {
             propertyKey
         )
     )
-}
-
-fun getPropertyOrNull(vertex: Vertex, propertyKey: String): String? {
-    val property = vertex.property<String>(propertyKey)
-    return if (property.isPresent) {
-        property.value()
-    } else null
 }
 
 abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long> {
@@ -285,24 +277,6 @@ abstract class GraphGenericRepository<E : ZonableEntity> : JpaRepository<E, Long
         }
         val parentEdge = vertex.addEdge(PARENT_EDGE_LABEL, traversal.next())
         parent.scopes.forEach { scope -> parentEdge.property(SCOPE_PROPERTY_KEY, JSON_UTILS.serialize(scope)) }
-    }
-
-    internal fun getParentEntities(entity: E): Set<ParentEntity> {
-        val parents = HashSet<ParentEntity>()
-        entity.parents.forEach { parent ->
-            val traversal = this.graphTraversal.V()
-                .has(ZONE_ID_KEY, entity.zone!!.name).has(entityIdKey, parent.identifier)
-            if (!traversal.hasNext()) {
-                throw IllegalStateException(
-                    String.format(
-                        "No parent exists in zone '%s' with '%s' value of '%s'.",
-                        entity.zone!!.name, entityIdKey, parent.identifier
-                    )
-                )
-            }
-            parents.add(ParentEntity(vertexToEntity(traversal.next()), parent.scopes))
-        }
-        return parents
     }
 
     fun checkVersionVertexExists(versionNumber: Int): Boolean {
