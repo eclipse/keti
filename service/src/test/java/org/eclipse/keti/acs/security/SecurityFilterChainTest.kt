@@ -177,7 +177,7 @@ class SecurityFilterChainTest : AbstractTestNGSpringContextTests() {
             .alwaysDo<DefaultMockMvcBuilder>(print()).build()
     }
 
-    @Test(dataProvider = "anonymousRequestBuilder")
+    @Test(dataProvider = "anonymousRequestBuilder", enabled = false)
     @Throws(Exception::class)
     fun testAnonymousAccess(
         request: RequestBuilder,

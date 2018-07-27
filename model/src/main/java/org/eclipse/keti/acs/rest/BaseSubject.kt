@@ -46,7 +46,7 @@ class BaseSubject {
 
     constructor() : super()
 
-    constructor(subjectIdentifier: String) {
+    constructor(subjectIdentifier: String?) {
         this.subjectIdentifier = subjectIdentifier
     }
 

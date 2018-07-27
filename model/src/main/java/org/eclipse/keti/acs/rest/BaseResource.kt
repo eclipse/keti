@@ -46,7 +46,7 @@ class BaseResource {
 
     constructor() : super()
 
-    constructor(resourceIdentifier: String) {
+    constructor(resourceIdentifier: String?) {
         this.resourceIdentifier = resourceIdentifier
     }
 
