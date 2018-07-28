@@ -75,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0
 "
 
 function generate_copyright_header {
-    if [[ "$1" == 'java' || "$1" == 'groovy' ]]; then
+    if [[ "$1" == 'kt' || "$1" == 'java' || "$1" == 'groovy' ]]; then
         BEGINNING_COMMENT_MARKER='/'
         CONTINUING_COMMENT_MARKER='*'
         ENDING_COMMENT_MARKER='/'
@@ -121,8 +121,8 @@ function generate_copyright_header {
 }
 
 function delete_copyright {
-    if [[ "$1" == 'java' || "$1" == 'groovy' ]]; then
-        perl -i -pe 'BEGIN{undef $/;} s/\/\*{79}?\s*?\*\s*?Copyright.*?(\n\s*?\*.*?)+?\n\s*?\*{79}?\/\n{1,}//' "$2"
+    if [[ "$1" == 'kt' || "$1" == 'java' || "$1" == 'groovy' ]]; then
+        perl -i -pe 'BEGIN{undef $/;} s|/\*{79}?\s*?\*\s*?Copyright.*?(\n\s*?\*.*?)+?\n\s*?\*{1,79}?/\n{1,}||' "$2"
     elif [[ "$1" == 'xml' ]]; then
         perl -i -pe 'BEGIN{undef $/;} s/<!-{2}?\s*?-\s*?Copyright.*?(\n\s*?-.*?)+?\n\s*?-{2}?>\n{1,}//' "$2"
     elif [[ "$1" == 'sh' || "$1" == 'properties' ]]; then
@@ -210,6 +210,7 @@ if [[ -n "$DELETE_COPYRIGHTS" && -n "$UPSERT_COPYRIGHTS" ]]; then
 fi
 
 if [[ -n "$DEBUG" ]]; then
+    generate_copyright_header 'kt'
     generate_copyright_header 'java'
     generate_copyright_header 'groovy'
     generate_copyright_header 'sh'
@@ -217,7 +218,7 @@ if [[ -n "$DEBUG" ]]; then
 fi
 
 if [[ -z "$SRC_FILE" ]]; then
-    for f in $( find "$ROOT_DIR" \( -not -path '*/\.*' -and -not -path '*/failsafe*' -and -not -path '*/surefire*' \) -type f \( -iname '*.groovy' -or -iname '*.java' -or -iname '*.sh' -or -iname '*.properties' -or -iname '*.xml' \) ); do
+    for f in $( find "$ROOT_DIR" \( -not -path '*/\.*' -and -not -path '*/failsafe*' -and -not -path '*/surefire*' \) -type f \( -iname '*.groovy' -or -iname '*.kt' -or -iname '*.java' -or -iname '*.sh' -or -iname '*.properties' -or -iname '*.xml' \) ); do
         modify_copyright_in_file "$f"
     done
 else
