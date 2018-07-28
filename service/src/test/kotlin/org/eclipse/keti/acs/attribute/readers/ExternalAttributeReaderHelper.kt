@@ -57,6 +57,7 @@ object ExternalAttributeReaderHelper {
         Mockito.`when`<CachedAttributes>(attributeCache.getAttributes(identifier)).thenReturn(null)
     }
 
+    @JvmStatic
     @DataProvider
     fun attributeSizeConstraintDataProvider(): Array<Array<Any?>> {
         return arrayOf<Array<Any?>>(arrayOf(0, 100), arrayOf(100, 0))
