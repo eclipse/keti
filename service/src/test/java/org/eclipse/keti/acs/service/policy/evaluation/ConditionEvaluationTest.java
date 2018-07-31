@@ -24,6 +24,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache;
+import org.eclipse.keti.acs.model.Attribute;
+import org.eclipse.keti.acs.model.Condition;
+import org.eclipse.keti.acs.rest.BaseResource;
+import org.eclipse.keti.acs.rest.BaseSubject;
+import org.eclipse.keti.acs.service.policy.validation.PolicySetValidator;
+import org.eclipse.keti.acs.service.policy.validation.PolicySetValidatorImpl;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,21 +41,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
-import org.eclipse.keti.acs.model.Attribute;
-import org.eclipse.keti.acs.model.Condition;
-import org.eclipse.keti.acs.rest.BaseResource;
-import org.eclipse.keti.acs.rest.BaseSubject;
-import org.eclipse.keti.acs.service.policy.validation.PolicySetValidator;
-import org.eclipse.keti.acs.service.policy.validation.PolicySetValidatorImpl;
-
 /**
  *
  * @author acs-engineers@ge.com
  */
 @ContextConfiguration(
-        classes = { GroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
+        classes = { NonCachingGroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
 public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
 
     @Autowired

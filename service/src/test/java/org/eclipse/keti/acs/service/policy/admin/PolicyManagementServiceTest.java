@@ -22,30 +22,14 @@ import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import org.eclipse.keti.acs.SpringSecurityPolicyContextResolver;
 import org.eclipse.keti.acs.attribute.cache.AttributeCacheFactory;
 import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorServiceImpl;
 import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory;
 import org.eclipse.keti.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
 import org.eclipse.keti.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader;
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache;
 import org.eclipse.keti.acs.config.InMemoryDataSourceConfig;
 import org.eclipse.keti.acs.model.Effect;
 import org.eclipse.keti.acs.model.PolicySet;
@@ -62,16 +46,32 @@ import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.eclipse.keti.acs.zone.management.dao.ZoneRepository;
 import org.eclipse.keti.acs.zone.resolver.SpringSecurityZoneResolver;
 import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 @Test
 @TestPropertySource("classpath:application.properties")
 @ActiveProfiles(resolver = TestActiveProfilesResolver.class)
-@ContextConfiguration(classes = { InMemoryPolicyEvaluationCache.class, InMemoryDataSourceConfig.class,
-        AttributeCacheFactory.class, PolicyManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
-        PolicySetValidatorImpl.class, GroovyConditionShell.class, SpringSecurityZoneResolver.class,
-        GroovyConditionCache.class, AttributeConnectorServiceImpl.class, AttributeReaderFactory.class,
-        PrivilegeServiceResourceAttributeReader.class, PrivilegeServiceSubjectAttributeReader.class,
-        PrivilegeManagementServiceImpl.class, SubjectRepositoryProxy.class, ResourceRepositoryProxy.class })
+@ContextConfiguration(
+        classes = { InMemoryPolicyEvaluationCache.class, InMemoryDataSourceConfig.class, AttributeCacheFactory.class,
+                PolicyManagementServiceImpl.class, SpringSecurityPolicyContextResolver.class,
+                PolicySetValidatorImpl.class, GroovyConditionShell.class, SpringSecurityZoneResolver.class,
+                NonCachingGroovyConditionCache.class, AttributeConnectorServiceImpl.class, AttributeReaderFactory.class,
+                PrivilegeServiceResourceAttributeReader.class, PrivilegeServiceSubjectAttributeReader.class,
+                PrivilegeManagementServiceImpl.class, SubjectRepositoryProxy.class, ResourceRepositoryProxy.class })
 public class PolicyManagementServiceTest extends AbstractTransactionalTestNGSpringContextTests {
 
     private static final String SUBDOMAIN1 = "tenant1";
