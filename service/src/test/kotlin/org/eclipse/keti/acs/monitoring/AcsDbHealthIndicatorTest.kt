@@ -65,7 +65,7 @@ class AcsDbHealthIndicatorTest {
     }
 
     @DataProvider
-    fun statuses(): Array<Array<Any?>> {
+    fun statuses(): Array<Array<out Any?>> {
         val happyMigrationManager = GraphMigrationManager()
         val sadMigrationManager = GraphMigrationManager()
         ReflectionTestUtils.setField(happyMigrationManager, IS_MIGRATION_COMPLETE_FIELD_NAME, true)

@@ -57,7 +57,7 @@ class CacheHealthIndicatorTest {
 
     @DataProvider
     @Throws(Exception::class)
-    fun statuses(): Array<Array<Any?>> {
+    fun statuses(): Array<Array<out Any?>> {
         return arrayOf(
             arrayOf(
                 mockCacheWithUp(true, true, DecisionCacheHealthIndicator::class.java),

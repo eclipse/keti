@@ -294,7 +294,7 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
     }
 
     @DataProvider(name = "policyEvalDataProvider")
-    private fun policyEvalDataProvider(): Array<Array<Any?>> {
+    private fun policyEvalDataProvider(): Array<Array<out Any?>> {
         return arrayOf(
             attributeInheritanceData(),
             scopedAttributeInheritanceData(),
@@ -304,7 +304,7 @@ class PolicyEvalWithGraphDbControllerIT : AbstractTestNGSpringContextTests() {
     }
 
     @DataProvider(name = "policyEvalExceedingAttributeLimitDataProvider")
-    private fun policyEvalExceedingAttributeLimitDataProvider(): Array<Array<Any?>> {
+    private fun policyEvalExceedingAttributeLimitDataProvider(): Array<Array<out Any?>> {
         return arrayOf(
             evaluationWithResourceAttributesExceedingTraversalLimitData(),
             evaluationWithSubjectAttributesExceedingTraversalLimitData()

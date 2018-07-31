@@ -60,7 +60,7 @@ class UaaHealthIndicatorTest {
     }
 
     @DataProvider
-    fun statuses(): Array<Array<Any?>> {
+    fun statuses(): Array<Array<out Any?>> {
         return arrayOf(
             arrayOf(mockRestWithUp(), Status.UP, HealthCode.AVAILABLE),
 

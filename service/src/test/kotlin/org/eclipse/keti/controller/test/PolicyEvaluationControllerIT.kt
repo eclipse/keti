@@ -183,7 +183,7 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
     }
 
     @DataProvider(name = "policyEvalDataProvider")
-    private fun policyEvalDataProvider(): Array<Array<Any?>> {
+    private fun policyEvalDataProvider(): Array<Array<out Any?>> {
         return arrayOf(
             requestEvaluationWithEmptyPolicySet(),
             requestEvaluationWithOnePolicySetAndEmptyPriorityList(),
@@ -260,7 +260,7 @@ class PolicyEvaluationControllerIT : AbstractTestNGSpringContextTests() {
     }
 
     @DataProvider(name = "policyEvalBadRequestDataProvider")
-    private fun policyEvalBadRequestDataProvider(): Array<Array<Any?>> {
+    private fun policyEvalBadRequestDataProvider(): Array<Array<out Any?>> {
         return arrayOf(
             requestEvaluationWithNonExistentPolicySet(),
             requestEvaluationWithTwoPolicySetsAndNoPriorityList(),

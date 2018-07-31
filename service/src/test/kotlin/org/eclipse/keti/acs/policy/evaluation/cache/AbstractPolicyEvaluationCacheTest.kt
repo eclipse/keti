@@ -486,7 +486,7 @@ class AbstractPolicyEvaluationCacheTest {
     }
 
     @DataProvider
-    private fun intervalProvider(): Array<Array<Any?>> {
+    private fun intervalProvider(): Array<Array<out Any?>> {
         return arrayOf(
             allConnectorsConfiguredNoneElapsed(),
             allConnectorsConfiguredOnlyResourceElapsed(),

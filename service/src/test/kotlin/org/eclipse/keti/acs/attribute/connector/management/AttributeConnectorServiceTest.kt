@@ -401,7 +401,7 @@ class AttributeConnectorServiceTest {
     }
 
     @DataProvider
-    private fun validConnectorProvider(): Array<Array<Any?>> {
+    private fun validConnectorProvider(): Array<Array<out Any?>> {
         return arrayOf(
             validConnector,
             connectorWithAdapterEndpointHavingAMixedCaseScheme,
@@ -410,7 +410,7 @@ class AttributeConnectorServiceTest {
     }
 
     @DataProvider
-    private fun badConnectorProvider(): Array<Array<Any?>> {
+    private fun badConnectorProvider(): Array<Array<out Any?>> {
         return arrayOf(
             nullConnector,
             connectorWithoutAdapter,

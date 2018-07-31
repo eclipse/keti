@@ -49,8 +49,8 @@ class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
     private lateinit var policySetValidator: PolicySetValidator
 
     @DataProvider(name = "invalidPolicyProvider")
-    fun invalidPolicies(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    fun invalidPolicies(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf("policyset/validator/test/missing-effect-policy.json", "missing: [\"effect\"]"),
             arrayOf("policyset/validator/test/missing-name-policy-set.json", "missing: [\"name\"]"),
             arrayOf("policyset/validator/test/empty-policies-policy-set.json", "/properties/policies"),

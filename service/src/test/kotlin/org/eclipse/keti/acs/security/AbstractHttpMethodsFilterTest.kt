@@ -89,7 +89,7 @@ class AbstractHttpMethodsFilterTest {
     }
 
     @DataProvider
-    fun mediaTypesAndExpectedStatuses(): Array<Array<Any?>> {
+    fun mediaTypesAndExpectedStatuses(): Array<Array<out Any?>> {
         return arrayOf(
             arrayOf(MediaType.ALL_VALUE, MockMvcResultMatchers.status().isOk),
             arrayOf(MediaType.APPLICATION_JSON_VALUE, MockMvcResultMatchers.status().isOk),

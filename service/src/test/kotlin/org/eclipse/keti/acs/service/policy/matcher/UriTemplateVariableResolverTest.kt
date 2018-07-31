@@ -38,8 +38,8 @@ class UriTemplateVariableResolverTest {
     }
 
     @DataProvider
-    fun uriDataProvider(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    fun uriDataProvider(): Array<Array<out Any?>> {
+        return arrayOf(
 
             arrayOf("/v1/site/123", UriTemplate("/v1{attribute_uri}"), "/site/123"),
             arrayOf("/v1/site/123/asset/345", UriTemplate("/v1{attribute_uri}/asset/345"), "/site/123"),

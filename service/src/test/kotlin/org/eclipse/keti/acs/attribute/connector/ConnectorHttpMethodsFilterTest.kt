@@ -64,8 +64,8 @@ class ConnectorHttpMethodsFilterTest {
     }
 
     @DataProvider
-    fun urisAndTheirAllowedHttpMethods(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    fun urisAndTheirAllowedHttpMethods(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf(
                 "/v1/connector/resource", HashSet(
                     listOf(

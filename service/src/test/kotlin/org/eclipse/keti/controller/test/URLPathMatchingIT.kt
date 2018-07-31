@@ -68,12 +68,12 @@ class URLPathMatchingIT : AbstractTestNGSpringContextTests() {
 
     @DataProvider
     @Throws(JsonProcessingException::class)
-    fun nonMatchedUrlPatternDp(): Array<Array<Any?>> {
+    fun nonMatchedUrlPatternDp(): Array<Array<out Any?>> {
         this.zone = this.jsonUtils.deserializeFromFile("controller-test/createZone.json", Zone::class.java)
         Assert.assertNotNull(this.zone, "createZone.json file not found or invalid")
         val zoneContent = this.objectWriter.writeValueAsString(this.zone)
 
-        return arrayOf<Array<Any?>>(
+        return arrayOf(
             arrayOf(
                 put("/ /v1/zone/zone-1", "zone-1").contentType(MediaType.APPLICATION_JSON).content(
                     zoneContent

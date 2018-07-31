@@ -475,8 +475,8 @@ class PolicyMatcherImplTest {
     }
 
     @DataProvider(name = "uriTemplateMatchDataProvider")
-    private fun uriTemplateMatchDataProvider(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    private fun uriTemplateMatchDataProvider(): Array<Array<out Any?>> {
+        return arrayOf(
             /**
              * Each entry has the following data: uriTemplate, HTTP request URI, URITemplate expected match
              * result, Expected expanded URITemplate variable values
@@ -615,7 +615,7 @@ class PolicyMatcherImplTest {
     }
 
     @DataProvider(name = "policySetMatcherDataProvider")
-    private fun policySetMatcherDataProvider(): Array<Array<Any?>> {
+    private fun policySetMatcherDataProvider(): Array<Array<out Any?>> {
         return arrayOf(
             /**
              * Each entry has the following data: uriTemplate, HTTP request URI, URITemplate expected match
@@ -706,8 +706,8 @@ class PolicyMatcherImplTest {
     }
 
     @DataProvider(name = "uriDataProviderDifferentMatchBehavior")
-    private fun uriDataProviderWithSlash(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    private fun uriDataProviderWithSlash(): Array<Array<out Any?>> {
+        return arrayOf(
             /**
              * Each entry has the following data: uriTemplate, HTTP request URI, URITemplate expected match
              * result, Policy Matcher expected match result, Expected expanded URITemplate variable values

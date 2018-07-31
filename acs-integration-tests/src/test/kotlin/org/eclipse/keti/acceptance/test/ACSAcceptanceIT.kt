@@ -78,17 +78,16 @@ class ACSAcceptanceIT : AbstractTestNGSpringContextTests() {
 
     private var headersWithZoneSubdomain: HttpHeaders? = null
 
-    val acsEndpoint: Array<Array<Any?>>
-        @DataProvider(name = "endpointProvider")
-        @Throws(Exception::class)
-        get() {
-            val policyEvalForBob = this.policyHelper.createEvalRequest(
-                "GET", "bob",
-                "/alarms/sites/sanramon", null
-            )
+    @DataProvider(name = "endpointProvider")
+    @Throws(Exception::class)
+    fun acsEndpoint(): Array<Array<out Any?>> {
+        val policyEvalForBob = this.policyHelper.createEvalRequest(
+            "GET", "bob",
+            "/alarms/sites/sanramon", null
+        )
 
-            return arrayOf(arrayOf(this.acsBaseUrl, this.headersWithZoneSubdomain, policyEvalForBob, "bob"))
-        }
+        return arrayOf(arrayOf(this.acsBaseUrl, this.headersWithZoneSubdomain, policyEvalForBob, "bob"))
+    }
 
     @BeforeClass
     @Throws(IOException::class)

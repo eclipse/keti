@@ -63,8 +63,8 @@ class EvaluationHttpMethodsFilterTest {
     }
 
     @DataProvider
-    fun urisAndTheirAllowedHttpMethods(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    fun urisAndTheirAllowedHttpMethods(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf(
                 "/v1/policy-evaluation",
                 HashSet(listOf(HttpMethod.POST, HttpMethod.OPTIONS))

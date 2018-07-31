@@ -106,8 +106,8 @@ class ZoneServiceTest : AbstractTransactionalTestNGSpringContextTests() {
     }
 
     @DataProvider(name = "badSubDomainDataProvider")
-    private fun badSubDomainDataProvider(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    private fun badSubDomainDataProvider(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf("-baddomain"),
             arrayOf("baddomain-"),
             arrayOf("bad.domain"),

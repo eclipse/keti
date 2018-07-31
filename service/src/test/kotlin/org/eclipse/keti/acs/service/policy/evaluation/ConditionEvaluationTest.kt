@@ -48,9 +48,9 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
     private lateinit var policySetValidator: PolicySetValidator
 
     // TODO: Should no exception just return the effect if the policy matched
-    val conditions: Array<Array<Any?>>
-        @DataProvider(name = "conditionsProvider")
-        get() = arrayOf<Array<Any?>>(
+    @DataProvider(name = "conditionsProvider")
+    fun conditions(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf(listOf(Condition("\"a\" == \"a\"")), true, false),
             arrayOf(listOf(Condition("\"a\" == \"b\"")), false, false),
             arrayOf(listOf(Condition("")), false, true),
@@ -60,10 +60,11 @@ class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
             arrayOf(listOf(Condition("\"a\" == \"b\""), Condition("\"c\" == \"b\"")), false, false),
             arrayOf(null, true, false)
         )
+    }
 
     @DataProvider(name = "conditionsWithVariablesProvider")
-    fun conditionsWithVariables(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    fun conditionsWithVariables(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf(
                 HashSet(
                     listOf(

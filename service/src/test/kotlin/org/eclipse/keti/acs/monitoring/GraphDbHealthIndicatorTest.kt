@@ -62,7 +62,7 @@ class GraphDbHealthIndicatorTest {
     }
 
     @DataProvider
-    fun statuses(): Array<Array<Any?>> {
+    fun statuses(): Array<Array<out Any?>> {
         return arrayOf(
             arrayOf(mockGraphDbWithUp(), Status.UP, HealthCode.IN_MEMORY, false),
 

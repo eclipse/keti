@@ -72,8 +72,8 @@ class ResourceAttributeResolverTest {
     }
 
     @DataProvider
-    fun resourceUriProvider(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    fun resourceUriProvider(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf("/v1/site/123/asset/456", "/v1{attribute_uri}/asset/{asset-id}", "/site/123"),
             arrayOf("/v1/site/123/asset/456", "/v2/DoesNotExist/{attribute_uri}", null),
             // attributeUriTemplate not defined

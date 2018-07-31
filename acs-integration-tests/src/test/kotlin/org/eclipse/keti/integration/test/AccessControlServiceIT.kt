@@ -65,9 +65,9 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
     @Autowired
     private lateinit var privilegeHelper: PrivilegeHelper
 
-    val subject: Array<Array<Any?>>
-        @DataProvider(name = "subjectProvider")
-        get() = arrayOf<Array<Any?>>(
+    @DataProvider(name = "subjectProvider")
+    fun subject(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf(
                 MARISSA_V1,
                 policyHelper.createEvalRequest(MARISSA_V1.subjectIdentifier!!, "sanramon"),
@@ -89,10 +89,12 @@ class AccessControlServiceIT : AbstractTestNGSpringContextTests() {
                 acsitSetUpFactory.acsUrl
             )
         )
+    }
 
-    val acsEndpoint: Array<Array<Any?>>
-        @DataProvider(name = "endpointProvider")
-        get() = arrayOf<Array<Any?>>(arrayOf(acsitSetUpFactory.acsUrl))
+    @DataProvider(name = "endpointProvider")
+    fun acsEndpoint(): Array<Array<out Any?>> {
+        return arrayOf(arrayOf(acsitSetUpFactory.acsUrl))
+    }
 
     @BeforeClass
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)

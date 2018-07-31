@@ -172,8 +172,8 @@ class AttributeConnectorConfigurationIT : AbstractTestNGSpringContextTests() {
     }
 
     @DataProvider(name = "requestUrlProvider")
-    private fun requestUrlProvider(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(arrayOf(RESOURCE_CONNECTOR_URL), arrayOf(SUBJECT_CONNECTOR_URL))
+    private fun requestUrlProvider(): Array<Array<out Any?>> {
+        return arrayOf(arrayOf(RESOURCE_CONNECTOR_URL), arrayOf(SUBJECT_CONNECTOR_URL))
     }
 
     @AfterClass

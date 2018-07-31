@@ -373,8 +373,8 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
     }
 
     @DataProvider(name = "policyDataProvider")
-    private fun policyDataProvider(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    private fun policyDataProvider(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf(File("src/test/resources/policy-set-with-one-policy-nocondition.json"), Effect.DENY),
             arrayOf(File("src/test/resources/policy-set-with-one-policy-one-condition.json"), Effect.PERMIT),
             arrayOf(File("src/test/resources/policy-set-with-multiple-policies-first-match.json"), Effect.DENY),
@@ -403,13 +403,13 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
     }
 
     @DataProvider(name = "policyRequestParameterProvider")
-    private fun policyRequestParameterProvider(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(arrayOf(null, "s1", "a1"), arrayOf("r1", null, "a1"), arrayOf("r1", "s1", null))
+    private fun policyRequestParameterProvider(): Array<Array<out Any?>> {
+        return arrayOf(arrayOf(null, "s1", "a1"), arrayOf("r1", null, "a1"), arrayOf("r1", "s1", null))
     }
 
     @DataProvider(name = "filterPolicySetsInvalidRequestDataProvider")
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
-    private fun filterPolicySetsInvalidRequestDataProvider(): Array<Array<Any?>> {
+    private fun filterPolicySetsInvalidRequestDataProvider(): Array<Array<out Any?>> {
         val onePolicySet = createDenyPolicySet()
         val twoPolicySets = createNotApplicableAndDenyPolicySets()
         return arrayOf(
@@ -438,7 +438,7 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
     }
 
     @DataProvider(name = "filterPolicySetsDataProvider")
-    private fun filterPolicySetsDataProvider(): Array<Array<Any?>> {
+    private fun filterPolicySetsDataProvider(): Array<Array<out Any?>> {
         val denyPolicySet = createDenyPolicySet()
         val notApplicableAndDenyPolicySets = createNotApplicableAndDenyPolicySets()
         return arrayOf(
@@ -492,7 +492,7 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
 
     @DataProvider(name = "multiplePolicySetsRequestDataProvider")
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
-    private fun multiplePolicySetsRequestDataProvider(): Array<Array<Any?>> {
+    private fun multiplePolicySetsRequestDataProvider(): Array<Array<out Any?>> {
         val denyPolicySet = createDenyPolicySet()
         val notApplicableAndDenyPolicySets = createNotApplicableAndDenyPolicySets()
         return arrayOf(

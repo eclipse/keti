@@ -59,7 +59,7 @@ object ExternalAttributeReaderHelper {
 
     @JvmStatic
     @DataProvider
-    fun attributeSizeConstraintDataProvider(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(arrayOf(0, 100), arrayOf(100, 0))
+    fun attributeSizeConstraintDataProvider(): Array<Array<out Any?>> {
+        return arrayOf(arrayOf(0, 100), arrayOf(100, 0))
     }
 } // Hiding constructor because this a test utility class

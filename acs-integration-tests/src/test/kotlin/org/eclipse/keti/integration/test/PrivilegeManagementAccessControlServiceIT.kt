@@ -83,39 +83,45 @@ class PrivilegeManagementAccessControlServiceIT : AbstractTestNGSpringContextTes
     private var zone3Headers: HttpHeaders? = null
     private var acsAdminRestTemplate: OAuth2RestTemplate? = null
 
-    val subjectProvider: Array<Array<Any?>>
-        @DataProvider(name = "subjectProvider")
-        get() = arrayOf<Array<Any?>>(
+    @DataProvider(name = "subjectProvider")
+    fun subjectProvider(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf(MARISSA_V1),
             arrayOf(JOE_V1),
             arrayOf(PETE_V1),
             arrayOf(JLO_V1),
             arrayOf(BOB_V1)
         )
+    }
 
     // empty subjectIdentifier
-    val invalidSubjectsPost: Array<Array<Any?>>
-        @DataProvider(name = "invalidSubjectPostProvider")
-        get() = arrayOf(arrayOf(BaseSubject(null), acsUrl))
+    @DataProvider(name = "invalidSubjectPostProvider")
+    fun invalidSubjectsPost(): Array<Array<out Any?>> {
+        return arrayOf(arrayOf(BaseSubject(null), acsUrl))
+    }
 
     // non empty resourceIdentifier
-    val resourcesPost: Array<Array<Any?>>
-        @DataProvider(name = "resourcePostProvider")
-        get() = arrayOf(arrayOf(BaseResource("/sites/sanramon"), acsUrl))
+    @DataProvider(name = "resourcePostProvider")
+    fun resourcesPost(): Array<Array<out Any?>> {
+        return arrayOf(arrayOf(BaseResource("/sites/sanramon"), acsUrl))
+    }
 
     // empty resourceIdentifier
-    val invalidResourcesPost: Array<Array<Any?>>
-        @DataProvider(name = "invalidResourcePostProvider")
-        get() = arrayOf(arrayOf(BaseResource(null), acsUrl))
+    @DataProvider(name = "invalidResourcePostProvider")
+    fun invalidResourcesPost(): Array<Array<out Any?>> {
+        return arrayOf(arrayOf(BaseResource(null), acsUrl))
+    }
 
     // non empty subjectIdentifier
-    val subjectsPost: Array<Array<Any?>>
-        @DataProvider(name = "subjectPostProvider")
-        get() = arrayOf(arrayOf(MARISSA_V1, acsUrl))
+    @DataProvider(name = "subjectPostProvider")
+    fun subjectsPost(): Array<Array<out Any?>> {
+        return arrayOf(arrayOf(MARISSA_V1, acsUrl))
+    }
 
-    val acsEndpoint: Array<Array<Any?>>
-        @DataProvider(name = "endpointProvider")
-        get() = arrayOf<Array<Any?>>(arrayOf(acsUrl))
+    @DataProvider(name = "endpointProvider")
+    fun acsEndpoint(): Array<Array<out Any?>> {
+        return arrayOf(arrayOf(acsUrl))
+    }
 
     @BeforeClass
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)

@@ -63,8 +63,8 @@ class MonitoringHttpMethodsFilterTest {
     }
 
     @DataProvider
-    fun urisAndTheirAllowedHttpMethods(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    fun urisAndTheirAllowedHttpMethods(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf(
                 "/monitoring/heartbeat",
                 HashSet(listOf(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS))

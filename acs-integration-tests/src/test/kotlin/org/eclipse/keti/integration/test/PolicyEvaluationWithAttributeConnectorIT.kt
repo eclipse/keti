@@ -244,8 +244,8 @@ class PolicyEvaluationWithAttributeConnectorIT : AbstractTestNGSpringContextTest
     }
 
     @DataProvider
-    private fun adapterStatusesAndResultingEffects(): Array<Array<Any?>> {
-        return arrayOf<Array<Any?>>(
+    private fun adapterStatusesAndResultingEffects(): Array<Array<out Any?>> {
+        return arrayOf(
             arrayOf(true, Effect.PERMIT, true),
             arrayOf(true, Effect.PERMIT, false),
             arrayOf(false, Effect.NOT_APPLICABLE, true)

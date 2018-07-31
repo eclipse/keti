@@ -81,9 +81,9 @@ class AcsHealthAggregatorTest {
     }
 
     @DataProvider
-    fun statuses(): Array<Array<Any?>> {
+    fun statuses(): Array<Array<out Any?>> {
         return arrayOf(
-            arrayOf<Any?>(DEGRADED_STATUS, listOf(Status.UP, DEGRADED_STATUS, Status.UP)),
+            arrayOf(DEGRADED_STATUS, listOf(Status.UP, DEGRADED_STATUS, Status.UP)),
             arrayOf(Status.UP, listOf(Status.UP, Status.UNKNOWN, Status.UP)),
             arrayOf(Status.DOWN, listOf(Status.UP, DEGRADED_STATUS, Status.DOWN))
         )
@@ -113,7 +113,7 @@ class AcsHealthAggregatorTest {
     }
 
     @DataProvider
-    fun singleStatuses(): Array<Array<Any?>> {
+    fun singleStatuses(): Array<Array<out Any?>> {
         return arrayOf(
             arrayOf("h1", Health.Builder().status(Status("CUSTOM")).build(), Status.UNKNOWN),
 
