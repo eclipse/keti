@@ -29,12 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import org.eclipse.keti.acs.attribute.readers.AttributeRetrievalException;
 import org.eclipse.keti.acs.commons.policy.condition.ConditionAssertionFailedException;
@@ -50,7 +44,6 @@ import org.eclipse.keti.acs.model.PolicySet;
 import org.eclipse.keti.acs.model.Target;
 import org.eclipse.keti.acs.policy.evaluation.cache.PolicyEvaluationCache;
 import org.eclipse.keti.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey;
-import org.eclipse.keti.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey.Builder;
 import org.eclipse.keti.acs.privilege.management.dao.AttributeLimitExceededException;
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
@@ -62,6 +55,10 @@ import org.eclipse.keti.acs.service.policy.validation.PolicySetValidationExcepti
 import org.eclipse.keti.acs.service.policy.validation.PolicySetValidator;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 @SuppressWarnings({ "javadoc", "nls" })
@@ -95,27 +92,7 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
                     + "Please review and resubmit the request.");
         }
 
-        List<PolicySet> allPolicySets = this.policyService.getAllPolicySets();
-
-        if (allPolicySets.isEmpty()) {
-            return new PolicyEvaluationResult(Effect.NOT_APPLICABLE);
-        }
-
-        LinkedHashSet<PolicySet> filteredPolicySets = filterPolicySetsByPriority(subjectIdentifier, uri, allPolicySets,
-                policySetsEvaluationOrder);
-
-        // At this point empty evaluation order means we have only one policy set.
-        // Fixing policy evaluation order so we could build a cache key.
-        PolicyEvaluationRequestCacheKey key;
-        if (policySetsEvaluationOrder.isEmpty()) {
-            key = new Builder().zoneId(zone.getName())
-                    .policySetIds(Stream.of(filteredPolicySets.iterator().next().getName())
-                            .collect(Collectors.toCollection(LinkedHashSet::new)))
-                    .request(request).build();
-        } else {
-            key = new Builder().zoneId(zone.getName()).request(request).build();
-        }
-
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey(request, zone.getName());
         PolicyEvaluationResult result = null;
         try {
             result = this.cache.get(key);
@@ -125,6 +102,9 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
         if (null == result) {
             result = new PolicyEvaluationResult(Effect.NOT_APPLICABLE);
+
+            LinkedHashSet<PolicySet> filteredPolicySets = filterPolicySetsByPriority(subjectIdentifier, uri,
+                    policySetsEvaluationOrder);
 
             HashSet<Attribute> supplementalResourceAttributes;
             if (null == request.getResourceAttributes()) {
@@ -167,8 +147,9 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
     }
 
     LinkedHashSet<PolicySet> filterPolicySetsByPriority(final String subjectIdentifier, final String uri,
-            final List<PolicySet> allPolicySets, final LinkedHashSet<String> policySetsEvaluationOrder)
-            throws IllegalArgumentException {
+            final LinkedHashSet<String> policySetsEvaluationOrder) throws IllegalArgumentException {
+
+        List<PolicySet> allPolicySets = this.policyService.getAllPolicySets();
 
         if (policySetsEvaluationOrder.isEmpty()) {
             if (allPolicySets.size() > 1) {

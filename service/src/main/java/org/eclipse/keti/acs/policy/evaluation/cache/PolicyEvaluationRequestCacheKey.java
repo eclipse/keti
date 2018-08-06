@@ -18,14 +18,17 @@
 
 package org.eclipse.keti.acs.policy.evaluation.cache;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
 
 public class PolicyEvaluationRequestCacheKey {
+    public static final String ANY_POLICY_SET_KEY = "any-policy-set-1f9c788b-e25d-4075-8fad-73bedcd67c2b";
+    public static final LinkedHashSet<String> EVALUATION_ORDER_ANY_POLICY_SET_KEY = new LinkedHashSet<>(
+            Collections.singleton(ANY_POLICY_SET_KEY));
 
     private final PolicyEvaluationRequestV1 request;
     private final LinkedHashSet<String> policySetIds;
@@ -33,22 +36,21 @@ public class PolicyEvaluationRequestCacheKey {
     private final String subjectId;
     private final String zoneId;
 
-    public PolicyEvaluationRequestCacheKey(final PolicyEvaluationRequestV1 request,
-            final LinkedHashSet<String> policySetIds, final String zoneId) {
+    public PolicyEvaluationRequestCacheKey(final PolicyEvaluationRequestV1 request, final String zoneId) {
         this.request = request;
-        this.policySetIds = policySetIds;
         this.resourceId = request.getResourceIdentifier();
         this.subjectId = request.getSubjectIdentifier();
         this.zoneId = zoneId;
-    }
 
-    public PolicyEvaluationRequestCacheKey(final LinkedHashSet<String> policySetIds, final String resourceId,
-            final String subjectId, final String zoneId) {
-        this.request = null;
-        this.policySetIds = policySetIds;
-        this.resourceId = resourceId;
-        this.subjectId = subjectId;
-        this.zoneId = zoneId;
+        if (request.getPolicySetsEvaluationOrder().isEmpty()) {
+            // When policySetEvaluationOrder is not specified in the request, cached decision is invalidated if any
+            // policy set in this zone was modified. This simplifies the logic of invalidating cached decisions for a
+            // zone with a single policy set. It also supports decision invalidation logic for use cases when a second
+            // (or more) policy sets are added/removed to a zone which initially had only one policy set.
+            this.policySetIds = EVALUATION_ORDER_ANY_POLICY_SET_KEY;
+        } else {
+            this.policySetIds = request.getPolicySetsEvaluationOrder();
+        }
     }
 
     public String toDecisionKey() {
@@ -111,64 +113,5 @@ public class PolicyEvaluationRequestCacheKey {
 
     public String getZoneId() {
         return this.zoneId;
-    }
-
-    public static class Builder {
-        private PolicyEvaluationRequestV1 builderRequest;
-        private LinkedHashSet<String> builderPolicySetIds = new LinkedHashSet<>();
-        private String builderResourceId;
-        private String builderSubjectId;
-        private String builderZoneId;
-
-        public Builder request(final PolicyEvaluationRequestV1 request) {
-            this.builderRequest = request;
-            return this;
-        }
-
-        public Builder policySetIds(final LinkedHashSet<String> policySets) {
-            if (null != this.builderRequest && !this.builderRequest.getPolicySetsEvaluationOrder().isEmpty()) {
-                throw new IllegalStateException(
-                        "Cannot set policy sets evaluation order if set in the policy request.");
-            }
-            if (null != policySets) {
-                this.builderPolicySetIds = policySets;
-            }
-            return this;
-        }
-
-        public Builder resourceId(final String resourceId) {
-            if (null != this.builderRequest) {
-                throw new IllegalStateException("Cannot set resource id if policy request is set.");
-            }
-            this.builderResourceId = resourceId;
-            return this;
-        }
-
-        public Builder subjectId(final String subjectId) {
-            if (null != this.builderRequest) {
-                throw new IllegalStateException("Cannot set subject id if policy request is set.");
-            }
-            this.builderSubjectId = subjectId;
-            return this;
-        }
-
-        public Builder zoneId(final String zoneId) {
-            this.builderZoneId = zoneId;
-            return this;
-        }
-
-        public PolicyEvaluationRequestCacheKey build() {
-            if (null != this.builderRequest) {
-                if (this.builderRequest.getPolicySetsEvaluationOrder().isEmpty()) {
-                    return new PolicyEvaluationRequestCacheKey(this.builderRequest, this.builderPolicySetIds,
-                            this.builderZoneId);
-                } else {
-                    return new PolicyEvaluationRequestCacheKey(this.builderRequest,
-                            this.builderRequest.getPolicySetsEvaluationOrder(), this.builderZoneId);
-                }
-            }
-            return new PolicyEvaluationRequestCacheKey(this.builderPolicySetIds, this.builderResourceId,
-                    this.builderSubjectId, this.builderZoneId);
-        }
     }
 }

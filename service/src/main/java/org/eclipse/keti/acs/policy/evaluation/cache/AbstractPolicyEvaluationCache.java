@@ -30,6 +30,10 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorService;
+import org.eclipse.keti.acs.privilege.management.dao.ResourceEntity;
+import org.eclipse.keti.acs.privilege.management.dao.SubjectEntity;
+import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Minutes;
@@ -37,11 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorService;
-import org.eclipse.keti.acs.privilege.management.dao.ResourceEntity;
-import org.eclipse.keti.acs.privilege.management.dao.SubjectEntity;
-import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
 
 enum EntityType {
 
@@ -242,9 +241,7 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
         }
 
         Set<String> policySetIds = key.getPolicySetIds();
-        for (String policySetId : policySetIds) {
-            setPolicySetIfNotExists(zoneId, policySetId);
-        }
+        policySetIds.forEach(policySetId -> setPolicySetIfNotExists(zoneId, policySetId));
     }
 
     @Override
@@ -281,6 +278,8 @@ public abstract class AbstractPolicyEvaluationCache implements PolicyEvaluationC
     @Override
     public void resetForPolicySet(final String zoneId, final String policySetId) {
         resetForEntity(zoneId, policySetId, EntityType.POLICY_SET, AbstractPolicyEvaluationCache::policySetKey);
+        resetForEntity(zoneId, PolicyEvaluationRequestCacheKey.ANY_POLICY_SET_KEY, EntityType.POLICY_SET,
+                AbstractPolicyEvaluationCache::policySetKey);
     }
 
     private void setPolicySetIfNotExists(final String zoneId, final String policySetId) {

@@ -206,14 +206,19 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
             expectedExceptions = IllegalArgumentException.class)
     public void testFilterPolicySetsByPriorityForInvalidRequest(final List<PolicySet> allPolicySets,
             final LinkedHashSet<String> policySetsPriority) {
-        this.evaluationService.filterPolicySetsByPriority("subject1", "resource1", allPolicySets, policySetsPriority);
+
+        when(this.policyService.getAllPolicySets()).thenReturn(allPolicySets);
+        this.evaluationService.filterPolicySetsByPriority("subject1", "resource1", policySetsPriority);
     }
 
     @Test(dataProvider = "filterPolicySetsDataProvider")
     public void testFilterPolicySetsByPriority(final List<PolicySet> allPolicySets,
             final LinkedHashSet<String> policySetsPriority, final LinkedHashSet<PolicySet> expectedFilteredPolicySets) {
+
+        when(this.policyService.getAllPolicySets()).thenReturn(allPolicySets);
         LinkedHashSet<PolicySet> actualFilteredPolicySets = this.evaluationService
-                .filterPolicySetsByPriority("subject1", "resource1", allPolicySets, policySetsPriority);
+                .filterPolicySetsByPriority("subject1", "resource1", policySetsPriority);
+
         Assert.assertEquals(actualFilteredPolicySets, expectedFilteredPolicySets);
     }
 
