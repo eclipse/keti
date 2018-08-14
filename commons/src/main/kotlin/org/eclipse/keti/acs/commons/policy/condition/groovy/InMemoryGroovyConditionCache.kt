@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,20 +14,29 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+ */
 
 package org.eclipse.keti.acs.commons.policy.condition.groovy
 
 import org.eclipse.keti.acs.commons.policy.condition.ConditionScript
+import org.springframework.util.ConcurrentReferenceHashMap
 
-interface GroovyConditionCache {
+class InMemoryGroovyConditionCache : GroovyConditionCache {
 
-    operator fun get(script: String): ConditionScript?
+    private val cache = ConcurrentReferenceHashMap<String, ConditionScript>()
 
-    fun put(
+    override operator fun get(script: String): ConditionScript? {
+        return this.cache[script]
+    }
+
+    override fun put(
         script: String,
         compiledScript: ConditionScript
-    )
+    ) {
+        this.cache[script] = compiledScript
+    }
 
-    fun remove(script: String)
+    override fun remove(script: String) {
+        this.cache.remove(script)
+    }
 }

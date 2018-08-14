@@ -18,32 +18,32 @@
 
 package org.eclipse.keti.acs.commons.policy.condition.groovy
 
-import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
-import org.mockito.Mockito;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.eclipse.keti.acs.commons.policy.condition.ConditionScript
+import org.mockito.Mockito
+import org.testng.Assert
+import org.testng.annotations.Test
 
-public class GroovyConditionCacheTest {
+class GroovyConditionCacheTest {
 
     @Test
-    public void testPutGetAndRemove() {
-        GroovyConditionCache cache = new InMemoryGroovyConditionCache();
-        ConditionScript compiledScript = Mockito.mock(ConditionScript.class);
-        String testScript = "1 == 1";
-        cache.put(testScript, compiledScript);
-        Assert.assertEquals(cache.get(testScript), compiledScript);
-        cache.remove(testScript);
-        Assert.assertNull(cache.get(testScript));
+    fun testPutGetAndRemove() {
+        val cache = InMemoryGroovyConditionCache()
+        val compiledScript = Mockito.mock(ConditionScript::class.java)
+        val testScript = "1 == 1"
+        cache.put(testScript, compiledScript)
+        Assert.assertEquals(cache[testScript], compiledScript)
+        cache.remove(testScript)
+        Assert.assertNull(cache[testScript])
     }
 
     @Test
-    public void testPutGetAndRemoveIfDisabled() {
-        GroovyConditionCache cache = new NonCachingGroovyConditionCache();
-        ConditionScript compiledScript = Mockito.mock(ConditionScript.class);
-        String testScript = "1 == 1";
-        cache.put(testScript, compiledScript);
-        Assert.assertNull(cache.get(testScript));
-        cache.remove(testScript);
-        Assert.assertNull(cache.get(testScript));
+    fun testPutGetAndRemoveIfDisabled() {
+        val cache = NonCachingGroovyConditionCache()
+        val compiledScript = Mockito.mock(ConditionScript::class.java)
+        val testScript = "1 == 1"
+        cache.put(testScript, compiledScript)
+        Assert.assertNull(cache[testScript])
+        cache.remove(testScript)
+        Assert.assertNull(cache[testScript])
     }
 }

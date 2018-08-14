@@ -22,8 +22,8 @@ import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.nhaarman.mockito_kotlin.any
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell
+import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache
 import org.eclipse.keti.acs.model.Attribute
 import org.eclipse.keti.acs.model.Effect
 import org.eclipse.keti.acs.model.Policy
@@ -82,7 +82,7 @@ private val EMPTY_ATTRS = emptySet<Attribute>()
 @Test
 @ContextConfiguration(
     classes = [
-        GroovyConditionCache::class,
+        NonCachingGroovyConditionCache::class,
         GroovyConditionShell::class,
         PolicySetValidatorImpl::class
     ]

@@ -18,8 +18,8 @@
 
 package org.eclipse.keti.acs.service.policy.evaluation
 
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell
+import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache
 import org.eclipse.keti.acs.model.Attribute
 import org.eclipse.keti.acs.model.Condition
 import org.eclipse.keti.acs.rest.BaseResource
@@ -40,7 +40,7 @@ import java.util.HashSet
  * @author acs-engineers@ge.com
  */
 @ContextConfiguration(
-    classes = [(GroovyConditionCache::class), (GroovyConditionShell::class), (PolicySetValidatorImpl::class)]
+    classes = [(NonCachingGroovyConditionCache::class), (GroovyConditionShell::class), (PolicySetValidatorImpl::class)]
 )
 class ConditionEvaluationTest : AbstractTestNGSpringContextTests() {
 

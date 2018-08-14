@@ -26,8 +26,8 @@ import org.eclipse.keti.acs.attribute.readers.ExternalResourceAttributeReader
 import org.eclipse.keti.acs.attribute.readers.ExternalSubjectAttributeReader
 import org.eclipse.keti.acs.attribute.readers.ResourceAttributeReader
 import org.eclipse.keti.acs.attribute.readers.SubjectAttributeReader
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell
+import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache
 import org.eclipse.keti.acs.model.Attribute
 import org.eclipse.keti.acs.model.Effect
 import org.eclipse.keti.acs.model.PolicySet
@@ -63,7 +63,7 @@ private const val SUBJECT_IDENTIFIER = "test-subject"
 private const val ACTION = "GET"
 
 @ContextConfiguration(
-    classes = [(GroovyConditionCache::class), (GroovyConditionShell::class), (PolicySetValidatorImpl::class)]
+    classes = [(NonCachingGroovyConditionCache::class), (GroovyConditionShell::class), (PolicySetValidatorImpl::class)]
 )
 class PolicyEvaluationWithAttributeReaderTest : AbstractTestNGSpringContextTests() {
 

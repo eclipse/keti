@@ -21,6 +21,7 @@ package org.eclipse.keti.acs.service.policy.validation
 import org.eclipse.keti.acs.commons.policy.condition.ConditionShell
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell
+import org.eclipse.keti.acs.commons.policy.condition.groovy.InMemoryGroovyConditionCache
 import org.eclipse.keti.acs.model.Condition
 import org.eclipse.keti.acs.model.PolicySet
 import org.eclipse.keti.acs.utils.JsonUtils
@@ -39,7 +40,7 @@ import java.util.ArrayList
  */
 @Test
 @ContextConfiguration(
-    classes = [(GroovyConditionCache::class), (GroovyConditionShell::class), (PolicySetValidatorImpl::class)]
+    classes = [(InMemoryGroovyConditionCache::class), (GroovyConditionShell::class), (PolicySetValidatorImpl::class)]
 )
 class PolicySetValidatorTest : AbstractTestNGSpringContextTests() {
 

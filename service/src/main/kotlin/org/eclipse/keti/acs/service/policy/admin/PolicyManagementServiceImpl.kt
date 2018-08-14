@@ -97,6 +97,15 @@ class PolicyManagementServiceImpl : PolicyManagementService {
                 "Found an existing policy set policySetName = {}, zone = {}, upserting now .", policySetName,
                 zone
             )
+
+            val policySet = this.jsonUtils.deserialize(
+                existingPolicySetEntity.policySetJson!!,
+                PolicySet::class.java
+            )
+            if (policySet != null) {
+                this.policySetValidator.removeCachedConditions(policySet)
+            }
+
             policySetEntity.id = existingPolicySetEntity.id
         } else {
             LOGGER.debug(

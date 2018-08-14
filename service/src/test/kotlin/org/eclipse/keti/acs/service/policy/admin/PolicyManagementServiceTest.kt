@@ -25,8 +25,8 @@ import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorSer
 import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory
 import org.eclipse.keti.acs.attribute.readers.PrivilegeServiceResourceAttributeReader
 import org.eclipse.keti.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell
+import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache
 import org.eclipse.keti.acs.config.InMemoryDataSourceConfig
 import org.eclipse.keti.acs.model.Effect
 import org.eclipse.keti.acs.model.PolicySet
@@ -78,7 +78,7 @@ private const val DEFAULT_SUBDOMAIN = "defaultTenant"
         PolicySetValidatorImpl::class,
         GroovyConditionShell::class,
         SpringSecurityZoneResolver::class,
-        GroovyConditionCache::class,
+        NonCachingGroovyConditionCache::class,
         AttributeConnectorServiceImpl::class,
         AttributeReaderFactory::class,
         PrivilegeServiceResourceAttributeReader::class,
