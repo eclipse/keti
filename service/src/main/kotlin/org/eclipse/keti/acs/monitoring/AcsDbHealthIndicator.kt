@@ -18,7 +18,7 @@
 
 package org.eclipse.keti.acs.monitoring
 
-import org.eclipse.keti.acs.privilege.management.dao.GraphMigrationManager
+import org.eclipse.keti.acs.privilege.management.dao.GraphStartupManager
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.actuate.health.Health
@@ -38,11 +38,11 @@ const val DB_DESCRIPTION =
 class AcsDbHealthIndicator @Autowired
 constructor(private val acsMonitoringRepository: AcsMonitoringRepository) : HealthIndicator {
 
-    private var migrationManager: GraphMigrationManager? = null
+    private var startupManager: GraphStartupManager? = null
 
     @Autowired(required = false)
-    fun setMigrationManager(migrationManager: GraphMigrationManager) {
-        this.migrationManager = migrationManager
+    fun setStartupManager(startupManager: GraphStartupManager) {
+        this.startupManager = startupManager
     }
 
     override fun health(): Health {
@@ -54,8 +54,8 @@ constructor(private val acsMonitoringRepository: AcsMonitoringRepository) : Heal
             LOGGER.debug("Checking ACS database status")
             this.acsMonitoringRepository.queryPolicySetTable()
 
-            if (this.migrationManager != null && !this.migrationManager!!.isMigrationComplete()) {
-                HealthCode.MIGRATION_INCOMPLETE
+            if (this.startupManager != null && !this.startupManager!!.isStartupComplete()) {
+                HealthCode.GRAPH_STARTUP_INCOMPLETE
             } else {
                 HealthCode.AVAILABLE
             }

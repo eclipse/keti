@@ -18,7 +18,7 @@
 
 package org.eclipse.keti.acs.monitoring
 
-import org.eclipse.keti.acs.privilege.management.dao.GraphMigrationManager
+import org.eclipse.keti.acs.privilege.management.dao.GraphStartupManager
 import org.mockito.Mockito
 import org.springframework.boot.actuate.health.Status
 import org.springframework.dao.ConcurrencyFailureException
@@ -31,7 +31,7 @@ import org.testng.Assert
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 
-private const val IS_MIGRATION_COMPLETE_FIELD_NAME = "isMigrationComplete"
+private const val IS_STARTUP_COMPLETE_FIELD_NAME = "isStartupComplete"
 
 class AcsDbHealthIndicatorTest {
 
@@ -41,10 +41,10 @@ class AcsDbHealthIndicatorTest {
         acsMonitoringRepository: AcsMonitoringRepository,
         status: Status,
         healthCode: HealthCode,
-        graphMigrationManager: GraphMigrationManager
+        graphStartupManager: GraphStartupManager
     ) {
         val acsDbHealthIndicator = AcsDbHealthIndicator(acsMonitoringRepository)
-        acsDbHealthIndicator.setMigrationManager(graphMigrationManager)
+        acsDbHealthIndicator.setStartupManager(graphStartupManager)
         Assert.assertEquals(status, acsDbHealthIndicator.health().status)
         Assert.assertEquals(
             DB_DESCRIPTION,
@@ -66,50 +66,50 @@ class AcsDbHealthIndicatorTest {
 
     @DataProvider
     fun statuses(): Array<Array<out Any?>> {
-        val happyMigrationManager = GraphMigrationManager()
-        val sadMigrationManager = GraphMigrationManager()
-        ReflectionTestUtils.setField(happyMigrationManager, IS_MIGRATION_COMPLETE_FIELD_NAME, true)
-        ReflectionTestUtils.setField(sadMigrationManager, IS_MIGRATION_COMPLETE_FIELD_NAME, false)
+        val happyStartupManager = GraphStartupManager()
+        val sadStartupManager = GraphStartupManager()
+        ReflectionTestUtils.setField(happyStartupManager, IS_STARTUP_COMPLETE_FIELD_NAME, true)
+        ReflectionTestUtils.setField(sadStartupManager, IS_STARTUP_COMPLETE_FIELD_NAME, false)
 
         return arrayOf(
-            arrayOf(mockDbWithUp(), Status.UP, HealthCode.AVAILABLE, happyMigrationManager),
+            arrayOf(mockDbWithUp(), Status.UP, HealthCode.AVAILABLE, happyStartupManager),
 
             arrayOf(
                 mockDbWithException(TransientDataAccessResourceException("")),
                 Status.DOWN,
                 HealthCode.UNAVAILABLE,
-                happyMigrationManager
+                happyStartupManager
             ),
 
             arrayOf(
                 mockDbWithException(QueryTimeoutException("")),
                 Status.DOWN,
                 HealthCode.UNAVAILABLE,
-                happyMigrationManager
+                happyStartupManager
             ),
 
             arrayOf(
                 mockDbWithException(DataSourceLookupFailureException("")),
                 Status.DOWN,
                 HealthCode.UNREACHABLE,
-                happyMigrationManager
+                happyStartupManager
             ),
 
             arrayOf(
                 mockDbWithException(PermissionDeniedDataAccessException("", null)),
                 Status.DOWN,
                 HealthCode.MISCONFIGURATION,
-                happyMigrationManager
+                happyStartupManager
             ),
 
             arrayOf(
                 mockDbWithException(ConcurrencyFailureException("")),
                 Status.DOWN,
                 HealthCode.ERROR,
-                happyMigrationManager
+                happyStartupManager
             ),
 
-            arrayOf(mockDbWithUp(), Status.DOWN, HealthCode.MIGRATION_INCOMPLETE, sadMigrationManager)
+            arrayOf(mockDbWithUp(), Status.DOWN, HealthCode.GRAPH_STARTUP_INCOMPLETE, sadStartupManager)
         )
     }
 
