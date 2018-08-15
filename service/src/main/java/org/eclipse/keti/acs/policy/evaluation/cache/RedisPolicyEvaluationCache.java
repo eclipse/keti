@@ -22,13 +22,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -38,9 +36,6 @@ import org.springframework.stereotype.Component;
 @Profile({ "cloud-redis", "redis" })
 public class RedisPolicyEvaluationCache extends AbstractPolicyEvaluationCache implements InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPolicyEvaluationCache.class);
-
-    @Value("${CACHED_EVAL_TTL_SECONDS:600}")
-    private long cachedEvalTimeToLiveSeconds;
 
     @Autowired
     private RedisTemplate<String, String> decisionCacheRedisTemplate;
@@ -81,24 +76,17 @@ public class RedisPolicyEvaluationCache extends AbstractPolicyEvaluationCache im
         return this.decisionCacheRedisTemplate.opsForValue().multiGet(keys);
     }
 
+    @Override
     void multiSet(final Map<String, String> map) {
         this.decisionCacheRedisTemplate.opsForValue().multiSet(map);
     }
 
     @Override
     void set(final String key, final String value) {
-        if (isPolicyEvalResultKey(key)) {
-            this.decisionCacheRedisTemplate.opsForValue().set(key, value, this.cachedEvalTimeToLiveSeconds,
-                    TimeUnit.SECONDS);
-        } else {
-            this.decisionCacheRedisTemplate.opsForValue().set(key, value);
-        }
+        this.decisionCacheRedisTemplate.opsForValue().set(key, value);
     }
 
-    public void setCachedEvalTimeToLiveSeconds(final long cachedEvalTimeToLiveSeconds) {
-        this.cachedEvalTimeToLiveSeconds = cachedEvalTimeToLiveSeconds;
-    }
-
+    @Override
     void setIfNotExists(final String key, final String value) {
         this.decisionCacheRedisTemplate.boundValueOps(key).setIfAbsent(value);
     }

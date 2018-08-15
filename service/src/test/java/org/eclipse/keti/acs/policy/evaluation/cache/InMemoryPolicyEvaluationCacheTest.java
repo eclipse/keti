@@ -26,13 +26,12 @@ import static org.testng.Assert.assertEquals;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.DateTime;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
-
 import org.eclipse.keti.acs.model.Effect;
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
+import org.joda.time.DateTime;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
 
 public class InMemoryPolicyEvaluationCacheTest {
 
@@ -53,8 +52,8 @@ public class InMemoryPolicyEvaluationCacheTest {
         request.setAction(ACTION_GET);
         request.setSubjectIdentifier(AGENT_MULDER);
         request.setResourceIdentifier(XFILES_ID);
-        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .request(request).build();
+
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey(request, ZONE_NAME);
 
         PolicyEvaluationResult result = new PolicyEvaluationResult(Effect.PERMIT);
         String value = OBJECT_MAPPER.writeValueAsString(result);

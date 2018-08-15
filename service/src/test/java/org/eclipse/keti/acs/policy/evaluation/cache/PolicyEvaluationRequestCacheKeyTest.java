@@ -18,50 +18,34 @@
 
 package org.eclipse.keti.acs.policy.evaluation.cache;
 
-import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
-import org.testng.annotations.Test;
-
-import java.util.LinkedHashSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static org.eclipse.keti.acs.testutils.XFiles.AGENT_MULDER;
 import static org.eclipse.keti.acs.testutils.XFiles.XFILES_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+
+import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
+import org.testng.annotations.Test;
+
 public class PolicyEvaluationRequestCacheKeyTest {
-    public static final String ZONE_NAME = "testzone1";
-    public static final String ACTION_GET = "GET";
+    private static final String ZONE_NAME = "testzone1";
+    private static final String ACTION_GET = "GET";
+    private static final String POLICY_ONE = "policyOne";
+    private static final LinkedHashSet<String> EVALUATION_ORDER_POLICYONE = new LinkedHashSet<>(
+            Collections.singleton(POLICY_ONE));
 
     @Test
-    public void testBuild() {
-        String subjectId = AGENT_MULDER;
-        String resourceId = XFILES_ID;
-        LinkedHashSet<String> policyEvaluationOrder = Stream.of("policyOne")
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .resourceId(resourceId).subjectId(subjectId).policySetIds(policyEvaluationOrder).build();
-
-        assertEquals(key.getZoneId(), ZONE_NAME);
-        assertEquals(key.getSubjectId(), subjectId);
-        assertEquals(key.getResourceId(), resourceId);
-        assertEquals(key.getPolicySetIds(), policyEvaluationOrder);
-        assertNull(key.getRequest());
-    }
-
-    @Test
-    public void testBuildByRequest() {
+    public void testKeyByRequest() {
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
         request.setAction(ACTION_GET);
         request.setSubjectIdentifier(AGENT_MULDER);
         request.setResourceIdentifier(XFILES_ID);
-        request.setPolicySetsEvaluationOrder(
-                Stream.of("policyOne").collect(Collectors.toCollection(LinkedHashSet::new)));
-        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .request(request).build();
+        request.setPolicySetsEvaluationOrder(EVALUATION_ORDER_POLICYONE);
+
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey(request, ZONE_NAME);
 
         assertEquals(key.getZoneId(), ZONE_NAME);
         assertEquals(key.getSubjectId(), request.getSubjectIdentifier());
@@ -71,57 +55,21 @@ public class PolicyEvaluationRequestCacheKeyTest {
     }
 
     @Test
-    public void testBuildByRequestAndPolicySetEvaluationOrder() {
+    public void testKeyByRequestWithEmptyPolicySetEvaluationOrder() {
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
         request.setAction(ACTION_GET);
         request.setSubjectIdentifier(AGENT_MULDER);
         request.setResourceIdentifier(XFILES_ID);
-        LinkedHashSet<String> policyEvaluationOrder = Stream.of("policyOne")
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .policySetIds(policyEvaluationOrder).request(request).build();
+
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey(request, ZONE_NAME);
 
         assertEquals(key.getZoneId(), ZONE_NAME);
         assertEquals(key.getSubjectId(), request.getSubjectIdentifier());
         assertEquals(key.getResourceId(), request.getResourceIdentifier());
-        assertEquals(key.getPolicySetIds(), policyEvaluationOrder);
+        assertEquals(key.getPolicySetIds(), PolicyEvaluationRequestCacheKey.EVALUATION_ORDER_ANY_POLICY_SET_KEY);
         assertEquals(key.getRequest(), request);
     }
 
-    @SuppressWarnings("unused")
-    @Test(expectedExceptions = IllegalStateException.class)
-    public void testIllegalStateExceptionForSettingPolicySetIds() {
-        PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        request.setPolicySetsEvaluationOrder(
-                Stream.of("policyOne").collect(Collectors.toCollection(LinkedHashSet::new)));
-        PolicyEvaluationRequestCacheKey policyEvaluationRequestCacheKey =
-            new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                                                         .request(request)
-                                                         .policySetIds(request.getPolicySetsEvaluationOrder())
-                                                         .build();
-    }
-
-    @SuppressWarnings("unused")
-    @Test(expectedExceptions = IllegalStateException.class)
-    public void testIllegalStateExceptionForSettingSubjectId() {
-        PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        PolicyEvaluationRequestCacheKey policyEvaluationRequestCacheKey =
-            new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                                                         .request(request)
-                                                         .subjectId("subject")
-                                                         .build();
-    }
-
-    @SuppressWarnings("unused")
-    @Test(expectedExceptions = IllegalStateException.class)
-    public void testIllegalStateExceptionForSettingResourceId() {
-        PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        PolicyEvaluationRequestCacheKey policyEvaluationRequestCacheKey =
-            new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                                                         .request(request)
-                                                         .resourceId("resource")
-                                                         .build();
-    }
 
     @Test
     public void testKeyEqualsForSameRequests() {
@@ -129,19 +77,18 @@ public class PolicyEvaluationRequestCacheKeyTest {
         request.setAction(ACTION_GET);
         request.setSubjectIdentifier(AGENT_MULDER);
         request.setResourceIdentifier(XFILES_ID);
-        request.setPolicySetsEvaluationOrder(
-                Stream.of("policyOne").collect(Collectors.toCollection(LinkedHashSet::new)));
-        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .request(request).build();
+        request.setPolicySetsEvaluationOrder(EVALUATION_ORDER_POLICYONE);
+
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey(request, ZONE_NAME);
 
         PolicyEvaluationRequestV1 otherRequest = new PolicyEvaluationRequestV1();
         otherRequest.setAction(ACTION_GET);
         otherRequest.setSubjectIdentifier(AGENT_MULDER);
         otherRequest.setResourceIdentifier(XFILES_ID);
-        otherRequest.setPolicySetsEvaluationOrder(
-                Stream.of("policyOne").collect(Collectors.toCollection(LinkedHashSet::new)));
-        PolicyEvaluationRequestCacheKey otherKey = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .request(otherRequest).build();
+        otherRequest.setPolicySetsEvaluationOrder(EVALUATION_ORDER_POLICYONE);
+
+        PolicyEvaluationRequestCacheKey otherKey = new PolicyEvaluationRequestCacheKey(otherRequest, ZONE_NAME);
+
         assertTrue(key.equals(otherKey));
     }
 
@@ -151,25 +98,24 @@ public class PolicyEvaluationRequestCacheKeyTest {
         request.setAction(ACTION_GET);
         request.setSubjectIdentifier(AGENT_MULDER);
         request.setResourceIdentifier(XFILES_ID);
-        request.setPolicySetsEvaluationOrder(
-                Stream.of("policyOne").collect(Collectors.toCollection(LinkedHashSet::new)));
-        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .request(request).build();
+        request.setPolicySetsEvaluationOrder(EVALUATION_ORDER_POLICYONE);
+
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey(request, ZONE_NAME);
 
         PolicyEvaluationRequestV1 otherRequest = new PolicyEvaluationRequestV1();
         otherRequest.setAction(ACTION_GET);
         otherRequest.setSubjectIdentifier(AGENT_MULDER);
         otherRequest.setResourceIdentifier(XFILES_ID);
-        PolicyEvaluationRequestCacheKey otherKey = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .request(otherRequest).build();
+
+        PolicyEvaluationRequestCacheKey otherKey = new PolicyEvaluationRequestCacheKey(otherRequest, ZONE_NAME);
+
         assertFalse(key.equals(otherKey));
     }
 
     @Test
     public void testToRedisKey() {
         PolicyEvaluationRequestV1 request = new PolicyEvaluationRequestV1();
-        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-                .request(request).build();
+        PolicyEvaluationRequestCacheKey key = new PolicyEvaluationRequestCacheKey(request, ZONE_NAME);
         assertEquals(key.toDecisionKey(), ZONE_NAME + ":*:*:" + Integer.toHexString(request.hashCode()));
     }
 }
