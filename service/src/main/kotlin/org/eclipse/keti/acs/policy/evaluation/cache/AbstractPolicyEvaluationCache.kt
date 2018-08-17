@@ -292,6 +292,7 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
         for (policySetId in policySetIds) {
             setPolicySetIfNotExists(zoneId, policySetId!!)
         }
+        policySetIds.forEach { setPolicySetIfNotExists(zoneId, it!!) }
     }
 
     override fun reset() {
@@ -343,6 +344,11 @@ abstract class AbstractPolicyEvaluationCache : PolicyEvaluationCache {
             policySetId,
             EntityType.POLICY_SET
         ) { _, _ -> policySetKey(zoneId, policySetId) }
+        resetForEntity(
+            zoneId,
+            ANY_POLICY_SET_KEY,
+            EntityType.POLICY_SET
+        ) { _, _ -> policySetKey(zoneId, ANY_POLICY_SET_KEY) }
     }
 
     private fun setPolicySetIfNotExists(

@@ -49,8 +49,7 @@ class InMemoryPolicyEvaluationCacheTest {
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = PolicyEvaluationResult(Effect.PERMIT)
         val value = OBJECT_MAPPER.writeValueAsString(result)

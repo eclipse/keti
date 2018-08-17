@@ -22,7 +22,6 @@ import com.nhaarman.mockito_kotlin.any
 import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorService
 import org.eclipse.keti.acs.attribute.connector.management.AttributeConnectorServiceImpl
 import org.eclipse.keti.acs.model.Effect
-import org.eclipse.keti.acs.model.PolicySet
 import org.eclipse.keti.acs.privilege.management.dao.ResourceEntity
 import org.eclipse.keti.acs.privilege.management.dao.SubjectEntity
 import org.eclipse.keti.acs.rest.AttributeConnector
@@ -47,11 +46,11 @@ import java.util.LinkedHashSet
 private const val ZONE_NAME = "testzone1"
 private val ZONE_ENTITY = ZoneEntity(1L, ZONE_NAME)
 private const val ACTION_GET = "GET"
-private val POLICY_ONE = PolicySet("policyOne")
-private val POLICY_TWO = PolicySet("policyTwo")
-private val EVALUATION_ORDER_POLICYONE_POLICYTWO = LinkedHashSet(listOf("policyOne", "policyTwo"))
-private val EVALUATION_ORDER_POLICYTWO_POLICYONE = LinkedHashSet(listOf("policyTwo", "policyOne"))
-private val EVALUATION_ORDER_POLICYONE = LinkedHashSet(listOf("policyOne"))
+private const val POLICY_ONE = "policyOne"
+private const val POLICY_TWO = "policyTwo"
+private val EVALUATION_ORDER_POLICYONE_POLICYTWO = LinkedHashSet(listOf(POLICY_ONE, POLICY_TWO))
+private val EVALUATION_ORDER_POLICYTWO_POLICYONE = LinkedHashSet(listOf(POLICY_TWO, POLICY_ONE))
+private val EVALUATION_ORDER_POLICYONE = LinkedHashSet(listOf(POLICY_ONE))
 
 private fun mockPermitResult(): PolicyEvaluationResult {
     val result = PolicyEvaluationResult(Effect.PERMIT)
@@ -72,6 +71,11 @@ class AbstractPolicyEvaluationCacheTest {
     @AfterMethod
     fun cleanupTest() {
         this.cache.reset()
+
+        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
+        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
+        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE)
+        this.cache.resetForPolicySet(ZONE_NAME, POLICY_TWO)
     }
 
     @Test
@@ -81,21 +85,17 @@ class AbstractPolicyEvaluationCacheTest {
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
         assertNull(this.cache[key])
     }
 
     @Test
     fun testGetWithCacheMissForResource() {
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE.name!!)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
         val result = mockPermitResult()
         this.cache[key] = result
         this.cache.delete(resourceKey(ZONE_NAME, XFILES_ID))
@@ -106,15 +106,11 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithCacheHit() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE.name!!)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
         request.policySetsEvaluationOrder = EVALUATION_ORDER_POLICYONE
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -128,15 +124,12 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithPolicyInvalidation() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE.name!!)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
         request.policySetsEvaluationOrder = EVALUATION_ORDER_POLICYONE
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -145,8 +138,56 @@ class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult!!.effect, result.effect)
 
         Thread.sleep(1)
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE.name!!)
+        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE)
         assertNull(this.cache[key])
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testGetWithResetForSinglePolicySet() {
+
+        val request = PolicyEvaluationRequestV1()
+        request.action = ACTION_GET
+        request.subjectIdentifier = AGENT_MULDER
+        request.resourceIdentifier = XFILES_ID
+
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
+
+        val result = mockPermitResult()
+        this.cache[key] = result
+
+        val cachedResult = this.cache[key]
+        assertEquals(cachedResult!!.effect, result.effect)
+
+        Thread.sleep(1)
+        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE)
+        assertNull(this.cache[key])
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testGetWithResetForPolicySetNotIncludedInEvaluationOrder() {
+
+        val request = PolicyEvaluationRequestV1()
+        request.action = ACTION_GET
+        request.subjectIdentifier = AGENT_MULDER
+        request.resourceIdentifier = XFILES_ID
+        request.policySetsEvaluationOrder = EVALUATION_ORDER_POLICYONE
+
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
+
+        val result = mockPermitResult()
+        this.cache[key] = result
+
+        var cachedResult = this.cache[key]
+        assertEquals(cachedResult!!.effect, result.effect)
+
+        Thread.sleep(1)
+        this.cache.resetForPolicySet(ZONE_NAME, POLICY_TWO)
+
+        cachedResult = this.cache[key]
+        assertNotNull(cachedResult)
+        assertEquals(cachedResult!!.effect, result.effect)
     }
 
     @Test
@@ -154,16 +195,11 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithResetForMultiplePolicySets() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE.name!!)
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_TWO.name!!)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
         request.policySetsEvaluationOrder = EVALUATION_ORDER_POLICYONE_POLICYTWO
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -173,7 +209,7 @@ class AbstractPolicyEvaluationCacheTest {
         assertEquals(cachedResult!!.effect, result.effect)
 
         Thread.sleep(1)
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_TWO.name!!)
+        this.cache.resetForPolicySet(ZONE_NAME, POLICY_TWO)
         assertNull(this.cache[key])
     }
 
@@ -182,16 +218,11 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithPolicyEvaluationOrderChange() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE.name!!)
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_TWO.name!!)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
         request.policySetsEvaluationOrder = EVALUATION_ORDER_POLICYONE_POLICYTWO
-        var key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        var key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -203,7 +234,7 @@ class AbstractPolicyEvaluationCacheTest {
         Thread.sleep(1)
 
         request.policySetsEvaluationOrder = EVALUATION_ORDER_POLICYTWO_POLICYONE
-        key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME).request(request).build()
+        key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         assertNull(this.cache[key])
     }
@@ -213,15 +244,10 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithResetForResource() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE.name!!)
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_TWO.name!!)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -239,13 +265,10 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithResetForLongResource() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = "/v1/x-files"
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -263,13 +286,10 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithResetForResources() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -288,13 +308,10 @@ class AbstractPolicyEvaluationCacheTest {
 
         val request = PolicyEvaluationRequestV1()
         val resolvedResourceUri = "/resolved-resource"
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         result.resolvedResourceUris = setOf(resolvedResourceUri)
@@ -316,13 +333,10 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithResetForResourcesByIds() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -340,13 +354,10 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithResetForSubject() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -364,13 +375,10 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithResetForSubjectsByIds() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -388,13 +396,10 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithResetForSubjects() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -411,13 +416,10 @@ class AbstractPolicyEvaluationCacheTest {
     fun testGetWithReset() {
 
         val request = PolicyEvaluationRequestV1()
-        this.cache.resetForSubject(ZONE_NAME, AGENT_MULDER)
-        this.cache.resetForResource(ZONE_NAME, XFILES_ID)
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val result = mockPermitResult()
         this.cache[key] = result
@@ -441,7 +443,7 @@ class AbstractPolicyEvaluationCacheTest {
         Mockito.doReturn(resourceConnector).`when`<AttributeConnectorService>(connectorService)
             .resourceAttributeConnector
         Mockito.doReturn(subjectConnector).`when`<AttributeConnectorService>(connectorService).subjectAttributeConnector
-        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE.name!!)
+        this.cache.resetForPolicySet(ZONE_NAME, POLICY_ONE)
 
         val isResourceConnectorConfigured = resourceConnector != null
         val isSubjectConnectorConfigured = subjectConnector != null
@@ -458,8 +460,7 @@ class AbstractPolicyEvaluationCacheTest {
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
         request.policySetsEvaluationOrder = EVALUATION_ORDER_POLICYONE
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val expectedResult = mockPermitResult()
         spiedCache[key] = expectedResult

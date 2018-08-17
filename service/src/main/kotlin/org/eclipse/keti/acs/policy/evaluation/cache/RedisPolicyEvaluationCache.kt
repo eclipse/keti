@@ -21,21 +21,16 @@ package org.eclipse.keti.acs.policy.evaluation.cache
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.data.redis.RedisConnectionFailureException
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
-import java.util.concurrent.TimeUnit
 
 private val LOGGER = LoggerFactory.getLogger(RedisPolicyEvaluationCache::class.java)
 
 @Component
 @Profile("cloud-redis", "redis")
 class RedisPolicyEvaluationCache : AbstractPolicyEvaluationCache(), InitializingBean {
-
-    @Value("\${CACHED_EVAL_TTL_SECONDS:600}")
-    private var cachedEvalTimeToLiveSeconds: Long = 600
 
     @Autowired
     private lateinit var decisionCacheRedisTemplate: RedisTemplate<String, String>
@@ -78,13 +73,7 @@ class RedisPolicyEvaluationCache : AbstractPolicyEvaluationCache(), Initializing
         key: String,
         value: String
     ) {
-        if (isPolicyEvalResultKey(key)) {
-            this.decisionCacheRedisTemplate.opsForValue().set(
-                key, value, this.cachedEvalTimeToLiveSeconds, TimeUnit.SECONDS
-            )
-        } else {
-            this.decisionCacheRedisTemplate.opsForValue().set(key, value)
-        }
+        this.decisionCacheRedisTemplate.opsForValue().set(key, value)
     }
 
     override fun setIfNotExists(

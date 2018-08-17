@@ -224,7 +224,8 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
         allPolicySets: List<PolicySet>,
         policySetsPriority: LinkedHashSet<String?>
     ) {
-        this.evaluationService.filterPolicySetsByPriority("subject1", "resource1", allPolicySets, policySetsPriority)
+        `when`(this.policyService.allPolicySets).thenReturn(allPolicySets)
+        this.evaluationService.filterPolicySetsByPriority("subject1", "resource1", policySetsPriority)
     }
 
     @Test(dataProvider = "filterPolicySetsDataProvider")
@@ -233,8 +234,9 @@ class PolicyEvaluationServiceTest : AbstractTestNGSpringContextTests() {
         policySetsPriority: LinkedHashSet<String?>,
         expectedFilteredPolicySets: LinkedHashSet<PolicySet>
     ) {
+        `when`(this.policyService.allPolicySets).thenReturn(allPolicySets)
         val actualFilteredPolicySets = this.evaluationService
-            .filterPolicySetsByPriority("subject1", "resource1", allPolicySets, policySetsPriority)
+            .filterPolicySetsByPriority("subject1", "resource1", policySetsPriority)
         Assert.assertEquals(actualFilteredPolicySets, expectedFilteredPolicySets)
     }
 

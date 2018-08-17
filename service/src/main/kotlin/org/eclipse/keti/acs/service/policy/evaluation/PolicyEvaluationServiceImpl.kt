@@ -31,7 +31,6 @@ import org.eclipse.keti.acs.model.Policy
 import org.eclipse.keti.acs.model.PolicySet
 import org.eclipse.keti.acs.policy.evaluation.cache.PolicyEvaluationCache
 import org.eclipse.keti.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey
-import org.eclipse.keti.acs.policy.evaluation.cache.PolicyEvaluationRequestCacheKey.Builder
 import org.eclipse.keti.acs.privilege.management.dao.AttributeLimitExceededException
 import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult
@@ -84,29 +83,7 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
             throw IllegalArgumentException("Policy evaluation request is missing required input parameters. " + "Please review and resubmit the request.")
         }
 
-        val allPolicySets = this.policyService.allPolicySets
-
-        if (allPolicySets.isEmpty()) {
-            return PolicyEvaluationResult(Effect.NOT_APPLICABLE)
-        }
-
-        val filteredPolicySets = filterPolicySetsByPriority(
-            subjectIdentifier, uri, allPolicySets,
-            policySetsEvaluationOrder
-        )
-
-        // At this point empty evaluation order means we have only one policy set.
-        // Fixing policy evaluation order so we could build a cache key.
-        val key: PolicyEvaluationRequestCacheKey = if (policySetsEvaluationOrder.isEmpty()) {
-            Builder().zoneId(zone.name!!)
-                .policySetIds(
-                    LinkedHashSet(setOf(filteredPolicySets.iterator().next().name))
-                )
-                .request(request).build()
-        } else {
-            Builder().zoneId(zone.name!!).request(request).build()
-        }
-
+        val key = PolicyEvaluationRequestCacheKey(request, zone.name!!)
         var result: PolicyEvaluationResult? = null
         try {
             result = this.cache[key]
@@ -116,6 +93,11 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
 
         if (null == result) {
             result = PolicyEvaluationResult(Effect.NOT_APPLICABLE)
+
+            val filteredPolicySets = filterPolicySetsByPriority(
+                subjectIdentifier, uri,
+                policySetsEvaluationOrder
+            )
 
             val supplementalResourceAttributes: HashSet<Attribute> = if (null == request.resourceAttributes) {
                 HashSet()
@@ -164,9 +146,10 @@ class PolicyEvaluationServiceImpl : PolicyEvaluationService {
     fun filterPolicySetsByPriority(
         subjectIdentifier: String,
         uri: String,
-        allPolicySets: List<PolicySet>,
         policySetsEvaluationOrder: LinkedHashSet<String?>
     ): LinkedHashSet<PolicySet> {
+
+        val allPolicySets = this.policyService.allPolicySets
 
         if (policySetsEvaluationOrder.isEmpty()) {
             if (allPolicySets.size > 1) {

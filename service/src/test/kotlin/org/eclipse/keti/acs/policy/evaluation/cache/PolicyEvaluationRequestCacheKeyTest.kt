@@ -23,40 +23,25 @@ import org.eclipse.keti.acs.testutils.AGENT_MULDER
 import org.eclipse.keti.acs.testutils.XFILES_ID
 import org.testng.Assert.assertEquals
 import org.testng.Assert.assertFalse
-import org.testng.Assert.assertNull
 import org.testng.Assert.assertTrue
 import org.testng.annotations.Test
 import java.util.LinkedHashSet
 
 private const val ZONE_NAME = "testzone1"
 private const val ACTION_GET = "GET"
+private const val POLICY_ONE = "policyOne"
+private val EVALUATION_ORDER_POLICYONE = LinkedHashSet(listOf(POLICY_ONE))
 
 class PolicyEvaluationRequestCacheKeyTest {
 
     @Test
-    fun testBuild() {
-        val subjectId = AGENT_MULDER
-        val resourceId = XFILES_ID
-        val policyEvaluationOrder = LinkedHashSet(listOf("policyOne"))
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .resourceId(resourceId).subjectId(subjectId).policySetIds(policyEvaluationOrder).build()
-
-        assertEquals(key.zoneId, ZONE_NAME)
-        assertEquals(key.subjectId, subjectId)
-        assertEquals(key.resourceId, resourceId)
-        assertEquals(key.policySetIds, policyEvaluationOrder)
-        assertNull(key.request)
-    }
-
-    @Test
-    fun testBuildByRequest() {
+    fun testKeyByRequest() {
         val request = PolicyEvaluationRequestV1()
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        request.policySetsEvaluationOrder = LinkedHashSet(listOf("policyOne"))
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        request.policySetsEvaluationOrder = EVALUATION_ORDER_POLICYONE
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         assertEquals(key.zoneId, ZONE_NAME)
         assertEquals(key.subjectId, request.subjectIdentifier)
@@ -66,48 +51,18 @@ class PolicyEvaluationRequestCacheKeyTest {
     }
 
     @Test
-    fun testBuildByRequestAndPolicySetEvaluationOrder() {
+    fun testKeyByRequestWithEmptyPolicySetEvaluationOrder() {
         val request = PolicyEvaluationRequestV1()
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        val policyEvaluationOrder = LinkedHashSet(listOf("policyOne"))
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .policySetIds(policyEvaluationOrder).request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         assertEquals(key.zoneId, ZONE_NAME)
         assertEquals(key.subjectId, request.subjectIdentifier)
         assertEquals(key.resourceId, request.resourceIdentifier)
-        assertEquals(key.policySetIds, policyEvaluationOrder)
+        assertEquals(key.policySetIds, EVALUATION_ORDER_ANY_POLICY_SET_KEY)
         assertEquals(key.request, request)
-    }
-
-    @Test(expectedExceptions = [(IllegalStateException::class)])
-    fun testIllegalStateExceptionForSettingPolicySetIds() {
-        val request = PolicyEvaluationRequestV1()
-        request.policySetsEvaluationOrder = LinkedHashSet(listOf("policyOne"))
-        PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request)
-            .policySetIds(request.policySetsEvaluationOrder)
-            .build()
-    }
-
-    @Test(expectedExceptions = [(IllegalStateException::class)])
-    fun testIllegalStateExceptionForSettingSubjectId() {
-        val request = PolicyEvaluationRequestV1()
-        PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request)
-            .subjectId("subject")
-            .build()
-    }
-
-    @Test(expectedExceptions = [(IllegalStateException::class)])
-    fun testIllegalStateExceptionForSettingResourceId() {
-        val request = PolicyEvaluationRequestV1()
-        PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request)
-            .resourceId("resource")
-            .build()
     }
 
     @Test
@@ -116,17 +71,15 @@ class PolicyEvaluationRequestCacheKeyTest {
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        request.policySetsEvaluationOrder = LinkedHashSet(listOf("policyOne"))
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        request.policySetsEvaluationOrder = EVALUATION_ORDER_POLICYONE
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val otherRequest = PolicyEvaluationRequestV1()
         otherRequest.action = ACTION_GET
         otherRequest.subjectIdentifier = AGENT_MULDER
         otherRequest.resourceIdentifier = XFILES_ID
-        otherRequest.policySetsEvaluationOrder = LinkedHashSet(listOf("policyOne"))
-        val otherKey = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(otherRequest).build()
+        otherRequest.policySetsEvaluationOrder = EVALUATION_ORDER_POLICYONE
+        val otherKey = PolicyEvaluationRequestCacheKey(otherRequest, ZONE_NAME)
         assertTrue(key == otherKey)
     }
 
@@ -136,24 +89,21 @@ class PolicyEvaluationRequestCacheKeyTest {
         request.action = ACTION_GET
         request.subjectIdentifier = AGENT_MULDER
         request.resourceIdentifier = XFILES_ID
-        request.policySetsEvaluationOrder = LinkedHashSet(listOf("policyOne"))
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        request.policySetsEvaluationOrder = EVALUATION_ORDER_POLICYONE
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
 
         val otherRequest = PolicyEvaluationRequestV1()
         otherRequest.action = ACTION_GET
         otherRequest.subjectIdentifier = AGENT_MULDER
         otherRequest.resourceIdentifier = XFILES_ID
-        val otherKey = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(otherRequest).build()
+        val otherKey = PolicyEvaluationRequestCacheKey(otherRequest, ZONE_NAME)
         assertFalse(key == otherKey)
     }
 
     @Test
     fun testToRedisKey() {
         val request = PolicyEvaluationRequestV1()
-        val key = PolicyEvaluationRequestCacheKey.Builder().zoneId(ZONE_NAME)
-            .request(request).build()
+        val key = PolicyEvaluationRequestCacheKey(request, ZONE_NAME)
         assertEquals(key.toDecisionKey(), ZONE_NAME + ":*:*:" + Integer.toHexString(request.hashCode()))
     }
 }
