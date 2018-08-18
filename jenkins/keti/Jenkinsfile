@@ -1,106 +1,158 @@
 #!/usr/bin/env groovy
 
+final def mavenOpts = '-B -T 1C -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
+
 pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr:'10'))
+        skipDefaultCheckout()
+    }
+    tools {
+        maven 'apache-maven-latest'
+        jdk 'jdk1.8.0-latest'
+    }
+    stages {
+        stage('Checkout Git repositories') {
+            failFast true
+            parallel {
+                stage('Pull request') {
+                    when {
+                        changeRequest()
+                    }
+                    steps {
+                        dir('keti') {
+                            checkout(
+                                [ $class: 'GitSCM',
+                                  branches: [ [ name: env.CHANGE_BRANCH ] ],
+                                  doGenerateSubmoduleConfigurations: false,
+                                  extensions: [ [ $class: 'SubmoduleOption',
+                                                  disableSubmodules: false,
+                                                  parentCredentials: true,
+                                                  recursiveSubmodules: true,
+                                                  reference: '',
+                                                  trackingSubmodules: true ] ],
+                                  submoduleCfg: [ ],
+                                  userRemoteConfigs: [ [ credentialsId: '670c4a5c-7db1-4a51-9706-e49458224cda',
+                                                         url: 'https://github.com/eclipse/keti' ] ] ]
+                            )
+                        }
+                    }
+                }
+                stage('Non-pull-request') {
+                    when {
+                        not {
+                            changeRequest()
+                        }
+                    }
+                    steps {
+                        dir('keti') {
+                            checkout(
+                                [ $class: 'GitSCM',
+                                  branches: [ [ name: env.BRANCH_NAME ] ],
+                                  doGenerateSubmoduleConfigurations: false,
+                                  extensions: [ [ $class: 'SubmoduleOption',
+                                                  disableSubmodules: false,
+                                                  parentCredentials: true,
+                                                  recursiveSubmodules: true,
+                                                  reference: '',
+                                                  trackingSubmodules: true ] ],
+                                  submoduleCfg: [ ],
+                                  userRemoteConfigs: [ [ credentialsId: '670c4a5c-7db1-4a51-9706-e49458224cda',
+                                                         url: 'https://github.com/eclipse/keti' ] ] ]
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        stage('Run post-SCM-checkout operations') {
+            steps {
+                sh '''
+                    ls -altr keti keti/kotlin
 
-	agent any
-	options {
-		buildDiscarder(logRotator(numToKeepStr:'10'))
-		skipDefaultCheckout()
-	}
-	tools{
-		maven 'apache-maven-latest' 
-		jdk 'jdk1.8.0-latest' 
-	}
-	stages {
+                    rm -rf public
+                    mkdir public
+                    cp -a keti public/keti
 
-		stage('Checkout git repository') {
-			steps {
-				echo 'Cleaning Workspace'
-				cleanWs()
-				echo 'Checking out keti repo'
-				dir ('keti') {
-					checkout scm
-				}
-				sh 'mkdir public && cp -frp keti public/keti'
-				sh 'mkdir public-graph &&  cp -frp keti public-graph/keti'
-			}
-			post {
-				success {
-					echo 'Checkout of the Git repository succeeded'
-				}
-				failure {
-					echo 'Checkout of the Git repository failed'
-				}
-			}
-		}
+                    rm -rf public-kt
+                    mkdir public-kt
+                    cp -a keti public-kt/keti
 
-		stage('Build Public Profile') {
-			steps {
-				sh 'cd public/keti && mvn clean install -P public' 
-			}
-			post {
-				success {
-					echo 'Build Public profile succeeded'
-				}
-				failure {
-					echo 'Build Public profile failed'
-				}
-			always {
-					junit '**/public/**/surefire-reports*/junitreports/TEST*.xml, **/public/**/surefire-reports*/**/junitreports/TEST*.xml'
-				}
-			}
-		}
+                    rm -rf public-graph
+                    mkdir public-graph
+                    cp -a keti public-graph/keti
 
-		stage('Build Public Graph Profile') {
-			steps {
-				sh 'cd public-graph/keti && mvn clean install -P public-graph' 
-			}
-			post {
-				success {
-					echo 'Build Public Graph Profile succeeded'
-				}
-				failure {
-					echo 'Build Public Graph Profile failed'
-				}
-				always {
-					junit '**/public-graph/**/surefire-reports*/junitreports/TEST*.xml, **/public-graph/**/surefire-reports*/**/junitreports/TEST*.xml'
-				}
-			}
-		}
-
-		stage('Run Integration tests using Public Profile') {
-			steps {
-				sh "cd public/keti && ./run-integration-tests.sh"
-			}
-			post {
-				success {
-					echo 'Run Integration tests using Public Profile succeeded'
-				}
-				failure {
-					echo 'Run Integration tests using Public Profile failed'
-				}
-				always {
-					junit '**/public/**/failsafe-reports*/junitreports/TEST*.xml, **/public/**/failsafe-reports*/**/junitreports/TEST*.xml'
-				}
-			}
-		}
-
-		stage('Run Integration tests using Public Graph Profile') {
-			steps {
-
-				sh "cd public-graph/keti && ./run-integration-tests.sh -g"
-			}
-			post {
-				success {
-					echo 'Run Integration tests using Public Graph Profile succeeded'
-				}
-				failure {
-					echo 'Run Integration tests using Public Graph Profile failed'
-				}
-				always {
-					junit '**/public-graph/**/failsafe-reports*/junitreports/TEST*.xml, **/public-graph/**/failsafe-reports*/**/junitreports/TEST*.xml'
-				}
-			}
-		}
-	}
+                    rm -rf public-graph-kt
+                    mkdir public-graph-kt
+                    cp -a keti public-graph-kt/keti
+                '''
+            }
+        }
+        stage('Build and run unit tests') {
+            failFast true
+            parallel {
+                stage("Build the 'public' Maven profile (Java)") {
+                    steps {
+                        sh "cd public/keti && mvn clean package install ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public"
+                    }
+                }
+                stage("Build the 'public' Maven profile (Kotlin)") {
+                    steps {
+                        sh "cd public-kt/keti/kotlin && mvn clean package install ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public-kt"
+                    }
+                }
+                stage("Build the 'public-graph' Maven profile (Java)") {
+                    steps {
+                        sh "cd public-graph/keti && mvn clean package install ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph"
+                    }
+                }
+                stage("Build the 'public-graph' Maven profile (Kotlin)") {
+                    steps {
+                        sh "cd public-graph-kt/keti/kotlin && mvn clean package install ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph-kt"
+                    }
+                }
+            }
+            post {
+                always {
+                    junit testResults: '**/public*/**/surefire-reports*/junitreports/TEST*.xml, **/public*/**/surefire-reports*/**/junitreports/TEST*.xml', allowEmptyResults: true
+                }
+            }
+        }
+        stage('Run integration tests') {
+            failFast true
+            parallel {
+                stage("Run integration tests using the 'public' Maven profile (Java)") {
+                    steps {
+                        sh "cd public/keti && PORT_OFFSET=10 source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public"
+                    }
+                }
+                stage("Run integration tests using the 'public' Maven profile (Kotlin)") {
+                    steps {
+                        sh "cd public-kt/keti/kotlin && PORT_OFFSET=20 source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public-kt"
+                    }
+                }
+                stage("Run integration tests using the 'public-graph' Maven profile (Java)") {
+                    steps {
+                        sh "cd public-graph/keti && PORT_OFFSET=30 source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph"
+                    }
+                }
+                stage("Run integration tests using the 'public-graph' Maven profile (Kotlin)") {
+                    steps {
+                        sh "cd public-graph-kt/keti/kotlin && PORT_OFFSET=40 source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph-kt"
+                    }
+                }
+            }
+            post {
+                always {
+                    junit testResults: '**/public*/**/failsafe-reports*/junitreports/TEST*.xml, **/public-*/**/failsafe-reports*/**/junitreports/TEST*.xml', allowEmptyResults: true
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+    }
 }
