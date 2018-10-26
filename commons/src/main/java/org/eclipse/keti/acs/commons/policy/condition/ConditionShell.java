@@ -18,12 +18,13 @@
 
 package org.eclipse.keti.acs.commons.policy.condition;
 
+import java.util.Map;
+
 /**
  * Represents a shell capable of compiling a policy condition.
  *
  * @author acs-engineers@ge.com
  */
-@FunctionalInterface
 public interface ConditionShell {
 
     /**
@@ -36,4 +37,17 @@ public interface ConditionShell {
      *             on validation error
      */
     ConditionScript parse(String script) throws ConditionParsingException;
+
+    /**
+     * Validates & executes the policy condition script.
+     *
+     * @param script
+     *            the policy condition string
+     * @param boundVariables
+     *            variable bindings of the script
+     * @return result of executing the policy condition script.
+     * @throws ConditionParsingException
+     *             on script validation error
+     */
+    boolean execute(String script, Map<String, Object> boundVariables) throws ConditionParsingException;
 }

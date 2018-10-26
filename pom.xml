@@ -87,7 +87,7 @@
         <reportng.version>1.1.2</reportng.version>
         <testng.version>6.9.10</testng.version>
         <cucumber.version>1.2.5</cucumber.version>
-        <groovy-all.version>2.4.12</groovy-all.version>
+        <groovy-all.version>2.5.2</groovy-all.version>
         <maven-surefire.version>2.20</maven-surefire.version>
         <maven-failsafe.version>2.20</maven-failsafe.version>
     </properties>
@@ -136,6 +136,7 @@
                 <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
                 <version>${groovy-all.version}</version>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>

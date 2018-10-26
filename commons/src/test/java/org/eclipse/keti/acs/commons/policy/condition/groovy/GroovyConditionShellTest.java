@@ -18,13 +18,19 @@
 
 package org.eclipse.keti.acs.commons.policy.condition.groovy;
 
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import org.eclipse.keti.acs.commons.policy.condition.ConditionParsingException;
 import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
 import org.eclipse.keti.acs.commons.policy.condition.ConditionShell;
+import org.eclipse.keti.acs.commons.policy.condition.ResourceHandler;
+import org.eclipse.keti.acs.commons.policy.condition.SubjectHandler;
+import org.eclipse.keti.acs.model.Attribute;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * Tests for Groovy policy condition script parsing and validation.
@@ -32,12 +38,13 @@ import org.eclipse.keti.acs.commons.policy.condition.ConditionShell;
  * @author acs-engineers@ge.com
  */
 public class GroovyConditionShellTest {
-    private ConditionShell shell;
+    private static final ResourceHandler RESOURCE_HANDLER = new ResourceHandler(new HashSet<Attribute>(), "", "");
+    private static final SubjectHandler SUBJECT_HANDLER = new SubjectHandler(new HashSet<Attribute>());
+    private static final AttributeMatcher ATTRIBUTE_MATCHER = new AttributeMatcher();
 
-    @BeforeClass
-    public void setup() {
-        this.shell = new GroovyConditionShell();
-    }
+    private static Map<String, Object> emptyBindingMap = new HashMap<>();
+
+    private ConditionShell shell = new GroovyConditionShell();
 
     /**
      * Test a policy condition parsing and compilation using an allowed policy operations.
@@ -45,125 +52,108 @@ public class GroovyConditionShellTest {
      * @throws ConditionParsingException
      *             this test should not throw this exception.
      */
-    @Test
-    public void testValidateScriptWithValidScript() throws ConditionParsingException {
-        String script = "\"a\".equals(\"a\")";
+    @Test(dataProvider = "validScript")
+    public void testParseValidScript(final String script, final Map<String, Object> boundVariables,
+            final boolean expectedResult) throws ConditionParsingException {
         ConditionScript parsedScript = this.shell.parse(script);
         Assert.assertNotNull(parsedScript);
     }
 
+    @Test(dataProvider = "validScript")
+    public void testExecuteValidScript(final String script, final Map<String, Object> boundVariables,
+            final boolean expectedResult) throws ConditionParsingException {
+        Assert.assertEquals(this.shell.execute(script, boundVariables), expectedResult);
+    }
+
+    @DataProvider
+    public Object[][] validScript() {
+        return new Object[][] { { "\"a\".equals(\"a\")", new HashMap<>(), true },
+                { "\"a\".equals(\"b\")", new HashMap<>(), false }, { "resource == \"b\"", getSingleBinding(), false },
+                { "resource != subject", getMultipleBindings(), true },
+                { "match.any(resource.attributes(\"\",\"\"), subject.attributes(\"\",\"\"))",
+                        getMultipleBindingsWithMatcher(), false },
+                { "resource = null; resource == null;", getSingleBinding(), true } };
+    }
+
+    private static Map<String, Object> getMultipleBindingsWithMatcher() {
+        Map<String, Object> parameter = getMultipleBindings();
+        parameter.put("match", ATTRIBUTE_MATCHER);
+        return parameter;
+    }
+
+    private static Map<String, Object> getMultipleBindings() {
+        Map<String, Object> parameter = getSingleBinding();
+        parameter.put("subject", SUBJECT_HANDLER);
+        return parameter;
+    }
+
+    private static Map<String, Object> getSingleBinding() {
+        Map<String, Object> parameter = emptyBindingMap;
+        parameter.put("resource", RESOURCE_HANDLER);
+        return parameter;
+    }
+
     /**
-     * Test a policy condition parsing and compilation for a blank script.
+     * Test a policy condition parsing and compilation for a blank/null script.
      *
      * @throws ConditionParsingException
      *             this test should not throw exception
      */
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testValidateEmptyScript() throws ConditionParsingException {
-        String script = "";
+    @Test(dataProvider = "illegalScript", expectedExceptions = IllegalArgumentException.class)
+    public void testParseBlankScript(final String script) throws ConditionParsingException {
         this.shell.parse(script);
     }
 
-    /**
-     * Test a policy condition parsing and compilation for a null script.
-     *
-     * @throws ConditionParsingException
-     *             this test should not throw exception
-     */
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testValidateNullScript() throws ConditionParsingException {
-        ConditionScript parsedScript = this.shell.parse(null);
-        Assert.assertNotNull(parsedScript);
+    @Test(dataProvider = "illegalScript", expectedExceptions = IllegalArgumentException.class)
+    public void testExecuteBlankScript(final String script) throws ConditionParsingException {
+        this.shell.execute(script, emptyBindingMap);
+    }
+
+    @DataProvider
+    public Object[][] illegalScript() {
+        return new Object[][] { { "" }, { null } };
     }
 
     /**
-     * Test a policy condition parsing and compilation for a script with for loop.
+     * Test the execution of a policy condition which does not result in a boolean value.
      *
      * @throws ConditionParsingException
-     *             we expect this exception for this test.
      */
-    @Test
-    public void testValidateScriptWithForLoop() throws ConditionParsingException {
-        String script = "for (int i = 0; i < 5; i++) {}";
-        this.shell.parse(script);
+    @Test(dataProvider = "invalidScript", expectedExceptions = ClassCastException.class)
+    public void testExecuteInvalidScript(final String script) throws ConditionParsingException {
+        this.shell.execute(script, emptyBindingMap);
+    }
+
+    @DataProvider
+    public Object[][] invalidScript() {
+        return new Object[][] { { "\"a\".concat(\"b\")" } };
     }
 
     /**
-     * Test a policy condition parsing and compilation for a script trying to invoke System.exit(0).
-     *
-     * @throws ConditionParsingException
-     *             we expect this exception for this test.
-     */
-    @Test(expectedExceptions = ConditionParsingException.class)
-    public void testValidateScriptWithSystemInvocation() throws ConditionParsingException {
-        String script = "System.exit(0)";
-        this.shell.parse(script);
-    }
-
-    /**
-     * Test a policy condition validation for a script trying to use reflection.
+     * Test a policy condition parsing and compilation for black-listed scripts.
      *
      * @throws ConditionParsingException
      *             we expect this exception for this test.
      */
-    @Test(expectedExceptions = ConditionParsingException.class)
-    public void testValidateScriptWithReflection() throws ConditionParsingException {
-        String script = "((System)(Class.forName(\"java.lang.System\")).newInstance()).exit(0);";
+    @Test(dataProvider = "blackListedScript", expectedExceptions = ConditionParsingException.class)
+    public void testParseBlackListedScript(final String script) throws ConditionParsingException {
         this.shell.parse(script);
     }
 
-    /**
-     * Test policy condition parsing and compilation for a script that uses threads which returns a value.
-     *
-     * @throws ConditionParsingException
-     *             we expect this exception for this test.
-     */
-    @Test(expectedExceptions = ConditionParsingException.class)
-    public void testParseScriptWithThreadInvocation() throws ConditionParsingException {
-        String script = "Thread.currentThread().toString()";
-        this.shell.parse(script);
+    @Test(dataProvider = "blackListedScript", expectedExceptions = ConditionParsingException.class)
+    public void testExecuteBlackListedScript(final String script) throws ConditionParsingException {
+        this.shell.execute(script, emptyBindingMap);
     }
 
-    @Test(expectedExceptions = ConditionParsingException.class)
-    public void testParseScriptWithSystemInvocation1() throws ConditionParsingException {
-        String script = "def c = System; c.exit(-1);";
-        this.shell.parse(script);
+    @DataProvider
+    public Object[][] blackListedScript() {
+        return new Object[][] { { "System.exit(0)" },
+                { "((System)(Class.forName(\"java.lang.System\")).newInstance()).exit(0);" },
+                { "Thread.currentThread().toString()" }, { "def c = System; c.exit(-1);" },
+                { "((Object)System).exit(-1);" }, { "Class.forName('java.lang.System').exit(-1);" },
+                { "('java.lang.System' as Class).exit(-1);" }, { "import static java.lang.System.exit; exit(-1);" },
+                { "Eval.me(' 2 * 4 + 2');" }, { "'env'.execute();" },
+                { "new ResourceHandler().getClass().getClassLoader().loadClass(System.class.getName())."
+                        + "getMethod(\"exit\");" } };
     }
-
-    @Test(expectedExceptions = ConditionParsingException.class)
-    public void testParseScriptWithSystemInvocation2() throws ConditionParsingException {
-        String script = "((Object)System).exit(-1);";
-        this.shell.parse(script);
-    }
-
-    @Test(expectedExceptions = ConditionParsingException.class)
-    public void testParseScriptWithSystemInvocation3() throws ConditionParsingException {
-        String script = "Class.forName('java.lang.System').exit(-1);";
-        this.shell.parse(script);
-    }
-
-    @Test(expectedExceptions = ConditionParsingException.class)
-    public void testParseScriptWithSystemInvocation4() throws ConditionParsingException {
-        String script = "('java.lang.System' as Class).exit(-1);";
-        this.shell.parse(script);
-    }
-
-    @Test(expectedExceptions = ConditionParsingException.class)
-    public void testParseScriptWithSystemInvocation5() throws ConditionParsingException {
-        String script = "import static java.lang.System.exit; exit(-1);";
-        this.shell.parse(script);
-    }
-
-    @Test(expectedExceptions = ConditionParsingException.class)
-    public void testParseScriptWithEval() throws ConditionParsingException {
-        String script = "Eval.me(' 2 * 4 + 2');";
-        this.shell.parse(script);
-    }
-
-    @Test(expectedExceptions = ConditionParsingException.class)
-    public void testParseScriptWithStringExecute() throws ConditionParsingException {
-        String script = "'env'.execute();";
-        this.shell.parse(script);
-    }
-
 }

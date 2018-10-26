@@ -24,20 +24,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
-import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.model.Condition;
-import org.eclipse.keti.acs.rest.BaseResource;
-import org.eclipse.keti.acs.rest.BaseSubject;
-import org.eclipse.keti.acs.service.policy.validation.PolicySetValidator;
-import org.eclipse.keti.acs.service.policy.validation.PolicySetValidatorImpl;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -45,175 +41,144 @@ import org.testng.annotations.Test;
  *
  * @author acs-engineers@ge.com
  */
-@ContextConfiguration(
-        classes = { NonCachingGroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
+@ContextConfiguration(classes = { GroovyConditionShell.class })
 public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
 
+    private static final String ATTRIBUTE_ISSUER = "acs";
+    private static final Attribute SITE_SAN_RAMON = getAttribute("site", "San Ramon");
+    private static final Attribute SITE_NEW_YORK = getAttribute("site", "New York");
+    private static final Attribute SITE_BOSTON = getAttribute("site", "Boston");
+    private static final Attribute SITE_LA = getAttribute("site", "LA");
+    private static final Attribute LOCATION_SAN_RAMON = getAttribute("location", "San Ramon");
+    private static final Attribute LOCATION_NEW_YORK = getAttribute("location", "New York");
+    private static final Attribute DEPARTMENT_SALES = getAttribute("department", "sales");
+
+    private PolicyEvaluationServiceImpl evaluationService;
+
     @Autowired
-    private PolicySetValidator policySetValidator;
+    private GroovyConditionShell conditionShell;
 
-    @BeforeClass
-    public void setup() {
-        ((PolicySetValidatorImpl) this.policySetValidator)
-                .setValidAcsPolicyHttpActions("GET, POST, PUT, DELETE, PATCH, SUBSCRIBE, MESSAGE");
-        ((PolicySetValidatorImpl) this.policySetValidator).init();
+    @BeforeMethod
+    private void setupMethod() throws Exception {
+        this.evaluationService = new PolicyEvaluationServiceImpl();
+        ReflectionTestUtils.setField(this.evaluationService, "conditionShell", this.conditionShell);
     }
 
-    @Test(dataProvider = "conditionsProvider")
-    public void testConditionEvaluationWithConstants(final List<Condition> conditions, final boolean expectedResult,
-            final boolean throwsException) {
-        PolicyEvaluationServiceImpl evaluationService = new PolicyEvaluationServiceImpl();
-        Whitebox.setInternalState(evaluationService, "policySetValidator", this.policySetValidator);
-        Set<Attribute> subjectAttributes = Collections.emptySet();
-        try {
-            Assert.assertEquals(evaluationService.evaluateConditions(subjectAttributes, new HashSet<>(), "",
-                    conditions, ""), expectedResult);
-        } catch (Exception e) {
-            if (throwsException) {
-                Assert.assertTrue(e instanceof PolicyEvaluationException);
-            }
-        }
+    private static Set<Attribute> getAttributes(final Attribute attributeOne, final Attribute attributeTwo) {
+        return new HashSet<>(Arrays.asList(attributeOne, attributeTwo));
     }
 
-    @DataProvider(name = "conditionsProvider")
-    public Object[][] getConditions() {
-        Object[][] data = new Object[][] { { Arrays.asList(new Condition("\"a\" == \"a\"")), true, false },
-                { Arrays.asList(new Condition("\"a\" == \"b\"")), false, false },
-                { Arrays.asList(new Condition("")), false, true }, { Collections.emptyList(), true, true }, // TODO:
-                                                                                                            // Should
-                // no
-                // exception
-                // just
-                // return the
-                // effect
-                // if the
-                // policy
-                // matched
-                { Arrays.asList(new Condition("\"a\" == \"a\""), new Condition("\"b\" == \"b\"")), true, false },
-                { Arrays.asList(new Condition("\"a\" == \"a\""), new Condition("\"a\" == \"b\"")), false, false },
-                { Arrays.asList(new Condition("\"a\" == \"b\""), new Condition("\"c\" == \"b\"")), false, false },
-                { null, true, false }
-
-        };
-        return data;
+    private static Attribute getAttribute(final String name, final String value) {
+        return new Attribute(ATTRIBUTE_ISSUER, name, value);
     }
 
-    @Test(dataProvider = "conditionsWithVariablesProvider")
+    @Test(dataProvider = "validConditionsWithConstants")
+    public void testConditionEvaluationWithConstants(final List<Condition> conditions, final boolean expectedResult) {
+        Assert.assertEquals(this.evaluationService.evaluateConditions(Collections.emptySet(), Collections.emptySet(),
+                StringUtils.EMPTY, conditions, StringUtils.EMPTY), expectedResult);
+    }
+
+    @DataProvider
+    private Object[][] validConditionsWithConstants() {
+        return new Object[][] { { Arrays.asList(new Condition("\"a\" == \"a\"")), true },
+                { Arrays.asList(new Condition("\"a\" == \"b\"")), false },
+                { Arrays.asList(new Condition("\"a\" == \"a\""), new Condition("\"b\" == \"b\"")), true },
+                { Arrays.asList(new Condition("\"a\" == \"a\""), new Condition("\"a\" == \"b\"")), false },
+                { Arrays.asList(new Condition("\"a\" == \"b\""), new Condition("\"c\" == \"b\"")), false },
+                { null, true }, { Collections.emptyList(), true } };
+    }
+
+    @Test(dataProvider = "validConditionsWithVariables")
     public void testConditionEvaluationWithVariables(final Set<Attribute> resourceAttributes,
-            final Set<Attribute> subjectAttributes, final List<Condition> conditions, final boolean expectedResult,
-            final boolean throwsException, final String resourceURI, final String resourceURITemplate) {
-
-        BaseResource resource = new BaseResource();
-        resource.setAttributes(resourceAttributes);
-
-        BaseSubject subject = new BaseSubject();
-        subject.setAttributes(subjectAttributes);
-
-        PolicyEvaluationServiceImpl evaluationService = new PolicyEvaluationServiceImpl();
-        Whitebox.setInternalState(evaluationService, "policySetValidator", this.policySetValidator);
-
-        try {
-            Assert.assertEquals(evaluationService.evaluateConditions(subjectAttributes, resourceAttributes, resourceURI,
-                    conditions, resourceURITemplate), expectedResult);
-
-        } catch (Exception e) {
-
-            if (throwsException) {
-                Assert.assertTrue(e instanceof PolicyEvaluationException);
-            } else {
-                Assert.fail("Unexpected exception.", e);
-            }
-
-        }
-
+            final Set<Attribute> subjectAttributes, final String resourceURI, final List<Condition> conditions,
+            final String resourceURITemplate, final boolean expectedResult) {
+        Assert.assertEquals(this.evaluationService.evaluateConditions(subjectAttributes, resourceAttributes,
+                resourceURI, conditions, resourceURITemplate), expectedResult);
     }
 
-    @DataProvider(name = "conditionsWithVariablesProvider")
-    public Object[][] getConditionsWithVariables() {
-        Object[][] data = new Object[][] {
+    @DataProvider
+    private Object[][] validConditionsWithVariables() {
+        return new Object[][] {
 
-                { new HashSet<>(Arrays.asList(new Attribute("acs", "site", "San Ramon"),
-                        new Attribute("acs", "site", "New York"))),
-                        new HashSet<>(Arrays.asList(new Attribute("acs", "site", "San Ramon"),
-                                new Attribute("acs", "site", "Boston"))),
+                { getAttributes(SITE_SAN_RAMON, SITE_NEW_YORK), getAttributes(SITE_SAN_RAMON, SITE_BOSTON),
+                        StringUtils.EMPTY,
                         Arrays.asList(new Condition("match.any(subject.attributes(\"acs\", \"site\"),"
                                 + " resource.attributes(\"acs\", \"site\"))")),
-                        true, false, "", "" },
-                { new HashSet<>(Arrays.asList(new Attribute("acs", "site", "San Ramon"),
-                        new Attribute("acs", "site", "New York"))),
-                        new HashSet<>(Arrays.asList(new Attribute("acs", "site", "LA"),
-                                new Attribute("acs", "site", "Boston"))),
+                        StringUtils.EMPTY, true },
+
+                { getAttributes(SITE_SAN_RAMON, SITE_NEW_YORK), getAttributes(SITE_LA, SITE_BOSTON), StringUtils.EMPTY,
                         Arrays.asList(new Condition("match.any(subject.attributes(\"acs\", \"site\"),"
                                 + " resource.attributes(\"acs\", \"site\"))")),
-                        false, false, "", "" },
-                { new HashSet<>(Arrays.asList(new Attribute("acs", "site", "San Ramon"),
-                        new Attribute("acs", "site", "New York"))),
-                        new HashSet<>(Arrays.asList(new Attribute("acs", "site", "San Ramon"),
-                                new Attribute("acs", "site", "New York"))),
+                        StringUtils.EMPTY, false },
+
+                { getAttributes(SITE_SAN_RAMON, SITE_NEW_YORK), getAttributes(SITE_SAN_RAMON, SITE_NEW_YORK),
+                        StringUtils.EMPTY,
                         Arrays.asList(new Condition("match.any(subject.attributes(\"acs\", \"site\"),"
                                 + " resource.attributes(\"acs\", \"site\"))")),
-                        true, false, "", ""
+                        StringUtils.EMPTY, true },
 
-                }, { new HashSet<>(Arrays.asList(new Attribute("acs", "location", "San Ramon"),
-                                                 new Attribute("acs", "location", "New York"))),
-                     new HashSet<>(Arrays.asList(new Attribute("acs", "site", "San Ramon"),
-                                                 new Attribute("acs", "site", "New York"))),
-                     Arrays.asList(new Condition("match.any(resource.attributes(\"acs\", \"location\"),"
-                                                 + " subject.attributes(\"acs\", \"site\"))")), true, false, "", ""
+                { getAttributes(LOCATION_SAN_RAMON, LOCATION_NEW_YORK), getAttributes(SITE_SAN_RAMON, SITE_NEW_YORK),
+                        StringUtils.EMPTY,
+                        Arrays.asList(new Condition("match.any(resource.attributes(\"acs\", \"location\"),"
+                                + " subject.attributes(\"acs\", \"site\"))")),
+                        StringUtils.EMPTY, true },
 
-                }, { new HashSet<>(Arrays.asList(new Attribute("acs", "site", "San Ramon"),
-                                                 new Attribute("acs", "site", "New York"))),
-                     Collections.emptySet(),
-                     Arrays.asList(new Condition(
-                         "match.single(resource.attributes(\"acs\", \"site\"), \"San Ramon\")")),
-                     true, false, "", ""
+                { getAttributes(SITE_SAN_RAMON, SITE_NEW_YORK), Collections.emptySet(), StringUtils.EMPTY,
+                        Arrays.asList(
+                                new Condition("match.single(resource.attributes(\"acs\", \"site\"), \"San Ramon\")")),
+                        StringUtils.EMPTY, true },
 
-                }, { Collections.emptySet(), Collections.emptySet(),
-                     Arrays.asList(new Condition("resource.uriVariable(\"site_id\").equals(\"boston\")")),
-                     true, false, "http://assets.predix.io/site/boston", "site/{site_id}"
+                { Collections.emptySet(), Collections.emptySet(), "http://assets.predix.io/site/Boston",
+                        Arrays.asList(new Condition("resource.uriVariable(\"site_id\").equals(\"Boston\")")),
+                        "site/{site_id}", true },
 
-                }, { Collections.emptySet(), Collections.emptySet(),
-                     Arrays.asList(new Condition("resource.uriVariable(\"site_id\").equals(\"newyork\")")),
-                     false, false, "http://assets.predix.io/site/boston", "site/{site_id}"
+                { Collections.emptySet(), Collections.emptySet(), "http://assets.predix.io/site/Boston",
+                        Arrays.asList(new Condition("resource.uriVariable(\"site_id\").equals(\"New York\")")),
+                        "site/{site_id}", false },
 
-                }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "boston"),
-                                                                         new Attribute("acs", "site", "New York"))),
-                     Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
-                                                 + " resource.uriVariable(\"site_id\"))")),
-                     true, false, "http://assets.predix.io/site/boston", "site/{site_id}"
+                { Collections.emptySet(), getAttributes(SITE_LA, SITE_BOSTON), "http://assets.predix.io/site/Boston",
+                        Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
+                                + " resource.uriVariable(\"site_id\"))")),
+                        "site/{site_id}", true },
 
-                }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "LA"),
-                                                                         new Attribute("acs", "site", "New York"))),
-                     Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
-                                                 + " resource.uriVariable(\"site_id\"))")),
-                     false, false, "http://assets.predix.io/site/boston", "site/{site_id}"
+                { Collections.emptySet(), getAttributes(SITE_SAN_RAMON, SITE_NEW_YORK),
+                        "http://assets.predix.io/site/Boston",
+                        Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
+                                + " resource.uriVariable(\"site_id\"))")),
+                        "site/{site_id}", false },
 
-                }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "LA"),
-                                                                         new Attribute("acs", "site", "New York"))),
-                     Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
-                                                 + " resource.uriVariable(\"site_id\"))")),
-                     false, false, "http://assets.predix.io/site", "site/{site_id}"
+                { Collections.emptySet(), getAttributes(SITE_SAN_RAMON, SITE_NEW_YORK), "http://assets.predix.io/site",
+                        Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
+                                + " resource.uriVariable(\"site_id\"))")),
+                        "site/{site_id}", false },
 
-                }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "boston"),
-                                                                         new Attribute("acs", "department", "sales"))),
-                     Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
-                                                 + " resource.uriVariable(\"site_id\"))"),
-                                   new Condition("match.single(subject.attributes(\"acs\", \"department\"),"
-                                                 + " resource.uriVariable(\"department_id\"))")),
-                     true, false,
-                     "http://assets.predix.io/site/boston/department/sales", "site/{site_id}/department/{department_id}"
+                { Collections.emptySet(), getAttributes(SITE_BOSTON, DEPARTMENT_SALES),
+                        "http://assets.predix.io/site/Boston/department/sales",
+                        Arrays.asList(
+                                new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
+                                        + " resource.uriVariable(\"site_id\"))"),
+                                new Condition("match.single(subject.attributes(\"acs\", \"department\"),"
+                                        + " resource.uriVariable(\"department_id\"))")),
+                        "site/{site_id}/department/{department_id}", true },
 
-                }, { Collections.emptySet(), new HashSet<>(Arrays.asList(new Attribute("acs", "site", "boston"),
-                                                                         new Attribute("acs", "department", "sales"))),
-                     Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
-                                                 + " resource.uriVariable(\"site_id\")) "
-                                                 + "and match.single(subject.attributes(\"acs\", \"department\"),"
-                                                 + " resource.uriVariable(\"department_id\"))")),
-                     true, false,
-                     "http://assets.predix.io/site/boston/department/sales", "site/{site_id}/department/{department_id}"
-
-                }, };
-        return data;
+                { Collections.emptySet(), getAttributes(SITE_BOSTON, DEPARTMENT_SALES),
+                        "http://assets.predix.io/site/Boston/department/sales",
+                        Arrays.asList(new Condition("match.single(subject.attributes(\"acs\", \"site\"),"
+                                + " resource.uriVariable(\"site_id\")) and"
+                                + " match.single(subject.attributes(\"acs\", \"department\"),"
+                                + " resource.uriVariable(\"department_id\"))")),
+                        "site/{site_id}/department/{department_id}", true } };
     }
 
+    @Test(dataProvider = "invalidConditions", expectedExceptions = PolicyEvaluationException.class)
+    public void testInvalidConditionEvaluation(final List<Condition> conditions) {
+        this.evaluationService.evaluateConditions(Collections.emptySet(), Collections.emptySet(), StringUtils.EMPTY,
+                conditions, StringUtils.EMPTY);
+    }
+
+    @DataProvider
+    private Object[][] invalidConditions() {
+        return new Object[][] { { Arrays.asList(new Condition(StringUtils.EMPTY)) },
+                { Arrays.asList(new Condition("'a'.equals('a')"), new Condition("System.exit(0)")) } };
+    }
 }

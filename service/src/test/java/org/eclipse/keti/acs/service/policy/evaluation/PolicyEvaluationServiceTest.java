@@ -37,7 +37,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.keti.acs.PolicyContextResolver;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
-import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.model.Effect;
 import org.eclipse.keti.acs.model.Policy;
@@ -53,8 +52,6 @@ import org.eclipse.keti.acs.service.policy.admin.PolicyManagementService;
 import org.eclipse.keti.acs.service.policy.matcher.MatchResult;
 import org.eclipse.keti.acs.service.policy.matcher.PolicyMatchCandidate;
 import org.eclipse.keti.acs.service.policy.matcher.PolicyMatcher;
-import org.eclipse.keti.acs.service.policy.validation.PolicySetValidator;
-import org.eclipse.keti.acs.service.policy.validation.PolicySetValidatorImpl;
 import org.eclipse.keti.acs.utils.JsonUtils;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
@@ -62,14 +59,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -84,8 +80,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author acs-engineers@ge.com
  */
 @Test
-@ContextConfiguration(
-        classes = { NonCachingGroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
+@ContextConfiguration(classes = { GroovyConditionShell.class })
 public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTests {
     private static final String ISSUER = "https://acs.attributes.int";
     private static final String SUBJECT_ATTRIB_NAME_ROLE = "role";
@@ -114,21 +109,14 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     @Mock
     private PolicyEvaluationCache cache;
     @Autowired
-    private PolicySetValidator policySetValidator;
+    private GroovyConditionShell conditionShell;
 
     private static final Set<Attribute> EMPTY_ATTRS = Collections.emptySet();
-
-    @BeforeClass
-    public void setupClass() {
-        ((PolicySetValidatorImpl) this.policySetValidator)
-                .setValidAcsPolicyHttpActions("GET, POST, PUT, DELETE, PATCH");
-        ((PolicySetValidatorImpl) this.policySetValidator).init();
-    }
 
     @BeforeMethod
     public void setupMethod() throws Exception {
         this.evaluationService = new PolicyEvaluationServiceImpl();
-        Whitebox.setInternalState(this.evaluationService, "policySetValidator", this.policySetValidator);
+        ReflectionTestUtils.setField(this.evaluationService, "conditionShell", this.conditionShell);
         MockitoAnnotations.initMocks(this);
         when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
         when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
