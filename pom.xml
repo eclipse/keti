@@ -78,7 +78,6 @@
         <google.guava.version>18.0</google.guava.version>
         <springframework.data.jpa>1.7.2.RELEASE</springframework.data.jpa>
         <h2database.version>1.4.185</h2database.version>
-        <flyway.version>3.0</flyway.version>
         <spring-security.version>4.2.0.RELEASE</spring-security.version>
         <openjpa.version>2.4.2</openjpa.version>
         <uaa-token-lib.version>4.0.1</uaa-token-lib.version>
