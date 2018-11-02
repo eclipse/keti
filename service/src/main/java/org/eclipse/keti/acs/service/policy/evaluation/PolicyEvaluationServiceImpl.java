@@ -30,12 +30,12 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.keti.acs.attribute.readers.AttributeRetrievalException;
-import org.eclipse.keti.acs.commons.policy.condition.ConditionAssertionFailedException;
-import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
 import org.eclipse.keti.acs.commons.policy.condition.ResourceHandler;
 import org.eclipse.keti.acs.commons.policy.condition.SubjectHandler;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.AttributeMatcher;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.model.Condition;
 import org.eclipse.keti.acs.model.Effect;
@@ -51,8 +51,6 @@ import org.eclipse.keti.acs.service.policy.admin.PolicyManagementService;
 import org.eclipse.keti.acs.service.policy.matcher.MatchResult;
 import org.eclipse.keti.acs.service.policy.matcher.PolicyMatchCandidate;
 import org.eclipse.keti.acs.service.policy.matcher.PolicyMatcher;
-import org.eclipse.keti.acs.service.policy.validation.PolicySetValidationException;
-import org.eclipse.keti.acs.service.policy.validation.PolicySetValidator;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
 import org.slf4j.Logger;
@@ -72,9 +70,9 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
     @Autowired
     private PolicyMatcher policyMatcher;
     @Autowired
-    private PolicySetValidator policySetValidator;
-    @Autowired
     private ZoneResolver zoneResolver;
+    @Autowired
+    private GroovyConditionShell conditionShell;
 
     @Override
     public PolicyEvaluationResult evalPolicy(final PolicyEvaluationRequestV1 request) {
@@ -249,29 +247,22 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
 
     boolean evaluateConditions(final Set<Attribute> subjectAttributes, final Set<Attribute> resourceAttributes,
             final String resourceURI, final List<Condition> conditions, final String resourceURITemplate) {
-        List<ConditionScript> validatedConditionScripts;
-        try {
-            validatedConditionScripts = this.policySetValidator.validatePolicyConditions(conditions);
-        } catch (PolicySetValidationException e) {
-            LOGGER.error("Unable to validate conditions: {}", e.getMessage());
-            throw new PolicyEvaluationException("Condition Validation failed", e);
-        }
-
         debugAttributes(subjectAttributes, resourceAttributes);
+
+        boolean result = true;
+
+        if (CollectionUtils.isEmpty(conditions)) {
+            return result;
+        }
 
         Map<String, Object> attributeBindingsMap = this.getAttributeBindingsMap(subjectAttributes, resourceAttributes,
                 resourceURI, resourceURITemplate);
 
-        boolean result = true;
-        for (int i = 0; i < validatedConditionScripts.size(); i++) {
-            ConditionScript conditionScript = validatedConditionScripts.get(i);
+        for (Condition condition : conditions) {
             try {
-                result = result && conditionScript.execute(attributeBindingsMap);
-            } catch (ConditionAssertionFailedException e) {
-                LOGGER.debug("Condition Assertion Failed", e);
-                result = false;
+                result = result && this.conditionShell.execute(condition.getCondition(), attributeBindingsMap);
             } catch (Exception e) {
-                LOGGER.error("Unable to evualate condition: {}", conditions.get(i), e);
+                LOGGER.error("Unable to evualate condition: {}", condition.getCondition(), e);
                 throw new PolicyEvaluationException("Condition Evaluation failed", e);
             }
         }

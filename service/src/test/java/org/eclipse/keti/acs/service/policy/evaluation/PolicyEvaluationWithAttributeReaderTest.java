@@ -34,7 +34,6 @@ import org.eclipse.keti.acs.attribute.readers.AttributeRetrievalException;
 import org.eclipse.keti.acs.attribute.readers.ExternalResourceAttributeReader;
 import org.eclipse.keti.acs.attribute.readers.ExternalSubjectAttributeReader;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
-import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.model.Effect;
 import org.eclipse.keti.acs.model.PolicySet;
@@ -46,27 +45,23 @@ import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
 import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
 import org.eclipse.keti.acs.service.policy.admin.PolicyManagementService;
 import org.eclipse.keti.acs.service.policy.matcher.PolicyMatcherImpl;
-import org.eclipse.keti.acs.service.policy.validation.PolicySetValidator;
-import org.eclipse.keti.acs.service.policy.validation.PolicySetValidatorImpl;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@ContextConfiguration(
-        classes = { NonCachingGroovyConditionCache.class, GroovyConditionShell.class, PolicySetValidatorImpl.class })
+@ContextConfiguration(classes = { GroovyConditionShell.class })
 public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSpringContextTests {
 
     @InjectMocks
@@ -86,7 +81,7 @@ public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSprin
     @Mock
     private ExternalSubjectAttributeReader externalSubjectAttributeReader;
     @Autowired
-    private PolicySetValidator policySetValidator;
+    private GroovyConditionShell conditionShell;
 
     private static final String RESOURCE_IDENTIFIER = "/sites/1234";
     private static final String SUBJECT_IDENTIFIER = "test-subject";
@@ -94,20 +89,13 @@ public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSprin
 
     private final PolicyMatcherImpl policyMatcher = new PolicyMatcherImpl();
 
-    @BeforeClass
-    public void setupClass() {
-        ((PolicySetValidatorImpl) this.policySetValidator)
-                .setValidAcsPolicyHttpActions("GET, POST, PUT, DELETE, PATCH");
-        ((PolicySetValidatorImpl) this.policySetValidator).init();
-    }
-
     @BeforeMethod
     public void setupMethod() throws Exception {
         this.evaluationService = new PolicyEvaluationServiceImpl();
         MockitoAnnotations.initMocks(this);
-        Whitebox.setInternalState(this.policyMatcher, "attributeReaderFactory", this.attributeReaderFactory);
-        Whitebox.setInternalState(this.evaluationService, "policyMatcher", this.policyMatcher);
-        Whitebox.setInternalState(this.evaluationService, "policySetValidator", this.policySetValidator);
+        ReflectionTestUtils.setField(this.policyMatcher, "attributeReaderFactory", this.attributeReaderFactory);
+        ReflectionTestUtils.setField(this.evaluationService, "policyMatcher", this.policyMatcher);
+        ReflectionTestUtils.setField(this.evaluationService, "conditionShell", this.conditionShell);
         when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
         when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
         when(this.attributeReaderFactory.getResourceAttributeReader()).thenReturn(this.externalResourceAttributeReader);
@@ -138,7 +126,6 @@ public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSprin
         Assert.assertEquals(evalResult.getEffect(), Effect.PERMIT);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testPolicyEvaluationWhenAdaptersTimeOut() throws Exception {
         String attributeRetrievalExceptionMessage = "attribute retrieval exception";

@@ -30,16 +30,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.internal.util.reflection.Whitebox;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory;
 import org.eclipse.keti.acs.attribute.readers.PrivilegeServiceResourceAttributeReader;
 import org.eclipse.keti.acs.attribute.readers.PrivilegeServiceSubjectAttributeReader;
@@ -57,6 +47,16 @@ import org.eclipse.keti.acs.service.policy.admin.PolicyManagementServiceImpl;
 import org.eclipse.keti.acs.service.policy.matcher.PolicyMatcherImpl;
 import org.eclipse.keti.acs.zone.management.dao.ZoneEntity;
 import org.eclipse.keti.acs.zone.resolver.ZoneResolver;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PolicyEvaluationWithAttributeUriTemplateTest {
 
@@ -80,8 +80,8 @@ public class PolicyEvaluationWithAttributeUriTemplateTest {
     @Test
     public void testEvaluateWithURIAttributeTemplate() throws JsonParseException, JsonMappingException, IOException {
         MockitoAnnotations.initMocks(this);
-        Whitebox.setInternalState(this.policyMatcher, "attributeReaderFactory", this.attributeReaderFactory);
-        Whitebox.setInternalState(this.evaluationService, "policyMatcher", this.policyMatcher);
+        ReflectionTestUtils.setField(this.policyMatcher, "attributeReaderFactory", this.attributeReaderFactory);
+        ReflectionTestUtils.setField(this.evaluationService, "policyMatcher", this.policyMatcher);
         when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
         when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
         when(this.attributeReaderFactory.getResourceAttributeReader()).thenReturn(this.defaultResourceAttributeReader);
