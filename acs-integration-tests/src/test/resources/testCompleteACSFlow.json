@@ -2,17 +2,12 @@
     "name" : "testCompleteACSFlow",
     "policies" : [
         {
+            "name" : "Subjects can access resource if they are assigned to the same site",
             "target" : {
-                "resource" : {
-                    "uriTemplate" : "/alarms/sites/{site_id}",
-                     "attributes" : [
-                     	{
-                     	"issuer":"issuerId1",
-                     	"name":"region"
-                     	}
-                     ]
-                },
                 "action" : "GET",
+                "resource" : {
+                    "uriTemplate" : "/alarms/sites/{site_id}"
+                },
                 "subject" : {
                      "attributes" : [
                      	{
@@ -25,10 +20,15 @@
             "conditions" : [
                 { 
                   "condition" : 
-                  "match.single(subject.attributes('issuerId1', 'site'), resource.uriVariable('site_id')) & resource.attributes('issuerId1','region').contains('testregion')" 
+                  "match.single(subject.attributes('issuerId1', 'site'), resource.uriVariable('site_id'))"
                 }
             ],
             "effect" : "PERMIT"
+        }
+        ,
+        {
+            "name" : "deny-all-policy",
+            "effect" : "DENY"
         }
     ]
 }
