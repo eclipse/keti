@@ -24,6 +24,18 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates;
+import org.eclipse.keti.acs.model.Attribute;
+import org.eclipse.keti.acs.model.Effect;
+import org.eclipse.keti.acs.rest.BaseResource;
+import org.eclipse.keti.acs.rest.BaseSubject;
+import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
+import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
+import org.eclipse.keti.test.utils.ACSITSetUpFactory;
+import org.eclipse.keti.test.utils.PolicyHelper;
+import org.eclipse.keti.test.utils.PrivilegeHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -42,17 +54,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import org.eclipse.keti.acs.commons.web.AcsApiUriTemplates;
-import org.eclipse.keti.acs.model.Attribute;
-import org.eclipse.keti.acs.model.Effect;
-import org.eclipse.keti.acs.rest.BaseResource;
-import org.eclipse.keti.acs.rest.BaseSubject;
-import org.eclipse.keti.acs.rest.PolicyEvaluationRequestV1;
-import org.eclipse.keti.acs.rest.PolicyEvaluationResult;
-import org.eclipse.keti.test.utils.ACSITSetUpFactory;
-import org.eclipse.keti.test.utils.PolicyHelper;
-import org.eclipse.keti.test.utils.PrivilegeHelper;
 
 /**
  * @author acs-engineers@ge.com
@@ -78,6 +79,8 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
     private OAuth2RestTemplate acsZoneRestTemplate;
 
     private HttpHeaders headersWithZoneSubdomain;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ACSAcceptanceIT.class);
 
     @BeforeClass
     public void setup() throws IOException {
@@ -117,40 +120,44 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
 
     @Test(dataProvider = "endpointProvider")
     public void testCompleteACSFlow(final String endpoint, final HttpHeaders headers,
-            final PolicyEvaluationRequestV1 policyEvalRequest, final String subjectIdentifier) throws Exception {
+            final PolicyEvaluationRequestV1 policyEvalRequest, final Effect expectedEffect) throws Exception {
 
         String testPolicyName = null;
-        BaseSubject marissa = null;
-        BaseResource testResource = null;
+        BaseSubject bob = null;
+        BaseResource alarms = null;
         try {
+            LOGGER.info("Adding a policy 'Subjects can access resource if they are assigned to the same site'.");
             testPolicyName = this.policyHelper.setTestPolicy(this.acsZoneRestTemplate, headers, endpoint,
                     "src/test/resources/testCompleteACSFlow.json");
-            BaseSubject subject = new BaseSubject(subjectIdentifier);
+            BaseSubject subject = new BaseSubject(policyEvalRequest.getSubjectIdentifier());
             Attribute site = new Attribute();
             site.setIssuer("issuerId1");
             site.setName("site");
             site.setValue("sanramon");
 
-            marissa = this.privilegeHelper.putSubject(this.acsZoneRestTemplate, subject, endpoint, headers, site);
-
-            Attribute region = new Attribute();
-            region.setIssuer("issuerId1");
-            region.setName("region");
-            region.setValue("testregion"); // test policy asserts on this value
+            LOGGER.info("Adding a subject '{}' assigned to a site '{}'.", subject.getSubjectIdentifier(),
+                    site.getValue());
+            bob = this.privilegeHelper.putSubject(this.acsZoneRestTemplate, subject, endpoint, headers, site);
 
             BaseResource resource = new BaseResource();
-            resource.setResourceIdentifier("/alarms/sites/sanramon");
+            resource.setResourceIdentifier(policyEvalRequest.getResourceIdentifier());
 
-            testResource = this.privilegeHelper.putResource(this.acsZoneRestTemplate, resource, endpoint, headers,
-                    region);
+            LOGGER.info("Adding a resource '{}'.", resource.getResourceIdentifier());
+            alarms = this.privilegeHelper.putResource(this.acsZoneRestTemplate, resource, endpoint, headers,
+                    new Attribute());
 
+            LOGGER.info("Evaluating if subject '{}' has access to resource '{}'.", bob.getSubjectIdentifier(),
+                    alarms.getResourceIdentifier());
             ResponseEntity<PolicyEvaluationResult> evalResponse = this.acsZoneRestTemplate.postForEntity(
                     endpoint + PolicyHelper.ACS_POLICY_EVAL_API_PATH, new HttpEntity<>(policyEvalRequest, headers),
                     PolicyEvaluationResult.class);
 
             Assert.assertEquals(evalResponse.getStatusCode(), HttpStatus.OK);
             PolicyEvaluationResult responseBody = evalResponse.getBody();
-            Assert.assertEquals(responseBody.getEffect(), Effect.PERMIT);
+            LOGGER.info("Request for subject '{}' assigned to '{}' to access resource '{}' returned '{}'.",
+                    bob.getSubjectIdentifier(), site.getValue(), alarms.getResourceIdentifier(),
+                    responseBody.getEffect().toString());
+            Assert.assertEquals(responseBody.getEffect(), expectedEffect);
         } finally {
             // delete policy
             if (null != testPolicyName) {
@@ -159,13 +166,13 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
             }
 
             // delete attributes
-            if (null != marissa) {
+            if (null != bob) {
                 this.acsZoneRestTemplate.exchange(
-                        endpoint + PrivilegeHelper.ACS_SUBJECT_API_PATH + marissa.getSubjectIdentifier(),
+                        endpoint + PrivilegeHelper.ACS_SUBJECT_API_PATH + bob.getSubjectIdentifier(),
                         HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
             }
-            if (null != testResource) {
-                String encodedResource = URLEncoder.encode(testResource.getResourceIdentifier(), "UTF-8");
+            if (null != alarms) {
+                String encodedResource = URLEncoder.encode(alarms.getResourceIdentifier(), "UTF-8");
                 URI uri = new URI(endpoint + PrivilegeHelper.ACS_RESOURCE_API_PATH + encodedResource);
                 this.acsZoneRestTemplate.exchange(uri, HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
             }
@@ -174,10 +181,13 @@ public class ACSAcceptanceIT extends AbstractTestNGSpringContextTests {
 
     @DataProvider(name = "endpointProvider")
     public Object[][] getAcsEndpoint() throws Exception {
-        PolicyEvaluationRequestV1 policyEvalForBob = this.policyHelper.createEvalRequest("GET", "bob",
+        PolicyEvaluationRequestV1 policyEvalForBobPermit = this.policyHelper.createEvalRequest("GET", "bob",
                 "/alarms/sites/sanramon", null);
-
-        return new Object[][] { { this.acsBaseUrl, this.headersWithZoneSubdomain, policyEvalForBob, "bob" } };
+        PolicyEvaluationRequestV1 policyEvalForBobDeny = this.policyHelper.createEvalRequest("GET", "bob",
+                "/alarms/sites/newyork", null);
+        return new Object[][] {
+                { this.acsBaseUrl, this.headersWithZoneSubdomain, policyEvalForBobPermit, Effect.PERMIT },
+                { this.acsBaseUrl, this.headersWithZoneSubdomain, policyEvalForBobDeny, Effect.DENY } };
     }
 
     private ResponseEntity<String> getMonitoringApiResponse(final HttpHeaders headers) {
