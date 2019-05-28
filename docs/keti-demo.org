@@ -56,7 +56,8 @@ cp acs-integration-tests/uaa/config/uaa.yml ../uaa/uaa/src/main/resources/uaa.ym
 
   - Start UAA
 #+BEGIN_SRC sh
-../uaa/gradlew run --info
+cd ../uaa
+./gradlew run --info
 #+END_SRC
 
 ** Use OAuth 2.0 client credentials to get admin token
