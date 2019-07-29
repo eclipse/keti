@@ -10,7 +10,7 @@ pipeline {
     }
     tools {
         maven 'apache-maven-latest'
-        jdk 'jdk1.8.0-latest'
+        jdk 'oracle-jdk8-latest'
     }
     stages {
         stage('Checkout Git repositories') {
