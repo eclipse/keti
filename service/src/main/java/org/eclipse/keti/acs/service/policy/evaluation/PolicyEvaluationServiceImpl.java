@@ -35,6 +35,7 @@ import org.eclipse.keti.acs.attribute.readers.AttributeRetrievalException;
 import org.eclipse.keti.acs.commons.policy.condition.ResourceHandler;
 import org.eclipse.keti.acs.commons.policy.condition.SubjectHandler;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.AttributeMatcher;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.model.Condition;
@@ -64,6 +65,8 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyEvaluationServiceImpl.class);
 
     @Autowired
+    private GroovyConditionCache conditionCache;
+    @Autowired
     private PolicyEvaluationCache cache;
     @Autowired
     private PolicyManagementService policyService;
@@ -71,8 +74,6 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
     private PolicyMatcher policyMatcher;
     @Autowired
     private ZoneResolver zoneResolver;
-    @Autowired
-    private GroovyConditionShell conditionShell;
 
     @Override
     public PolicyEvaluationResult evalPolicy(final PolicyEvaluationRequestV1 request) {
@@ -258,9 +259,15 @@ public class PolicyEvaluationServiceImpl implements PolicyEvaluationService {
         Map<String, Object> attributeBindingsMap = this.getAttributeBindingsMap(subjectAttributes, resourceAttributes,
                 resourceURI, resourceURITemplate);
 
+        // To prevent GroovyClassLoader leakage, a new GroovyConditionShell is instantiated every time instead
+        // of making it a Spring-managed bean via @Autowired. This ensures that when this function returns and the
+        // shell goes out of scope, it along with its GroovyClassLoader(s) can be garbage collected under memory
+        // pressure.
+        GroovyConditionShell conditionShell = new GroovyConditionShell(conditionCache);
+
         for (Condition condition : conditions) {
             try {
-                result = result && this.conditionShell.execute(condition.getCondition(), attributeBindingsMap);
+                result = result && conditionShell.execute(condition.getCondition(), attributeBindingsMap);
             } catch (Exception e) {
                 LOGGER.error("Unable to evualate condition: {}", condition.getCondition(), e);
                 throw new PolicyEvaluationException("Condition Evaluation failed", e);

@@ -44,7 +44,6 @@ public class GroovyConditionScript implements ConditionScript {
      *            the script object.
      */
     public GroovyConditionScript(final Script script) {
-        super();
         this.script = script;
     }
 

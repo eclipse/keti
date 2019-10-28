@@ -36,7 +36,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.keti.acs.PolicyContextResolver;
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.model.Effect;
 import org.eclipse.keti.acs.model.Policy;
@@ -80,7 +81,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author acs-engineers@ge.com
  */
 @Test
-@ContextConfiguration(classes = { GroovyConditionShell.class })
+@ContextConfiguration(classes = { NonCachingGroovyConditionCache.class })
 public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTests {
     private static final String ISSUER = "https://acs.attributes.int";
     private static final String SUBJECT_ATTRIB_NAME_ROLE = "role";
@@ -109,14 +110,14 @@ public class PolicyEvaluationServiceTest extends AbstractTestNGSpringContextTest
     @Mock
     private PolicyEvaluationCache cache;
     @Autowired
-    private GroovyConditionShell conditionShell;
+    private GroovyConditionCache conditionCache;
 
     private static final Set<Attribute> EMPTY_ATTRS = Collections.emptySet();
 
     @BeforeMethod
     public void setupMethod() throws Exception {
         this.evaluationService = new PolicyEvaluationServiceImpl();
-        ReflectionTestUtils.setField(this.evaluationService, "conditionShell", this.conditionShell);
+        ReflectionTestUtils.setField(this.evaluationService, "conditionCache", this.conditionCache);
         MockitoAnnotations.initMocks(this);
         when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
         when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);

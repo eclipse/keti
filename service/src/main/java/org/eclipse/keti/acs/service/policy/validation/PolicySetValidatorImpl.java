@@ -27,13 +27,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
@@ -41,6 +34,13 @@ import org.eclipse.keti.acs.model.Condition;
 import org.eclipse.keti.acs.model.Policy;
 import org.eclipse.keti.acs.model.PolicySet;
 import org.eclipse.keti.acs.utils.JsonUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchema;
@@ -60,9 +60,6 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
 
     @Autowired
     private GroovyConditionCache conditionCache;
-
-    @Autowired
-    private GroovyConditionShell conditionShell;
 
     static {
         JSONSCHEMA = JSONUTILS.readJsonNodeFromFile("acs-policy-set-schema.json");
@@ -145,19 +142,18 @@ public class PolicySetValidatorImpl implements PolicySetValidator {
             if ((conditions == null) || conditions.isEmpty()) {
                 return conditionScripts;
             }
+
+            // To prevent GroovyClassLoader leakage, a new GroovyConditionShell is instantiated every time instead
+            // of making it a Spring-managed bean via @Autowired. This ensures that when this function returns and the
+            // shell goes out of scope, it along with its GroovyClassLoader(s) can be garbage collected under memory
+            // pressure.
+            GroovyConditionShell conditionShell = new GroovyConditionShell(conditionCache);
+
             for (Condition condition : conditions) {
                 String conditionScript = condition.getCondition();
-                ConditionScript compiledScript = this.conditionCache.get(conditionScript);
-                if (compiledScript != null) {
-                    conditionScripts.add(compiledScript);
-                    continue;
-                }
-
                 try {
-                    LOGGER.debug("Adding condition: {}", conditionScript);
-                    compiledScript = this.conditionShell.parse(conditionScript);
+                    ConditionScript compiledScript = conditionShell.parse(conditionScript);
                     conditionScripts.add(compiledScript);
-                    this.conditionCache.put(conditionScript, compiledScript);
                 } catch (Exception e) {
                     throw new PolicySetValidationException(
                             "Condition : [" + conditionScript + "] validation failed with error : " + e.getMessage(),

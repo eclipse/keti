@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.model.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ import org.testng.annotations.Test;
  *
  * @author acs-engineers@ge.com
  */
-@ContextConfiguration(classes = { GroovyConditionShell.class })
+@ContextConfiguration(classes = { NonCachingGroovyConditionCache.class })
 public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
 
     private static final String ATTRIBUTE_ISSUER = "acs";
@@ -56,12 +57,12 @@ public class ConditionEvaluationTest extends AbstractTestNGSpringContextTests {
     private PolicyEvaluationServiceImpl evaluationService;
 
     @Autowired
-    private GroovyConditionShell conditionShell;
+    private GroovyConditionCache conditionCache;
 
     @BeforeMethod
     private void setupMethod() throws Exception {
         this.evaluationService = new PolicyEvaluationServiceImpl();
-        ReflectionTestUtils.setField(this.evaluationService, "conditionShell", this.conditionShell);
+        ReflectionTestUtils.setField(this.evaluationService, "conditionCache", this.conditionCache);
     }
 
     private static Set<Attribute> getAttributes(final Attribute attributeOne, final Attribute attributeTwo) {
