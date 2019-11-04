@@ -1,16 +1,20 @@
 #!/usr/bin/env groovy
 
-final def mavenOpts = '-B -T 1C -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
+final def mavenOpts = '-B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
 
 pipeline {
-    agent any
-    options {
-        buildDiscarder(logRotator(numToKeepStr:'10'))
-        skipDefaultCheckout()
+    agent {
+        kubernetes {
+            label 'migration'
+        }
     }
     tools {
         maven 'apache-maven-latest'
-        jdk 'jdk1.8.0-latest'
+        jdk 'adoptopenjdk-hotspot-jdk8-latest'
+    }
+    options {
+        buildDiscarder(logRotator(numToKeepStr:'10'))
+        skipDefaultCheckout()
     }
     stages {
         stage('Checkout Git repositories') {
@@ -68,7 +72,7 @@ pipeline {
         }
         stage('Run post-SCM-checkout operations') {
             steps {
-                sh '''
+                sh """#!/bin/bash -xe
                     ls -altr keti keti/kotlin
 
                     rm -rf public
@@ -86,66 +90,110 @@ pipeline {
                     rm -rf public-graph-kt
                     mkdir public-graph-kt
                     cp -a keti public-graph-kt/keti
-                '''
+                """
             }
         }
-        stage('Build and run unit tests') {
-            failFast true
-            parallel {
-                stage("Build the 'public' Maven profile (Java)") {
-                    steps {
-                        sh "cd public/keti && mvn clean package install ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public"
-                    }
-                }
-                stage("Build the 'public' Maven profile (Kotlin)") {
-                    steps {
-                        sh "cd public-kt/keti/kotlin && mvn clean package install ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public-kt"
-                    }
-                }
-                stage("Build the 'public-graph' Maven profile (Java)") {
-                    steps {
-                        sh "cd public-graph/keti && mvn clean package install ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph"
-                    }
-                }
-                stage("Build the 'public-graph' Maven profile (Kotlin)") {
-                    steps {
-                        sh "cd public-graph-kt/keti/kotlin && mvn clean package install ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph-kt"
-                    }
-                }
+        stage("Build and run non-hierarchical unit tests (Java)") {
+            steps {
+                sh """#!/bin/bash -xe
+                    cd public/keti && mvn clean package install ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public
+                """
             }
             post {
                 always {
-                    junit testResults: '**/public*/**/surefire-reports*/junitreports/TEST*.xml, **/public*/**/surefire-reports*/**/junitreports/TEST*.xml', allowEmptyResults: true
+                    junit testResults : '**/public/**/surefire-reports*/junitreports/TEST*.xml, **/public/**/surefire-reports*/**/junitreports/TEST*.xml',
+                          allowEmptyResults : true
                 }
             }
         }
-        stage('Run integration tests') {
-            failFast true
-            parallel {
-                stage("Run integration tests using the 'public' Maven profile (Java)") {
-                    steps {
-                        sh "cd public/keti && PORT_OFFSET=10 source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public"
-                    }
-                }
-                stage("Run integration tests using the 'public' Maven profile (Kotlin)") {
-                    steps {
-                        sh "cd public-kt/keti/kotlin && PORT_OFFSET=20 source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public-kt"
-                    }
-                }
-                stage("Run integration tests using the 'public-graph' Maven profile (Java)") {
-                    steps {
-                        sh "cd public-graph/keti && PORT_OFFSET=30 source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph"
-                    }
-                }
-                stage("Run integration tests using the 'public-graph' Maven profile (Kotlin)") {
-                    steps {
-                        sh "cd public-graph-kt/keti/kotlin && PORT_OFFSET=40 source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph-kt"
-                    }
-                }
+        stage("Build and run non-hierarchical unit tests (Kotlin)") {
+            steps {
+                sh """#!/bin/bash -xe
+                    cd public-kt/keti/kotlin && mvn clean package install ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public-kt
+                """
             }
             post {
                 always {
-                    junit testResults: '**/public*/**/failsafe-reports*/junitreports/TEST*.xml, **/public-*/**/failsafe-reports*/**/junitreports/TEST*.xml', allowEmptyResults: true
+                    junit testResults : '**/public-kt/**/surefire-reports*/junitreports/TEST*.xml, **/public-kt/**/surefire-reports*/**/junitreports/TEST*.xml',
+                          allowEmptyResults : true
+                }
+            }
+        }
+        stage("Build and run hierarchical unit tests (Java)") {
+            steps {
+                sh """#!/bin/bash -xe
+                    cd public-graph/keti && mvn clean package install ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph
+                """
+            }
+            post {
+                always {
+                    junit testResults : '**/public-graph/**/surefire-reports*/junitreports/TEST*.xml, **/public-graph/**/surefire-reports*/**/junitreports/TEST*.xml',
+                          allowEmptyResults : true
+                }
+            }
+        }
+        stage("Build and run hierarchical unit tests (Kotlin)") {
+            steps {
+                sh """#!/bin/bash -xe
+                    cd public-graph-kt/keti/kotlin && mvn clean package install ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph-kt
+                """
+            }
+            post {
+                always {
+                    junit testResults : '**/public-graph-kt/**/surefire-reports*/junitreports/TEST*.xml, **/public-graph-kt/**/surefire-reports*/**/junitreports/TEST*.xml',
+                          allowEmptyResults : true
+                }
+            }
+        }
+        stage("Run non-hierarchical integration tests (Java)") {
+            steps {
+                sh """#!/bin/bash -xe
+                    cd public/keti && export PORT_OFFSET=10 && source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public
+                """
+            }
+            post {
+                always {
+                    junit testResults : '**/public/**/failsafe-reports*/junitreports/TEST*.xml, **/public/**/failsafe-reports*/**/junitreports/TEST*.xml',
+                          allowEmptyResults : true
+                }
+            }
+        }
+        stage("Run non-hierarchical integration tests (Kotlin)") {
+            steps {
+                sh """#!/bin/bash -xe
+                    cd public-kt/keti/kotlin && export PORT_OFFSET=20 && source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public -D maven.repo.local=${env.WORKSPACE}/m2-public-kt
+                """
+            }
+            post {
+                always {
+                    junit testResults : '**/public-kt/**/failsafe-reports*/junitreports/TEST*.xml, **/public-kt/**/failsafe-reports*/**/junitreports/TEST*.xml',
+                          allowEmptyResults : true
+                }
+            }
+        }
+        stage("Run hierarchical integration tests (Java)") {
+            steps {
+                sh """#!/bin/bash -xe
+                    cd public-graph/keti && export PORT_OFFSET=30 && source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph
+                """
+            }
+            post {
+                always {
+                    junit testResults : '**/public-graph/**/failsafe-reports*/junitreports/TEST*.xml, **/public-graph/**/failsafe-reports*/**/junitreports/TEST*.xml',
+                          allowEmptyResults : true
+                }
+            }
+        }
+        stage("Run hierarchical integration tests (Kotlin)") {
+            steps {
+                sh """#!/bin/bash -xe
+                    cd public-graph-kt/keti/kotlin && export PORT_OFFSET=40 && source ./set-env-local.sh && cd acs-integration-tests && mvn clean verify ${mavenOpts} -P public-graph -D maven.repo.local=${env.WORKSPACE}/m2-public-graph-kt
+                """
+            }
+            post {
+                always {
+                    junit testResults : '**/public-graph-kt/**/failsafe-reports*/junitreports/TEST*.xml, **/public-graph-kt/**/failsafe-reports*/**/junitreports/TEST*.xml',
+                          allowEmptyResults : true
                 }
             }
         }

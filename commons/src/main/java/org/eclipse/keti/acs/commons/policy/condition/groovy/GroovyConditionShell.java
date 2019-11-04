@@ -23,8 +23,8 @@ import static java.util.Collections.singletonMap;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -37,14 +37,9 @@ import org.eclipse.keti.acs.commons.policy.condition.AbstractHandler;
 import org.eclipse.keti.acs.commons.policy.condition.ConditionAssertionFailedException;
 import org.eclipse.keti.acs.commons.policy.condition.ConditionParsingException;
 import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
-import org.eclipse.keti.acs.commons.policy.condition.ConditionShell;
 import org.eclipse.keti.acs.commons.policy.condition.ResourceHandler;
 import org.eclipse.keti.acs.commons.policy.condition.SubjectHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.GroovySystem;
 import groovy.lang.Script;
@@ -54,13 +49,13 @@ import groovy.transform.CompileStatic;
  * @author acs-engineers@ge.com
  */
 @SuppressWarnings("nls")
-@Component
-public class GroovyConditionShell implements ConditionShell {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GroovyConditionShell.class);
+public class GroovyConditionShell {
 
+    private final GroovyConditionCache conditionCache;
     private final GroovyShell shell;
 
-    public GroovyConditionShell() {
+    public GroovyConditionShell(final GroovyConditionCache conditionCache) {
+        this.conditionCache = conditionCache;
 
         SecureASTCustomizer secureASTCustomizer = createSecureASTCustomizer();
         ImportCustomizer importCustomizer = createImportCustomizer();
@@ -70,66 +65,78 @@ public class GroovyConditionShell implements ConditionShell {
         compilerConfiguration.addCompilationCustomizers(secureASTCustomizer);
         compilerConfiguration.addCompilationCustomizers(importCustomizer);
         compilerConfiguration.addCompilationCustomizers(astTransformationCustomizer);
+        compilerConfiguration.getOptimizationOptions().put(CompilerConfiguration.INVOKEDYNAMIC, true);
 
-        this.shell = new GroovyShell(GroovyConditionShell.class.getClassLoader(), compilerConfiguration);
+        this.shell = new GroovyShell(this.getClass().getClassLoader(), compilerConfiguration);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Validates the script & generates condition script object.
      *
-     * @see org.eclipse.keti.acs.commons.conditions.ConditionShell#parse(java.lang. String )
+     * @param script
+     *            the policy condition string
+     * @return a Script object instance capable of executing the policy condition.
+     * @throws ConditionParsingException
+     *             on validation error
      */
-    @Override
     public ConditionScript parse(final String script) throws ConditionParsingException {
-        if (StringUtils.isEmpty(script)) {
-            throw new IllegalArgumentException("Script is null or empty.");
-        }
-
-        try {
-            Script groovyScript = this.shell.parse(script);
-            return new GroovyConditionScript(groovyScript);
-        } catch (CompilationFailedException e) {
-            throw new ConditionParsingException("Failed to validate the condition script.", script, e);
-        }
+        return parse(script, true);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.keti.acs.commons.conditions.ConditionShell#execute(java.lang. String, java.util.Map )
-     */
-    @Override
-    public boolean execute(final String script, final Map<String, Object> boundVariables)
-            throws ConditionParsingException {
+    private ConditionScript parse(
+        final String script,
+        final boolean removeLoadedClasses
+    ) throws ConditionParsingException {
         if (StringUtils.isEmpty(script)) {
             throw new IllegalArgumentException("Script is null or empty.");
         }
 
         try {
-            Script groovyScript = this.shell.parse(script);
-
-            if (LOGGER.isDebugEnabled()) {
-                StringBuilder msgBuilder = new StringBuilder();
-                msgBuilder.append("The script is bound to the following variables:\n");
-                for (Entry<String, Object> entry : boundVariables.entrySet()) {
-                    msgBuilder.append("* ").append(entry.getKey()).append(":").append(entry.getValue()).append("\n");
-                }
-                LOGGER.debug(msgBuilder.toString());
+            ConditionScript compiledScript = conditionCache.get(script);
+            if (compiledScript == null) {
+                Script groovyScript = this.shell.parse(script);
+                compiledScript = new GroovyConditionScript(groovyScript);
+                conditionCache.put(script, compiledScript);
             }
-
-            Binding binding = new Binding(boundVariables);
-            groovyScript.setBinding(binding);
-            boolean result = (boolean) groovyScript.run();
-
-            this.shell.getClassLoader().clearCache();
-            GroovySystem.getMetaClassRegistry().removeMetaClass(groovyScript.getClass());
-
-            return result;
+            return compiledScript;
         } catch (CompilationFailedException e) {
             throw new ConditionParsingException("Failed to parse the condition script.", script, e);
+        } finally {
+            if (removeLoadedClasses) {
+                removeLoadedClasses();
+            }
+        }
+    }
+
+    /**
+     * Validates & executes the policy condition script.
+     *
+     * @param script
+     *            the policy condition string
+     * @param boundVariables
+     *            variable bindings of the script
+     * @return result of executing the policy condition script.
+     * @throws ConditionParsingException
+     *             on script validation error
+     */
+    public boolean execute(final String script, final Map<String, Object> boundVariables)
+            throws ConditionParsingException {
+        ConditionScript conditionScript = parse(script, false);
+
+        try {
+            return conditionScript.execute(boundVariables);
         } catch (ConditionAssertionFailedException e) {
             return false;
+        } finally {
+            removeLoadedClasses();
         }
+    }
+
+    private void removeLoadedClasses() {
+        for (Class<?> groovyClass : shell.getClassLoader().getLoadedClasses()) {
+            GroovySystem.getMetaClassRegistry().removeMetaClass(groovyClass);
+        }
+        shell.resetLoadedClasses();
     }
 
     private static ImportCustomizer createImportCustomizer() {
@@ -147,18 +154,18 @@ public class GroovyConditionShell implements ConditionShell {
         // Disallow method definition.
         secureASTCustomizer.setMethodDefinitionAllowed(false);
         // Disallow all imports by setting a blank whitelist.
-        secureASTCustomizer.setImportsWhitelist(Arrays.asList(new String[] {}));
+        secureASTCustomizer.setImportsWhitelist(Collections.emptyList());
         // Disallow star imports by setting a blank whitelist.
         secureASTCustomizer.setStarImportsWhitelist(Arrays.asList(
-                new String[] { "org.crsh.command.*", "org.crsh.cli.*", "org.crsh.groovy.*",
-                        "org.eclipse.keti.acs.commons.policy.condition.*" }));
+                "org.crsh.command.*", "org.crsh.cli.*", "org.crsh.groovy.*",
+                "org.eclipse.keti.acs.commons.policy.condition.*"));
         // Set white list for constant type classes.
         secureASTCustomizer.setConstantTypesClassesWhiteList(Arrays.asList(
-                new Class[] { Boolean.class, boolean.class, Collection.class, Double.class, double.class, Float.class,
-                        float.class, Integer.class, int.class, Long.class, long.class, Object.class, String.class }));
+                Boolean.class, boolean.class, Collection.class, Double.class, double.class, Float.class,
+                float.class, Integer.class, int.class, Long.class, long.class, Object.class, String.class));
         secureASTCustomizer.setReceiversClassesWhiteList(Arrays.asList(
-                new Class[] { Boolean.class, Collection.class, Integer.class, Iterable.class, Object.class, Set.class,
-                        String.class }));
+                Boolean.class, Collection.class, Integer.class, Iterable.class, Object.class, Set.class,
+                String.class));
         return secureASTCustomizer;
     }
 

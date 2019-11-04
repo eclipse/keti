@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.eclipse.keti.acs.commons.policy.condition.ConditionParsingException;
 import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
-import org.eclipse.keti.acs.commons.policy.condition.ConditionShell;
 import org.eclipse.keti.acs.commons.policy.condition.ResourceHandler;
 import org.eclipse.keti.acs.commons.policy.condition.SubjectHandler;
 import org.eclipse.keti.acs.model.Attribute;
@@ -44,7 +43,7 @@ public class GroovyConditionShellTest {
 
     private static Map<String, Object> emptyBindingMap = new HashMap<>();
 
-    private ConditionShell shell = new GroovyConditionShell();
+    private final GroovyConditionShell shell = new GroovyConditionShell(new NonCachingGroovyConditionCache());
 
     /**
      * Test a policy condition parsing and compilation using an allowed policy operations.

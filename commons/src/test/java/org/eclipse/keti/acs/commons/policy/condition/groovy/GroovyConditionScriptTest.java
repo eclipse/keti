@@ -23,12 +23,10 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import org.eclipse.keti.acs.commons.policy.condition.ConditionParsingException;
 import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
-import org.eclipse.keti.acs.commons.policy.condition.ConditionShell;
 import org.eclipse.keti.acs.commons.policy.condition.ResourceHandler;
 import org.eclipse.keti.acs.commons.policy.condition.SubjectHandler;
 import org.eclipse.keti.acs.model.Attribute;
@@ -39,12 +37,7 @@ import org.eclipse.keti.acs.model.Attribute;
  * @author acs-engineers@ge.com
  */
 public class GroovyConditionScriptTest {
-    private ConditionShell shell;
-
-    @BeforeClass
-    public void setup() {
-        this.shell = new GroovyConditionShell();
-    }
+    private final GroovyConditionShell shell = new GroovyConditionShell(new NonCachingGroovyConditionCache());
 
     /**
      * Test the execution of a policy condition, which should evaluate to true, using strings constants.

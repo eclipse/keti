@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -372,7 +373,7 @@ public class PolicyMatcherImplTest {
         PolicySet policySet = PolicySets.loadFromFile(file);
         List<Policy> policies = policySet.getPolicies();
 
-        GroovyConditionShell shell = new GroovyConditionShell();
+        GroovyConditionShell shell = new GroovyConditionShell(new NonCachingGroovyConditionCache());
         for (Policy policy : policies) {
             for (Condition condition : policy.getConditions()) {
                 shell.parse(condition.getCondition());

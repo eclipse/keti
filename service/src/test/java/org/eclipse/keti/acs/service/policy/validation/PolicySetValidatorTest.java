@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.keti.acs.commons.policy.condition.ConditionScript;
-import org.eclipse.keti.acs.commons.policy.condition.ConditionShell;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
 import org.eclipse.keti.acs.commons.policy.condition.groovy.InMemoryGroovyConditionCache;
@@ -218,8 +217,8 @@ public class PolicySetValidatorTest extends AbstractTestNGSpringContextTests {
         this.policySetValidator.validatePolicySet(policySet);
         GroovyConditionCache conditionCache =
                 (GroovyConditionCache) ReflectionTestUtils.getField(this.policySetValidator, "conditionCache");
-        Map<String, ConditionShell> cache =
-                (Map<String, ConditionShell>) ReflectionTestUtils.getField(conditionCache, "cache");
+        Map<String, GroovyConditionShell> cache =
+                (Map<String, GroovyConditionShell>) ReflectionTestUtils.getField(conditionCache, "cache");
         int cacheSize = cache.size();
         Assert.assertTrue(cacheSize > 0);
         this.policySetValidator.removeCachedConditions(policySet);

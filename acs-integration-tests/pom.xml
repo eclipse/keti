@@ -74,7 +74,7 @@
             <plugin>
                 <groupId>org.codehaus.cargo</groupId>
                 <artifactId>cargo-maven2-plugin</artifactId>
-                <version>1.4.19</version>
+                <version>1.7.7</version>
                 <configuration>
                     <skip>${maven.test.skip}</skip>
                     <configuration>
@@ -84,6 +84,7 @@
                         </properties>
                     </configuration>
                     <container>
+                        <timeout>600000</timeout>
                         <containerId>tomcat8x</containerId>
                         <systemProperties>
                             <CLOUD_FOUNDRY_CONFIG_PATH>${project.basedir}/uaa/config</CLOUD_FOUNDRY_CONFIG_PATH>

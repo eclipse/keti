@@ -33,7 +33,8 @@ import org.eclipse.keti.acs.attribute.readers.AttributeReaderFactory;
 import org.eclipse.keti.acs.attribute.readers.AttributeRetrievalException;
 import org.eclipse.keti.acs.attribute.readers.ExternalResourceAttributeReader;
 import org.eclipse.keti.acs.attribute.readers.ExternalSubjectAttributeReader;
-import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionShell;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.GroovyConditionCache;
+import org.eclipse.keti.acs.commons.policy.condition.groovy.NonCachingGroovyConditionCache;
 import org.eclipse.keti.acs.model.Attribute;
 import org.eclipse.keti.acs.model.Effect;
 import org.eclipse.keti.acs.model.PolicySet;
@@ -61,7 +62,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@ContextConfiguration(classes = { GroovyConditionShell.class })
+@ContextConfiguration(classes = { NonCachingGroovyConditionCache.class })
 public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSpringContextTests {
 
     @InjectMocks
@@ -81,7 +82,7 @@ public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSprin
     @Mock
     private ExternalSubjectAttributeReader externalSubjectAttributeReader;
     @Autowired
-    private GroovyConditionShell conditionShell;
+    private GroovyConditionCache conditionCache;
 
     private static final String RESOURCE_IDENTIFIER = "/sites/1234";
     private static final String SUBJECT_IDENTIFIER = "test-subject";
@@ -95,7 +96,7 @@ public class PolicyEvaluationWithAttributeReaderTest extends AbstractTestNGSprin
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(this.policyMatcher, "attributeReaderFactory", this.attributeReaderFactory);
         ReflectionTestUtils.setField(this.evaluationService, "policyMatcher", this.policyMatcher);
-        ReflectionTestUtils.setField(this.evaluationService, "conditionShell", this.conditionShell);
+        ReflectionTestUtils.setField(this.evaluationService, "conditionCache", this.conditionCache);
         when(this.zoneResolver.getZoneEntityOrFail()).thenReturn(new ZoneEntity(0L, "testzone"));
         when(this.cache.get(any(PolicyEvaluationRequestCacheKey.class))).thenReturn(null);
         when(this.attributeReaderFactory.getResourceAttributeReader()).thenReturn(this.externalResourceAttributeReader);
