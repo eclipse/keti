@@ -19,7 +19,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>acs-integration-tests</artifactId>
-    <name>Predix Access Control Service Integration Tests</name>
+    <name>Integration Tests</name>
     <packaging>jar</packaging>
 
     <parent>
@@ -282,14 +282,6 @@
             <type>war</type>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>central</id>
-            <name>Maven Repository Switchboard</name>
-            <url>http://repo1.maven.org/maven2</url>
-        </repository>
-    </repositories>
 
     <profiles>
         <profile>
