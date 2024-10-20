@@ -85,7 +85,7 @@
         <reportng.version>1.1.2</reportng.version>
         <testng.version>6.9.10</testng.version>
         <cucumber.version>1.2.5</cucumber.version>
-        <groovy.version>2.5.6</groovy.version>
+        <groovy.version>2.5.14</groovy.version>
         <maven-surefire.version>3.0.0-M3</maven-surefire.version>
         <maven-failsafe.version>3.0.0-M3</maven-failsafe.version>
     </properties>
